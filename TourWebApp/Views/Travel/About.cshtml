@@ -1,9 +1,14 @@
-﻿@model TravelAboutViewModel
+﻿
+@model TravelAboutViewModel
 @{
     ViewData["Title"] = "Giới thiệu";
 }
 
-<main>
+@section Styles {
+    <link rel="stylesheet" href="~/css/about-refresh.css" asp-append-version="true" />
+}
+
+<main class="ht-about-page">
     <section class="page-hero page-hero-about">
         <div class="page-hero-overlay"></div>
         <div class="container travel-container">
@@ -13,31 +18,60 @@
         </div>
     </section>
 
-    <section class="travel-section">
+    <section class="travel-section ht-about-mission">
         <div class="container travel-container">
             <div class="row g-5 align-items-center">
                 <div class="col-lg-6">
-                    <span class="section-kicker">Sứ mệnh</span>
-                    <h2 class="about-title">Mỗi chuyến đi phải rõ ràng, an tâm và đáng tiền.</h2>
-                    <p class="about-copy">HappyTrip được xây dựng để mang lại trải nghiệm du lịch chỉn chu: tư vấn đúng nhu cầu, lịch trình dễ theo, dịch vụ minh bạch và hỗ trợ xuyên suốt chuyến đi. Chúng tôi ưu tiên sự thoải mái thực tế thay vì tour dày điểm đến nhưng thiếu trải nghiệm.</p>
+                    <div class="ht-about-mission-content">
+                        <span class="section-kicker">Sứ mệnh của chúng tôi</span>
+                        <h2 class="about-title">Mỗi chuyến đi phải rõ ràng, an tâm và đáng tiền.</h2>
+                        <p class="about-copy">
+                            HappyTrip được xây dựng để mang lại trải nghiệm du lịch chỉn chu:
+                            tư vấn đúng nhu cầu, lịch trình dễ theo, dịch vụ minh bạch và hỗ trợ
+                            xuyên suốt chuyến đi. Chúng tôi ưu tiên sự thoải mái thực tế thay vì
+                            tour dày điểm đến nhưng thiếu trải nghiệm.
+                        </p>
+
+                        <div class="ht-about-values">
+                            <span><i class="fa-solid fa-circle-check"></i> Lịch trình rõ ràng</span>
+                            <span><i class="fa-solid fa-circle-check"></i> Tư vấn phù hợp</span>
+                            <span><i class="fa-solid fa-circle-check"></i> Trải nghiệm thực tế</span>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="col-lg-6">
-                    <img class="about-main-image reveal" src="/img/about/mission.jpg" alt="Đội ngũ HappyTrip đang lên lịch trình tour" loading="lazy" />
+                    <div class="ht-about-mission-media reveal">
+                        <img src="/img/about/mission.jpg"
+                             alt="Trải nghiệm khám phá thiên nhiên cùng HappyTrip"
+                             loading="lazy" />
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="travel-section section-cream">
+    <section class="travel-section section-cream ht-about-team">
         <div class="container travel-container">
-            <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
-                     model='new SectionHeadingModel { Kicker = "Đội ngũ đồng hành", Title = "Những người đứng sau mỗi hành trình", Description = "Đội ngũ vận hành và hướng dẫn viên của HappyTrip luôn ưu tiên trải nghiệm thực tế của khách.", AlignClass = "text-center" }' />
 
-            <div class="team-grid mt-4">
+            <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
+                     model='new SectionHeadingModel {
+                         Kicker = "Đội ngũ đồng hành",
+                         Title = "Những người đứng sau mỗi hành trình",
+                         Description = "Đội ngũ vận hành và hướng dẫn viên của HappyTrip luôn ưu tiên trải nghiệm thực tế của khách.",
+                         AlignClass = "text-center"
+                     }' />
+
+            <div class="team-grid ht-about-team-grid mt-4">
                 @foreach (var member in Model.TeamMembers)
                 {
-                    <article class="team-card reveal">
-                        <img src="@member.ImageUrl" alt="@member.Name" loading="lazy" />
+                    <article class="team-card ht-about-team-card reveal">
+                        <div class="ht-about-avatar">
+                            <img src="@member.ImageUrl"
+                                 alt="@member.Name"
+                                 loading="lazy" />
+                        </div>
+
                         <div class="team-body">
                             <h3>@member.Name</h3>
                             <span>@member.Role</span>
@@ -49,7 +83,7 @@
         </div>
     </section>
 
-    <section class="travel-section">
+    <section class="travel-section ht-about-stats">
         <div class="container travel-container">
             <div class="stats-grid">
                 @foreach (var stat in Model.Stats)
@@ -62,4 +96,5 @@
             </div>
         </div>
     </section>
+
 </main>
