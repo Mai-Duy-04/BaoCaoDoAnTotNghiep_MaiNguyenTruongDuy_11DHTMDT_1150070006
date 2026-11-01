@@ -25,12 +25,86 @@ public static class TravelContentData
     public static readonly IReadOnlyList<DestinationItem> Destinations =
         new List<DestinationItem>
         {
-            new() { Slug = "phu-quoc", Name = "Phú Quốc", Country = "Việt Nam", Category = "Biển", Description = "Thiên đường biển xanh, cát trắng và chuỗi hoạt động nghỉ dưỡng phù hợp gia đình lẫn nhóm bạn.", PriceFrom = 3850000m, ImageUrl = "/img/tours/phuquoc.jpg" },
-            new() { Slug = "vung-tau", Name = "Vũng Tàu", Country = "Việt Nam", Category = "Biển", Description = "Lịch trình ngắn ngày dễ đi, tắm biển, hải sản tươi và check-in các điểm ngắm cảnh nổi bật.", PriceFrom = 1050000m, ImageUrl = "/img/tours/vungtau.jpg" },
-            new() { Slug = "da-lat", Name = "Đà Lạt", Country = "Việt Nam", Category = "Núi", Description = "Không khí mát lạnh, đồi thông, cà phê và những cung đường săn mây đặc trưng phố núi.", PriceFrom = 2890000m, ImageUrl = "/img/tours/dalat.jpg" },
-            new() { Slug = "can-tho", Name = "Cần Thơ", Country = "Việt Nam", Category = "Văn hóa", Description = "Chợ nổi, miệt vườn, ẩm thực địa phương và trải nghiệm sông nước đậm chất miền Tây.", PriceFrom = 1490000m, ImageUrl = "/img/tours/cantho.jpg" },
-            new() { Slug = "sai-gon", Name = "TP. Hồ Chí Minh", Country = "Việt Nam", Category = "Thành phố", Description = "Nhịp sống hiện đại hòa cùng kiến trúc lịch sử, phù hợp city tour, ẩm thực và mua sắm.", PriceFrom = 1290000m, ImageUrl = "/img/tours/saigon-city.jpg" },
-            new() { Slug = "mien-tay", Name = "Miền Tây sông nước", Country = "Việt Nam", Category = "Khám phá", Description = "Hành trình qua vườn trái cây, làng nghề và văn hóa bản địa mộc mạc, gần gũi.", PriceFrom = 1590000m, ImageUrl = "/img/home/mientay.jpg" }
+            new()
+            {
+                Slug = "phu-quoc",
+                Name = "Phú Quốc",
+                Country = "Việt Nam",
+                Category = "Biển",
+                Description = "Đảo ngọc với biển xanh trong vắt, những bãi cát trắng và khung cảnh hoàng hôn tuyệt đẹp.",
+                PriceFrom = 3850000m,
+                ImageUrl = "/img/tours/phuquoc.jpg"
+            },
+            new()
+            {
+                Slug = "vung-tau",
+                Name = "Vũng Tàu",
+                Country = "Việt Nam",
+                Category = "Biển",
+                Description = "Thành phố biển nổi bật với cung đường ven biển, ngọn hải đăng và làn gió đại dương.",
+                PriceFrom = 1050000m,
+                ImageUrl = "/img/tours/vungtau.jpg"
+            },
+            new()
+            {
+                Slug = "da-lat",
+                Name = "Đà Lạt",
+                Country = "Việt Nam",
+                Category = "Núi",
+                Description = "Thành phố sương mù với rừng thông xanh, những đồi hoa và bầu không khí mát lành.",
+                PriceFrom = 2890000m,
+                ImageUrl = "/img/tours/dalat.jpg"
+            },
+            new()
+            {
+                Slug = "can-tho",
+                Name = "Cần Thơ",
+                Country = "Việt Nam",
+                Category = "Văn hóa",
+                Description = "Chợ nổi buổi sớm, những dòng sông hiền hòa và nét văn hóa đặc trưng của miền Tây.",
+                PriceFrom = 1490000m,
+                ImageUrl = "/img/tours/cantho.jpg"
+            },
+            new()
+            {
+                Slug = "sai-gon",
+                Name = "TP. Hồ Chí Minh",
+                Country = "Việt Nam",
+                Category = "Thành phố",
+                Description = "Đô thị năng động với kiến trúc lịch sử, những con phố nhộn nhịp và ẩm thực phong phú.",
+                PriceFrom = 1290000m,
+                ImageUrl = "/img/tours/saigon-city.jpg"
+            },
+            new()
+            {
+                Slug = "mien-tay",
+                Name = "Miền Tây sông nước",
+                Country = "Việt Nam",
+                Category = "Khám phá",
+                Description = "Miệt vườn xanh mát, những chuyến đò bình dị và nét đẹp mộc mạc của vùng sông nước.",
+                PriceFrom = 1590000m,
+                ImageUrl = "/img/home/mientay.jpg"
+            },
+            new()
+            {
+                Slug = "ben-tre",
+                Name = "Bến Tre",
+                Country = "Việt Nam",
+                Category = "Văn hóa",
+                Description = "Xứ dừa thanh bình với những con rạch nhỏ, vườn cây xanh mát và cuộc sống miền quê gần gũi.",
+                PriceFrom = 0m,
+                ImageUrl = "/img/tours/bentre.jpg"
+            },
+            new()
+            {
+                Slug = "phan-thiet",
+                Name = "Phan Thiết",
+                Country = "Việt Nam",
+                Category = "Biển",
+                Description = "Vùng biển đầy nắng gió với đồi cát trải dài, làng chài bình dị và khung cảnh thiên nhiên đặc sắc.",
+                PriceFrom = 0m,
+                ImageUrl = "/img/tours/phanthiet.jpg"
+            }
         };
 
     public static readonly IReadOnlyList<TourPackageItem> Tours =
@@ -85,7 +159,9 @@ public static class TravelContentData
             return Destinations;
         }
 
-        return Destinations.Where(x => x.Category.Equals(filter, StringComparison.OrdinalIgnoreCase)).ToList();
+        return Destinations
+            .Where(x => x.Category.Equals(filter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     public static IReadOnlyList<TourPackageItem> GetTours(string? filter)
@@ -95,17 +171,21 @@ public static class TravelContentData
             return Tours;
         }
 
-        return Tours.Where(x => x.Category.Equals(filter, StringComparison.OrdinalIgnoreCase)).ToList();
+        return Tours
+            .Where(x => x.Category.Equals(filter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     public static DestinationItem? GetDestinationBySlug(string slug)
     {
-        return Destinations.FirstOrDefault(x => x.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+        return Destinations.FirstOrDefault(
+            x => x.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
     }
 
     public static TourPackageItem? GetTourBySlug(string slug)
     {
-        return Tours.FirstOrDefault(x => x.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+        return Tours.FirstOrDefault(
+            x => x.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
     }
 
     public static IReadOnlyList<DestinationItem> GetRelatedDestinations(string currentSlug, int take = 3)

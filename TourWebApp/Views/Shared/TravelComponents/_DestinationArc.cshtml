@@ -1,0 +1,60 @@
+@model IEnumerable<DestinationItem>
+
+@{
+    var destinations = Model.ToList();
+}
+
+<section class="ht-arc-section" aria-label="Khám phá điểm đến miền Nam">
+    <div class="ht-arc-heading">
+        <span class="ht-arc-kicker">
+            HAPPYTRIP · KHÁM PHÁ ĐIỂM ĐẾN
+        </span>
+
+        <h2>Miền Nam qua từng khung hình</h2>
+
+        <p>
+            Từ phố thị nhộn nhịp đến biển xanh, phố núi và miền sông nước,
+            mỗi điểm đến là một câu chuyện đáng khám phá.
+        </p>
+    </div>
+
+    @if (destinations.Count > 0)
+    {
+        <div class="ht-arc-stage"
+             aria-roledescription="carousel"
+             aria-label="Bộ sưu tập điểm đến miền Nam">
+
+            @for (var i = 0; i < destinations.Count; i++)
+            {
+                <div class="ht-arc-slide"
+                     data-index="@i"
+                     data-position="@(i == 0 ? "0" : "hidden")"
+                     aria-hidden="@(i == 0 ? "false" : "true")">
+
+                    <partial name="~/Views/Shared/TravelComponents/_Destination3DCard.cshtml"
+                             model="destinations[i]" />
+                </div>
+            }
+        </div>
+
+        <div class="ht-arc-controls">
+            <button type="button"
+                    class="ht-arc-prev"
+                    aria-label="Điểm đến trước">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+
+            <div class="ht-arc-counter" aria-live="off">
+                <strong class="ht-arc-current">01</strong>
+                <span>/</span>
+                <span>@destinations.Count.ToString("D2")</span>
+            </div>
+
+            <button type="button"
+                    class="ht-arc-next"
+                    aria-label="Điểm đến tiếp theo">
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    }
+</section>

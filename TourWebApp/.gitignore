@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.log
+.env
+.env.*
+appsettings.Development.jsonwwwroot/videos/happytrip-cruise.mp4

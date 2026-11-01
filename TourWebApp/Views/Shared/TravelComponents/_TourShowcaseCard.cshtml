@@ -1,0 +1,53 @@
+@model TourPackageItem
+
+<article class="ht-showcase-card">
+    <div class="ht-showcase-media">
+        <img src="@Model.ImageUrl"
+             alt="Hình ảnh tour @Model.Name"
+             loading="lazy" />
+
+        <div class="ht-showcase-image-overlay"></div>
+
+        <span class="ht-showcase-category">
+            <i class="fa-solid fa-location-dot"></i>
+            @Model.Category
+        </span>
+
+        <div class="ht-showcase-image-caption">
+            <span>HAPPYTRIP · HÀNH TRÌNH NỔI BẬT</span>
+            <h3>@Model.Name</h3>
+        </div>
+    </div>
+
+    <div class="ht-showcase-content">
+        <div class="ht-showcase-meta">
+            <span>
+                <i class="fa-regular fa-clock"></i>
+                @Model.Duration
+            </span>
+
+            <span>
+                <i class="fa-solid fa-star"></i>
+                @Model.Rating.ToString("0.0")/5
+            </span>
+        </div>
+
+        <p class="ht-showcase-description">
+            @Model.Description
+        </p>
+
+        <div class="ht-showcase-footer">
+            <div class="ht-showcase-price">
+                <span>GIÁ TOUR</span>
+                <strong>@Model.Price.ToString("N0")đ</strong>
+            </div>
+
+            <a href="/tours/@Model.Slug"
+               class="ht-showcase-detail"
+               aria-label="Xem chi tiết tour @Model.Name">
+                Xem chi tiết
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+    </div>
+</article>

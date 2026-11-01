@@ -44,7 +44,7 @@ public class TravelController : Controller
         var model = new TravelHomeViewModel
         {
             WhyTravelWithUs = TravelContentData.WhyTravelWithUs,
-            FeaturedDestinations = TravelContentData.Destinations.Take(4).ToList(),
+           FeaturedDestinations = TravelContentData.Destinations.ToList(),
             PopularTours = TravelContentData.Tours.Take(3).ToList(),
             GuidePosts = TravelContentData.GuidePosts,
             Testimonials = TravelContentData.Testimonials

@@ -10,6 +10,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISeatInventoryService, SeatInventoryService>();
+builder.Services.AddScoped<IMatchingScoreService, MatchingScoreService>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

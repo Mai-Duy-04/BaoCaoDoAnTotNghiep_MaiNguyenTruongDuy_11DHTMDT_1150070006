@@ -1,4 +1,5 @@
 ﻿@model TravelHomeViewModel
+
 @{
     ViewData["Title"] = "Trang chủ";
 
@@ -8,28 +9,43 @@
         Subtitle = "Tour chọn lọc, điểm đến nổi bật và trải nghiệm du lịch trọn vẹn trên khắp Việt Nam.",
         PrimaryButtonText = "Khám phá tour",
         PrimaryButtonUrl = "/tours",
-        SecondaryButtonText = "Lên kế hoạch ngay",
-        SecondaryButtonUrl = "/contact",
+        SecondaryButtonText = "Gợi ý tour cho tôi",
+        SecondaryButtonUrl = "/goi-y-tour",
         BackgroundImageUrl = "/img/tours/dalat_city.jpg"
     };
 
     var finalCta = new CtaSectionModel
     {
         Title = "Sẵn sàng cho chuyến đi tiếp theo?",
-        Subtitle = "Chỉ cần nói điểm bạn muốn đi, HappyTrip sẽ lo phần còn lại.",
-        PrimaryButtonText = "Bắt đầu tư vấn",
-        PrimaryButtonUrl = "/contact",
+        Subtitle = "Chọn điểm đến, sở thích và ngân sách để HappyTrip tìm hành trình phù hợp với bạn.",
+        PrimaryButtonText = "Gợi ý tour cho tôi",
+        PrimaryButtonUrl = "/goi-y-tour",
         SecondaryButtonText = "Xem danh sách tour",
         SecondaryButtonUrl = "/tours",
         BackgroundImageUrl = "/img/home/cta-bg.jpg"
     };
 }
 
+<link rel="stylesheet"
+      href="~/css/tour-showcase.css"
+      asp-append-version="true" />
+
+<link rel="stylesheet"
+      href="~/css/destination-arc.css"
+      asp-append-version="true" />
+
+<link rel="stylesheet"
+      href="~/css/home-ai-recommendation.css"
+      asp-append-version="true" />
 
 <main>
-    <partial name="~/Views/Shared/TravelComponents/_Hero.cshtml" model="hero" />
+    <partial name="~/Views/Shared/TravelComponents/_Hero.cshtml"
+             model="hero" />
+
     <partial name="~/Views/Shared/TravelComponents/_SearchBar.cshtml" />
+
     <partial name="~/Views/Shared/TravelComponents/_DealHot.cshtml" />
+
     <section class="travel-section">
         <div class="container travel-container">
             <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
@@ -50,33 +66,69 @@
         </div>
     </section>
 
-    <section class="travel-section section-cream">
+    <partial name="~/Views/Shared/TravelComponents/_DestinationArc.cshtml"
+             model="Model.FeaturedDestinations" />
+
+    <partial name="~/Views/Shared/TravelComponents/_TourShowcase.cshtml"
+             model="Model.PopularTours" />
+
+    <section class="ht-home-ai-section" aria-labelledby="htHomeAiTitle">
         <div class="container travel-container">
-            <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
-                     model='new SectionHeadingModel { Kicker = "Điểm đến nổi bật", Title = "Biển xanh, phố núi và miền sông nước", Description = "Danh sách điểm đến được HappyTrip tuyển chọn theo mùa đẹp, lịch trình rõ và chi phí hợp lý.", AlignClass = "text-center" }' />
+            <div class="ht-home-ai-banner">
 
-            <div class="destination-grid mt-4">
-                @foreach (var item in Model.FeaturedDestinations)
-                {
-                    <partial name="~/Views/Shared/TravelComponents/_DestinationCard.cshtml" model="item" />
-                }
-            </div>
-        </div>
-    </section>
+                <div class="ht-home-ai-copy">
+                    <span class="ht-home-ai-eyebrow">
+                        <i class="fa-solid fa-sparkles"></i>
+                        HAPPYTRIP · GỢI Ý TOUR THÔNG MINH
+                    </span>
 
-    <section class="travel-section ht-popular-tours">
-        <div class="container travel-container">
-            <div class="section-heading-row">
-                <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
-                         model='new SectionHeadingModel { Kicker = "Tour được yêu thích", Title = "Lịch trình bán chạy tại HappyTrip", Description = "Tour thiết kế sẵn cho nhóm nhỏ, gia đình hoặc khách lẻ muốn đi nhanh, gọn và chất lượng.", AlignClass = "text-start" }' />
-                <a href="/tours" class="section-link">Xem tất cả tour</a>
-            </div>
+                    <h2 id="htHomeAiTitle">
+                        Chưa biết đi đâu? <span>Hỏi Tripi nè!</span>
+                    </h2>
 
-            <div class="tour-grid mt-3">
-                @foreach (var tour in Model.PopularTours)
-                {
-                    <partial name="~/Views/Shared/TravelComponents/_TourCard.cshtml" model="tour" />
-                }
+                    <p>
+                        Chọn điểm đến, sở thích và ngân sách.
+                        Tripi sẽ giúp bạn tìm những chuyến đi phù hợp.
+                    </p>
+
+                    <div class="ht-home-ai-actions">
+                        <a href="/goi-y-tour" class="ht-home-ai-button">
+                            Gợi ý tour cho tôi
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                        <span class="ht-home-ai-caption">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Xếp hạng bằng Matching Score
+                        </span>
+                    </div>
+                </div>
+
+                <div class="ht-home-ai-mascot">
+                    <div class="ht-home-ai-glow"></div>
+
+                    <div class="ht-home-ai-rabbit">
+                        <img src="~/img/tripi/tripi-rabbit.png"
+                             alt="Tripi, chú thỏ du lịch của HappyTrip"
+                             loading="lazy" />
+                    </div>
+
+                    <div class="ht-home-ai-shadow"></div>
+
+                    <span class="ht-home-ai-speech">
+                        Đi chơi cùng Tripi nha!
+                        <i class="fa-solid fa-heart"></i>
+                    </span>
+
+                    <span class="ht-home-ai-spark ht-home-ai-spark-one">
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+
+                    <span class="ht-home-ai-spark ht-home-ai-spark-two">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </span>
+                </div>
+
             </div>
         </div>
     </section>
@@ -86,13 +138,26 @@
             <div class="row g-4 align-items-center">
                 <div class="col-lg-6">
                     <span class="section-kicker">Trải nghiệm</span>
+
                     <h2>Đi sâu trải nghiệm, không chỉ đi cho đủ điểm.</h2>
-                    <p>HappyTrip ưu tiên trải nghiệm địa phương: food tour, chợ nổi, làng nghề, cung đường thiên nhiên và các hoạt động gắn với văn hóa bản xứ.</p>
-                    <a href="/destinations" class="btn travel-btn travel-btn-primary mt-3">Khám phá trải nghiệm</a>
+
+                    <p>
+                        HappyTrip ưu tiên trải nghiệm địa phương: food tour,
+                        chợ nổi, làng nghề, cung đường thiên nhiên và các
+                        hoạt động gắn với văn hóa bản xứ.
+                    </p>
+
+                    <a href="/destinations"
+                       class="btn travel-btn travel-btn-primary mt-3">
+                        Khám phá trải nghiệm
+                    </a>
                 </div>
+
                 <div class="col-lg-6">
                     <div class="experience-media reveal">
-                        <img src="/img/home/biendao.jpg" alt="Trải nghiệm du lịch biển đảo cùng HappyTrip" loading="lazy" />
+                        <img src="/img/home/biendao.jpg"
+                             alt="Trải nghiệm du lịch biển đảo cùng HappyTrip"
+                             loading="lazy" />
                     </div>
                 </div>
             </div>
@@ -108,12 +173,15 @@
                 @foreach (var post in Model.GuidePosts)
                 {
                     <article class="guide-card reveal">
-                        <img src="@post.ImageUrl" alt="@post.Title" loading="lazy" />
+                        <img src="@post.ImageUrl"
+                             alt="@post.Title"
+                             loading="lazy" />
+
                         <div class="guide-body">
                             <span class="guide-date">@post.DateLabel</span>
                             <h3>@post.Title</h3>
                             <p>@post.Summary</p>
-                            <a href="/" class="guide-link">Xem thêm</a>
+                            <a href="/">Xem thêm</a>
                         </div>
                     </article>
                 }
@@ -125,14 +193,25 @@
         <div class="container travel-container">
             <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
                      model='new SectionHeadingModel { Kicker = "Khách hàng nói gì", Title = "Đánh giá thực tế từ khách đi tour", Description = "Phản hồi từ khách hàng đã trải nghiệm dịch vụ cùng HappyTrip.", AlignClass = "text-center" }' />
+
             <div class="testimonial-grid mt-4">
                 @foreach (var testimonial in Model.Testimonials)
                 {
-                    <partial name="~/Views/Shared/TravelComponents/_TestimonialCard.cshtml" model="testimonial" />
+                    <partial name="~/Views/Shared/TravelComponents/_TestimonialCard.cshtml"
+                             model="testimonial" />
                 }
             </div>
         </div>
     </section>
 
-    <partial name="~/Views/Shared/TravelComponents/_CTASection.cshtml" model="finalCta" />
+    <partial name="~/Views/Shared/TravelComponents/_CTASection.cshtml"
+             model="finalCta" />
 </main>
+
+<script src="~/js/destination-arc.js"
+        asp-append-version="true"
+        defer></script>
+
+<script src="~/js/tour-showcase.js"
+        asp-append-version="true"
+        defer></script>

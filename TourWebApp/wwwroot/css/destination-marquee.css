@@ -1,0 +1,648 @@
+
+.ht-arc-section {
+    --arc-green: #24382f;
+    --arc-green-dark: #172820;
+    --arc-gold: #d2aa70;
+    --arc-gold-light: #f0d6a5;
+    --arc-cream: #f8f4ed;
+
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 62px 0 58px;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 62%,
+            rgba(158, 125, 76, 0.16),
+            transparent 52%
+        ),
+        linear-gradient(
+            180deg,
+            #faf7f1 0%,
+            #f2eadf 55%,
+            #f9f5ee 100%
+        );
+
+    color: var(--arc-green);
+}
+
+.ht-arc-section::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 61%;
+
+    width: min(1080px, 90vw);
+    height: 280px;
+
+    border: 1px solid rgba(135, 105, 65, 0.2);
+    border-radius: 50%;
+
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 90px rgba(126, 104, 72, 0.08);
+
+    pointer-events: none;
+}
+
+.ht-arc-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(66, 77, 60, 0.025),
+        transparent 23%,
+        transparent 77%,
+        rgba(66, 77, 60, 0.025)
+    );
+
+    pointer-events: none;
+}
+
+.ht-arc-heading {
+    position: relative;
+    z-index: 10;
+
+    max-width: 980px;
+    margin: 0 auto 14px;
+    padding: 0 20px;
+
+    text-align: center;
+}
+
+.ht-arc-kicker {
+    display: block;
+    margin-bottom: 12px;
+
+    color: #a47a45;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.ht-arc-heading h2 {
+    max-width: 920px;
+    margin: 0 auto;
+
+    color: #253c30;
+
+    font-size: clamp(2rem, 3.2vw, 3.3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+
+    text-wrap: balance;
+}
+
+.ht-arc-heading p {
+    max-width: 660px;
+    margin: 14px auto 0;
+
+    color: #6c746b;
+
+    font-size: 0.98rem;
+    line-height: 1.7;
+}
+
+.ht-arc-stage {
+    position: relative;
+
+    width: 100%;
+    max-width: 1250px;
+    height: 450px;
+
+    margin: 8px auto 0;
+
+    perspective: 1200px;
+    perspective-origin: 50% 43%;
+    transform-style: preserve-3d;
+
+    user-select: none;
+}
+
+.ht-arc-slide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 255px;
+    height: 350px;
+
+    opacity: 0;
+
+    transform-origin: center center;
+    transform-style: preserve-3d;
+
+    will-change: transform, opacity, filter;
+    backface-visibility: visible;
+}
+
+.ht-arc-slide[data-position="hidden"] {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.ht-arc-card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    border: 2px solid rgba(173, 130, 65, 0.85);
+    border-radius: 16px;
+
+    background: var(--arc-green-dark);
+
+    box-shadow:
+        0 26px 55px rgba(28, 39, 31, 0.34),
+        0 12px 24px rgba(14, 23, 17, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.ht-arc-slide.is-active .ht-arc-card {
+    border-color: #bd8f4d;
+
+    box-shadow:
+        0 35px 75px rgba(24, 36, 28, 0.4),
+        0 14px 30px rgba(17, 27, 19, 0.22),
+        0 0 0 1px rgba(211, 169, 103, 0.35);
+}
+
+.ht-arc-slide:hover .ht-arc-card {
+    border-color: #e2b576;
+}
+
+.ht-arc-card-media {
+    position: relative;
+
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow: hidden;
+
+    background: #203b2d;
+}
+
+.ht-arc-card-media > img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+    filter:
+        saturate(1.25)
+        contrast(1.13)
+        brightness(0.96);
+
+    transform: scale(1.02);
+
+    transition:
+        transform 0.45s ease,
+        filter 0.45s ease;
+}
+
+.ht-arc-slide.is-active .ht-arc-card-media > img {
+    filter:
+        saturate(1.3)
+        contrast(1.15)
+        brightness(1.03);
+}
+
+.ht-arc-slide:hover .ht-arc-card-media > img {
+    transform: scale(1.065);
+}
+
+.ht-arc-card-shade {
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        180deg,
+        rgba(5, 17, 11, 0.54) 0%,
+        rgba(5, 17, 11, 0.08) 28%,
+        rgba(5, 17, 11, 0.12) 49%,
+        rgba(5, 17, 11, 0.65) 76%,
+        rgba(5, 17, 11, 0.94) 100%
+    );
+
+    pointer-events: none;
+}
+
+.ht-arc-card-location {
+    position: absolute;
+    top: 16px;
+    left: 15px;
+    z-index: 2;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #ffffff;
+
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    text-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.75),
+        0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+.ht-arc-card-location i {
+    color: #f2d4a1;
+    font-size: 0.75rem;
+}
+
+.ht-arc-card-wishlist {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+
+    margin: 0;
+}
+
+.ht-arc-card-heart {
+    display: grid;
+    place-items: center;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    border: 1.5px solid rgba(255, 255, 255, 0.72);
+    border-radius: 50%;
+
+    background: rgba(13, 27, 19, 0.83);
+
+    color: #ffffff;
+    font-size: 1rem;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+
+    backdrop-filter: blur(10px);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.ht-arc-card-heart:hover {
+    transform: scale(1.1);
+
+    background: rgba(21, 45, 31, 0.98);
+    border-color: #f2d4a1;
+}
+
+.ht-arc-card-heart.is-active {
+    color: #ff647d;
+    border-color: rgba(255, 100, 125, 0.7);
+}
+
+.ht-arc-card-title {
+    position: absolute;
+    bottom: 17px;
+    left: 16px;
+    right: 16px;
+
+    z-index: 2;
+}
+
+.ht-arc-card-title > span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #f0cd94;
+
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.ht-arc-card-title h3 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 1.85rem;
+    font-weight: 900;
+    line-height: 1.1;
+
+    text-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.85),
+        0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.ht-arc-card-content {
+    position: relative;
+
+    flex: 0 0 auto;
+
+    padding: 14px 16px 16px;
+
+    border-top: 1px solid rgba(224, 189, 132, 0.28);
+
+    background: linear-gradient(
+        180deg,
+        #293e32 0%,
+        #1b3025 100%
+    );
+
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.ht-arc-card-description {
+    display: -webkit-box;
+
+    min-height: 35px;
+    margin: 0 0 12px;
+
+    overflow: hidden;
+
+    color: rgba(249, 246, 237, 0.9);
+
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.55;
+
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+.ht-arc-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.ht-arc-card-price span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: rgba(240, 218, 184, 0.8);
+
+    font-size: 0.57rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.ht-arc-card-price strong {
+    color: #f2ca86;
+
+    font-size: 1.04rem;
+    font-weight: 900;
+    line-height: 1.2;
+
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.ht-arc-card-link {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    width: 40px;
+    height: 40px;
+
+    border: 1px solid rgba(255, 246, 225, 0.6);
+    border-radius: 50%;
+
+    background: #eac991;
+    color: #1b3025;
+
+    font-size: 0.94rem;
+
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.22);
+
+    text-decoration: none;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.ht-arc-card-link:hover {
+    transform: translateY(-3px) scale(1.07);
+
+    background: #fff0ce;
+    color: #172820;
+
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.ht-arc-controls {
+    position: relative;
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 24px;
+    margin-top: 6px;
+}
+
+.ht-arc-controls button {
+    display: grid;
+    place-items: center;
+
+    width: 46px;
+    height: 46px;
+
+    padding: 0;
+
+    border: 1.5px solid rgba(150, 115, 72, 0.55);
+    border-radius: 50%;
+
+    background: #fffaf2;
+    color: #263b30;
+
+    font-size: 1rem;
+
+    box-shadow: 0 7px 20px rgba(68, 55, 35, 0.15);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.ht-arc-controls button:hover {
+    transform: translateY(-3px);
+
+    background: #d8b47b;
+    border-color: #a47b44;
+    color: #172820;
+}
+
+.ht-arc-counter {
+    min-width: 85px;
+
+    color: #877662;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+
+.ht-arc-counter strong {
+    color: #a47843;
+    font-weight: 900;
+}
+
+.ht-arc-controls button:focus-visible,
+.ht-arc-card-heart:focus-visible,
+.ht-arc-card-link:focus-visible {
+    outline: 3px solid #c18e4e;
+    outline-offset: 4px;
+}
+
+@media (max-width: 991px) {
+    .ht-arc-section {
+        padding: 55px 0 52px;
+    }
+
+    .ht-arc-stage {
+        height: 420px;
+    }
+
+    .ht-arc-slide {
+        width: 235px;
+        height: 330px;
+    }
+
+    .ht-arc-card-title h3 {
+        font-size: 1.7rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .ht-arc-section {
+        padding: 48px 0 48px;
+    }
+
+    .ht-arc-heading {
+        margin-bottom: 12px;
+    }
+
+    .ht-arc-heading h2 {
+        font-size: clamp(1.9rem, 6vw, 2.5rem);
+    }
+
+    .ht-arc-heading p {
+        font-size: 0.86rem;
+        line-height: 1.6;
+    }
+
+    .ht-arc-stage {
+        height: 385px;
+    }
+
+    .ht-arc-slide {
+        width: 215px;
+        height: 310px;
+    }
+
+    .ht-arc-card-title h3 {
+        font-size: 1.5rem;
+    }
+
+    .ht-arc-card-description {
+        font-size: 0.68rem;
+    }
+
+    .ht-arc-card-price strong {
+        font-size: 0.9rem;
+    }
+
+    .ht-arc-controls {
+        gap: 18px;
+    }
+
+    .ht-arc-controls button {
+        width: 43px;
+        height: 43px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ht-arc-section {
+        padding: 42px 0 44px;
+    }
+
+    .ht-arc-stage {
+        height: 355px;
+    }
+
+    .ht-arc-slide {
+        width: 195px;
+        height: 290px;
+    }
+
+    .ht-arc-card-title h3 {
+        font-size: 1.4rem;
+    }
+
+    .ht-arc-card-location {
+        font-size: 0.58rem;
+    }
+
+    .ht-arc-card-content {
+        padding: 11px 13px 13px;
+    }
+
+    .ht-arc-card-description {
+        min-height: 31px;
+        font-size: 0.65rem;
+    }
+
+    .ht-arc-card-link {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ht-arc-card,
+    .ht-arc-card-media > img,
+    .ht-arc-card-heart,
+    .ht-arc-card-link,
+    .ht-arc-controls button {
+        transition: none;
+    }
+}

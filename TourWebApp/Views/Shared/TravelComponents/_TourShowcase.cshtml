@@ -1,0 +1,66 @@
+@model IEnumerable<TourPackageItem>
+
+@{
+    var tours = Model.ToList();
+}
+
+<section class="ht-showcase-section" aria-label="Tour nổi bật HappyTrip">
+    <div class="ht-showcase-heading">
+        <span class="ht-showcase-kicker">
+            HAPPYTRIP · HÀNH TRÌNH NỔI BẬT
+        </span>
+
+        <h2>Những chuyến đi đáng trải nghiệm</h2>
+
+        <p>
+            Khám phá những hành trình du lịch được HappyTrip tuyển chọn,
+            với lịch trình rõ ràng và chi phí minh bạch.
+        </p>
+    </div>
+
+    @if (tours.Count > 0)
+    {
+        <div class="ht-showcase-stage"
+             aria-roledescription="carousel"
+             aria-label="Các tour nổi bật">
+
+            @for (var i = 0; i < tours.Count; i++)
+            {
+                <div class="ht-showcase-slide"
+                     data-index="@i"
+                     data-position="@(i == 0 ? "0" : "hidden")"
+                     aria-hidden="@(i == 0 ? "false" : "true")">
+                    <partial name="~/Views/Shared/TravelComponents/_TourShowcaseCard.cshtml"
+                             model="tours[i]" />
+                </div>
+            }
+        </div>
+
+        <div class="ht-showcase-controls">
+            <button class="ht-showcase-prev"
+                    type="button"
+                    aria-label="Tour trước">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+
+            <div class="ht-showcase-counter" aria-live="polite">
+                <strong class="ht-showcase-current">01</strong>
+                <span>/</span>
+                <span>@tours.Count.ToString("D2")</span>
+            </div>
+
+            <button class="ht-showcase-next"
+                    type="button"
+                    aria-label="Tour tiếp theo">
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="ht-showcase-all">
+            <a href="/tours">
+                Khám phá tất cả tour
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    }
+</section>

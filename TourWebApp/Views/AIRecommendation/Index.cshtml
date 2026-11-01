@@ -1,0 +1,404 @@
+
+@model TourWebApp.Controllers.AIRecommendationPageViewModel
+
+@{
+    ViewData["Title"] = "Gợi ý tour phù hợp";
+    var selectedInterests = (Model.Request.IdSoThich ?? new List<int>()).ToHashSet();
+    var hasResults = Model.DaTimKiem && Model.KetQua.Count > 0;
+    var hasNoResults = Model.DaTimKiem && Model.KetQua.Count == 0;
+}
+
+<link rel="stylesheet" href="~/css/ai-recommendation.css" asp-append-version="true" />
+
+<div class="ht-ai-page">
+    <div class="ht-ai-container">
+
+        <header class="ht-ai-header">
+            <span class="ht-ai-kicker">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                HAPPYTRIP · GỢI Ý HÀNH TRÌNH
+            </span>
+
+            <h1>Khám phá chuyến đi dành cho bạn</h1>
+
+            <p>
+                Chia sẻ nhu cầu của bạn để Tripi giúp tìm kiếm
+                và xếp hạng những hành trình phù hợp nhất.
+            </p>
+        </header>
+
+        <div class="ht-ai-layout">
+
+            <aside class="ht-ai-sidebar">
+                <form method="get"
+                      action="/goi-y-tour"
+                      class="ht-ai-form"
+                      id="htAiRecommendationForm">
+
+                    <h2>
+                        <i class="fa-solid fa-sliders"></i>
+                        Sở thích du lịch
+                    </h2>
+
+                    <div class="ht-ai-field">
+                        <label for="IdDiemDen">Điểm đến mong muốn</label>
+
+                        <select id="IdDiemDen" name="IdDiemDen">
+                            <option value="">Không giới hạn điểm đến</option>
+
+                            @foreach (var dd in Model.DiemDens)
+                            {
+                                <option value="@dd.Id"
+                                        selected="@(Model.Request.IdDiemDen == dd.Id)">
+                                    @dd.Ten
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="ht-ai-field">
+                        <label>Bạn thích trải nghiệm gì?</label>
+                        <p class="ht-ai-field-hint">Có thể chọn nhiều sở thích.</p>
+
+                        <div class="ht-ai-interests">
+                            @foreach (var st in Model.SoThichs)
+                            {
+                                <label class="ht-ai-interest">
+                                    <input type="checkbox"
+                                           name="IdSoThich"
+                                           value="@st.Id"
+                                           checked="@selectedInterests.Contains(st.Id)" />
+                                    <span>@st.Ten</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="ht-ai-field">
+                        <label for="NganSachToiDa">Ngân sách tối đa (VNĐ)</label>
+
+                        <input type="number"
+                               id="NganSachToiDa"
+                               name="NganSachToiDa"
+                               min="1"
+                               step="1"
+                               placeholder="Ví dụ: 3000000"
+                               value="@Model.Request.NganSachToiDa" />
+                    </div>
+
+                    <div class="ht-ai-field">
+                        <label for="SoNgayToiDa">Số ngày tối đa</label>
+
+                        <input type="number"
+                               id="SoNgayToiDa"
+                               name="SoNgayToiDa"
+                               min="1"
+                               max="365"
+                               placeholder="Ví dụ: 3"
+                               value="@Model.Request.SoNgayToiDa" />
+                    </div>
+
+                    <div class="ht-ai-field">
+                        <label for="TopN">Số tour muốn xem</label>
+
+                        <select id="TopN" name="TopN">
+                            <option value="3" selected="@(Model.Request.TopN == 3)">Top 3 tour</option>
+                            <option value="5" selected="@(Model.Request.TopN == 5)">Top 5 tour</option>
+                            <option value="10" selected="@(Model.Request.TopN == 10)">Top 10 tour</option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                            name="tim"
+                            value="1"
+                            class="ht-ai-submit"
+                            id="htAiSubmit">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Tìm tour phù hợp
+                    </button>
+
+                    <a href="/goi-y-tour" class="ht-ai-reset">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Làm mới lựa chọn
+                    </a>
+                </form>
+            </aside>
+
+            <section class="ht-ai-results">
+
+                <div class="ht-ai-results-header">
+                    <div>
+                        <span class="ht-ai-results-kicker">
+                            KẾT QUẢ CÁ NHÂN HÓA
+                        </span>
+                        <h2>Hành trình dành cho bạn</h2>
+                    </div>
+
+                    @if (Model.DaTimKiem)
+                    {
+                        <span class="ht-ai-results-count">
+                            @Model.KetQua.Count tour
+                        </span>
+                    }
+                </div>
+
+                <div id="htAiLoading"
+                     class="ht-ai-loading"
+                     hidden
+                     role="status"
+                     aria-live="polite">
+
+                    <div class="ht-tripi-character ht-tripi-thinking">
+                        <img src="~/img/tripi/tripi-rabbit.png"
+                             alt="Tripi đang tìm kiếm tour" />
+                    </div>
+
+                    <div class="ht-ai-thinking-dots" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <h3>Tripi đang tìm tour cho bạn...</h3>
+
+                    <p>
+                        HappyTrip đang đối chiếu điểm đến, sở thích,
+                        ngân sách và thời gian để xếp hạng các tour.
+                    </p>
+                </div>
+
+                <div id="htAiResultContent">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ThongBao))
+                    {
+                        <div class="ht-ai-notice" role="status">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>@Model.ThongBao</span>
+                        </div>
+                    }
+
+                    @if (!Model.DaTimKiem)
+                    {
+                        <div class="ht-ai-empty ht-ai-welcome">
+
+                            <div class="ht-tripi-character ht-tripi-welcome">
+                                <div class="ht-tripi-halo"></div>
+
+                                <img src="~/img/tripi/tripi-rabbit.png"
+                                     alt="Tripi, chú thỏ du lịch HappyTrip"
+                                     loading="eager" />
+
+                                <div class="ht-tripi-ground-shadow"></div>
+
+                                <span class="ht-tripi-star ht-tripi-star-one">
+                                    <i class="fa-solid fa-star"></i>
+                                </span>
+
+                                <span class="ht-tripi-star ht-tripi-star-two">
+                                    <i class="fa-solid fa-sparkles"></i>
+                                </span>
+                            </div>
+
+                            <span class="ht-tripi-greeting">
+                                Xin chào, mình là Tripi! 🐰
+                            </span>
+
+                            <h3>Hành trình của bạn bắt đầu từ đây</h3>
+
+                            <p>
+                                Chọn điểm đến, sở thích và ngân sách nhé.
+                                Tripi sẽ giúp bạn khám phá những tour phù hợp!
+                            </p>
+
+                            <div class="ht-tripi-hints">
+                                <span>
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    Điểm đến
+                                </span>
+                                <span>
+                                    <i class="fa-solid fa-heart"></i>
+                                    Sở thích
+                                </span>
+                                <span>
+                                    <i class="fa-solid fa-wallet"></i>
+                                    Ngân sách
+                                </span>
+                            </div>
+
+                        </div>
+                    }
+                    else if (hasResults)
+                    {
+                        <div class="ht-tripi-result-message">
+                            <div class="ht-tripi-result-avatar">
+                                <img src="~/img/tripi/tripi-rabbit.png"
+                                     alt="Tripi vui mừng vì đã tìm được tour"
+                                     loading="lazy" />
+                            </div>
+
+                            <div>
+                                <span class="ht-tripi-message-kicker">
+                                    TRIPI ĐÃ TÌM XONG!
+                                </span>
+
+                                <h3>Tripi tìm thấy @Model.KetQua.Count hành trình cho bạn!</h3>
+
+                                <p>
+                                    Các tour bên dưới được xếp hạng theo
+                                    điểm phù hợp với nhu cầu bạn đã chọn.
+                                </p>
+                            </div>
+
+                            <i class="fa-solid fa-sparkles ht-tripi-result-spark"></i>
+                        </div>
+
+                        <div class="ht-ai-list">
+                            @foreach (var tour in Model.KetQua)
+                            {
+                                <article class="ht-ai-tour-card">
+
+                                    <div class="ht-ai-tour-image">
+                                        <img src="@TourImagePathHelper.ToTourImageSrc(tour.HinhAnh)"
+                                             alt="Tour @tour.TenTour"
+                                             loading="lazy" />
+
+                                        <span class="ht-ai-match-badge">
+                                            @tour.MatchingScore/100 điểm
+                                        </span>
+                                    </div>
+
+                                    <div class="ht-ai-tour-content">
+
+                                        <div class="ht-ai-tour-meta">
+                                            <span>
+                                                <i class="fa-solid fa-location-dot"></i>
+                                                @tour.DiaDiem
+                                            </span>
+
+                                            <span>
+                                                <i class="fa-regular fa-clock"></i>
+                                                @tour.ThoiGian
+                                            </span>
+                                        </div>
+
+                                        <h3>@tour.TenTour</h3>
+
+                                        <div class="ht-ai-score-breakdown">
+                                            <div>
+                                                <span>Sở thích</span>
+                                                <strong>@tour.DiemSoThich/50</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>Điểm đến</span>
+                                                <strong>@tour.DiemDiemDen/30</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>Ngân sách</span>
+                                                <strong>@tour.DiemNganSach/20</strong>
+                                            </div>
+                                        </div>
+
+                                        <div class="ht-ai-score-track">
+                                            <div style="width:@(tour.MatchingScore)%"></div>
+                                        </div>
+
+                                        <div class="ht-ai-reasons">
+                                            @foreach (var reason in tour.LyDoGoiY)
+                                            {
+                                                <p>
+                                                    <i class="fa-solid fa-check"></i>
+                                                    @reason
+                                                </p>
+                                            }
+                                        </div>
+
+                                        <div class="ht-ai-tour-footer">
+                                            <div class="ht-ai-price">
+                                                <span>GIÁ TOUR TỪ</span>
+                                                <strong>@tour.GiaBan.ToString("N0")đ</strong>
+                                            </div>
+
+                                            <a asp-controller="Tour"
+                                               asp-action="ChiTiet"
+                                               asp-route-id="@tour.IdTour"
+                                               class="ht-ai-detail">
+                                                Xem tour
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    }
+                    else if (hasNoResults)
+                    {
+                        <div class="ht-ai-empty ht-ai-no-results">
+
+                            <div class="ht-tripi-character ht-tripi-sad">
+                                <img src="~/img/tripi/tripi-rabbit.png"
+                                     alt="Tripi gợi ý bạn điều chỉnh tìm kiếm"
+                                     loading="lazy" />
+                                <div class="ht-tripi-ground-shadow"></div>
+                            </div>
+
+                            <h3>Tripi chưa tìm thấy tour phù hợp</h3>
+
+                            <p>
+                                Bạn thử tăng ngân sách, chọn thêm thời gian
+                                hoặc thay đổi điểm đến để tìm hành trình khác nhé!
+                            </p>
+
+                            <a href="/goi-y-tour" class="ht-ai-try-again">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                Thử tìm lại
+                            </a>
+                        </div>
+                    }
+
+                    <p class="ht-ai-disclaimer">
+                        Điểm phù hợp được tính theo tiêu chí lựa chọn và trọng số
+                        của hệ thống, không phải xác suất dự đoán sở thích.
+                        Thông tin lịch khởi hành và chỗ trống cần kiểm tra
+                        tại trang chi tiết tour.
+                    </p>
+
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const form = document.getElementById("htAiRecommendationForm");
+        const loading = document.getElementById("htAiLoading");
+        const content = document.getElementById("htAiResultContent");
+        const submitButton = document.getElementById("htAiSubmit");
+
+        if (!form || !loading || !content || !submitButton) return;
+
+        form.addEventListener("submit", event => {
+            if (event.defaultPrevented || !form.checkValidity()) return;
+
+            loading.hidden = false;
+            content.hidden = true;
+            submitButton.disabled = true;
+            submitButton.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Đang tìm tour...';
+        });
+
+        window.addEventListener("pageshow", event => {
+            if (!event.persisted) return;
+
+            loading.hidden = true;
+            content.hidden = false;
+            submitButton.disabled = false;
+            submitButton.innerHTML =
+                '<i class="fa-solid fa-magnifying-glass"></i> Tìm tour phù hợp';
+        });
+    })();
+</script>

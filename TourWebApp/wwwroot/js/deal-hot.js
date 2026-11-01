@@ -1,80 +1,105 @@
+"use strict";
+
 document.addEventListener("DOMContentLoaded", () => {
     const section = document.querySelector(".deal-hot");
-    if (!section) return;
+
+    if (!section || section.dataset.initialized === "true") {
+        return;
+    }
 
     const track = section.querySelector(".deal-hot-track");
     const prev = section.querySelector(".deal-hot-prev");
     const next = section.querySelector(".deal-hot-next");
     const dotsContainer = section.querySelector(".deal-hot-dots");
 
-    if (!track || !prev || !next || !dotsContainer) return;
+    if (!track || !prev || !next || !dotsContainer) {
+        return;
+    }
 
-    const cards = Array.from(track.querySelectorAll(".deal-hot-card"));
+    const cards = Array.from(
+        track.querySelectorAll(".deal-hot-card")
+    );
+
     if (cards.length < 2) return;
 
+    section.dataset.initialized = "true";
+
     const INTERVAL = 4000;
+
     const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
     );
 
     let currentIndex = 0;
     let autoplay = null;
-    let resumeTimer = null;
-    let isDragging = false;
+
+    dotsContainer.replaceChildren();
 
     const dots = cards.map((card, index) => {
         const dot = document.createElement("button");
 
         dot.type = "button";
         dot.className = "deal-hot-dot";
-        dot.setAttribute("aria-label", `Xem banner ${index + 1}`);
+        dot.setAttribute(
+            "aria-label",
+            `Xem ưu đãi ${index + 1}`
+        );
 
         dot.addEventListener("click", () => {
-            moveTo(index);
-            restartAutoplay();
+            selectSlide(index);
         });
 
         dotsContainer.appendChild(dot);
         return dot;
     });
 
-    function getMaxScroll() {
-        return Math.max(0, track.scrollWidth - track.clientWidth);
-    }
-
     function getPosition(index) {
-        return Math.min(
-            cards[index].offsetLeft - cards[0].offsetLeft,
-            getMaxScroll()
-        );
+        let offset = index - currentIndex;
+        const half = Math.floor(cards.length / 2);
+
+        if (offset > half) {
+            offset -= cards.length;
+        }
+
+        if (offset < -half) {
+            offset += cards.length;
+        }
+
+        return offset;
     }
 
-    function updateDots() {
+    function render() {
+        cards.forEach((card, index) => {
+            const position = getPosition(index);
+            const active = position === 0;
+
+            card.dataset.position = String(position);
+            card.classList.toggle("is-active", active);
+            card.setAttribute("tabindex", active ? "0" : "-1");
+
+            if (active) {
+                card.setAttribute("aria-current", "true");
+            } else {
+                card.removeAttribute("aria-current");
+            }
+        });
+
         dots.forEach((dot, index) => {
             const active = index === currentIndex;
 
             dot.classList.toggle("active", active);
-            dot.setAttribute(
-                "aria-current",
-                active ? "true" : "false"
-            );
+            dot.setAttribute("aria-pressed", String(active));
         });
     }
 
     function moveTo(index) {
         currentIndex = (index + cards.length) % cards.length;
-
-        track.scrollTo({
-            left: getPosition(currentIndex),
-            behavior: reducedMotion.matches ? "instant" : "smooth"
-        });
-
-        updateDots();
+        render();
     }
 
     function stopAutoplay() {
         if (autoplay !== null) {
-            clearInterval(autoplay);
+            clearTimeout(autoplay);
             autoplay = null;
         }
     }
@@ -84,63 +109,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (document.hidden || reducedMotion.matches) return;
 
-        autoplay = setInterval(() => {
-            if (!isDragging) {
-                moveTo(currentIndex + 1);
-            }
+        autoplay = setTimeout(function advance() {
+            moveTo(currentIndex + 1);
+            autoplay = setTimeout(advance, INTERVAL);
         }, INTERVAL);
     }
 
-    function restartAutoplay() {
-        stopAutoplay();
-        clearTimeout(resumeTimer);
-
-        resumeTimer = setTimeout(() => {
-            startAutoplay();
-        }, INTERVAL);
+    function selectSlide(index) {
+        moveTo(index);
+        startAutoplay();
     }
 
     prev.addEventListener("click", () => {
-        moveTo(currentIndex - 1);
-        restartAutoplay();
+        selectSlide(currentIndex - 1);
     });
 
     next.addEventListener("click", () => {
-        moveTo(currentIndex + 1);
-        restartAutoplay();
+        selectSlide(currentIndex + 1);
     });
 
-    track.addEventListener("pointerdown", () => {
-        isDragging = true;
-        stopAutoplay();
-    });
-
-    window.addEventListener("pointerup", () => {
-        if (!isDragging) return;
-
-        isDragging = false;
-        restartAutoplay();
-    });
-
-    track.addEventListener("scroll", () => {
-        if (!isDragging) return;
-
-        let closest = 0;
-        let closestDistance = Infinity;
-
-        cards.forEach((card, index) => {
-            const distance = Math.abs(
-                track.scrollLeft - getPosition(index)
-            );
-
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closest = index;
+    cards.forEach((card, index) => {
+        card.addEventListener("click", event => {
+            if (index !== currentIndex) {
+                event.preventDefault();
+                selectSlide(index);
             }
         });
+    });
 
-        currentIndex = closest;
-        updateDots();
+    track.addEventListener("keydown", event => {
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            selectSlide(currentIndex - 1);
+        }
+
+        if (event.key === "ArrowRight") {
+            event.preventDefault();
+            selectSlide(currentIndex + 1);
+        }
+    });
+
+    let touchStartX = null;
+
+    track.addEventListener("touchstart", event => {
+        if (event.touches.length !== 1) return;
+        touchStartX = event.touches[0].clientX;
+    }, { passive: true });
+
+    track.addEventListener("touchend", event => {
+        if (
+            touchStartX === null ||
+            event.changedTouches.length !== 1
+        ) {
+            return;
+        }
+
+        const difference =
+            event.changedTouches[0].clientX - touchStartX;
+
+        touchStartX = null;
+
+        if (Math.abs(difference) < 50) return;
+
+        selectSlide(
+            difference < 0
+                ? currentIndex + 1
+                : currentIndex - 1
+        );
     }, { passive: true });
 
     document.addEventListener("visibilitychange", () => {
@@ -151,13 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    window.addEventListener("resize", () => {
-        track.scrollTo({
-            left: getPosition(currentIndex),
-            behavior: "instant"
-        });
-    });
+    reducedMotion.addEventListener?.("change", startAutoplay);
 
-    updateDots();
+    render();
     startAutoplay();
 });

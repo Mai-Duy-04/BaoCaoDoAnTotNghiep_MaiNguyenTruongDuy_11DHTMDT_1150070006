@@ -1,343 +1,605 @@
-﻿@model List<TourWebApp.Data.Models.Tour>
+﻿
+@model List<TourWebApp.Data.Models.Tour>
 
 @{
     ViewData["Title"] = "Tất cả tour";
+
     var lichGanNhat = ViewBag.LichGanNhat as Dictionary<int, TourWebApp.Data.Models.LichKhoiHanh>;
     var loaiTours = ViewBag.LoaiTours as List<TourWebApp.Data.Models.LoaiTour> ?? new List<TourWebApp.Data.Models.LoaiTour>();
     var phuongTienList = ViewBag.PhuongTienList as List<string> ?? new List<string>();
     var q = Context.Request.Query;
-    bool chiConCho = q["concho"] == "true" || q["concho"] == "on";
+    var chiConCho = q["concho"] == "true" || q["concho"] == "on";
     var wishlistIds = ViewBag.WishlistIds as HashSet<int> ?? new HashSet<int>();
     var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var currentPage = ViewBag.CurrentPage is int cp ? cp : 1;
+    var totalPages = ViewBag.TotalPages is int tp ? tp : 1;
+    var selectedSort = q["sort"].ToString();
 }
+
 <link rel="stylesheet" href="~/css/tour-filter.css" />
 <link rel="stylesheet" href="~/css/tour-compare.css" />
+<link rel="stylesheet" href="~/css/tour-listing-premium.css" asp-append-version="true" />
 
-<div class="tours-container">
-<section class="tour-listing-page planner-filter-wrap mb-4">
-    <div class="tour-filter-head">
-        <p class="tour-filter-kicker">Khám phá hành trình</p>
-        <h1 class="tour-filter-title">Chọn tour phù hợp ngân sách và lịch trình của bạn</h1>
+<div class="tours-container ht-explorer">
+
+    <div class="ht-explorer-intro">
+        <div>
+            <span class="ht-explorer-kicker">HAPPYTRIP · KHÁM PHÁ HÀNH TRÌNH</span>
+            <h1>Khám phá chuyến đi của bạn</h1>
+            <p>Tìm hành trình phù hợp với thời gian, sở thích và ngân sách của bạn.</p>
+        </div>
+        <div class="ht-explorer-intro-icon">
+            <i class="fa-regular fa-compass"></i>
+        </div>
     </div>
-    <form method="get" id="quickFilterForm" class="planner-card planner-card-tour">
-        <div class="planner-field planner-field-wide planner-field-relative">
-            <label for="diadiemInputTop">Điểm đến</label>
-            <input type="text" name="diadiem" id="diadiemInputTop" placeholder="VD: Đà Lạt, Nha Trang..." value="@q["diadiem"]" autocomplete="off" />
-            <div class="autocomplete-box" id="goiYBoxTop"></div>
-        </div>
-        <div class="planner-field">
-            <label for="ngaydiTop">Ngày đi</label>
-            <input type="date" id="ngaydiTop" name="ngaydi" value="@q["ngaydi"]" />
-        </div>
-        <div class="planner-field">
-            <label for="songayTop">Số ngày</label>
-            <input type="number" id="songayTop" name="songay" min="1" placeholder="VD: 3" value="@q["songay"]" />
-        </div>
-        <div class="planner-field">
-            <label for="phuongTienTop">Phương tiện</label>
-            <select id="phuongTienTop" name="phuongtien">
-                <option value="">Tất cả</option>
-                @foreach (var pt in phuongTienList)
-                {
-                    <option value="@pt" selected="@(q["phuongtien"] == pt)">@pt</option>
-                }
-            </select>
-        </div>
-        <div class="planner-field">
-            <label for="idLoaiTourTop">Loại tour</label>
-            <select id="idLoaiTourTop" name="idLoaiTour">
-                <option value="">Tất cả</option>
-                @foreach (var lt in loaiTours)
-                {
-                    <option value="@lt.IdLoaiTour" selected="@(q["idLoaiTour"] == lt.IdLoaiTour.ToString())">@lt.TenLoai</option>
-                }
-            </select>
-        </div>
-        <div class="planner-field planner-field-action">
-            <label class="planner-check-wrap" for="conChoCheckTop">
-                <input type="checkbox" id="conChoCheckTop" name="concho" value="true" checked="@chiConCho" />
-                <span>Chỉ còn tour còn chỗ</span>
-            </label>
-            <button class="planner-submit" type="submit">Tìm tour</button>
-            <button type="button" class="planner-advanced" data-bs-toggle="modal" data-bs-target="#filterModal">Nâng cao</button>
-        </div>
-    </form>
-</section>
 
-<h2 class="title-all-tour">Tất cả tour</h2>
+    <div class="ht-explorer-layout">
 
-<!-- =================== LIST TOUR =================== -->
-<section class="tours-showcase">
-<div class="row g-4 tour-listing-grid">
-@{
-    var tourIndex = 0;
-}
-
-@foreach (var t in Model)
-{
-    var lich = (lichGanNhat != null && lichGanNhat.ContainsKey(t.IdTour))
-    ? lichGanNhat[t.IdTour]
-    : null;
-
-    string trangThai = "Không có lịch";
-    string ngay = "--";
-    string gio = "--";
-    string socho = "--";
-
-    if (lich != null)
-    {
-        ngay = lich.NgayKhoiHanh.ToString("dd/MM/yyyy");
-        gio = lich.GioKhoiHanh?.ToString("HH:mm") ?? "--";
-        socho = lich.SoChoConLai.ToString();
-
-        trangThai = lich.SoChoConLai <= 0 ? "Hết chỗ" : lich.SoChoConLai <= 5 ? "Sắp hết chỗ" : "Còn chỗ";
-    }
-
-    <div class="col-xl-3 col-lg-4 col-md-6 d-flex reveal" style="--stagger:@(tourIndex % 8)">
-
-        <article class="tour-card-modern tour-list-card shadow-lg rounded-4 overflow-hidden h-100 w-100 d-flex flex-column">
-
-            @if (t.PhanTramGiam > 0)
-            {
-                <div class="position-absolute top-0 end-0 m-3 px-3 py-2 bg-warning rounded-pill text-white fw-bold">
-                    -@t.PhanTramGiam%
+        <aside class="ht-filter-sidebar">
+            <div class="ht-filter-heading">
+                <div>
+                    <i class="fa-solid fa-sliders"></i>
+                    <strong>Bộ lọc tour</strong>
                 </div>
-            }
-
-            <div class="position-relative tour-list-image-wrap" style="height:165px; overflow:hidden;">
-                <form asp-controller="Wishlist"
-                      asp-action="Toggle"
-                      method="post"
-                      class="position-absolute top-0 start-0 m-2"
-                      style="z-index: 3;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="idTour" value="@t.IdTour" />
-                    <input type="hidden" name="returnUrl" value="@returnUrl" />
-                    <button type="submit"
-                            class="btn btn-sm rounded-circle @(wishlistIds.Contains(t.IdTour) ? "btn-danger" : "btn-light")"
-                            title="@(wishlistIds.Contains(t.IdTour) ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")"
-                            aria-label="@(wishlistIds.Contains(t.IdTour) ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")">
-                        <i class="fa@(wishlistIds.Contains(t.IdTour) ? "s" : "r") fa-heart"></i>
-                    </button>
-                </form>
-
-                <img src="@TourImagePathHelper.ToTourImageSrc(t.HinhAnh)"
-                     class="w-100 h-100 tour-list-image"
-                     style="object-fit:cover; border-radius:10px;" />
+                <a asp-controller="Tour" asp-action="TatCa" class="ht-filter-reset">
+                    Xóa lọc
+                </a>
             </div>
 
-            <div class="bg-light p-3 border-bottom tour-list-meta">
+            <form method="get" id="quickFilterForm" class="ht-filter-form">
 
-                <p class="mb-1"><b>Mã tour:</b> @t.MaTour</p>
-                <p class="mb-1"><b>Điểm đến:</b> @t.DiaDiem</p>
-
-                @if (lich != null)
-                {
-                    <p class="mb-1"><b>Ngày gần nhất:</b> @ngay</p>
-                    <p class="mb-1"><b>Giờ khởi hành:</b> @gio</p>
-                    <p class="mb-1"><b>Còn lại:</b> @socho chỗ</p>
-                    <p class="mb-1"><b>Trạng thái:</b> @trangThai</p>
-                }
-                else
-                {
-                    <p class="mb-1 text-muted"><b>Lịch:</b> Chưa cập nhật lịch khởi hành</p>
-                }
-
-                <p class="mb-0"><b>Phương tiện:</b> @t.PhuongTien</p>
-            </div>
-
-            <div class="p-3 d-flex flex-column gap-2 flex-grow-1 tour-list-body">
-
-                <p class="tour-list-tag">Việt Nam</p>
-
-                <h4 class="fw-bold tour-list-title">@t.TenTour</h4>
-
-                <p class="tour-list-desc">@t.MoTa</p>
-
-                <div class="tour-list-footer d-flex align-items-center justify-content-between mt-auto">
-                    <p class="tour-price mb-0">Từ <strong>@string.Format("{0:N0}đ", t.GiaKhuyenMai)</strong></p>
-                    <a asp-controller="Tour"
-                       asp-action="ChiTiet"
-                       asp-route-id="@t.IdTour"
-                       class="tour-link-detail">
-                        Xem chi tiết
-                    </a>
+                <div class="ht-filter-group planner-field planner-field-relative">
+                    <label for="diadiemInputTop">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Điểm đến
+                    </label>
+                    <input
+                        type="text"
+                        name="diadiem"
+                        id="diadiemInputTop"
+                        placeholder="Bạn muốn đi đâu?"
+                        value="@q["diadiem"]"
+                        autocomplete="off" />
+                    <div class="autocomplete-box" id="goiYBoxTop"></div>
                 </div>
 
-                <button type="button"
-                        class="btn btn-outline-primary btn-sm mt-2 compare-toggle-btn"
-                        data-tour-id="@t.IdTour">
-                    Chọn so sánh
+                <div class="ht-filter-group planner-field">
+                    <label for="ngaydiTop">
+                        <i class="fa-regular fa-calendar"></i>
+                        Ngày khởi hành
+                    </label>
+                    <input
+                        type="date"
+                        id="ngaydiTop"
+                        name="ngaydi"
+                        value="@q["ngaydi"]" />
+                </div>
+
+                <div class="ht-filter-group planner-field">
+                    <label for="songayTop">
+                        <i class="fa-regular fa-clock"></i>
+                        Số ngày
+                    </label>
+                    <input
+                        type="number"
+                        id="songayTop"
+                        name="songay"
+                        min="1"
+                        placeholder="Ví dụ: 3"
+                        value="@q["songay"]" />
+                </div>
+
+                <div class="ht-filter-group planner-field">
+                    <label for="idLoaiTourTop">
+                        <i class="fa-solid fa-map"></i>
+                        Loại tour
+                    </label>
+                    <select id="idLoaiTourTop" name="idLoaiTour">
+                        <option value="">Tất cả loại tour</option>
+                        @foreach (var lt in loaiTours)
+                        {
+                            <option value="@lt.IdLoaiTour"
+                                    selected="@(q["idLoaiTour"] == lt.IdLoaiTour.ToString())">
+                                @lt.TenLoai
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="ht-filter-group planner-field">
+                    <label for="phuongTienTop">
+                        <i class="fa-solid fa-bus"></i>
+                        Phương tiện
+                    </label>
+                    <select id="phuongTienTop" name="phuongtien">
+                        <option value="">Tất cả phương tiện</option>
+                        @foreach (var pt in phuongTienList)
+                        {
+                            <option value="@pt" selected="@(q["phuongtien"] == pt)">
+                                @pt
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="ht-filter-group ht-filter-check-group">
+                    <label class="ht-filter-check" for="conChoCheckTop">
+                        <input type="checkbox"
+                               id="conChoCheckTop"
+                               name="concho"
+                               value="true"
+                               checked="@chiConCho" />
+                        <span>Chỉ hiển thị tour còn chỗ</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="ht-filter-submit">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    Áp dụng bộ lọc
                 </button>
 
-            </div>
-
-        </article>
-
-    </div>
-    tourIndex++;
-}
-
-</div>
-</section>
-
-<!-- ================= MODAL FILTER ================= -->
-<div class="modal fade" id="filterModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-4">
-
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Bộ lọc nâng cao</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <form method="get" id="filterForm">
-                <div class="modal-body">
-
-                    <div class="row g-3">
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Điểm đến</label>
-                            <input type="text" name="diadiem" id="diadiemInput"
-                                   class="form-control"
-                                   placeholder="VD: Đà Lạt, Nha Trang..."
-                                   autocomplete="off"
-                                   value="@q["diadiem"]">
-                            <div class="autocomplete-box" id="goiYBox"></div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Ngày đi</label>
-                            <input type="date" name="ngaydi" class="form-control" value="@q["ngaydi"]" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Số ngày</label>
-                            <input type="number" name="songay"
-                                   class="form-control"
-                                   placeholder="VD: 3"
-                                   min="1"
-                                   value="@q["songay"]" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Phương tiện</label>
-                            <select name="phuongtien" class="form-select">
-                                <option value="">-- Tất cả --</option>
-                                @foreach (var pt in phuongTienList)
-                                {
-                                    <option value="@pt" selected="@(q["phuongtien"] == pt)">@pt</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Loại tour</label>
-                            <select name="idLoaiTour" class="form-select">
-                                <option value="">-- Tất cả --</option>
-                                @foreach (var lt in loaiTours)
-                                {
-                                    <option value="@lt.IdLoaiTour" selected="@(q["idLoaiTour"] == lt.IdLoaiTour.ToString())">@lt.TenLoai</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="form-check mt-1">
-                                <input class="form-check-input" type="checkbox" id="conChoCheck" name="concho" value="true" checked="@chiConCho" />
-                                <label class="form-check-label" for="conChoCheck">Chỉ hiện tour còn chỗ</label>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mt-2">
-                            <label class="form-label fw-semibold">Khoảng giá</label>
-
-                            <div class="price-slider-container">
-                                <div class="slider-track"></div>
-
-                                <input type="range" class="range-min" min="0" max="20000000" step="50000" value="0">
-                                <input type="range" class="range-max" min="0" max="20000000" step="50000" value="20000000">
-                            </div>
-
-                            <div class="d-flex justify-content-between mt-3">
-                                <div>
-                                    <span class="fw-bold">Từ:</span>
-                                    <input type="text" name="giamin" id="giaminInput"
-                                           class="form-control money-input"
-                                           style="width:150px;"
-                                           value="@q["giamin"]">
-                                </div>
-
-                                <div>
-                                    <span class="fw-bold">Đến:</span>
-                                    <input type="text" name="giamax" id="giamaxInput"
-                                           class="form-control money-input"
-                                           style="width:150px;"
-                                           value="@q["giamax"]">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mt-3">
-                            <label class="form-label fw-semibold">Sắp xếp</label>
-                            <select name="sort" class="form-select">
-                                <option value="">-- Không sắp xếp --</option>
-                                <option value="gia_tang" selected="@(q["sort"]=="gia_tang")">Giá tăng dần</option>
-                                <option value="gia_giam" selected="@(q["sort"]=="gia_giam")">Giá giảm dần</option>
-                                <option value="ten" selected="@(q["sort"]=="ten")">Tên A -> Z</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-primary px-4 rounded-pill fw-bold">Áp dụng</button>
-                </div>
+                <button type="button"
+                        class="ht-filter-advanced"
+                        data-bs-toggle="modal"
+                        data-bs-target="#filterModal">
+                    <i class="fa-solid fa-sliders"></i>
+                    Lọc nâng cao
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </button>
             </form>
 
+            <div class="ht-filter-tip">
+                <i class="fa-solid fa-lightbulb"></i>
+                <p>Bạn có thể lọc thêm theo khoảng giá và sắp xếp trong mục nâng cao.</p>
+            </div>
+        </aside>
+
+        <main class="ht-explorer-results">
+
+            <div class="ht-results-toolbar">
+                <div class="ht-results-title-wrap">
+                    <span class="ht-results-eyebrow">DANH SÁCH HÀNH TRÌNH</span>
+                    <h2>Tất cả tour <span class="ht-results-count">@Model.Count</span></h2>
+                </div>
+
+                
+<div class="ht-results-actions">
+    <span class="ht-results-page">
+        Trang @currentPage / @Math.Max(1, totalPages)
+    </span>
+
+    <form method="get" class="ht-tour-sort-form" id="tourSortForm">
+        @foreach (var parameter in Context.Request.Query)
+        {
+            if (!string.Equals(parameter.Key, "sort", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(parameter.Key, "page", StringComparison.OrdinalIgnoreCase))
+            {
+                <input type="hidden" name="@parameter.Key" value="@parameter.Value.ToString()" />
+            }
+        }
+
+        <label for="tourSortSelect">Sắp xếp:</label>
+
+        <select name="sort" id="tourSortSelect" aria-label="Sắp xếp danh sách tour">
+            <option value="" selected="@(selectedSort == "")">Mặc định</option>
+            <option value="ten" selected="@(selectedSort == "ten")">Tên tour A–Z</option>
+            <option value="gia_tang" selected="@(selectedSort == "gia_tang")">Giá thấp đến cao</option>
+            <option value="gia_giam" selected="@(selectedSort == "gia_giam")">Giá cao đến thấp</option>
+        </select>
+
+        <button type="submit" class="ht-sort-submit">Áp dụng</button>
+    </form>
+</div>
+
+            </div>
+
+            @if (Model.Count == 0)
+            {
+                <div class="ht-results-empty">
+                    <i class="fa-regular fa-compass"></i>
+                    <h3>Chưa tìm thấy tour phù hợp</h3>
+                    <p>Bạn thử đổi điểm đến, ngày đi hoặc điều kiện lọc nhé.</p>
+                    <a asp-controller="Tour" asp-action="TatCa">Xem tất cả tour</a>
+                </div>
+            }
+            else
+            {
+                <section class="tours-showcase">
+                    <div class="row g-3 tour-listing-grid">
+
+                        @{
+                            var tourIndex = 0;
+                        }
+
+                        @foreach (var t in Model)
+                        {
+                            var lich = lichGanNhat != null &&
+                                       lichGanNhat.TryGetValue(t.IdTour, out var lichTimDuoc)
+                                ? lichTimDuoc
+                                : null;
+
+                            var ngay = lich != null
+                                ? lich.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                : "Chưa cập nhật";
+
+                            var soCho = lich?.SoChoConLai ?? 0;
+
+                            var trangThai = lich == null
+                                ? "Chưa có lịch"
+                                : soCho <= 0
+                                    ? "Hết chỗ"
+                                    : soCho <= 5
+                                        ? "Sắp hết chỗ"
+                                        : "Còn chỗ";
+
+                            var statusClass = lich == null
+                                ? "ht-status-pending"
+                                : soCho <= 0
+                                    ? "ht-status-full"
+                                    : soCho <= 5
+                                        ? "ht-status-low"
+                                        : "ht-status-open";
+
+                            <div class="col-xl-4 col-md-6 d-flex"
+                                 style="--stagger:@(tourIndex % 9)">
+
+                                <article class="tour-card-modern tour-list-card ht-tour-card">
+
+                                    <div class="tour-list-image-wrap ht-tour-media">
+
+                                        <img
+                                            src="@TourImagePathHelper.ToTourImageSrc(t.HinhAnh)"
+                                            class="tour-list-image"
+                                            alt="Hình ảnh tour @t.TenTour"
+                                            loading="lazy" />
+
+                                        <div class="ht-tour-image-shade"></div>
+
+                                        <form asp-controller="Wishlist"
+                                              asp-action="Toggle"
+                                              method="post"
+                                              class="ht-tour-wishlist">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="idTour" value="@t.IdTour" />
+                                            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                                            <button type="submit"
+                                                    class="ht-tour-heart @(wishlistIds.Contains(t.IdTour) ? "is-favorite" : "")"
+                                                    title="@(wishlistIds.Contains(t.IdTour) ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")"
+                                                    aria-label="@(wishlistIds.Contains(t.IdTour) ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")">
+                                                <i class="fa@(wishlistIds.Contains(t.IdTour) ? "s" : "r") fa-heart"></i>
+                                            </button>
+                                        </form>
+
+                                        @if (t.PhanTramGiam > 0)
+                                        {
+                                            <span class="ht-tour-discount">
+                                                -@t.PhanTramGiam%
+                                            </span>
+                                        }
+
+                                        <span class="ht-tour-image-label">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                            Việt Nam
+                                        </span>
+                                    </div>
+
+                                    <div class="tour-list-body ht-tour-content">
+
+                                        <div class="ht-tour-topline">
+                                            <span class="ht-tour-code">@t.MaTour</span>
+                                            <span class="ht-tour-status @statusClass">
+                                                @trangThai
+                                            </span>
+                                        </div>
+
+                                        <h3 class="tour-list-title ht-tour-title"
+                                            title="@t.TenTour">
+                                            @t.TenTour
+                                        </h3>
+
+                                        <div class="ht-tour-information">
+                                            <div class="ht-tour-info">
+                                                <i class="fa-solid fa-location-arrow"></i>
+                                                <span title="@t.DiaDiem">@t.DiaDiem</span>
+                                            </div>
+
+                                            <div class="ht-tour-info">
+                                                <i class="fa-regular fa-calendar-days"></i>
+                                                <span>@ngay</span>
+                                            </div>
+
+                                            <div class="ht-tour-info">
+                                                <i class="fa-solid fa-bus-simple"></i>
+                                                <span>@(string.IsNullOrWhiteSpace(t.PhuongTien) ? "Chưa cập nhật" : t.PhuongTien)</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="ht-tour-bottom">
+                                            <div class="ht-tour-price-wrap">
+                                                <span>GIÁ TOUR TỪ</span>
+                                                <strong>@string.Format("{0:N0}đ", t.GiaKhuyenMai)</strong>
+                                            </div>
+
+                                            <a asp-controller="Tour"
+                                               asp-action="ChiTiet"
+                                               asp-route-id="@t.IdTour"
+                                               class="tour-link-detail ht-tour-detail">
+                                                Chi tiết
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            </a>
+                                        </div>
+
+                                        <button type="button"
+                                                class="compare-toggle-btn ht-tour-compare"
+                                                data-tour-id="@t.IdTour">
+                                            <i class="fa-solid fa-code-compare"></i>
+                                            Chọn so sánh
+                                        </button>
+
+                                    </div>
+
+                                </article>
+                            </div>
+
+                            tourIndex++;
+                        }
+                    </div>
+                </section>
+            }
+
+            @if (totalPages > 1)
+            {
+                <nav class="ht-tour-pagination" aria-label="Phân trang tour">
+
+                    @if (currentPage > 1)
+                    {
+                        <a class="ht-page-button ht-page-arrow"
+                           href="@BuildPageUrl(currentPage - 1)"
+                           aria-label="Trang trước">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
+                    }
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <a class="ht-page-button @(i == currentPage ? "ht-page-active" : "")"
+                           href="@BuildPageUrl(i)"
+                           aria-label="Trang @i"
+                           aria-current="@(i == currentPage ? "page" : null)">
+                            @i
+                        </a>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <a class="ht-page-button ht-page-arrow"
+                           href="@BuildPageUrl(currentPage + 1)"
+                           aria-label="Trang tiếp theo">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    }
+                </nav>
+            }
+
+        </main>
+    </div>
+
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 ht-filter-modal">
+
+                <div class="modal-header">
+                    <h5 id="filterModalTitle" class="modal-title fw-bold">
+                        <i class="fa-solid fa-sliders"></i>
+                        Bộ lọc nâng cao
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Đóng"></button>
+                </div>
+
+                <form method="get" id="filterForm">
+                    <div class="modal-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold" for="diadiemInput">Điểm đến</label>
+                                <input type="text"
+                                       name="diadiem"
+                                       id="diadiemInput"
+                                       class="form-control"
+                                       placeholder="Nhập điểm đến..."
+                                       autocomplete="off"
+                                       value="@q["diadiem"]" />
+                                <div class="autocomplete-box" id="goiYBox"></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Ngày đi</label>
+                                <input type="date"
+                                       name="ngaydi"
+                                       class="form-control"
+                                       value="@q["ngaydi"]" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Số ngày</label>
+                                <input type="number"
+                                       name="songay"
+                                       class="form-control"
+                                       min="1"
+                                       placeholder="Ví dụ: 3"
+                                       value="@q["songay"]" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phương tiện</label>
+                                <select name="phuongtien" class="form-select">
+                                    <option value="">Tất cả</option>
+                                    @foreach (var pt in phuongTienList)
+                                    {
+                                        <option value="@pt" selected="@(q["phuongtien"] == pt)">
+                                            @pt
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Loại tour</label>
+                                <select name="idLoaiTour" class="form-select">
+                                    <option value="">Tất cả</option>
+                                    @foreach (var lt in loaiTours)
+                                    {
+                                        <option value="@lt.IdLoaiTour"
+                                                selected="@(q["idLoaiTour"] == lt.IdLoaiTour.ToString())">
+                                            @lt.TenLoai
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="conChoCheck"
+                                           name="concho"
+                                           value="true"
+                                           checked="@chiConCho" />
+                                    <label class="form-check-label" for="conChoCheck">
+                                        Chỉ hiện tour còn chỗ
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Khoảng giá</label>
+
+                                <div class="price-slider-container">
+                                    <div class="slider-track"></div>
+                                    <input type="range"
+                                           class="range-min"
+                                           min="0"
+                                           max="20000000"
+                                           step="50000"
+                                           value="0" />
+                                    <input type="range"
+                                           class="range-max"
+                                           min="0"
+                                           max="20000000"
+                                           step="50000"
+                                           value="20000000" />
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-3 gap-3">
+                                    <div>
+                                        <label class="form-label">Từ</label>
+                                        <input type="text"
+                                               name="giamin"
+                                               id="giaminInput"
+                                               class="form-control money-input"
+                                               value="@q["giamin"]" />
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">Đến</label>
+                                        <input type="text"
+                                               name="giamax"
+                                               id="giamaxInput"
+                                               class="form-control money-input"
+                                               value="@q["giamax"]" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Sắp xếp</label>
+                                <select name="sort" class="form-select">
+                                    <option value="">Mặc định</option>
+                                    <option value="gia_tang" selected="@(selectedSort == "gia_tang")">
+                                        Giá tăng dần
+                                    </option>
+                                    <option value="gia_giam" selected="@(selectedSort == "gia_giam")">
+                                        Giá giảm dần
+                                    </option>
+                                    <option value="ten" selected="@(selectedSort == "ten")">
+                                        Tên A - Z
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Đóng
+                        </button>
+                        <button type="submit" class="ht-modal-submit">
+                            Áp dụng bộ lọc
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+
+    <div id="compareBar" class="compare-bar" hidden>
+        <div class="compare-bar__content">
+            <span id="compareCount">0/4 tour</span>
+            <button type="button"
+                    id="compareNowBtn"
+                    class="btn btn-sm btn-primary"
+                    disabled>
+                So sánh ngay
+            </button>
+            <button type="button"
+                    id="clearCompareBtn"
+                    class="btn btn-sm btn-outline-secondary">
+                Xóa
+            </button>
+        </div>
+    </div>
+
 </div>
 
-@if (ViewBag.TotalPages > 1)
-{
-    <div class="d-flex justify-content-center mt-5 gap-2">
+@functions {
+    private string BuildPageUrl(int page)
+    {
+        var parameters = new Dictionary<string, string>();
 
-        @if (ViewBag.CurrentPage > 1)
+        foreach (var item in Context.Request.Query)
         {
-            <a class="btn btn-outline-primary rounded-pill"
-               href="?page=@(ViewBag.CurrentPage - 1)&diadiem=@q["diadiem"]&ngaydi=@q["ngaydi"]&songay=@q["songay"]&giamin=@q["giamin"]&giamax=@q["giamax"]&phuongtien=@q["phuongtien"]&idLoaiTour=@q["idLoaiTour"]&concho=@q["concho"]&sort=@q["sort"]">
-                &larr;
-            </a>
+            if (!string.Equals(item.Key, "page", StringComparison.OrdinalIgnoreCase))
+            {
+                parameters[item.Key] = item.Value.ToString();
+            }
         }
 
-        @for (int i = 1; i <= ViewBag.TotalPages; i++)
-        {
-            <a class="btn @(i == ViewBag.CurrentPage ? "btn-primary" : "btn-outline-primary") rounded-pill"
-               href="?page=@i&diadiem=@q["diadiem"]&ngaydi=@q["ngaydi"]&songay=@q["songay"]&giamin=@q["giamin"]&giamax=@q["giamax"]&phuongtien=@q["phuongtien"]&idLoaiTour=@q["idLoaiTour"]&concho=@q["concho"]&sort=@q["sort"]">
-                @i
-            </a>
-        }
+        parameters["page"] = page.ToString();
 
-        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-        {
-            <a class="btn btn-outline-primary rounded-pill"
-               href="?page=@(ViewBag.CurrentPage + 1)&diadiem=@q["diadiem"]&ngaydi=@q["ngaydi"]&songay=@q["songay"]&giamin=@q["giamin"]&giamax=@q["giamax"]&phuongtien=@q["phuongtien"]&idLoaiTour=@q["idLoaiTour"]&concho=@q["concho"]&sort=@q["sort"]">
-                &rarr;
-            </a>
-        }
-
-    </div>
+       return $"{Context.Request.Path}{Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(string.Empty, parameters)}";
+    }
 }
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const sortSelect = document.getElementById("tourSortSelect");
+        const sortForm = document.getElementById("tourSortForm");
+
+        if (sortSelect && sortForm) {
+            sortSelect.addEventListener("change", function () {
+                sortForm.requestSubmit();
+            });
+        }
+    });
+</script>
+
 <script src="~/js/filter-slider.js"></script>
-<div id="compareBar" class="compare-bar" hidden>
-    <div class="compare-bar__content">
-        <span id="compareCount">0/4 tour</span>
-        <button type="button" id="compareNowBtn" class="btn btn-sm btn-primary" disabled>So sánh ngay</button>
-        <button type="button" id="clearCompareBtn" class="btn btn-sm btn-outline-secondary">Xóa</button>
-    </div>
-</div>
 <script src="~/js/compare-tour.js"></script>
-</div>
+<script src="~/js/tour-listing-premium.js" asp-append-version="true" defer></script>

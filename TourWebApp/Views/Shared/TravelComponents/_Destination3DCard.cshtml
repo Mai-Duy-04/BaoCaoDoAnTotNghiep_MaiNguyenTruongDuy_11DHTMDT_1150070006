@@ -1,0 +1,79 @@
+
+@model DestinationItem
+
+@{
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var wishlistSlugs = ViewBag.WishlistDestinationSlugs as HashSet<string>;
+    var isWishlisted = wishlistSlugs?.Contains(Model.Slug) == true;
+
+    var destinationTag = Model.Category switch
+    {
+        "Biển" => "BIỂN XANH & NẮNG VÀNG",
+        "Núi" => "THIÊN NHIÊN & PHỐ NÚI",
+        "Văn hóa" => "VĂN HÓA & BẢN SẮC",
+        "Thành phố" => "NHỊP SỐNG ĐÔ THỊ",
+        "Khám phá" => "HÀNH TRÌNH KHÁM PHÁ",
+        _ => "VẺ ĐẸP MIỀN NAM"
+    };
+}
+
+<article class="ht-arc-card">
+    <div class="ht-arc-card-media">
+        <img src="@Model.ImageUrl"
+             alt="Khám phá @Model.Name"
+             loading="lazy" />
+
+        <div class="ht-arc-card-shade"></div>
+
+        <span class="ht-arc-card-location">
+            <i class="fa-solid fa-location-dot"></i>
+            Việt Nam
+        </span>
+
+        <form asp-controller="Wishlist"
+              asp-action="ToggleByDestination"
+              method="post"
+              class="ht-arc-card-wishlist">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="destinationSlug"
+                   value="@Model.Slug" />
+
+            <input type="hidden"
+                   name="returnUrl"
+                   value="@returnUrl" />
+
+            <button type="submit"
+                    class="ht-arc-card-heart @(isWishlisted ? "is-active" : "")"
+                    aria-label="@(isWishlisted ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích") @Model.Name"
+                    title="@(isWishlisted ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")">
+                <i class="@(isWishlisted ? "fas" : "far") fa-heart"></i>
+            </button>
+        </form>
+
+        <div class="ht-arc-card-title">
+            <span>@destinationTag</span>
+            <h3>@Model.Name</h3>
+        </div>
+    </div>
+
+    <div class="ht-arc-card-content">
+        <p class="ht-arc-card-description">
+            @Model.Description
+        </p>
+
+        <div class="ht-arc-card-footer">
+            <span class="ht-arc-card-explore">
+                KHÁM PHÁ ĐỊA DANH
+            </span>
+
+            <a href="/destinations/@Model.Slug"
+               class="ht-arc-card-link"
+               aria-label="Khám phá điểm đến @Model.Name"
+               title="Khám phá @Model.Name">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+    </div>
+</article>

@@ -1,16 +1,48 @@
 @model HeroModel
 
-<section class="hero-section" style="background-image: url('@Model.BackgroundImageUrl');">
-    <div class="hero-overlay"></div>
-    <div class="container travel-container hero-content">
-        <h1>@Model.Title</h1>
-        <p>@Model.Subtitle</p>
-        <div class="hero-actions">
-            <a href="@Model.PrimaryButtonUrl" class="btn travel-btn travel-btn-primary">@Model.PrimaryButtonText</a>
-            <a href="@Model.SecondaryButtonUrl" class="btn travel-btn travel-btn-outline">@Model.SecondaryButtonText</a>
-        </div>
-        <div class="scroll-indicator">
-            <span></span>
+<link rel="stylesheet" href="~/css/home-hero.css" asp-append-version="true" />
+
+<section class="hero-section ht-video-hero" aria-label="Khám phá cùng HappyTrip">
+    <div class="ht-video-media">
+        <video id="happytripHeroVideo"
+               class="ht-hero-video"
+               autoplay
+               muted
+               loop
+               playsinline
+               preload="metadata"
+               poster="/img/happytrip-hero/hero-background.png"
+               aria-hidden="true">
+            <source src="/videos/happytrip-cruise.mp4" type="video/mp4" />
+        </video>
+    </div>
+
+    <div class="ht-video-overlay"></div>
+
+    <div class="container travel-container ht-video-content">
+        <div class="ht-video-copy">
+            <span class="ht-video-eyebrow">
+                <span class="ht-video-line"></span>
+                HAPPYTRIP · KHÁM PHÁ THẾ GIỚI
+            </span>
+
+            <h1>@Model.Title</h1>
+            <p>@Model.Subtitle</p>
+
+            <div class="ht-video-actions">
+                <a href="@Model.PrimaryButtonUrl"
+                   class="btn travel-btn ht-video-btn-primary">
+                    @Model.PrimaryButtonText
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+
+                <a href="@Model.SecondaryButtonUrl"
+                   class="btn travel-btn ht-video-btn-outline">
+                    @Model.SecondaryButtonText
+                </a>
+            </div>
         </div>
     </div>
 </section>
+
+<script src="~/js/home-hero.js" asp-append-version="true" defer></script>

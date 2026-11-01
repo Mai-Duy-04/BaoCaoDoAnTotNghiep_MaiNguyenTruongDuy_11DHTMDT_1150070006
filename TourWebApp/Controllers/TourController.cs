@@ -78,7 +78,7 @@ namespace TourWebApp.Controllers
             string? sort,
             int page = 1)
         {
-            int pageSize = 4;
+            int pageSize = 9;
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             var query = _db.Tours

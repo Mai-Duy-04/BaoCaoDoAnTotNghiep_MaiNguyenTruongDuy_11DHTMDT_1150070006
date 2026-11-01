@@ -1,0 +1,282 @@
+.ht-video-hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    min-height: 740px;
+    height: min(860px, 92svh);
+    padding: 120px 0 115px;
+    margin: 0;
+    overflow: hidden;
+    background: #132c3b;
+    color: #fff;
+}
+
+.ht-video-hero .ht-video-media {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    overflow: hidden;
+    background: #132c3b url("/img/happytrip-hero/hero-background.png") center / cover no-repeat;
+}
+
+.ht-video-hero .ht-hero-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
+
+.ht-video-hero .ht-video-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(6, 21, 31, .72) 0%,
+            rgba(6, 21, 31, .46) 36%,
+            rgba(6, 21, 31, .13) 75%,
+            rgba(6, 21, 31, .08) 100%
+        ),
+        linear-gradient(
+            0deg,
+            rgba(6, 21, 31, .35),
+            transparent 45%
+        );
+}
+
+.ht-video-hero .ht-video-content {
+    position: relative;
+    z-index: 2;
+    width: min(1200px, calc(100% - 40px));
+}
+
+.ht-video-hero .ht-video-copy {
+    max-width: 660px;
+    text-align: left;
+    animation: htVideoIntro .9s ease both;
+}
+
+.ht-video-hero .ht-video-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 25px;
+    color: #e9d5b5;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+}
+
+.ht-video-hero .ht-video-line {
+    flex-shrink: 0;
+    width: 38px;
+    height: 1px;
+    background: #e9d5b5;
+}
+
+.ht-video-hero .ht-video-copy h1 {
+    max-width: 660px;
+    margin: 0 0 24px;
+    color: #fff;
+    font-size: clamp(3rem, 5vw, 5.4rem);
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -.025em;
+    text-wrap: balance;
+    text-shadow: 0 3px 25px rgba(0, 0, 0, .18);
+}
+
+.ht-video-hero .ht-video-copy p {
+    max-width: 490px;
+    margin: 0;
+    color: rgba(255, 255, 255, .9);
+    font-size: clamp(1rem, 1.3vw, 1.18rem);
+    line-height: 1.85;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .15);
+}
+
+.ht-video-hero .ht-video-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 13px;
+    margin-top: 32px;
+}
+
+.ht-video-hero .ht-video-btn-primary,
+.ht-video-hero .ht-video-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: .94rem;
+    font-weight: 800;
+    transition:
+        background-color .25s ease,
+        color .25s ease,
+        transform .25s ease;
+}
+
+.ht-video-hero .ht-video-btn-primary {
+    background: #e9d5b5;
+    border: 1px solid #e9d5b5;
+    color: #24382f;
+}
+
+.ht-video-hero .ht-video-btn-primary:hover {
+    background: #fff;
+    color: #24382f;
+    transform: translateY(-3px);
+}
+
+.ht-video-hero .ht-video-btn-outline {
+    background: rgba(255, 255, 255, .09);
+    border: 1px solid rgba(255, 255, 255, .7);
+    color: #fff;
+    backdrop-filter: blur(9px);
+}
+
+.ht-video-hero .ht-video-btn-outline:hover {
+    background: #fff;
+    color: #24382f;
+    transform: translateY(-3px);
+}
+
+.ht-video-hero .ht-video-footer {
+    position: absolute;
+    bottom: 32px;
+    left: max(24px, calc((100vw - 1200px) / 2));
+    right: max(24px, calc((100vw - 1200px) / 2));
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    color: rgba(255, 255, 255, .75);
+    font-size: .69rem;
+    font-weight: 800;
+    letter-spacing: .15em;
+}
+
+.ht-video-hero .ht-video-control {
+    position: absolute;
+    right: 30px;
+    bottom: 75px;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .7);
+    background: rgba(12, 27, 33, .35);
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: background-color .2s ease, transform .2s ease;
+}
+
+.ht-video-hero .ht-video-control:hover {
+    background: rgba(255, 255, 255, .25);
+    transform: scale(1.06);
+}
+
+.ht-video-hero .ht-video-control:focus-visible {
+    outline: 3px solid #e9d5b5;
+    outline-offset: 4px;
+}
+
+@keyframes htVideoIntro {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 991px) {
+    .ht-video-hero {
+        min-height: 650px;
+        height: 85svh;
+        padding: 120px 0 100px;
+    }
+
+    .ht-video-hero .ht-video-copy h1 {
+        font-size: clamp(2.8rem, 6vw, 4.5rem);
+    }
+}
+
+@media (max-width: 575px) {
+    .ht-video-hero {
+        min-height: 620px;
+        height: 85svh;
+        padding: 115px 0 105px;
+    }
+
+    .ht-video-hero .ht-video-content {
+        width: calc(100% - 36px);
+    }
+
+    .ht-video-hero .ht-video-eyebrow {
+        font-size: .64rem;
+        letter-spacing: .07em;
+    }
+
+    .ht-video-hero .ht-video-copy h1 {
+        font-size: clamp(2.4rem, 9vw, 3.5rem);
+    }
+
+    .ht-video-hero .ht-video-copy p {
+        font-size: .96rem;
+        line-height: 1.7;
+    }
+
+    .ht-video-hero .ht-video-actions {
+        gap: 10px;
+    }
+
+    .ht-video-hero .ht-video-btn-primary,
+    .ht-video-hero .ht-video-btn-outline {
+        min-height: 46px;
+        padding: 10px 17px;
+        font-size: .84rem;
+    }
+
+    .ht-video-hero .ht-video-footer {
+        left: 18px;
+        right: 18px;
+        bottom: 22px;
+        font-size: .55rem;
+        letter-spacing: .04em;
+    }
+
+    .ht-video-hero .ht-video-control {
+        right: 18px;
+        bottom: 65px;
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ht-video-hero .ht-video-copy {
+        animation: none;
+    }
+
+    .ht-video-hero .ht-video-btn-primary,
+    .ht-video-hero .ht-video-btn-outline,
+    .ht-video-hero .ht-video-control {
+        transition: none;
+    }
+}
