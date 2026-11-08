@@ -1,0 +1,612 @@
+
+@{
+    ViewData["Title"] = "Trò chuyện cùng Tripi AI | HappyTrip";
+    ViewData["Description"] = "Khám phá những hành trình du lịch cùng trợ lý AI Tripi của HappyTrip.";
+}
+
+<link rel="stylesheet"
+      href="~/css/tripi-chat.css"
+      asp-append-version="true" />
+
+<main id="tripiChatPage"
+      class="tripi-page tripi-world-page">
+
+    <div class="tripi-container tripi-world-container">
+
+        <!-- ============================================
+             TRIPI AI WORKSPACE
+             HOME: FULL SCREEN
+             RESULTS: CHAT 38% - TOUR 62%
+        ============================================= -->
+
+        <section class="tripi-workspace tripi-world-workspace"
+                 aria-label="Không gian trợ lý du lịch Tripi">
+
+            <!-- ========================================
+                 TRIPI CHAT
+            ========================================= -->
+
+            <div class="tripi-chat-panel tripi-world-chat">
+
+                <!-- HEADER -->
+
+                <header class="tripi-chat-header">
+
+                    <div class="tripi-chat-identity">
+
+                        <div class="tripi-chat-avatar">
+                            <img src="~/img/tripi/tripi-fox.png"
+                                 alt="Linh vật cáo Tripi"
+                                 loading="eager" />
+                        </div>
+
+                        <div class="tripi-chat-identity-text">
+
+                            <h2>
+                                Tripi
+                                <span class="tripi-ai-label">
+                                    AI
+                                </span>
+                            </h2>
+
+                            <p>
+                                <span class="tripi-status-dot"></span>
+                                Trợ lý du lịch HappyTrip
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="tripi-chat-header-actions">
+
+                        <button id="tripiNewChat"
+                                class="tripi-header-button"
+                                type="button"
+                                title="Bắt đầu cuộc trò chuyện mới">
+
+                            <i class="fa-solid fa-plus"
+                               aria-hidden="true"></i>
+
+                            <span>Trò chuyện mới</span>
+
+                        </button>
+
+                    </div>
+
+                </header>
+
+                <!-- STATUS -->
+
+                <div class="tripi-world-chat-status">
+
+                    <span>
+                        <i class="fa-solid fa-wand-magic-sparkles"
+                           aria-hidden="true"></i>
+
+                        Người bạn đồng hành cho mọi chuyến đi
+                    </span>
+
+                </div>
+
+                <!-- MOBILE: XEM KET QUA -->
+
+                <a href="#tripiTourResults"
+                   class="tripi-mobile-view-results">
+
+                    <i class="fa-solid fa-map-location-dot"
+                       aria-hidden="true"></i>
+
+                    Xem kết quả tour
+
+                    <i class="fa-solid fa-arrow-down"
+                       aria-hidden="true"></i>
+
+                </a>
+
+                <!-- ====================================
+                     NOI DUNG HOI THOAI
+                ===================================== -->
+
+                <div id="tripiMessages"
+                     class="tripi-chat-messages"
+                     role="log"
+                     aria-label="Nội dung hội thoại với Tripi"
+                     aria-live="polite"
+                     aria-relevant="additions text">
+
+                    <!-- LOI CHAO MAC DINH
+                         CHI HIEN KHI DA VAO CHAT -->
+
+                    <div class="tripi-message tripi-message-assistant">
+
+                        <div class="tripi-message-avatar">
+
+                            <img src="~/img/tripi/tripi-fox.png"
+                                 alt="Tripi" />
+
+                        </div>
+
+                        <div class="tripi-message-body">
+
+                            <div class="tripi-message-author">
+
+                                Tripi
+
+                                <span>Người bạn đồng hành</span>
+
+                            </div>
+
+                            <div class="tripi-message-bubble">
+
+                                <p>
+                                    Xin chào! 🦊
+                                    Mình là Tripi, trợ lý du lịch
+                                    của HappyTrip.
+                                </p>
+
+                                <p>
+                                    Bạn có thể trò chuyện với mình
+                                    về những ý tưởng du lịch.
+                                    Khi cần tìm tour, mình sẽ giúp bạn
+                                    khám phá các lựa chọn phù hợp
+                                    trên HappyTrip nhé!
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- =================================
+                         MAN HINH CHAO TRIPI
+                    ================================== -->
+
+                    <div id="tripiWelcome"
+                         class="tripi-welcome">
+
+                        <div class="tripi-welcome-heading">
+
+                            <!-- NHAN TRIPI -->
+
+                            <span class="tripi-welcome-badge">
+
+                                <i class="fa-solid fa-wand-magic-sparkles"
+                                   aria-hidden="true"></i>
+
+                                TRIPI AI · TRỢ LÝ DU LỊCH HAPPYTRIP
+
+                            </span>
+                            <!-- TIEU DE CHINH -->  
+                            <h3>Tripi &#273;&#7891;ng hành cùng<br />hành trình của bạn ✨</h3>
+                            <!-- MO TA -->
+                            <p>
+                                Bạn muốn khám phá địa điểm nào,
+                                tìm tour phù hợp hay cần tư vấn lịch trình?
+                                Hãy trò chuyện với Tripi nhé!
+                            </p>
+
+                        </div>
+
+                        <!-- =================================
+                             4 GOI Y - GIU DATA PROMPT
+                        ================================== -->
+
+                        <div class="tripi-suggestion-grid">
+
+                            <!-- GOI Y 1 -->
+
+                            <button type="button"
+                                    class="tripi-suggestion"
+                                    data-tripi-prompt="Mình muốn tìm tour Tây Ninh, thích văn hóa và lịch sử, ngân sách 3 triệu, tối đa 3 ngày.">
+
+                                <span class="tripi-suggestion-icon">
+                                    <i class="fa-solid fa-mountain-sun"
+                                       aria-hidden="true"></i>
+                                </span>
+
+                                <span class="tripi-suggestion-text">
+
+                                    <strong>Khám phá Tây Ninh</strong>
+
+                                    <small>
+                                        Thiên nhiên và văn hóa
+                                    </small>
+
+                                </span>
+
+                                <i class="fa-solid fa-arrow-right tripi-suggestion-arrow"
+                                   aria-hidden="true"></i>
+
+                            </button>
+
+                            <!-- GOI Y 2 -->
+
+                            <button type="button"
+                                    class="tripi-suggestion"
+                                    data-tripi-prompt="Mình muốn tìm tour cuối tuần gần TP.HCM, thời gian khoảng 2 ngày. Bạn tư vấn các tour phù hợp nhé.">
+
+                                <span class="tripi-suggestion-icon">
+                                    <i class="fa-solid fa-car-side"
+                                       aria-hidden="true"></i>
+                                </span>
+
+                                <span class="tripi-suggestion-text">
+
+                                    <strong>
+                                        Tour cuối tuần gần TP.HCM
+                                    </strong>
+
+                                    <small>
+                                        Chuyến đi ngắn ngày
+                                    </small>
+
+                                </span>
+
+                                <i class="fa-solid fa-arrow-right tripi-suggestion-arrow"
+                                   aria-hidden="true"></i>
+
+                            </button>
+
+                            <!-- GOI Y 3 -->
+
+                            <button type="button"
+                                    class="tripi-suggestion"
+                                    data-tripi-prompt="Mình muốn khám phá các tour du lịch văn hóa và lịch sử. Hãy gợi ý những hành trình phù hợp.">
+
+                                <span class="tripi-suggestion-icon">
+                                    <i class="fa-solid fa-landmark"
+                                       aria-hidden="true"></i>
+                                </span>
+
+                                <span class="tripi-suggestion-text">
+
+                                    <strong>
+                                        Du lịch văn hóa - lịch sử
+                                    </strong>
+
+                                    <small>
+                                        Khám phá giá trị văn hóa
+                                    </small>
+
+                                </span>
+
+                                <i class="fa-solid fa-arrow-right tripi-suggestion-arrow"
+                                   aria-hidden="true"></i>
+
+                            </button>
+
+                            <!-- GOI Y 4 -->
+
+                            <button type="button"
+                                    class="tripi-suggestion"
+                                    data-tripi-prompt="Mình muốn đi du lịch nhưng chưa biết chọn tour nào. Hãy hỏi về ngân sách, sở thích và thời gian để gợi ý tour cho mình nhé.">
+
+                                <span class="tripi-suggestion-icon">
+                                    <i class="fa-solid fa-wallet"
+                                       aria-hidden="true"></i>
+                                </span>
+
+                                <span class="tripi-suggestion-text">
+
+                                    <strong>
+                                        Gợi ý tour theo ngân sách
+                                    </strong>
+
+                                    <small>
+                                        Lựa chọn phù hợp túi tiền
+                                    </small>
+
+                                </span>
+
+                                <i class="fa-solid fa-arrow-right tripi-suggestion-arrow"
+                                   aria-hidden="true"></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- =================================
+                         TRIPI DANG XU LY
+                    ================================== -->
+
+                    <div id="tripiTyping"
+                         class="tripi-typing tripi-world-typing"
+                         role="status"
+                         aria-label="Tripi đang chuẩn bị câu trả lời"
+                         hidden>
+
+                        <div class="tripi-message-avatar">
+
+                            <img src="~/img/tripi/tripi-fox.png"
+                                 alt="Tripi" />
+
+                        </div>
+
+                        <div class="tripi-typing-bubble">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <small>
+                            Tripi đang suy nghĩ...
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <!-- ====================================
+                     CHAT COMPOSER
+                     GIU NGUYEN ID VA CSRF
+
+                     tripi-chat.js se di chuyen composer
+                     vao welcome khi o che do home.
+                ===================================== -->
+
+                <div class="tripi-chat-composer">
+
+                    <form id="tripiChatForm"
+                          autocomplete="off">
+
+                        @Html.AntiForgeryToken()
+
+                        <label for="tripiMessageInput"
+                               class="tripi-visually-hidden">
+
+                            Nhập tin nhắn gửi Tripi
+
+                        </label>
+
+                        <div class="tripi-compose-box">
+
+                            <textarea id="tripiMessageInput"
+                                      name="message"
+                                      rows="2"
+                                      maxlength="1000"
+                                      placeholder="Kể Tripi nghe chuyến đi của bạn..."
+                                      aria-describedby="tripiComposerHint"
+                                      required></textarea>
+
+                            <button id="tripiSendButton"
+                                    class="tripi-send-button"
+                                    type="submit"
+                                    aria-label="Gửi tin nhắn">
+
+                                <i class="fa-solid fa-arrow-up"
+                                   aria-hidden="true"></i>
+
+                            </button>
+
+                        </div>
+
+                        <div class="tripi-composer-bottom">
+
+                            <span id="tripiComposerHint">
+
+                                <i class="fa-solid fa-keyboard"
+                                   aria-hidden="true"></i>
+
+                                Enter để gửi · Shift + Enter xuống dòng
+
+                            </span>
+
+                            <span id="tripiCharacterCount">
+                                0 / 1000
+                            </span>
+
+                        </div>
+
+                    </form>
+
+                    <div id="tripiChatError"
+                         class="tripi-chat-error"
+                         role="alert"
+                         hidden></div>
+
+                    <p class="tripi-chat-disclaimer">
+
+                        <i class="fa-solid fa-circle-info"
+                           aria-hidden="true"></i>
+
+                        Thông tin tour cần được kiểm tra
+                        trước khi đặt dịch vụ.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================
+                 KET QUA TOUR BEN PHAI
+            ========================================= -->
+
+            <aside class="tripi-side-panel tripi-world-results"
+                   aria-label="Các tour được Tripi gợi ý">
+
+                <!-- KET QUA HEADER -->
+
+                <header class="tripi-world-recommendations-heading">
+
+                    <div class="tripi-results-heading-content">
+
+                        <span class="tripi-results-eyebrow">
+
+                            <i class="fa-solid fa-compass"
+                               aria-hidden="true"></i>
+
+                            KHÁM PHÁ CÙNG TRIPI
+
+                        </span>
+
+                        <h2 id="tripiRecommendationsTitle">
+                            Hành trình dành cho bạn
+                        </h2>
+
+                        <p class="tripi-results-subtitle">
+
+                            Tour thực tế từ HappyTrip,
+                            được sắp xếp theo mức độ phù hợp
+                            với nhu cầu bạn chia sẻ.
+
+                        </p>
+
+                    </div>
+
+                    <span class="tripi-world-live-label">
+
+                        <i class="fa-solid fa-wand-magic-sparkles"
+                           aria-hidden="true"></i>
+
+                        AI Gợi ý
+
+                    </span>
+
+                </header>
+
+                <!-- TRANG THAI TIM TOUR -->
+
+                <div id="tripiWorldSearching"
+                     class="tripi-world-searching"
+                     role="status"
+                     aria-live="polite"
+                     hidden>
+
+                    <div class="tripi-world-searching-art">
+
+                        <i class="fa-solid fa-bus-simple"
+                           aria-hidden="true"></i>
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                    </div>
+
+                    <strong>
+                        Tripi đang khám phá hành trình cho bạn...
+                    </strong>
+
+                    <p>
+                        Đang chuẩn bị những lựa chọn từ HappyTrip.
+                    </p>
+
+                </div>
+
+                <!-- =================================
+                     KET QUA TU API
+
+                     KHONG DOI ID:
+                     tripiTourResults
+                ================================== -->
+
+                <section class="tripi-recommendations tripi-world-recommendations"
+                         aria-labelledby="tripiRecommendationsTitle">
+
+                    <div id="tripiTourResults"
+                         class="tripi-tour-results tripi-world-tour-results"
+                         aria-live="polite">
+
+                        <div class="tripi-tour-empty">
+
+                            <div class="tripi-tour-empty-icon">
+
+                                <i class="fa-solid fa-map-location-dot"
+                                   aria-hidden="true"></i>
+
+                            </div>
+
+                            <h4>
+                                Hành trình tiếp theo đang chờ bạn!
+                            </h4>
+
+                            <p>
+                                Hãy trò chuyện với Tripi.
+                                Khi bạn muốn tìm tour,
+                                những lựa chọn từ HappyTrip
+                                sẽ xuất hiện tại đây.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- RESULTS FOOTER -->
+
+                <footer class="tripi-world-results-footer">
+
+                    <!-- MOBILE: BACK TO CHAT -->
+
+                    <a href="#tripiChatForm"
+                       class="tripi-mobile-back-chat"
+                       aria-label="Quay lại khung trò chuyện với Tripi">
+
+                        <i class="fa-solid fa-comments"
+                           aria-hidden="true"></i>
+
+                        <span>
+                            Quay lại trò chuyện với Tripi
+                        </span>
+
+                        <i class="fa-solid fa-arrow-up"
+                           aria-hidden="true"></i>
+
+                    </a>
+
+                    <i class="fa-solid fa-lightbulb"
+                       aria-hidden="true"></i>
+
+                    <span>
+
+                        Chọn <strong>Hỏi về tour này</strong>
+                        để Tripi giải đáp chi tiết hơn,
+                        hoặc mở trang tour để xem thông tin đầy đủ.
+
+                    </span>
+
+                </footer>
+
+            </aside>
+
+        </section>
+
+        <!-- ============================================
+             PAGE FOOTER
+        ============================================= -->
+
+        <div class="tripi-world-bottom">
+
+            <span>
+                <i class="fa-solid fa-shield-heart"
+                   aria-hidden="true"></i>
+                Dữ liệu tour HappyTrip
+            </span>
+
+            <span>
+                <i class="fa-solid fa-route"
+                   aria-hidden="true"></i>
+                Gợi ý theo sở thích
+            </span>
+
+            <span>
+                <i class="fa-solid fa-comments"
+                   aria-hidden="true"></i>
+                Trò chuyện cùng AI
+            </span>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script src="~/js/tripi-chat.js"
+        asp-append-version="true"
+        defer></script>

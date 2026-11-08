@@ -1,126 +1,156 @@
+
 .ht-home-ai-section {
-    padding: 48px 0 58px;
-    background: #f8f5ef;
+    padding: 46px 0 64px;
+    background: #f8f7fc;
 }
 
 .ht-home-ai-banner {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 245px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
     align-items: center;
-    gap: 15px;
-    min-height: 220px;
-    padding: 27px 42px;
+    gap: 20px;
+    min-height: 360px;
+    padding: 38px 54px;
     overflow: hidden;
     isolation: isolate;
-    border: 1px solid rgba(209, 184, 143, .72);
-    border-radius: 23px;
-    background:
-        radial-gradient(
-            ellipse at 85% 50%,
-            rgba(218, 200, 159, .18),
-            transparent 43%
-        ),
-        linear-gradient(115deg, #2c4638, #20382b);
-    box-shadow: 0 17px 38px rgba(36, 53, 40, .11);
-}
-
-.ht-home-ai-banner::before {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    content: "";
+    border: 1px solid #e8e4f5;
+    border-radius: 30px;
     background: linear-gradient(
         110deg,
-        transparent 30%,
-        rgba(255, 255, 255, .035) 54%,
-        transparent 73%
+        #ffffff 5%,
+        #f7f5ff 55%,
+        #eeeafe 100%
     );
+    box-shadow: 0 18px 44px rgba(82, 73, 140, .08);
+}
+
+.ht-home-ai-banner::after {
+    position: absolute;
+    z-index: -1;
+    right: -120px;
+    bottom: -230px;
+    width: 460px;
+    height: 460px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(245, 194, 180, .19),
+        transparent 68%
+    );
+    content: "";
     pointer-events: none;
 }
 
-.ht-home-ai-copy {
+.ht-home-ai-decor {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.ht-home-ai-decor-one {
+    top: -95px;
+    left: 30%;
+    width: 210px;
+    height: 210px;
+    background: radial-gradient(
+        circle,
+        rgba(222, 219, 253, .4),
+        transparent 70%
+    );
+}
+
+.ht-home-ai-decor-two {
+    bottom: -100px;
+    left: -100px;
+    width: 230px;
+    height: 230px;
+    background: radial-gradient(
+        circle,
+        rgba(242, 212, 224, .27),
+        transparent 70%
+    );
+}
+
+.ht-home-ai-content {
     position: relative;
     z-index: 3;
     min-width: 0;
 }
 
-.ht-home-ai-eyebrow {
+.ht-home-ai-kicker {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-    color: #dec59a;
-    font-size: 10px;
+    gap: 9px;
+    margin-bottom: 14px;
+    color: #8880c4;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 1.5px;
 }
 
-.ht-home-ai-eyebrow i {
-    font-size: 12px;
+.ht-home-ai-kicker i {
+    color: #9d91d5;
+    font-size: 14px;
 }
 
-.ht-home-ai-copy h2 {
-    margin: 0 0 10px;
-    color: #fffaf0;
-    font-family: "Times New Roman", Georgia, serif;
-    font-size: clamp(24px, 2.7vw, 35px);
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: 0;
-    word-spacing: normal;
+.ht-home-ai-content h2 {
+    margin: 0 0 16px;
+    color: #33354f;
+    font-family: "Tai Heritage Pro", "Segoe UI", sans-serif;
+    font-size: clamp(29px, 3.25vw, 44px);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -.4px;
 }
 
-.ht-home-ai-copy h2 span {
-    color: #e7c998;
+.ht-home-ai-content h2 span {
+    display: block;
+    color: #8981c7;
 }
 
-.ht-home-ai-copy > p {
-    max-width: 545px;
+.ht-home-ai-description {
+    max-width: 540px;
     margin: 0;
-    color: rgba(255, 250, 240, .77);
-    font-size: 12px;
-    line-height: 1.7;
+    color: #77798e;
+    font-size: 14px;
+    line-height: 1.85;
 }
 
 .ht-home-ai-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 12px 18px;
-    margin-top: 21px;
+    gap: 13px 20px;
+    margin-top: 24px;
 }
 
 .ht-home-ai-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    min-height: 41px;
-    padding: 9px 17px;
-    border: 1px solid #e4c89b;
-    border-radius: 11px;
-    background: #e4c89b;
-    color: #294436;
-    font-size: 12px;
+    gap: 18px;
+    min-height: 47px;
+    padding: 11px 20px;
+    border: 1px solid #8179c2;
+    border-radius: 999px;
+    background: linear-gradient(110deg, #7873bb, #a191d8);
+    color: #fff;
+    box-shadow: 0 9px 21px rgba(112, 99, 188, .2);
+    font-size: 13px;
     font-weight: 800;
     text-decoration: none;
-    box-shadow: 0 6px 13px rgba(0, 0, 0, .08);
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease,
-        background .25s ease;
+    transition: transform .25s ease, box-shadow .25s ease;
 }
 
 .ht-home-ai-button:hover {
     transform: translateY(-3px);
-    background: #f0d9b1;
-    color: #294436;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, .14);
+    color: #fff;
+    box-shadow: 0 15px 29px rgba(112, 99, 188, .3);
 }
 
 .ht-home-ai-button i {
-    font-size: 11px;
     transition: transform .25s ease;
 }
 
@@ -128,341 +158,333 @@
     transform: translateX(4px);
 }
 
-.ht-home-ai-caption {
+.ht-home-ai-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #686784;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ht-home-ai-secondary:hover {
+    color: #8179c2;
+}
+
+.ht-home-ai-benefits {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-top: 24px;
+}
+
+.ht-home-ai-benefits span {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    color: rgba(242, 235, 218, .63);
-    font-size: 10px;
+    color: #9694a9;
+    font-size: 11px;
 }
 
-.ht-home-ai-caption i {
-    color: #dfc28c;
+.ht-home-ai-benefits i {
+    color: #a59bd8;
 }
 
-.ht-home-ai-mascot {
+.ht-home-ai-visual {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 245px;
-    height: 200px;
-    justify-self: end;
+    width: 100%;
+    height: 310px;
+    min-width: 0;
     isolation: isolate;
 }
 
-.ht-home-ai-glow {
+.ht-home-ai-orbit {
     position: absolute;
-    z-index: -1;
-    width: 185px;
-    height: 185px;
+    z-index: 0;
+    width: 285px;
+    height: 285px;
+    border: 1px solid rgba(144, 134, 203, .22);
     border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(241, 225, 184, .27),
-        rgba(233, 222, 190, .10) 45%,
-        transparent 73%
-    );
-    animation: ht-tripi-glow 4.5s ease-in-out infinite;
+    pointer-events: none;
 }
 
-.ht-home-ai-rabbit {
+.ht-home-ai-orbit-two {
+    width: 225px;
+    height: 225px;
+    border-color: rgba(144, 134, 203, .16);
+}
+
+.ht-home-ai-fox {
     position: relative;
     z-index: 2;
-    width: 171px;
-    height: 171px;
-    overflow: hidden;
-    border: 4px solid rgba(249, 240, 223, .85);
-    border-radius: 50%;
-    background: #faf6ee;
-    box-shadow:
-        0 12px 27px rgba(0, 0, 0, .16),
-        0 0 0 8px rgba(238, 213, 170, .08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(100%, 295px);
+    height: 295px;
     transform-origin: center bottom;
-    animation: ht-tripi-bounce 3.3s ease-in-out infinite;
-    transition:
-        box-shadow .25s ease,
-        border-color .25s ease;
+    animation: ht-home-tripi-float 3.5s ease-in-out infinite;
 }
 
-.ht-home-ai-rabbit img {
+.ht-home-ai-fox img {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center;
-    transition: transform .35s ease;
+    object-fit: contain;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
 }
 
 .ht-home-ai-shadow {
     position: absolute;
-    bottom: 7px;
+    z-index: 1;
+    bottom: 0;
     left: 50%;
-    width: 112px;
-    height: 14px;
+    width: 140px;
+    height: 15px;
     border-radius: 50%;
-    background: rgba(6, 19, 12, .32);
-    filter: blur(8px);
+    background: rgba(77, 67, 116, .16);
+    filter: blur(9px);
     transform: translateX(-50%);
-    animation: ht-tripi-shadow 3.3s ease-in-out infinite;
+    animation: ht-home-tripi-shadow 3.5s ease-in-out infinite;
 }
 
-.ht-home-ai-speech {
-    position: absolute;
-    z-index: 4;
-    top: 18px;
-    right: 0;
-    padding: 8px 10px;
-    border: 1px solid #e9d9bb;
-    border-radius: 12px 12px 12px 3px;
-    background: #fffaf1;
-    color: #35523d;
-    box-shadow: 0 7px 17px rgba(0, 0, 0, .10);
-    font-size: 10px;
-    font-weight: 800;
-    white-space: nowrap;
-    animation: ht-tripi-speech 4s ease-in-out infinite;
-}
-
-.ht-home-ai-speech i {
-    margin-left: 4px;
-    color: #e9a590;
-}
-
-.ht-home-ai-spark {
+.ht-home-ai-star {
     position: absolute;
     z-index: 3;
-    color: #e8c888;
-    font-size: 13px;
+    color: #aca1df;
     pointer-events: none;
+    animation: ht-home-tripi-star 3.3s ease-in-out infinite;
 }
 
-.ht-home-ai-spark-one {
-    top: 38px;
-    left: 9px;
-    animation: ht-tripi-spark 3s ease-in-out infinite;
+.ht-home-ai-star-one {
+    top: 13px;
+    right: 55px;
+    font-size: 21px;
 }
 
-.ht-home-ai-spark-two {
-    right: 20px;
-    bottom: 30px;
-    font-size: 17px;
-    animation: ht-tripi-spark 3.7s ease-in-out infinite -1s;
+.ht-home-ai-star-two {
+    bottom: 36px;
+    left: 31px;
+    color: #eeb5a3;
+    font-size: 18px;
+    animation-delay: -1.5s;
 }
 
-.ht-home-ai-mascot:hover .ht-home-ai-rabbit {
+.ht-home-ai-float {
+    position: absolute;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 13px;
+    border: 1px solid #e9e5f6;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .95);
+    color: #777199;
+    box-shadow: 0 8px 22px rgba(86, 74, 135, .09);
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    animation: ht-home-tripi-card 4s ease-in-out infinite;
+}
+
+.ht-home-ai-float i {
+    color: #9c8dd4;
+}
+
+.ht-home-ai-float-one {
+    top: 44px;
+    left: -7px;
+}
+
+.ht-home-ai-float-two {
+    right: -9px;
+    bottom: 55px;
+    animation-delay: -1.5s;
+}
+
+.ht-home-ai-visual:hover .ht-home-ai-fox {
     animation-play-state: paused;
-    transform: translateY(-12px) rotate(5deg);
-    border-color: #f4d49d;
-    box-shadow:
-        0 20px 32px rgba(0, 0, 0, .20),
-        0 0 0 10px rgba(238, 213, 170, .13);
+    transform: translateY(-9px) rotate(3deg) scale(1.04);
 }
 
-.ht-home-ai-mascot:hover .ht-home-ai-rabbit img {
-    transform: scale(1.07);
-}
-
-.ht-home-ai-mascot:hover .ht-home-ai-speech {
-    animation-play-state: paused;
-    transform: translateY(-3px);
-}
-
-@keyframes ht-tripi-bounce {
+@keyframes ht-home-tripi-float {
     0%, 100% {
         transform: translateY(0) rotate(-2deg);
     }
 
-    45% {
-        transform: translateY(-11px) rotate(3deg);
-    }
-
-    70% {
-        transform: translateY(-5px) rotate(0);
+    50% {
+        transform: translateY(-12px) rotate(2deg);
     }
 }
 
-@keyframes ht-tripi-shadow {
+@keyframes ht-home-tripi-shadow {
     0%, 100% {
-        opacity: .75;
+        opacity: .72;
         transform: translateX(-50%) scale(1);
     }
 
-    45% {
-        opacity: .4;
+    50% {
+        opacity: .36;
         transform: translateX(-50%) scale(.76);
     }
-
-    70% {
-        opacity: .58;
-        transform: translateX(-50%) scale(.89);
-    }
 }
 
-@keyframes ht-tripi-glow {
-    0%, 100% {
-        opacity: .73;
-        transform: scale(.95);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.11);
-    }
-}
-
-@keyframes ht-tripi-speech {
+@keyframes ht-home-tripi-card {
     0%, 100% {
         transform: translateY(0);
     }
 
     50% {
-        transform: translateY(-5px);
+        transform: translateY(-7px);
     }
 }
 
-@keyframes ht-tripi-spark {
+@keyframes ht-home-tripi-star {
     0%, 100% {
-        transform: translateY(0) scale(.9) rotate(-12deg);
         opacity: .55;
+        transform: scale(.85) rotate(-10deg);
     }
 
     50% {
-        transform: translateY(-11px) scale(1.2) rotate(15deg);
         opacity: 1;
+        transform: scale(1.18) rotate(12deg);
     }
 }
 
 @media (max-width: 991px) {
     .ht-home-ai-banner {
-        grid-template-columns: minmax(0, 1fr) 190px;
-        padding: 25px 28px;
+        grid-template-columns: minmax(0, 1fr) 245px;
+        gap: 12px;
+        padding: 32px;
     }
 
-    .ht-home-ai-mascot {
-        width: 190px;
-        height: 195px;
+    .ht-home-ai-content h2 {
+        font-size: 33px;
     }
 
-    .ht-home-ai-rabbit {
-        width: 150px;
-        height: 150px;
+    .ht-home-ai-visual {
+        height: 265px;
     }
 
-    .ht-home-ai-speech {
-        top: 4px;
-        right: -3px;
-        font-size: 9px;
+    .ht-home-ai-fox {
+        width: 245px;
+        height: 245px;
     }
 
-    .ht-home-ai-copy h2 {
-        font-size: 28px;
+    .ht-home-ai-orbit {
+        width: 240px;
+        height: 240px;
+    }
+
+    .ht-home-ai-orbit-two {
+        width: 185px;
+        height: 185px;
+    }
+
+    .ht-home-ai-float {
+        display: none;
     }
 }
 
-@media (max-width: 575px) {
+@media (max-width: 767px) {
     .ht-home-ai-section {
-        padding: 34px 0 45px;
+        padding: 30px 0 42px;
     }
 
     .ht-home-ai-banner {
-        grid-template-columns: minmax(0, 1fr) 105px;
-        gap: 5px;
-        min-height: 210px;
-        padding: 22px 16px;
-        border-radius: 17px;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 30px 23px 18px;
+        border-radius: 23px;
     }
 
-    .ht-home-ai-eyebrow {
-        max-width: 240px;
-        font-size: 8px;
-        letter-spacing: .7px;
-        line-height: 1.6;
+    .ht-home-ai-content h2 {
+        font-size: clamp(29px, 7.5vw, 38px);
     }
 
-    .ht-home-ai-copy h2 {
-        font-size: clamp(20px, 5vw, 25px);
+    .ht-home-ai-description {
+        font-size: 13px;
     }
 
-    .ht-home-ai-copy > p {
-        font-size: 11px;
-        line-height: 1.6;
+    .ht-home-ai-visual {
+        height: 250px;
+        margin-top: 8px;
     }
 
-    .ht-home-ai-actions {
-        margin-top: 16px;
+    .ht-home-ai-fox {
+        width: 225px;
+        height: 225px;
+    }
+
+    .ht-home-ai-orbit {
+        width: 225px;
+        height: 225px;
+    }
+
+    .ht-home-ai-orbit-two {
+        width: 170px;
+        height: 170px;
+    }
+
+    .ht-home-ai-star-one {
+        right: 20%;
+    }
+
+    .ht-home-ai-star-two {
+        left: 17%;
+    }
+}
+
+@media (max-width: 420px) {
+    .ht-home-ai-banner {
+        padding: 25px 18px 16px;
+    }
+
+    .ht-home-ai-kicker {
+        font-size: 9px;
+        letter-spacing: 1px;
     }
 
     .ht-home-ai-button {
-        min-height: 36px;
-        padding: 8px 10px;
-        gap: 7px;
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+
+    .ht-home-ai-secondary {
+        font-size: 11px;
+    }
+
+    .ht-home-ai-benefits {
+        gap: 9px 12px;
+    }
+
+    .ht-home-ai-benefits span {
         font-size: 10px;
-    }
-
-    .ht-home-ai-caption {
-        display: none;
-    }
-
-    .ht-home-ai-mascot {
-        width: 105px;
-        height: 155px;
-    }
-
-    .ht-home-ai-rabbit {
-        width: 101px;
-        height: 101px;
-        border-width: 3px;
-    }
-
-    .ht-home-ai-glow {
-        width: 135px;
-        height: 135px;
-    }
-
-    .ht-home-ai-shadow {
-        width: 70px;
-        bottom: 16px;
-    }
-
-    .ht-home-ai-speech {
-        top: 0;
-        right: -5px;
-        max-width: 110px;
-        padding: 6px 7px;
-        white-space: normal;
-        text-align: center;
-        font-size: 8px;
-    }
-
-    .ht-home-ai-spark-one {
-        top: 16px;
-        left: 0;
-    }
-
-    .ht-home-ai-spark-two {
-        bottom: 8px;
-        right: 2px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .ht-home-ai-rabbit,
+    .ht-home-ai-fox,
     .ht-home-ai-shadow,
-    .ht-home-ai-glow,
-    .ht-home-ai-speech,
-    .ht-home-ai-spark {
+    .ht-home-ai-star,
+    .ht-home-ai-float {
         animation: none !important;
     }
 
-    .ht-home-ai-rabbit,
-    .ht-home-ai-rabbit img,
     .ht-home-ai-button,
     .ht-home-ai-button i {
         transition: none !important;
     }
 
-    .ht-home-ai-mascot:hover .ht-home-ai-rabbit {
+    .ht-home-ai-visual:hover .ht-home-ai-fox {
         transform: none;
     }
 }

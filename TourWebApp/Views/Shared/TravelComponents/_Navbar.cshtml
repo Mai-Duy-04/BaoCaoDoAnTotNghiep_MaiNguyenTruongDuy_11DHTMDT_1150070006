@@ -1,4 +1,5 @@
-﻿@{
+﻿
+@{
     var currentPath = Context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
     var idTaiKhoan = Context.Session.GetInt32("IdTaiKhoan");
     var hoTen = Context.Session.GetString("HoTen") ?? "Tài khoản";
@@ -6,51 +7,88 @@
 
     bool IsActive(string url)
     {
-        if (url == "/")
+        var normalizedUrl = url.ToLowerInvariant();
+
+        if (normalizedUrl == "/")
         {
             return currentPath == "/";
         }
 
-        return currentPath == url || currentPath.StartsWith(url + "/", StringComparison.Ordinal);
+        return currentPath == normalizedUrl
+            || currentPath.StartsWith(normalizedUrl + "/", StringComparison.Ordinal);
     }
 }
 
 <header class="travel-navbar-wrap">
-    <nav class="navbar navbar-expand-lg travel-navbar">
+    <nav class="navbar navbar-expand-lg travel-navbar" aria-label="Điều hướng chính">
         <div class="container travel-container">
             <a class="travel-brand" href="/">
                 <span class="brand-mark">H</span>
                 <span class="brand-text">HappyTrip</span>
             </a>
 
-            <button class="navbar-toggler travel-navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#travelMainNav" aria-controls="travelMainNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler travel-navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#travelMainNav"
+                    aria-controls="travelMainNav"
+                    aria-expanded="false"
+                    aria-label="Mở menu điều hướng">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="travelMainNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                    <li class="nav-item"><a class="nav-link travel-nav-link @(IsActive("/") ? "is-active" : "")" href="/">Trang chủ</a></li>
-                    <li class="nav-item"><a class="nav-link travel-nav-link @(IsActive("/about") ? "is-active" : "")" href="/about">Giới thiệu</a></li>
-                    <li class="nav-item"><a class="nav-link travel-nav-link @(IsActive("/tours") ? "is-active" : "")" href="/tours">Tour</a></li>
-                    <li class="nav-item"><a class="nav-link travel-nav-link @(IsActive("/destinations") ? "is-active" : "")" href="/destinations">Điểm đến</a></li>
-                    <li class="nav-item"><a class="nav-link travel-nav-link @(IsActive("/contact") ? "is-active" : "")" href="/contact">Liên hệ</a></li>
+
+                    <li class="nav-item">
+                        <a class="nav-link travel-nav-link @(IsActive("/") ? "is-active" : "")"
+                           href="/">Trang chủ</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link travel-nav-link @(IsActive("/about") ? "is-active" : "")"
+                           href="/about">Giới thiệu</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link travel-nav-link @(IsActive("/tours") || IsActive("/tour") ? "is-active" : "")"
+                           href="/tours">Tour</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link travel-nav-link @(IsActive("/contact") ? "is-active" : "")"
+                           href="/contact">Liên hệ</a>
+                    </li>
 
                     @if (idTaiKhoan == null)
                     {
-                        <li class="nav-item"><a class="nav-link travel-nav-link" href="/TaiKhoan/DangNhap">Đăng nhập</a></li>
-                        <li class="nav-item"><a class="nav-link travel-nav-link" href="/TaiKhoan/DangKy">Đăng ký</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link travel-nav-link"
+                               href="/TaiKhoan/DangNhap">Đăng nhập</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link travel-nav-link"
+                               href="/TaiKhoan/DangKy">Đăng ký</a>
+                        </li>
+
                         <li class="nav-item ms-lg-1 mt-3 mt-lg-0">
-                            <a class="btn travel-btn travel-btn-primary" href="/TaiKhoan/DangNhap">Đặt tour</a>
+                            <a class="btn travel-btn travel-btn-primary"
+                               href="/TaiKhoan/DangNhap">Đặt tour</a>
                         </li>
                     }
                     else
                     {
                         <li class="nav-item">
-                            <a class="nav-link travel-nav-link @(IsActive("/TaiKhoan/KhoPhieuGiamGia") ? "is-active" : "")" href="/TaiKhoan/KhoPhieuGiamGia">Voucher</a>
+                            <a class="nav-link travel-nav-link @(IsActive("/TaiKhoan/KhoPhieuGiamGia") ? "is-active" : "")"
+                               href="/TaiKhoan/KhoPhieuGiamGia">Voucher</a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link travel-nav-link @(IsActive("/Wishlist") ? "is-active" : "")" href="/Wishlist">Yêu thích</a>
+                            <a class="nav-link travel-nav-link @(IsActive("/Wishlist") ? "is-active" : "")"
+                               href="/Wishlist">Yêu thích</a>
                         </li>
+
                         <li class="nav-item dropdown ms-lg-1 mt-3 mt-lg-0">
                             <button class="btn travel-btn travel-btn-primary dropdown-toggle travel-account-btn"
                                     type="button"
@@ -58,19 +96,43 @@
                                     aria-expanded="false">
                                 @hoTen
                             </button>
+
                             <ul class="dropdown-menu dropdown-menu-end travel-account-menu">
-                                <li><a class="dropdown-item" href="/TaiKhoan/HoSo">Hồ sơ</a></li>
-                                <li><a class="dropdown-item" href="/TaiKhoan/DonCuaToi">Đơn của tôi</a></li>
-                                <li><a class="dropdown-item" href="/TaiKhoan/KhoPhieuGiamGia">Kho voucher</a></li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="/TaiKhoan/HoSo">Hồ sơ</a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="/TaiKhoan/DonCuaToi">Đơn của tôi</a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="/TaiKhoan/KhoPhieuGiamGia">Kho voucher</a>
+                                </li>
+
                                 @if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    <li><a class="dropdown-item" href="/QuanTri/Dashboard">Dashboard Admin</a></li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="/QuanTri/Dashboard">Dashboard Admin</a>
+                                    </li>
                                 }
-                                <li><hr class="dropdown-divider" /></li>
-                                <li><a class="dropdown-item text-danger" href="/TaiKhoan/DangXuat">Đăng xuất</a></li>
+
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item text-danger"
+                                       href="/TaiKhoan/DangXuat">Đăng xuất</a>
+                                </li>
                             </ul>
                         </li>
                     }
+
                 </ul>
             </div>
         </div>

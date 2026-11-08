@@ -1,0 +1,586 @@
+
+/* ==========================================================
+   HAPPYTRIP - TRIPI 3D DECORATIONS
+   File: wwwroot/css/tripi-decor.css
+
+   NHIEM VU:
+   - Hien thi sticker PNG 3D
+   - Hieu ung sticker chuyen dong
+   - Phong canh nui va doi xanh
+   - Trang tri popup Tripi mini
+
+   KHONG DIEU CHINH:
+   - Font va tieu de trang lon
+   - Chieu cao trang chat
+   - Khoang cach noi dung chinh
+   - Form gui tin nhan
+   - Bo cuc chat / ket qua tour
+   - Gemini, RAG, Matching Score
+   ========================================================== */
+
+
+/* ==========================================================
+   01. SCENE CHUNG
+   ========================================================== */
+
+#tripiChatPage .tripi-3d-scene,
+#tripiAssistant .tripi-3d-scene {
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+}
+
+#tripiChatPage .tripi-3d-scene *,
+#tripiAssistant .tripi-3d-scene * {
+    pointer-events: none;
+    user-select: none;
+}
+
+
+/* ==========================================================
+   02. STICKER PNG
+   ========================================================== */
+
+#tripiChatPage .tripi-3d-sticker,
+#tripiAssistant .tripi-3d-sticker {
+    position: absolute;
+
+    display: block;
+
+    width: var(--size, 100px);
+    max-width: none;
+
+    height: auto;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(
+            0 12px 15px rgba(34, 66, 44, .13)
+        );
+
+    animation:
+        tripi3dFloat
+        var(--duration, 7s)
+        ease-in-out
+        infinite alternate;
+
+    animation-delay: var(--delay, 0s);
+
+    transform-origin: center;
+
+    will-change: transform;
+}
+
+
+/* ==========================================================
+   03. ANIMATION
+   ========================================================== */
+
+@keyframes tripi3dFloat {
+    from {
+        transform:
+            translate3d(0, 4px, 0)
+            rotate(-4deg);
+    }
+
+    to {
+        transform:
+            translate3d(5px, -15px, 0)
+            rotate(5deg);
+    }
+}
+
+@keyframes tripi3dDrift {
+    from {
+        transform:
+            translate3d(-12px, 0, 0)
+            rotate(-4deg);
+    }
+
+    to {
+        transform:
+            translate3d(18px, -13px, 0)
+            rotate(3deg);
+    }
+}
+
+@keyframes tripi3dCloud {
+    from {
+        transform:
+            translate3d(-8px, 0, 0);
+    }
+
+    to {
+        transform:
+            translate3d(12px, -6px, 0);
+    }
+}
+
+@keyframes tripi3dTwinkle {
+    from {
+        transform:
+            scale(.82)
+            rotate(-12deg);
+
+        opacity: .6;
+    }
+
+    to {
+        transform:
+            scale(1.08)
+            rotate(12deg);
+
+        opacity: 1;
+    }
+}
+
+
+/* ==========================================================
+   04. PHONG CANH NUI VA DOI
+   ========================================================== */
+
+#tripiChatPage .tripi-3d-landscape,
+#tripiAssistant .tripi-3d-landscape {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
+
+    z-index: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+}
+
+#tripiChatPage .tripi-3d-landscape svg,
+#tripiAssistant .tripi-3d-landscape svg {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ==========================================================
+   05. SCENE TRANG TRIPI TOAN MAN HINH
+
+   LUU Y:
+   Khong dat width, height, min-height hay padding
+   cho .tripi-world-chat va .tripi-chat-messages.
+   Cac phan do thuoc tripi-chat.css.
+   ========================================================== */
+
+#tripiChatPage .tripi-3d-scene.tripi-3d-full {
+    display: none;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-scene.tripi-3d-full {
+    position: absolute;
+
+    inset: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+}
+
+/* Khi vao hoi thoai hoac ket qua thi an sticker */
+
+#tripiChatPage.tripi-mode-chat
+.tripi-3d-scene.tripi-3d-full,
+#tripiChatPage.tripi-mode-results
+.tripi-3d-scene.tripi-3d-full {
+    display: none !important;
+}
+
+
+/* ==========================================================
+   06. PHONG CANH TRANG LON
+   ========================================================== */
+
+#tripiChatPage
+.tripi-3d-full .tripi-3d-landscape {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
+
+    height: clamp(105px, 12vw, 160px);
+
+    opacity: .9;
+
+    z-index: 0;
+}
+
+
+/* ==========================================================
+   07. STICKER BEN TRAI
+   ========================================================== */
+
+/* May trai */
+
+#tripiChatPage .tripi-3d-cloud-left {
+    top: 7%;
+    left: 2%;
+
+    --size: clamp(85px, 9vw, 150px);
+    --duration: 9s;
+
+    animation-name: tripi3dCloud;
+}
+
+/* May anh */
+
+#tripiChatPage .tripi-3d-camera-left {
+    top: 20%;
+    left: 10%;
+
+    --size: clamp(90px, 9vw, 150px);
+    --duration: 6s;
+}
+
+/* Ho chieu */
+
+#tripiChatPage .tripi-3d-passport-left {
+    top: 44%;
+    left: 4%;
+
+    --size: clamp(100px, 10vw, 160px);
+    --duration: 7s;
+    --delay: -2s;
+}
+
+/* Bien chi duong */
+
+#tripiChatPage .tripi-3d-signpost-left {
+    bottom: 10%;
+    left: 3%;
+
+    --size: clamp(85px, 8vw, 130px);
+    --duration: 8s;
+}
+
+
+/* ==========================================================
+   08. STICKER BEN PHAI
+   ========================================================== */
+
+/* May bay */
+
+#tripiChatPage .tripi-3d-airplane-right {
+    top: 12%;
+    right: 14%;
+
+    --size: clamp(100px, 10vw, 158px);
+    --duration: 8s;
+
+    animation-name: tripi3dDrift;
+}
+
+/* May phai */
+
+#tripiChatPage .tripi-3d-cloud-right {
+    top: 28%;
+    right: 11%;
+
+    --size: clamp(70px, 7vw, 110px);
+    --duration: 10s;
+
+    animation-name: tripi3dCloud;
+}
+
+/* Ban do */
+
+#tripiChatPage .tripi-3d-map-right {
+    top: 42%;
+    right: 5%;
+
+    --size: clamp(90px, 9vw, 145px);
+    --duration: 6.5s;
+}
+
+/* Vali */
+
+#tripiChatPage .tripi-3d-suitcase-right {
+    bottom: 12%;
+    right: 9%;
+
+    --size: clamp(90px, 9vw, 150px);
+    --duration: 7s;
+    --delay: -3s;
+}
+
+
+/* ==========================================================
+   09. SPARKLES
+   ========================================================== */
+
+#tripiChatPage .tripi-3d-sparkle-left {
+    top: 28%;
+    left: 5%;
+
+    --size: 38px;
+    --duration: 3s;
+
+    animation-name: tripi3dTwinkle;
+}
+
+#tripiChatPage .tripi-3d-sparkle-right {
+    top: 17%;
+    right: 10%;
+
+    --size: 40px;
+    --duration: 3.5s;
+
+    animation-name: tripi3dTwinkle;
+}
+
+
+/* ==========================================================
+   10. POPUP MINI - CHI TRANG TRI
+
+   Khong can thiep kich thuoc popup,
+   font, loi chao, nut goi y hay o nhap.
+   ========================================================== */
+
+#tripiAssistant
+#tripiAssistantWelcome {
+    isolation: isolate;
+}
+
+/* Lop hinh anh trong popup */
+
+#tripiAssistant
+#tripiAssistantWelcome > .tripi-3d-scene {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    pointer-events: none;
+}
+
+/* Noi dung popup nam tren hinh trang tri */
+
+#tripiAssistant
+#tripiAssistantWelcome > :not(.tripi-3d-scene) {
+    position: relative;
+    z-index: 2;
+}
+
+/* Phong canh popup */
+
+#tripiAssistant
+.tripi-3d-mini .tripi-3d-landscape {
+    height: 65px;
+    opacity: .75;
+}
+
+/* Camera popup */
+
+#tripiAssistant .tripi-3d-mini-camera {
+    top: 10px;
+    left: 5%;
+
+    --size: 52px;
+    --duration: 6s;
+}
+
+/* May bay giay popup */
+
+#tripiAssistant .tripi-3d-mini-plane {
+    top: 10px;
+    right: 5%;
+
+    --size: 60px;
+    --duration: 8s;
+
+    animation-name: tripi3dDrift;
+}
+
+/* May popup */
+
+#tripiAssistant .tripi-3d-mini-cloud {
+    top: 28px;
+    right: 37%;
+
+    --size: 35px;
+    --duration: 9s;
+
+    animation-name: tripi3dCloud;
+}
+
+/* Sao popup */
+
+#tripiAssistant .tripi-3d-mini-sparkle {
+    top: 62px;
+    left: 23%;
+
+    --size: 18px;
+    --duration: 3s;
+
+    animation-name: tripi3dTwinkle;
+}
+
+
+/* ==========================================================
+   11. LAPTOP
+   ========================================================== */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+
+    #tripiChatPage .tripi-3d-camera-left {
+        left: 2%;
+        --size: 105px;
+    }
+
+    #tripiChatPage .tripi-3d-passport-left {
+        left: 1%;
+        --size: 115px;
+    }
+
+    #tripiChatPage .tripi-3d-airplane-right {
+        right: 3%;
+        --size: 105px;
+    }
+
+    #tripiChatPage .tripi-3d-map-right {
+        right: 1%;
+        --size: 110px;
+    }
+
+    #tripiChatPage .tripi-3d-signpost-left {
+        --size: 100px;
+    }
+
+    #tripiChatPage .tripi-3d-suitcase-right {
+        --size: 105px;
+    }
+
+    #tripiChatPage
+    .tripi-3d-full .tripi-3d-landscape {
+        height: 125px;
+    }
+}
+
+
+/* ==========================================================
+   12. DIEN THOAI
+   ========================================================== */
+
+@media (max-width: 700px) {
+
+    /* Giam so sticker de tranh che noi dung */
+
+    #tripiChatPage .tripi-3d-camera-left {
+        top: 7%;
+        left: 2%;
+
+        --size: 52px;
+    }
+
+    #tripiChatPage .tripi-3d-airplane-right {
+        top: 7%;
+        right: 2%;
+
+        --size: 61px;
+    }
+
+    #tripiChatPage .tripi-3d-cloud-left {
+        top: 17%;
+        left: 0;
+
+        --size: 55px;
+        opacity: .35;
+    }
+
+    #tripiChatPage .tripi-3d-cloud-right,
+    #tripiChatPage .tripi-3d-passport-left,
+    #tripiChatPage .tripi-3d-signpost-left,
+    #tripiChatPage .tripi-3d-map-right,
+    #tripiChatPage .tripi-3d-suitcase-right,
+    #tripiChatPage .tripi-3d-sparkle-left,
+    #tripiChatPage .tripi-3d-sparkle-right {
+        display: none;
+    }
+
+    #tripiChatPage
+    .tripi-3d-full .tripi-3d-landscape {
+        height: 110px;
+    }
+}
+
+
+/* ==========================================================
+   13. MAN HINH THAP
+   ========================================================== */
+
+@media (max-height: 700px) and (min-width: 701px) {
+
+    #tripiChatPage .tripi-3d-cloud-left {
+        --size: 95px;
+    }
+
+    #tripiChatPage .tripi-3d-camera-left {
+        --size: 105px;
+    }
+
+    #tripiChatPage .tripi-3d-passport-left {
+        --size: 110px;
+    }
+
+    #tripiChatPage .tripi-3d-airplane-right {
+        --size: 110px;
+    }
+
+    #tripiChatPage .tripi-3d-map-right {
+        --size: 100px;
+    }
+
+    #tripiChatPage .tripi-3d-suitcase-right {
+        --size: 105px;
+    }
+
+    #tripiChatPage
+    .tripi-3d-full .tripi-3d-landscape {
+        height: 95px;
+    }
+}
+
+
+/* ==========================================================
+   14. ACCESSIBILITY
+   ========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #tripiChatPage .tripi-3d-sticker,
+    #tripiAssistant .tripi-3d-sticker {
+        animation: none !important;
+        will-change: auto !important;
+    }
+}

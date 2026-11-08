@@ -1,4 +1,5 @@
-﻿@model TravelHomeViewModel
+
+@model TravelHomeViewModel
 
 @{
     ViewData["Title"] = "Trang chủ";
@@ -26,17 +27,10 @@
     };
 }
 
-<link rel="stylesheet"
-      href="~/css/tour-showcase.css"
-      asp-append-version="true" />
-
-<link rel="stylesheet"
-      href="~/css/destination-arc.css"
-      asp-append-version="true" />
-
-<link rel="stylesheet"
-      href="~/css/home-ai-recommendation.css"
-      asp-append-version="true" />
+<link rel="stylesheet" href="~/css/tour-showcase.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/destination-arc.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/home-ai-recommendation.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/happytrip-ai-theme.css" asp-append-version="true" />
 
 <main>
     <partial name="~/Views/Shared/TravelComponents/_Hero.cshtml"
@@ -44,10 +38,100 @@
 
     <partial name="~/Views/Shared/TravelComponents/_SearchBar.cshtml" />
 
+    <section class="ht-home-ai-section" aria-labelledby="htHomeAiTitle">
+        <div class="container travel-container">
+
+            <div class="ht-home-ai-banner">
+
+                <div class="ht-home-ai-decor ht-home-ai-decor-one"></div>
+                <div class="ht-home-ai-decor ht-home-ai-decor-two"></div>
+
+                <div class="ht-home-ai-content">
+                    <span class="ht-home-ai-kicker">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        TRỢ LÝ GỢI Ý TOUR HAPPYTRIP
+                    </span>
+
+                    <h2 id="htHomeAiTitle">
+                        Chưa biết đi đâu?
+                        <span>Để Tripi giúp bạn!</span>
+                    </h2>
+
+                    <p class="ht-home-ai-description">
+                        Không cần tìm kiếm giữa hàng trăm chuyến đi.
+                        Chọn điểm đến, sở thích, ngân sách và thời gian
+                        để HappyTrip tìm những tour phù hợp với bạn.
+                    </p>
+
+                    <div class="ht-home-ai-actions">
+                        <a href="/goi-y-tour" class="ht-home-ai-button">
+                            Bắt đầu gợi ý tour
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                        <a href="/tours" class="ht-home-ai-secondary">
+                            Khám phá tất cả tour
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+
+                    <div class="ht-home-ai-benefits">
+                        <span>
+                            <i class="fa-solid fa-heart"></i>
+                            Theo sở thích
+                        </span>
+                        <span>
+                            <i class="fa-solid fa-wallet"></i>
+                            Theo ngân sách
+                        </span>
+                        <span>
+                            <i class="fa-solid fa-chart-simple"></i>
+                            Xếp hạng phù hợp
+                        </span>
+                    </div>
+                </div>
+
+                <div class="ht-home-ai-visual">
+                    <div class="ht-home-ai-orbit ht-home-ai-orbit-one"></div>
+                    <div class="ht-home-ai-orbit ht-home-ai-orbit-two"></div>
+
+                    <span class="ht-home-ai-star ht-home-ai-star-one">
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+
+                    <span class="ht-home-ai-star ht-home-ai-star-two">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </span>
+
+                    <div class="ht-home-ai-fox">
+                        <img src="/img/tripi/tripi-fox.png"
+                             alt="Tripi, linh vật cáo cam của HappyTrip"
+                             loading="lazy" />
+                    </div>
+
+                    <div class="ht-home-ai-shadow"></div>
+
+                    <div class="ht-home-ai-float ht-home-ai-float-one">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Đúng điểm đến
+                    </div>
+
+                    <div class="ht-home-ai-float ht-home-ai-float-two">
+                        <i class="fa-solid fa-suitcase-rolling"></i>
+                        Chuyến đi của bạn
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
     <partial name="~/Views/Shared/TravelComponents/_DealHot.cshtml" />
 
     <section class="travel-section">
         <div class="container travel-container">
+
             <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
                      model='new SectionHeadingModel { Kicker = "Vì sao chọn HappyTrip", Title = "Du lịch nhẹ nhàng, trải nghiệm trọn vẹn", Description = "Từ khâu tư vấn đến vận hành tour, mọi thứ đều được thiết kế để bạn chỉ cần tận hưởng chuyến đi.", AlignClass = "text-center" }' />
 
@@ -63,6 +147,7 @@
                     </div>
                 }
             </div>
+
         </div>
     </section>
 
@@ -72,79 +157,22 @@
     <partial name="~/Views/Shared/TravelComponents/_TourShowcase.cshtml"
              model="Model.PopularTours" />
 
-    <section class="ht-home-ai-section" aria-labelledby="htHomeAiTitle">
-        <div class="container travel-container">
-            <div class="ht-home-ai-banner">
-
-                <div class="ht-home-ai-copy">
-                    <span class="ht-home-ai-eyebrow">
-                        <i class="fa-solid fa-sparkles"></i>
-                        HAPPYTRIP · GỢI Ý TOUR THÔNG MINH
-                    </span>
-
-                    <h2 id="htHomeAiTitle">
-                        Chưa biết đi đâu? <span>Hỏi Tripi nè!</span>
-                    </h2>
-
-                    <p>
-                        Chọn điểm đến, sở thích và ngân sách.
-                        Tripi sẽ giúp bạn tìm những chuyến đi phù hợp.
-                    </p>
-
-                    <div class="ht-home-ai-actions">
-                        <a href="/goi-y-tour" class="ht-home-ai-button">
-                            Gợi ý tour cho tôi
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-
-                        <span class="ht-home-ai-caption">
-                            <i class="fa-solid fa-circle-check"></i>
-                            Xếp hạng bằng Matching Score
-                        </span>
-                    </div>
-                </div>
-
-                <div class="ht-home-ai-mascot">
-                    <div class="ht-home-ai-glow"></div>
-
-                    <div class="ht-home-ai-rabbit">
-                        <img src="~/img/tripi/tripi-rabbit.png"
-                             alt="Tripi, chú thỏ du lịch của HappyTrip"
-                             loading="lazy" />
-                    </div>
-
-                    <div class="ht-home-ai-shadow"></div>
-
-                    <span class="ht-home-ai-speech">
-                        Đi chơi cùng Tripi nha!
-                        <i class="fa-solid fa-heart"></i>
-                    </span>
-
-                    <span class="ht-home-ai-spark ht-home-ai-spark-one">
-                        <i class="fa-solid fa-star"></i>
-                    </span>
-
-                    <span class="ht-home-ai-spark ht-home-ai-spark-two">
-                        <i class="fa-solid fa-sparkles"></i>
-                    </span>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
     <section class="travel-section experience-section">
         <div class="container travel-container">
+
             <div class="row g-4 align-items-center">
+
                 <div class="col-lg-6">
                     <span class="section-kicker">Trải nghiệm</span>
 
-                    <h2>Đi sâu trải nghiệm, không chỉ đi cho đủ điểm.</h2>
+                    <h2>
+                        Đi sâu trải nghiệm, không chỉ đi cho đủ điểm.
+                    </h2>
 
                     <p>
                         HappyTrip ưu tiên trải nghiệm địa phương: food tour,
-                        chợ nổi, làng nghề, cung đường thiên nhiên và các
-                        hoạt động gắn với văn hóa bản xứ.
+                        chợ nổi, làng nghề, cung đường thiên nhiên và
+                        các hoạt động gắn với văn hóa bản xứ.
                     </p>
 
                     <a href="/destinations"
@@ -160,12 +188,15 @@
                              loading="lazy" />
                     </div>
                 </div>
+
             </div>
+
         </div>
     </section>
 
     <section class="travel-section section-cream">
         <div class="container travel-container">
+
             <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
                      model='new SectionHeadingModel { Kicker = "Cẩm nang du lịch", Title = "Mẹo nhanh trước khi lên đường", Description = "Tổng hợp kinh nghiệm thực tế để bạn chuẩn bị tốt hơn cho từng hành trình.", AlignClass = "text-center" }' />
 
@@ -173,6 +204,7 @@
                 @foreach (var post in Model.GuidePosts)
                 {
                     <article class="guide-card reveal">
+
                         <img src="@post.ImageUrl"
                              alt="@post.Title"
                              loading="lazy" />
@@ -183,14 +215,17 @@
                             <p>@post.Summary</p>
                             <a href="/">Xem thêm</a>
                         </div>
+
                     </article>
                 }
             </div>
+
         </div>
     </section>
 
     <section class="travel-section">
         <div class="container travel-container">
+
             <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
                      model='new SectionHeadingModel { Kicker = "Khách hàng nói gì", Title = "Đánh giá thực tế từ khách đi tour", Description = "Phản hồi từ khách hàng đã trải nghiệm dịch vụ cùng HappyTrip.", AlignClass = "text-center" }' />
 
@@ -201,6 +236,7 @@
                              model="testimonial" />
                 }
             </div>
+
         </div>
     </section>
 

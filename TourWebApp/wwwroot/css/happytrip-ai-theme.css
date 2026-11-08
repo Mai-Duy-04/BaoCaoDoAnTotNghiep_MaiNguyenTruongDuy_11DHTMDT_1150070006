@@ -1,0 +1,490 @@
+
+.ht-home-ai-section {
+    background: #f8f5ef;
+}
+
+.ht-home-ai-banner {
+    border-color: #e6dccc;
+    background: linear-gradient(
+        115deg,
+        #fffefa 5%,
+        #faf5eb 57%,
+        #f0e8da 100%
+    );
+    box-shadow: 0 18px 44px rgba(62, 52, 38, .08);
+}
+
+.ht-home-ai-banner::after {
+    background: radial-gradient(
+        circle,
+        rgba(232, 160, 120, .18),
+        transparent 68%
+    );
+}
+
+.ht-home-ai-decor-one {
+    background: radial-gradient(
+        circle,
+        rgba(216, 195, 165, .28),
+        transparent 70%
+    );
+}
+
+.ht-home-ai-decor-two {
+    background: radial-gradient(
+        circle,
+        rgba(233, 204, 177, .3),
+        transparent 70%
+    );
+}
+
+.ht-home-ai-kicker,
+.ht-home-ai-kicker i {
+    color: #a77b50;
+}
+
+.ht-home-ai-content h2 {
+    color: #2f4035;
+}
+
+.ht-home-ai-content h2 span {
+    color: #ac8454;
+}
+
+.ht-home-ai-description {
+    color: #746f66;
+}
+
+.ht-home-ai-button {
+    border-color: #344b3b;
+    background: linear-gradient(110deg, #344b3b, #526a52);
+    color: #ffffff;
+    box-shadow: 0 9px 21px rgba(52, 75, 59, .17);
+}
+
+.ht-home-ai-button:hover {
+    border-color: #253b2d;
+    background: linear-gradient(110deg, #253b2d, #445d48);
+    color: #ffffff;
+    box-shadow: 0 15px 29px rgba(52, 75, 59, .24);
+}
+
+.ht-home-ai-secondary {
+    color: #816748;
+}
+
+.ht-home-ai-secondary:hover {
+    color: #344b3b;
+}
+
+.ht-home-ai-benefits span {
+    color: #847c6f;
+}
+
+.ht-home-ai-benefits i {
+    color: #b48a57;
+}
+
+.ht-home-ai-orbit {
+    border-color: rgba(180, 138, 87, .27);
+}
+
+.ht-home-ai-orbit-two {
+    border-color: rgba(180, 138, 87, .16);
+}
+
+.ht-home-ai-star {
+    color: #d2aa6f;
+}
+
+.ht-home-ai-star-two {
+    color: #e8a078;
+}
+
+.ht-home-ai-shadow {
+    background: rgba(74, 57, 38, .19);
+}
+
+.ht-home-ai-float {
+    border-color: #e7dac6;
+    background: rgba(255, 253, 248, .96);
+    color: #6f624e;
+    box-shadow: 0 8px 22px rgba(74, 57, 38, .08);
+}
+
+.ht-home-ai-float i {
+    color: #b48a57;
+}
+
+.ht-ai-page {
+    --ai-ink: #304237;
+    --ai-muted: #817a6e;
+    --ai-purple: #a77b50;
+    --ai-lavender: #f5ebdc;
+    --ai-line: #e8dfd2;
+    background: #f8f5ef;
+    color: #304237;
+}
+
+.ht-ai-hero {
+    border-color: #e7dccb;
+    background: linear-gradient(
+        115deg,
+        #fffefa 5%,
+        #faf6ee 65%,
+        #f1e6d5 100%
+    );
+    box-shadow: 0 18px 55px rgba(74, 57, 38, .065);
+}
+
+.ht-ai-hero-glow-one {
+    background: radial-gradient(
+        circle,
+        rgba(222, 196, 155, .26),
+        transparent 70%
+    );
+}
+
+.ht-ai-hero-glow-two {
+    background: radial-gradient(
+        circle,
+        rgba(239, 171, 133, .18),
+        transparent 72%
+    );
+}
+
+.ht-ai-hero-kicker,
+.ht-ai-section-kicker,
+.ht-ai-results-kicker {
+    color: #a77b50;
+}
+
+.ht-ai-hero h1 {
+    color: #304237;
+}
+
+.ht-ai-hero h1 span {
+    color: #ad8555;
+}
+
+.ht-ai-hero-description {
+    color: #7d7669;
+}
+
+.ht-ai-hero-primary {
+    background: #344b3b;
+    color: #ffffff;
+    box-shadow: 0 9px 22px rgba(52, 75, 59, .18);
+}
+
+.ht-ai-hero-primary:hover {
+    background: #253b2d;
+    color: #ffffff;
+    box-shadow: 0 15px 28px rgba(52, 75, 59, .23);
+}
+
+.ht-ai-hero-secondary {
+    color: #77694f;
+}
+
+.ht-ai-hero-secondary i {
+    color: #b48a57;
+}
+
+.ht-ai-hero-secondary:hover {
+    color: #344b3b;
+}
+
+.ht-ai-hero-trust span {
+    color: #81796b;
+}
+
+.ht-ai-hero-trust i {
+    color: #ad8c61;
+}
+
+.ht-ai-orbit {
+    border-color: rgba(172, 132, 84, .23);
+}
+
+.ht-ai-orbit-two {
+    border-color: rgba(172, 132, 84, .15);
+}
+
+.ht-ai-mascot-shadow {
+    background: rgba(74, 57, 38, .16);
+}
+
+.ht-ai-mascot-label,
+.ht-ai-visual-chip {
+    border-color: #eadfce;
+    background: rgba(255, 253, 248, .95);
+    color: #776448;
+    box-shadow: 0 10px 28px rgba(74, 57, 38, .08);
+}
+
+.ht-ai-visual-chip i,
+.ht-ai-visual-star {
+    color: #b48a57;
+}
+
+.ht-ai-visual-star-two,
+.ht-ai-mascot-label i {
+    color: #de9679;
+}
+
+.ht-ai-step {
+    border-color: #e9dfd1;
+    background: #fffefa;
+    box-shadow: 0 8px 24px rgba(74, 57, 38, .045);
+}
+
+.ht-ai-step-purple {
+    background: #eaf0e7;
+    color: #446149;
+}
+
+.ht-ai-step-peach {
+    background: #fbede2;
+    color: #bb875a;
+}
+
+.ht-ai-step-blue {
+    background: #f3eada;
+    color: #a77b50;
+}
+
+.ht-ai-step h3,
+.ht-ai-workspace-heading h2 {
+    color: #304237;
+}
+
+.ht-ai-step p,
+.ht-ai-workspace-heading p {
+    color: #817a6e;
+}
+
+.ht-ai-sidebar {
+    border-color: #e8dfd2;
+    background: #fffefa;
+    box-shadow: 0 14px 36px rgba(74, 57, 38, .05);
+}
+
+.ht-ai-form-heading {
+    border-bottom-color: #eee5d8;
+}
+
+.ht-ai-form-icon {
+    background: #edf1e8;
+    color: #4b654d;
+}
+
+.ht-ai-form-heading h3,
+.ht-ai-results-header h2 {
+    color: #304237;
+}
+
+.ht-ai-form-heading p,
+.ht-ai-field-hint {
+    color: #8b8479;
+}
+
+.ht-ai-field > label {
+    color: #425344;
+}
+
+.ht-ai-field > label i {
+    color: #b18a58;
+}
+
+.ht-ai-field select,
+.ht-ai-field input[type="number"] {
+    border-color: #e3dacd;
+    background: #fffefa;
+    color: #364739;
+}
+
+.ht-ai-field select:focus,
+.ht-ai-field input[type="number"]:focus {
+    border-color: #ae8a58;
+    box-shadow: 0 0 0 3px rgba(174, 138, 88, .13);
+}
+
+.ht-ai-interest span {
+    border-color: #e7dfd3;
+    background: #faf7f0;
+    color: #716c63;
+}
+
+.ht-ai-interest:hover span {
+    border-color: #bc9d71;
+}
+
+.ht-ai-interest input:checked + span {
+    border-color: #344b3b;
+    background: #344b3b;
+    color: #ffffff;
+}
+
+.ht-ai-interest input:focus-visible + span {
+    outline-color: #b48a57;
+}
+
+.ht-ai-submit {
+    background: linear-gradient(110deg, #344b3b, #536b54);
+    color: #ffffff;
+    box-shadow: 0 10px 19px rgba(52, 75, 59, .16);
+}
+
+.ht-ai-submit:hover:not(:disabled) {
+    box-shadow: 0 15px 26px rgba(52, 75, 59, .22);
+}
+
+.ht-ai-reset,
+.ht-ai-disclaimer {
+    color: #8b8579;
+}
+
+.ht-ai-reset:hover {
+    color: #344b3b;
+}
+
+.ht-ai-results-count {
+    background: #edf1e8;
+    color: #48624b;
+}
+
+.ht-ai-empty,
+.ht-ai-loading {
+    border-color: #e8dfd2;
+    background: #fffefa;
+}
+
+.ht-ai-empty-visual {
+    background: linear-gradient(135deg, #edf1e8, #f8ecde);
+    color: #b18a58;
+}
+
+.ht-ai-empty-spark {
+    color: #df9c78;
+}
+
+.ht-ai-empty-label {
+    color: #aa8553;
+}
+
+.ht-ai-empty h3,
+.ht-ai-loading h3 {
+    color: #304237;
+}
+
+.ht-ai-empty p,
+.ht-ai-loading p {
+    color: #827c70;
+}
+
+.ht-ai-empty-tags span {
+    border-color: #e8dfd2;
+    background: #faf7f0;
+    color: #777164;
+}
+
+.ht-ai-empty-tags i {
+    color: #b18a58;
+}
+
+.ht-ai-thinking-dots span {
+    background: #b48a57;
+}
+
+.ht-ai-notice {
+    border-color: #e8dac6;
+    background: #fff7e9;
+    color: #876c4b;
+}
+
+.ht-ai-success {
+    border-color: #dfe7da;
+    background: linear-gradient(110deg, #edf2e9, #fffefa);
+}
+
+.ht-ai-success-icon {
+    color: #557a57;
+}
+
+.ht-ai-success strong {
+    color: #344b3b;
+}
+
+.ht-ai-success p {
+    color: #817a6e;
+}
+
+.ht-ai-tour-card {
+    border-color: #e8dfd2;
+    background: #fffefa;
+    box-shadow: 0 10px 24px rgba(74, 57, 38, .05);
+}
+
+.ht-ai-tour-card:hover {
+    box-shadow: 0 17px 35px rgba(74, 57, 38, .11);
+}
+
+.ht-ai-match-badge {
+    background: #344b3b;
+    color: #ffffff;
+}
+
+.ht-ai-tour-meta,
+.ht-ai-score-breakdown span,
+.ht-ai-reasons p {
+    color: #817a6e;
+}
+
+.ht-ai-tour-meta i {
+    color: #b18a58;
+}
+
+.ht-ai-tour-content h3 {
+    color: #304237;
+}
+
+.ht-ai-score-breakdown strong {
+    color: #48624b;
+}
+
+.ht-ai-score-track {
+    background: #ece8de;
+}
+
+.ht-ai-score-track div {
+    background: linear-gradient(90deg, #d0af7f, #48664d);
+}
+
+.ht-ai-reasons i {
+    color: #658769;
+}
+
+.ht-ai-tour-footer {
+    border-top-color: #eee7dc;
+}
+
+.ht-ai-price span {
+    color: #8b8579;
+}
+
+.ht-ai-price strong {
+    color: #304b37;
+}
+
+.ht-ai-detail,
+.ht-ai-try-again {
+    background: #344b3b;
+    color: #ffffff;
+}
+
+.ht-ai-detail:hover,
+.ht-ai-try-again:hover {
+    background: #253b2d;
+    color: #ffffff;
+}

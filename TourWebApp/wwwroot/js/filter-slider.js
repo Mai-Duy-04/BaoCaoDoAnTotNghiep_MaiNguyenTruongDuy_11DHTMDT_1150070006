@@ -75,54 +75,153 @@ function initPriceRange() {
 
 function initAutoCompleteDiaDiem() {
     const pairs = [
-        { input: document.getElementById("diadiemInput"), box: document.getElementById("goiYBox") },
-        { input: document.getElementById("diadiemInputTop"), box: document.getElementById("goiYBoxTop") }
+        {
+            input: document.getElementById("diadiemInputTop"),
+            box: document.getElementById("goiYBoxTop")
+        },
+        {
+            input: document.getElementById("diadiemInput"),
+            box: document.getElementById("goiYBox")
+        }
     ].filter(p => p.input && p.box);
 
-    if (!pairs.length) return;
-
     pairs.forEach(({ input, box }) => {
-        input.addEventListener("input", function () {
-            const keyword = input.value.trim();
+        let timer = null;
+        let controller = null;
 
-            if (keyword.length < 1) {
-                box.style.display = "none";
+        input.setAttribute("autocomplete", "off");
+
+        function hide() {
+            box.style.display = "none";
+        }
+
+        function showMessage(message) {
+            box.replaceChildren();
+
+            const item = document.createElement("div");
+            item.className = "ht-search-message";
+            item.textContent = message;
+
+            box.appendChild(item);
+            box.style.display = "block";
+        }
+
+        function renderResults(items) {
+            box.replaceChildren();
+
+            if (!items.length) {
+                showMessage("Không tìm thấy tour phù hợp.");
                 return;
             }
 
-            fetch(`/Tour/GoiyDiaDiem?keyword=${encodeURIComponent(keyword)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        box.style.display = "none";
+            items.forEach(tour => {
+                const link = document.createElement("a");
+
+                link.className = "ht-live-tour-item";
+                link.href = tour.url ||
+                    `/Tour/ChiTiet/${tour.idTour}`;
+
+                const icon = document.createElement("span");
+                icon.className = "ht-live-tour-icon";
+
+                const iconElement = document.createElement("i");
+                iconElement.className =
+                    "fa-solid fa-location-dot";
+                icon.appendChild(iconElement);
+
+                const info = document.createElement("span");
+                info.className = "ht-live-tour-info";
+
+                const name = document.createElement("strong");
+                name.textContent = tour.tenTour || "Tour";
+
+                const destination = document.createElement("small");
+                destination.textContent =
+                    tour.diaDiem || "Chưa cập nhật điểm đến";
+
+                info.append(name, destination);
+
+                const price = document.createElement("span");
+                price.className = "ht-live-tour-price";
+                price.textContent = tour.gia || "Liên hệ";
+
+                link.append(icon, info, price);
+                box.appendChild(link);
+            });
+
+            const footer = document.createElement("div");
+            footer.className = "ht-live-tour-footer";
+            footer.textContent =
+                "Chọn một tour để xem chi tiết. " +
+                "Nhấn Enter để lọc toàn bộ danh sách.";
+
+            box.appendChild(footer);
+            box.style.display = "block";
+        }
+
+        input.addEventListener("input", () => {
+            clearTimeout(timer);
+            controller?.abort();
+
+            const keyword = input.value.trim();
+
+            if (!keyword) {
+                hide();
+                return;
+            }
+
+            showMessage("Đang tìm tour...");
+
+            timer = setTimeout(async () => {
+                controller = new AbortController();
+
+                try {
+                    const response = await fetch(
+                        `/Tour/GoiYTour?keyword=${encodeURIComponent(keyword)}`,
+                        {
+                            signal: controller.signal,
+                            headers: {
+                                "Accept": "application/json"
+                            }
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Không lấy được dữ liệu");
+                    }
+
+                    const data = await response.json();
+
+                    // Tránh hiển thị kết quả của từ khóa cũ
+                    if (input.value.trim() !== keyword) {
                         return;
                     }
 
-                    box.innerHTML = "";
-
-                    data.forEach(item => {
-                        const div = document.createElement("div");
-                        div.classList.add("autocomplete-item");
-                        div.textContent = item;
-
-                        div.onclick = function () {
-                            input.value = item;
-                            box.style.display = "none";
-                        };
-
-                        box.appendChild(div);
-                    });
-
-                    box.style.display = "block";
-                })
-                .catch(() => {
-                    box.style.display = "none";
-                });
+                    renderResults(
+                        Array.isArray(data) ? data : []
+                    );
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        showMessage(
+                            "Không thể tải gợi ý. Vui lòng thử lại."
+                        );
+                    }
+                }
+            }, 180);
         });
 
-        document.addEventListener("click", function (e) {
-            if (!input.contains(e.target) && !box.contains(e.target)) {
-                box.style.display = "none";
+        input.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                hide();
+            }
+        });
+
+        document.addEventListener("click", event => {
+            if (
+                event.target !== input &&
+                !box.contains(event.target)
+            ) {
+                hide();
             }
         });
     });
@@ -260,5 +359,5 @@ function initCustomSelects() {
 }
 
 initPriceRange();
-initAutoCompleteDiaDiem();
+// initAutoCompleteDiaDiem();
 initCustomSelects();

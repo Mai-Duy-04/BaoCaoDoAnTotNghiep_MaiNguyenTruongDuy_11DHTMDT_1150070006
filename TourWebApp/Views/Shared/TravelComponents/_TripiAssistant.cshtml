@@ -1,0 +1,391 @@
+@*
+    TRIPI AI ASSISTANT - HAPPYTRIP
+
+    Giao diện trợ lý AI dạng sidebar.
+    Được sử dụng chung trong _Layout.cshtml.
+
+    API hiện có:
+    POST /api/tripi-chat/gui-tin-nhan
+
+    Chức năng xử lý sẽ nằm trong:
+    wwwroot/js/tripi-assistant.js
+
+    CSS:
+    wwwroot/css/tripi-assistant.css
+*@
+
+<div id="tripiAssistant"
+     class="tripi-assistant"
+     data-tripi-assistant
+     aria-label="Trợ lý du lịch AI Tripi">
+
+    @* Nút nổi mở trợ lý AI *@
+    <button type="button"
+            id="tripiAssistantLauncher"
+            class="tripi-assistant-launcher"
+            aria-label="Mở trợ lý du lịch Tripi"
+            aria-controls="tripiAssistantPanel"
+            aria-expanded="false">
+
+        <span class="tripi-launcher-glow"></span>
+
+        <span class="tripi-launcher-mascot">
+            <img src="~/img/tripi/tripi-fox.png"
+                 alt=""
+                 loading="lazy" />
+        </span>
+
+        <span class="tripi-launcher-text">
+            <strong>Hỏi Tripi</strong>
+            <small>AI Travel Assistant</small>
+        </span>
+
+        <span class="tripi-launcher-sparkle"
+              aria-hidden="true">
+            <i class="fa-solid fa-sparkles"></i>
+        </span>
+    </button>
+
+    @* Lớp phủ cho giao diện điện thoại *@
+    <div id="tripiAssistantBackdrop"
+         class="tripi-assistant-backdrop"
+         aria-hidden="true"></div>
+
+    @* Sidebar AI bên trái *@
+    <aside id="tripiAssistantPanel"
+           class="tripi-assistant-panel"
+           role="dialog"
+           aria-modal="false"
+           aria-labelledby="tripiAssistantTitle"
+           aria-hidden="true"
+           tabindex="-1">
+
+        @* Header *@
+        <header class="tripi-assistant-header">
+
+            <div class="tripi-assistant-brand">
+
+                <span class="tripi-assistant-brand-avatar">
+                    <img src="~/img/tripi/tripi-fox.png"
+                         alt="Tripi"
+                         loading="lazy" />
+                </span>
+
+                <span class="tripi-assistant-brand-info">
+                    <strong id="tripiAssistantTitle">
+                        Tripi
+                        <span class="tripi-assistant-ai-badge">
+                            AI
+                        </span>
+                    </strong>
+
+                    <small>
+                        <span class="tripi-assistant-online-dot"></span>
+                        Bạn đồng hành du lịch HappyTrip
+                    </small>
+                </span>
+
+            </div>
+
+            <div class="tripi-assistant-header-buttons">
+
+                <button type="button"
+                        id="tripiAssistantNewChat"
+                        class="tripi-assistant-icon-button"
+                        aria-label="Bắt đầu cuộc trò chuyện mới"
+                        title="Trò chuyện mới">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+
+                <button type="button"
+                        id="tripiAssistantClose"
+                        class="tripi-assistant-icon-button tripi-assistant-close"
+                        aria-label="Đóng trợ lý Tripi"
+                        title="Đóng">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+        </header>
+
+        @* Khu vực thông tin về trang hiện tại *@
+        <div id="tripiAssistantPageContext"
+             class="tripi-assistant-page-context"
+             hidden>
+
+            <span class="tripi-context-icon">
+                <i class="fa-solid fa-location-dot"></i>
+            </span>
+
+            <span class="tripi-context-text">
+                <small>Bạn đang khám phá</small>
+                <strong id="tripiAssistantContextName">
+                    HappyTrip
+                </strong>
+            </span>
+
+            <button type="button"
+                    id="tripiAssistantClearContext"
+                    class="tripi-context-clear"
+                    aria-label="Bỏ chọn tour đang xem"
+                    title="Bỏ chọn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+        @* Khu vực tin nhắn *@
+        <div id="tripiAssistantMessages"
+             class="tripi-assistant-messages"
+             role="log"
+             aria-label="Nội dung cuộc trò chuyện với Tripi"
+             aria-live="polite"
+             aria-relevant="additions text">
+
+            @* Lời chào đầu tiên *@
+            <div class="tripi-assistant-message tripi-assistant-message-ai"
+                 data-tripi-initial-message>
+
+                <span class="tripi-assistant-message-avatar">
+                    <img src="~/img/tripi/tripi-fox.png"
+                         alt="Tripi" />
+                </span>
+
+                <div class="tripi-assistant-message-content">
+
+                    <span class="tripi-assistant-message-name">
+                        Tripi
+                        <i class="fa-solid fa-sparkles"
+                           aria-hidden="true"></i>
+                    </span>
+
+                    <div class="tripi-assistant-message-bubble">
+                        <p>
+                            Xin chàooo! 🦊✨
+                            Mình là Tripi, người bạn đồng hành
+                            du lịch của bạn tại HappyTrip.
+                        </p>
+
+                        <p>
+                            Bạn đang muốn đi đâu?
+                            Cứ kể mình nghe, mình sẽ giúp bạn
+                            khám phá những tour phù hợp nhé!
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            @* Khối bắt đầu cuộc trò chuyện *@
+            <section id="tripiAssistantWelcome"
+                     class="tripi-assistant-welcome"
+                     aria-label="Câu hỏi gợi ý">
+
+                <div class="tripi-assistant-welcome-title">
+                    <span>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        KHÁM PHÁ CÙNG TRIPI
+                    </span>
+
+                    <h3>Hôm nay bạn muốn đi đâu?</h3>
+
+                    <p>
+                        Bắt đầu bằng một ý tưởng nhỏ.
+                        Tripi sẽ giúp bạn tìm hành trình phù hợp.
+                    </p>
+                </div>
+                
+            <div class="tripi-assistant-suggestions">
+
+                <!-- Gợi ý 1: Tây Ninh -->
+                <button type="button"
+                        class="tripi-assistant-suggestion"
+                        data-tripi-suggestion="Mình muốn khám phá tour Tây Ninh, thích văn hóa và lịch sử, ngân sách tối đa 3 triệu đồng, thời gian tối đa 3 ngày.">
+
+                    <span class="tripi-suggestion-emoji">
+                        🗺️
+                    </span>
+
+                    <span>
+                        <strong>Khám phá Tây Ninh</strong>
+                    </span>
+
+                </button>
+
+                <!-- Gợi ý 2: Biển đảo -->
+                <button type="button"
+                        class="tripi-assistant-suggestion"
+                        data-tripi-suggestion="Mình muốn tìm tour du lịch biển đảo, thời gian khoảng 2 đến 3 ngày.">
+
+                    <span class="tripi-suggestion-emoji">
+                        🏝️
+                    </span>
+
+                    <span>
+                        <strong>Du lịch biển đảo</strong>
+                    </span>
+
+                </button>
+
+                <!-- Gợi ý 3: Văn hóa lịch sử -->
+                <button type="button"
+                        class="tripi-assistant-suggestion"
+                        data-tripi-suggestion="Mình muốn tìm tour du lịch văn hóa và lịch sử. Hãy gợi ý những tour phù hợp cho mình nhé.">
+
+                    <span class="tripi-suggestion-emoji">
+                        🏛️
+                    </span>
+
+                    <span>
+                        <strong>Văn hóa – lịch sử</strong>
+                    </span>
+
+                </button>
+
+                <!-- Gợi ý 4: Ngân sách -->
+                <button type="button"
+                        class="tripi-assistant-suggestion"
+                        data-tripi-suggestion="Mình muốn tìm tour phù hợp ngân sách. Hãy hỏi mình mức chi tiêu, thời gian và sở thích trước khi gợi ý nhé.">
+
+                    <span class="tripi-suggestion-emoji">
+                        💰
+                    </span>
+
+                    <span>
+                        <strong>Tour theo ngân sách</strong>
+                    </span>
+
+                </button>
+
+            </div>
+
+            </section>
+
+            @* Trạng thái AI đang trả lời *@
+            <div id="tripiAssistantTyping"
+                 class="tripi-assistant-typing"
+                 role="status"
+                 aria-label="Tripi đang suy nghĩ"
+                 hidden>
+
+                <span class="tripi-assistant-message-avatar">
+                    <img src="~/img/tripi/tripi-fox.png"
+                         alt="" />
+                </span>
+
+                <span class="tripi-assistant-typing-bubble">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+
+                <small>Tripi đang khám phá...</small>
+
+            </div>
+
+        </div>
+
+        @* Khu vực kết quả tour từ Matching Score *@
+        <section id="tripiAssistantResults"
+                 class="tripi-assistant-results"
+                 aria-label="Tour HappyTrip phù hợp"
+                 hidden>
+
+            <div class="tripi-assistant-results-header">
+
+                <div>
+                    <span class="tripi-results-kicker">
+                        <i class="fa-solid fa-sparkles"></i>
+                        GỢI Ý CHO BẠN
+                    </span>
+
+                    <h3>Hành trình phù hợp</h3>
+                </div>
+
+                <button type="button"
+                        id="tripiAssistantCollapseResults"
+                        class="tripi-assistant-icon-button"
+                        aria-label="Thu gọn kết quả tour"
+                        aria-expanded="true">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+
+            </div>
+
+            <div id="tripiAssistantTourList"
+                 class="tripi-assistant-tour-list"
+                 aria-live="polite">
+            </div>
+
+        </section>
+
+        @* Ô nhập tin nhắn *@
+        <div class="tripi-assistant-composer">
+
+            <div id="tripiAssistantError"
+                 class="tripi-assistant-error"
+                 role="alert"
+                 hidden></div>
+
+            <form id="tripiAssistantForm"
+                  autocomplete="off">
+
+                @Html.AntiForgeryToken()
+
+                <label for="tripiAssistantInput"
+                       class="tripi-assistant-visually-hidden">
+                    Nhập câu hỏi gửi Tripi
+                </label>
+
+                <div class="tripi-assistant-input-wrap">
+
+                    <textarea id="tripiAssistantInput"
+                              name="message"
+                              rows="2"
+                              maxlength="1000"
+                              placeholder="Hỏi Tripi về chuyến đi của bạn..."
+                              required></textarea>
+
+                    <button type="submit"
+                            id="tripiAssistantSend"
+                            class="tripi-assistant-send"
+                            aria-label="Gửi tin nhắn">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+
+                </div>
+
+                <div class="tripi-assistant-input-help">
+                    <span>
+                        <i class="fa-solid fa-keyboard"></i>
+                        Enter gửi · Shift+Enter xuống dòng
+                    </span>
+
+                    <span id="tripiAssistantCount">
+                        0/1000
+                    </span>
+                </div>
+
+            </form>
+
+            <div class="tripi-assistant-footer-links">
+
+                <span>
+                    <i class="fa-solid fa-shield-heart"></i>
+                    AI dựa trên dữ liệu HappyTrip
+                </span>
+
+                <a href="/tripi-chat">
+                    Mở toàn màn hình
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+</div>

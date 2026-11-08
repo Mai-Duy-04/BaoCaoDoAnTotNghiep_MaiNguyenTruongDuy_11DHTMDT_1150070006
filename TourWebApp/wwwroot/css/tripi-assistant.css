@@ -1,0 +1,2093 @@
+/* ==========================================================
+   HAPPYTRIP - TRIPI AI ASSISTANT
+   File: wwwroot/css/tripi-assistant.css
+
+   Phong cách: Modern AI Travel Companion
+   Mau chu dao: Forest Green / Cream / Fox Orange
+
+   Trang thai mo: .tripi-assistant.is-open
+   Trang thai loading: .tripi-assistant.is-loading
+   ========================================================== */
+
+/* ===== 1. DESIGN TOKENS ===== */
+
+.tripi-assistant {
+    --tripi-green: #244c3b;
+    --tripi-green-dark: #193a2c;
+    --tripi-green-light: #eaf3ec;
+
+    --tripi-orange: #f49a46;
+    --tripi-orange-dark: #d87628;
+    --tripi-orange-light: #fff0dd;
+
+    --tripi-cream: #fffaf3;
+    --tripi-surface: #ffffff;
+    --tripi-surface-soft: #f8faf7;
+
+    --tripi-text: #26362f;
+    --tripi-muted: #78867c;
+    --tripi-border: #e5eae3;
+
+    --tripi-shadow:
+        0 20px 65px rgba(25, 58, 44, 0.15);
+
+    --tripi-ease: cubic-bezier(.22, 1, .36, 1);
+    --tripi-width: 440px;
+
+    font-family: inherit;
+    color: var(--tripi-text);
+    position: relative;
+    z-index: 1050;
+}
+
+.tripi-assistant,
+.tripi-assistant * {
+    box-sizing: border-box;
+}
+
+.tripi-assistant [hidden] {
+    display: none !important;
+}
+
+.tripi-assistant button {
+    font-family: inherit;
+}
+
+.tripi-assistant button:focus-visible,
+.tripi-assistant a:focus-visible,
+.tripi-assistant textarea:focus-visible {
+    outline: 3px solid rgba(244, 154, 70, .75);
+    outline-offset: 3px;
+}
+
+.tripi-assistant-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* ===== 2. FLOATING LAUNCHER ===== */
+
+.tripi-assistant-launcher {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    z-index: 1052;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-height: 68px;
+    padding: 8px 20px 8px 8px;
+
+    border: 1px solid rgba(255,255,255,.32);
+    border-radius: 100px;
+
+    background: linear-gradient(
+        135deg,
+        #245640 0%,
+        #193c2d 100%
+    );
+
+    color: #fff;
+    cursor: pointer;
+    overflow: visible;
+
+    box-shadow:
+        0 12px 35px rgba(25,58,44,.28),
+        0 4px 12px rgba(25,58,44,.12);
+
+    transition:
+        transform .3s var(--tripi-ease),
+        box-shadow .3s ease,
+        opacity .3s ease;
+}
+
+.tripi-assistant-launcher:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 18px 45px rgba(25,58,44,.34),
+        0 6px 18px rgba(25,58,44,.16);
+}
+
+.tripi-assistant-launcher:active {
+    transform: translateY(-1px) scale(.98);
+}
+
+.tripi-launcher-glow {
+    position: absolute;
+    inset: -5px;
+    z-index: -1;
+
+    border: 2px solid rgba(244,154,70,.28);
+    border-radius: inherit;
+
+    animation: tripiGlow 3.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.tripi-launcher-mascot {
+    position: relative;
+    display: grid;
+    place-items: center;
+
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        #fff5df,
+        #ffe2b5
+    );
+
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.65);
+}
+
+.tripi-launcher-mascot img {
+    display: block;
+    width: 48px;
+    height: 48px;
+
+    object-fit: contain;
+
+    animation: tripiFoxFloat 3.2s ease-in-out infinite;
+}
+
+.tripi-launcher-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+.tripi-launcher-text strong {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .1px;
+    line-height: 1.2;
+}
+
+.tripi-launcher-text small {
+    color: #dceae0;
+    font-size: 10px;
+    letter-spacing: .4px;
+}
+
+.tripi-launcher-sparkle {
+    position: absolute;
+    top: -8px;
+    right: 13px;
+
+    display: grid;
+    place-items: center;
+
+    width: 27px;
+    height: 27px;
+
+    border-radius: 50%;
+    background: var(--tripi-orange);
+    color: #fff;
+    font-size: 12px;
+
+    box-shadow: 0 4px 12px rgba(244,154,70,.35);
+
+    animation: tripiTwinkle 2.5s ease-in-out infinite;
+}
+
+/* Font Awesome 6 Free does not provide fa-sparkles
+   consistently. Keep a visible sparkle fallback. */
+.tripi-launcher-sparkle .fa-sparkles::before,
+.tripi-assistant-message-name .fa-sparkles::before,
+.tripi-results-kicker .fa-sparkles::before {
+    content: "\2728";
+    font-family: sans-serif;
+}
+
+/* Hide launcher while panel is open */
+
+.tripi-assistant.is-open .tripi-assistant-launcher {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(14px);
+}
+
+/* ===== 3. BACKDROP ===== */
+
+.tripi-assistant-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1053;
+
+    background: rgba(12,32,22,.25);
+    backdrop-filter: blur(2px);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity .3s ease,
+        visibility .3s ease;
+}
+
+/* Only the mobile layout uses the backdrop. */
+
+/* ===== 4. MAIN PANEL ===== */
+
+.tripi-assistant-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    z-index: 1054;
+
+    display: flex;
+    flex-direction: column;
+
+    width: min(var(--tripi-width), 100vw);
+    height: 100vh;
+    height: 100dvh;
+
+    overflow: hidden;
+
+    border-right: 1px solid rgba(36,76,59,.1);
+
+    background:
+        radial-gradient(
+            circle at 15% 3%,
+            rgba(255,230,196,.36),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            #fffdf9 0%,
+            #ffffff 45%,
+            #f9fbf8 100%
+        );
+
+    box-shadow: var(--tripi-shadow);
+
+    transform: translateX(calc(-100% - 30px));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        transform .5s var(--tripi-ease),
+        opacity .3s ease,
+        visibility .5s ease;
+}
+
+.tripi-assistant.is-open .tripi-assistant-panel {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.tripi-assistant-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+
+    background: linear-gradient(
+        90deg,
+        var(--tripi-green),
+        #7ca98c,
+        var(--tripi-orange)
+    );
+
+    z-index: 5;
+}
+
+/* ===== 5. HEADER ===== */
+
+.tripi-assistant-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    flex-shrink: 0;
+
+    min-height: 92px;
+    padding: 19px 20px 16px;
+
+    border-bottom: 1px solid var(--tripi-border);
+
+    background: rgba(255,255,255,.83);
+    backdrop-filter: blur(16px);
+}
+
+.tripi-assistant-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.tripi-assistant-brand-avatar {
+    display: grid;
+    place-items: center;
+
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+
+    border-radius: 18px;
+
+    background: linear-gradient(
+        145deg,
+        #fff0d8,
+        #ffe0b5
+    );
+
+    box-shadow:
+        0 5px 15px rgba(244,154,70,.16),
+        inset 0 1px 2px rgba(255,255,255,.9);
+}
+
+.tripi-assistant-brand-avatar img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.tripi-assistant-brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.tripi-assistant-brand-info strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--tripi-green-dark);
+}
+
+.tripi-assistant-ai-badge {
+    padding: 4px 7px;
+
+    border: 1px solid #ffd5a5;
+    border-radius: 7px;
+
+    background: #fff0dd;
+    color: #bd671f;
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .7px;
+}
+
+.tripi-assistant-brand-info small {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: var(--tripi-muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.tripi-assistant-online-dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+
+    border-radius: 50%;
+    background: #4ab579;
+    box-shadow: 0 0 0 3px rgba(74,181,121,.13);
+}
+
+.tripi-assistant-header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.tripi-assistant-icon-button {
+    display: grid;
+    place-items: center;
+
+    width: 35px;
+    height: 35px;
+
+    border: 1px solid var(--tripi-border);
+    border-radius: 11px;
+
+    background: #fff;
+    color: var(--tripi-green);
+
+    font-size: 14px;
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+.tripi-assistant-icon-button:hover {
+    background: var(--tripi-green-light);
+    transform: translateY(-2px);
+}
+
+.tripi-assistant-close:hover {
+    background: #fff0ed;
+    color: #c35242;
+}
+
+/* ===== 6. CONTEXT BAR ===== */
+
+.tripi-assistant-page-context {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin: 12px 18px 0;
+    padding: 11px 12px;
+
+    flex-shrink: 0;
+
+    border: 1px solid #dce9dc;
+    border-radius: 14px;
+
+    background: linear-gradient(
+        110deg,
+        #eff7ef,
+        #fff8ed
+    );
+
+    animation: tripiFadeUp .35s ease both;
+}
+
+.tripi-context-icon {
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+
+    border-radius: 11px;
+
+    background: #dceee0;
+    color: var(--tripi-green);
+    font-size: 14px;
+}
+
+.tripi-context-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.tripi-context-text small {
+    color: var(--tripi-muted);
+    font-size: 10px;
+}
+
+.tripi-context-text strong {
+    font-size: 12px;
+    color: var(--tripi-green-dark);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tripi-context-clear {
+    display: grid;
+    place-items: center;
+
+    width: 26px;
+    height: 26px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+    color: #789080;
+
+    cursor: pointer;
+}
+
+.tripi-context-clear:hover {
+    background: #dceee0;
+    color: var(--tripi-green-dark);
+}
+
+/* ===== 7. CHAT MESSAGES AREA ===== */
+
+.tripi-assistant-messages {
+    flex: 1;
+    min-height: 0;
+
+    padding: 23px 19px 28px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+
+    scrollbar-width: thin;
+    scrollbar-color: #c9d6cc transparent;
+}
+
+.tripi-assistant-messages::-webkit-scrollbar,
+.tripi-assistant-tour-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tripi-assistant-messages::-webkit-scrollbar-thumb,
+.tripi-assistant-tour-list::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background: #c9d6cc;
+}
+
+/* ===== 8. CHAT BUBBLES ===== */
+
+.tripi-assistant-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    width: 100%;
+    margin-bottom: 20px;
+
+    animation: tripiMessageIn .4s var(--tripi-ease) both;
+}
+
+.tripi-assistant-message-avatar {
+    display: grid;
+    place-items: center;
+
+    width: 33px;
+    height: 33px;
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background: linear-gradient(
+        135deg,
+        #fff0da,
+        #ffe2be
+    );
+}
+
+.tripi-assistant-message-avatar img {
+    width: 31px;
+    height: 31px;
+    object-fit: contain;
+}
+
+.tripi-assistant-message-content {
+    max-width: calc(100% - 43px);
+    min-width: 0;
+}
+
+.tripi-assistant-message-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    margin: 0 0 7px 3px;
+
+    color: var(--tripi-green);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.tripi-assistant-message-name i {
+    color: var(--tripi-orange);
+    font-size: 11px;
+}
+
+.tripi-assistant-message-bubble {
+    padding: 14px 16px;
+
+    border: 1px solid #e7ede6;
+    border-radius: 5px 19px 19px 19px;
+
+    background: #fff;
+
+    box-shadow: 0 5px 18px rgba(39,64,47,.045);
+
+    color: #344039;
+    font-size: 13px;
+    line-height: 1.75;
+
+    overflow-wrap: anywhere;
+}
+
+.tripi-assistant-message-bubble p {
+    margin: 0 0 10px;
+}
+
+.tripi-assistant-message-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.tripi-assistant-message-bubble strong {
+    color: var(--tripi-green-dark);
+    font-weight: 800;
+}
+
+.tripi-assistant-message-bubble ul,
+.tripi-assistant-message-bubble ol {
+    padding-left: 19px;
+    margin: 8px 0 10px;
+}
+
+.tripi-assistant-message-bubble li {
+    margin-bottom: 5px;
+}
+
+.tripi-assistant-message-user {
+    justify-content: flex-end;
+}
+
+.tripi-assistant-message-user .tripi-assistant-message-content {
+    max-width: 88%;
+}
+
+.tripi-assistant-message-user .tripi-assistant-message-bubble {
+    border: none;
+    border-radius: 19px 19px 5px 19px;
+
+    background: linear-gradient(
+        135deg,
+        #285741,
+        #1d4432
+    );
+
+    color: #fff;
+
+    box-shadow: 0 5px 15px rgba(29,68,50,.13);
+}
+
+.tripi-assistant-message-user .tripi-assistant-message-bubble strong {
+    color: #fff5d7;
+}
+
+/* Optional source citations rendered by JS */
+
+.tripi-assistant-source {
+    margin-top: 10px;
+    padding: 9px 11px;
+
+    border: 1px solid #e2ece2;
+    border-radius: 11px;
+
+    background: #f7faf5;
+
+    color: #53725d;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* ===== 9. WELCOME SUGGESTIONS ===== */
+
+.tripi-assistant-welcome {
+    margin: 12px 0 10px;
+    animation: tripiFadeUp .45s ease both;
+}
+
+.tripi-assistant-welcome-title {
+    padding: 5px 3px 16px;
+}
+
+.tripi-assistant-welcome-title > span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-bottom: 10px;
+
+    color: var(--tripi-orange-dark);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.tripi-assistant-welcome-title h3 {
+    margin: 0 0 8px;
+
+    color: var(--tripi-green-dark);
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.tripi-assistant-welcome-title p {
+    margin: 0;
+
+    color: var(--tripi-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.tripi-assistant-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.tripi-assistant-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    padding: 13px;
+
+    border: 1px solid #e5ebe3;
+    border-radius: 16px;
+
+    background: #fff;
+    color: var(--tripi-text);
+
+    text-align: left;
+    cursor: pointer;
+
+    box-shadow: 0 3px 12px rgba(26,57,38,.025);
+
+    transition:
+        border-color .25s ease,
+        background .25s ease,
+        transform .25s var(--tripi-ease),
+        box-shadow .25s ease;
+}
+
+.tripi-assistant-suggestion:hover {
+    transform: translateX(4px);
+
+    border-color: #b9d7c1;
+    background: #f8fcf8;
+
+    box-shadow: 0 8px 20px rgba(26,57,38,.065);
+}
+
+.tripi-suggestion-emoji {
+    display: grid;
+    place-items: center;
+
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+
+    border-radius: 13px;
+    background: #fff2de;
+    font-size: 21px;
+}
+
+.tripi-assistant-suggestion:nth-child(2) .tripi-suggestion-emoji {
+    background: #e5f3f3;
+}
+
+.tripi-assistant-suggestion:nth-child(3) .tripi-suggestion-emoji {
+    background: #eaf0ff;
+}
+
+.tripi-assistant-suggestion > span:nth-child(2) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.tripi-assistant-suggestion strong {
+    color: var(--tripi-green-dark);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.tripi-assistant-suggestion small {
+    color: var(--tripi-muted);
+    font-size: 11px;
+}
+
+.tripi-assistant-suggestion > i {
+    color: #98aa9b;
+    font-size: 11px;
+}
+
+/* ===== 10. TYPING INDICATOR ===== */
+
+.tripi-assistant-typing {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin: 10px 0 18px;
+
+    animation: tripiFadeUp .3s ease both;
+}
+
+.tripi-assistant-typing-bubble {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    min-height: 37px;
+    padding: 10px 14px;
+
+    border: 1px solid #e8eee6;
+    border-radius: 5px 16px 16px 16px;
+
+    background: #fff;
+}
+
+.tripi-assistant-typing-bubble span {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+    background: #90b49c;
+
+    animation: tripiTypingBounce 1.1s infinite ease-in-out;
+}
+
+.tripi-assistant-typing-bubble span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.tripi-assistant-typing-bubble span:nth-child(3) {
+    animation-delay: .3s;
+}
+
+.tripi-assistant-typing > small {
+    color: var(--tripi-muted);
+    font-size: 10px;
+}
+
+/* ===== 11. TOUR RECOMMENDATIONS ===== */
+
+.tripi-assistant-results {
+    flex-shrink: 0;
+
+    padding: 14px 18px;
+
+    border-top: 1px solid #e6ebe4;
+
+    background: linear-gradient(
+        180deg,
+        #f7fbf6,
+        #fffdfa
+    );
+
+    animation: tripiFadeUp .35s ease both;
+}
+
+.tripi-assistant-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.tripi-results-kicker {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: var(--tripi-orange-dark);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.tripi-assistant-results-header h3 {
+    margin: 5px 0 0;
+
+    color: var(--tripi-green-dark);
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.tripi-assistant-tour-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    max-height: min(290px, 34vh);
+    overflow-y: auto;
+
+    padding-right: 3px;
+
+    scrollbar-width: thin;
+}
+
+.tripi-assistant-tour-card {
+    display: flex;
+    gap: 11px;
+
+    padding: 10px;
+
+    border: 1px solid #e3eae1;
+    border-radius: 16px;
+
+    background: #fff;
+
+    box-shadow: 0 5px 15px rgba(35,70,47,.04);
+
+    animation: tripiFadeUp .4s ease both;
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        border-color .25s ease;
+}
+
+.tripi-assistant-tour-card:hover {
+    transform: translateY(-3px);
+    border-color: #bed5c2;
+    box-shadow: 0 12px 25px rgba(35,70,47,.11);
+}
+
+.tripi-assistant-tour-image {
+    width: 90px;
+    height: 100px;
+    flex-shrink: 0;
+
+    border-radius: 11px;
+    background: #eaf1e9;
+
+    object-fit: cover;
+}
+
+.tripi-assistant-tour-info {
+    flex: 1;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tripi-assistant-tour-name {
+    display: -webkit-box;
+    overflow: hidden;
+
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+
+    color: var(--tripi-green-dark);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+.tripi-assistant-tour-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+
+    color: var(--tripi-muted);
+    font-size: 10px;
+}
+
+.tripi-assistant-tour-price {
+    color: #c9752d;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.tripi-assistant-tour-score {
+    align-self: flex-start;
+
+    padding: 4px 8px;
+
+    border-radius: 8px;
+
+    background: #e8f5e9;
+    color: #267048;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.tripi-assistant-tour-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+}
+
+.tripi-assistant-tour-actions a,
+.tripi-assistant-tour-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    padding: 7px 9px;
+
+    border: 1px solid #d6e6d9;
+    border-radius: 8px;
+
+    background: #f3faf3;
+    color: var(--tripi-green);
+
+    text-decoration: none;
+
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        color .2s ease;
+}
+
+.tripi-assistant-tour-actions a:hover,
+.tripi-assistant-tour-actions button:hover {
+    background: var(--tripi-green);
+    color: #fff;
+}
+
+/* ===== 12. COMPOSER ===== */
+
+.tripi-assistant-composer {
+    position: relative;
+    flex-shrink: 0;
+
+    padding: 14px 17px 15px;
+
+    border-top: 1px solid var(--tripi-border);
+
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(14px);
+}
+
+.tripi-assistant-composer form {
+    margin: 0;
+}
+
+.tripi-assistant-input-wrap {
+    position: relative;
+
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+
+    padding: 10px 11px 10px 15px;
+
+    border: 1.5px solid #d9e4da;
+    border-radius: 18px;
+
+    background: #fff;
+
+    box-shadow: 0 4px 18px rgba(31,66,43,.04);
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.tripi-assistant-input-wrap:focus-within {
+    border-color: #81b391;
+
+    box-shadow:
+        0 0 0 4px rgba(93,156,111,.10),
+        0 6px 18px rgba(31,66,43,.055);
+}
+
+.tripi-assistant-input-wrap textarea {
+    flex: 1;
+    min-width: 0;
+
+    width: 100%;
+    min-height: 40px;
+    max-height: 125px;
+
+    padding: 7px 0;
+
+    border: 0;
+    outline: 0 !important;
+    box-shadow: none !important;
+
+    background: transparent;
+
+    color: var(--tripi-text);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+
+    resize: none;
+    overflow-y: auto;
+}
+
+.tripi-assistant-input-wrap textarea::placeholder {
+    color: #9ba79d;
+}
+
+.tripi-assistant-send {
+    display: grid;
+    place-items: center;
+
+    width: 41px;
+    height: 41px;
+    flex-shrink: 0;
+
+    border: 0;
+    border-radius: 13px;
+
+    background: linear-gradient(
+        135deg,
+        #2d644a,
+        #1f4835
+    );
+
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+
+    box-shadow: 0 5px 14px rgba(31,72,53,.16);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        opacity .2s ease;
+}
+
+.tripi-assistant-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(31,72,53,.22);
+}
+
+.tripi-assistant-send:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.tripi-assistant-input-help {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 8px;
+    padding: 0 4px;
+
+    color: #9aa69c;
+    font-size: 10px;
+}
+
+.tripi-assistant-input-help i {
+    margin-right: 4px;
+}
+
+.tripi-assistant-footer-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-top: 12px;
+    padding: 0 3px;
+
+    font-size: 10px;
+}
+
+.tripi-assistant-footer-links > span {
+    color: #8c9c8e;
+}
+
+.tripi-assistant-footer-links > span i {
+    margin-right: 4px;
+    color: #74a384;
+}
+
+.tripi-assistant-footer-links a {
+    color: var(--tripi-green);
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.tripi-assistant-footer-links a:hover {
+    color: var(--tripi-orange-dark);
+}
+
+.tripi-assistant-footer-links a i {
+    margin-left: 3px;
+    font-size: 9px;
+}
+
+/* ===== 13. ERRORS / LOADING ===== */
+
+.tripi-assistant-error {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+
+    border: 1px solid #f7d0c8;
+    border-radius: 11px;
+
+    background: #fff2ef;
+    color: #a94434;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.tripi-assistant.is-loading .tripi-assistant-send {
+    opacity: .55;
+    pointer-events: none;
+}
+
+.tripi-assistant.is-loading .tripi-assistant-brand-avatar img {
+    animation: tripiFoxFloat 2.1s ease-in-out infinite;
+}
+
+/* ===== 14. ANIMATIONS ===== */
+
+@keyframes tripiFoxFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(-2deg);
+    }
+
+    50% {
+        transform: translateY(-4px) rotate(3deg);
+    }
+}
+
+@keyframes tripiTwinkle {
+    0%, 100% {
+        transform: scale(1) rotate(-12deg);
+        opacity: .85;
+    }
+
+    50% {
+        transform: scale(1.18) rotate(10deg);
+        opacity: 1;
+    }
+}
+
+@keyframes tripiGlow {
+    0%, 100% {
+        opacity: .25;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: .65;
+        transform: scale(1.035);
+    }
+}
+
+@keyframes tripiFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes tripiMessageIn {
+    from {
+        opacity: 0;
+        transform: translateY(9px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes tripiTypingBounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: .55;
+    }
+
+    30% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+
+/* ===== 15. RESPONSIVE ===== */
+
+@media (max-width: 991.98px) {
+    .tripi-assistant-launcher {
+        right: 18px;
+        bottom: 18px;
+    }
+
+    .tripi-assistant.is-open .tripi-assistant-backdrop {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .tripi-assistant {
+        --tripi-width: 100vw;
+    }
+
+    .tripi-assistant-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .tripi-assistant-header {
+        padding: 15px 14px 12px;
+        min-height: 78px;
+    }
+
+    .tripi-assistant-brand-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 14px;
+    }
+
+    .tripi-assistant-brand-avatar img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .tripi-assistant-brand-info strong {
+        font-size: 19px;
+    }
+
+    .tripi-assistant-brand-info small {
+        font-size: 10px;
+    }
+
+    .tripi-assistant-messages {
+        padding: 17px 13px 21px;
+    }
+
+    .tripi-assistant-message-bubble {
+        padding: 12px 13px;
+    }
+
+    .tripi-assistant-results {
+        padding: 12px 13px;
+    }
+
+    .tripi-assistant-composer {
+        padding: 11px 12px max(12px, env(safe-area-inset-bottom));
+    }
+
+    .tripi-assistant-launcher {
+        right: 15px;
+        bottom: max(15px, env(safe-area-inset-bottom));
+
+        min-height: 60px;
+        padding: 6px 16px 6px 6px;
+    }
+
+    .tripi-launcher-mascot {
+        width: 46px;
+        height: 46px;
+    }
+
+    .tripi-launcher-mascot img {
+        width: 43px;
+        height: 43px;
+    }
+
+    .tripi-launcher-text strong {
+        font-size: 13px;
+    }
+
+    .tripi-launcher-text small {
+        font-size: 9px;
+    }
+}
+
+/* Small laptop heights */
+
+@media (max-height: 650px) {
+    .tripi-assistant-header {
+        min-height: 74px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .tripi-assistant-tour-list {
+        max-height: 180px;
+    }
+
+    .tripi-assistant-messages {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .tripi-assistant-composer {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+/* Accessibility: reduce animation when requested */
+
+@media (prefers-reduced-motion: reduce) {
+    .tripi-assistant,
+    .tripi-assistant *,
+    .tripi-assistant *::before,
+    .tripi-assistant *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==================================================
+   TRIPI AI - COMPACT UI FIX
+   Goi gon sidebar, tranh CSS chung anh huong
+   ================================================== */
+
+.tripi-assistant-panel {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.tripi-assistant-panel .tripi-assistant-brand-info strong {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.tripi-assistant-panel .tripi-assistant-brand-info small {
+    font-size: 11px;
+}
+
+.tripi-assistant-panel .tripi-assistant-message-name {
+    font-size: 11px;
+}
+
+.tripi-assistant-panel .tripi-assistant-message-bubble,
+.tripi-assistant-panel .tripi-assistant-message-bubble p,
+.tripi-assistant-panel .tripi-assistant-message-bubble li {
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.tripi-assistant-panel .tripi-assistant-welcome-title h3 {
+    font-size: 19px;
+    line-height: 1.3;
+}
+
+.tripi-assistant-panel .tripi-assistant-welcome-title p {
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.tripi-assistant-panel .tripi-assistant-suggestion {
+    min-height: 65px;
+    padding: 10px 12px;
+}
+
+.tripi-assistant-panel .tripi-assistant-suggestion strong {
+    font-size: 12px;
+}
+
+.tripi-assistant-panel .tripi-assistant-suggestion small {
+    font-size: 10px;
+}
+
+.tripi-assistant-panel .tripi-assistant-messages {
+    padding: 16px;
+}
+
+.tripi-assistant-panel .tripi-assistant-message {
+    margin-bottom: 14px;
+}
+
+.tripi-assistant-panel .tripi-assistant-composer {
+    padding: 12px 15px;
+}
+
+.tripi-assistant-panel .tripi-assistant-input-wrap textarea {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.tripi-assistant-panel .tripi-assistant-input-help,
+.tripi-assistant-panel .tripi-assistant-footer-links {
+    font-size: 10px;
+}
+
+/* Nút nổi gọn hơn, ít che nội dung */
+
+.tripi-assistant-launcher {
+    min-height: 60px;
+    padding: 6px 16px 6px 6px;
+    gap: 9px;
+}
+
+.tripi-launcher-mascot {
+    width: 46px;
+    height: 46px;
+}
+
+.tripi-launcher-mascot img {
+    width: 43px;
+    height: 43px;
+}
+
+.tripi-launcher-text strong {
+    font-size: 13px;
+}
+
+.tripi-launcher-text small {
+    font-size: 9px;
+}
+
+/* ===== TRIPI POPUP - FIX LAUNCHER VA PANEL ===== */
+
+/* Nút cáo nhỏ nằm góc phải */
+#tripiAssistant #tripiAssistantLauncher {
+    position: fixed !important;
+    right: 22px !important;
+    bottom: 22px !important;
+    left: auto !important;
+    top: auto !important;
+
+    width: auto !important;
+    max-width: 190px !important;
+    min-height: 58px !important;
+    padding: 6px 14px 6px 6px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+
+    border-radius: 99px !important;
+    z-index: 1052 !important;
+}
+
+#tripiAssistant #tripiAssistantLauncher
+.tripi-launcher-mascot {
+    display: grid !important;
+    place-items: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    flex: 0 0 44px !important;
+}
+
+#tripiAssistant #tripiAssistantLauncher
+.tripi-launcher-mascot img {
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    object-fit: contain !important;
+}
+
+#tripiAssistant #tripiAssistantLauncher
+.tripi-launcher-text strong {
+    font-size: 13px !important;
+}
+
+#tripiAssistant #tripiAssistantLauncher
+.tripi-launcher-text small {
+    font-size: 9px !important;
+}
+
+/* Popup ban đầu luôn ẩn */
+#tripiAssistant #tripiAssistantPanel {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    width: min(440px, 100vw) !important;
+    height: 100dvh !important;
+
+    transform: translateX(-110%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+
+    overflow: hidden !important;
+    z-index: 1054 !important;
+}
+
+/* Chỉ mở khi người dùng bấm nút cáo */
+#tripiAssistant.is-open #tripiAssistantPanel {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* Khi popup mở, ẩn nút nổi */
+#tripiAssistant.is-open #tripiAssistantLauncher {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Không để hình cáo trong header phóng to */
+#tripiAssistant .tripi-assistant-brand-avatar img,
+#tripiAssistant .tripi-assistant-message-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    object-fit: contain !important;
+}
+
+/* Giữ ô nhập và các nút đúng kích thước */
+#tripiAssistant .tripi-assistant-input-wrap {
+    display: flex !important;
+    align-items: flex-end !important;
+}
+
+#tripiAssistant #tripiAssistantInput {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+#tripiAssistant #tripiAssistantSend {
+    flex: 0 0 41px !important;
+    width: 41px !important;
+    height: 41px !important;
+}
+
+/* Mobile */
+@media (max-width: 575px) {
+    #tripiAssistant #tripiAssistantPanel {
+        width: 100vw !important;
+    }
+
+    #tripiAssistant #tripiAssistantLauncher {
+        right: 14px !important;
+        bottom: 14px !important;
+    }
+}
+
+
+/* ==================================================
+   TRIPI POPUP - COMPACT FINAL LAYOUT
+   Chi ap dung cho popup, khong anh huong trang lon
+   ================================================== */
+
+/* 1. Kich thuoc popup */
+#tripiAssistant {
+    --tripi-width: 400px;
+}
+
+#tripiAssistant #tripiAssistantPanel {
+    width: min(400px, 100vw) !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+}
+
+/* 2. Header */
+#tripiAssistant .tripi-assistant-header {
+    flex: 0 0 auto;
+    min-height: 68px !important;
+    padding: 10px 14px !important;
+}
+
+#tripiAssistant .tripi-assistant-brand-avatar {
+    width: 43px !important;
+    height: 43px !important;
+}
+
+#tripiAssistant .tripi-assistant-brand-avatar img {
+    width: 39px !important;
+    height: 39px !important;
+}
+
+#tripiAssistant .tripi-assistant-brand-info strong {
+    font-size: 18px !important;
+}
+
+#tripiAssistant .tripi-assistant-brand-info small {
+    font-size: 10px !important;
+}
+
+/* 3. Khu vuc hoi thoai */
+#tripiAssistant #tripiAssistantMessages {
+    display: flex !important;
+    flex-direction: column;
+
+    flex: 1 1 auto;
+    min-height: 0 !important;
+
+    padding: 10px !important;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Khong hien bong bong chao bi lap */
+#tripiAssistant:has(
+    #tripiAssistantWelcome:not([hidden])
+) [data-tripi-initial-message] {
+    display: none !important;
+}
+
+/* Man hinh chao khong cuon */
+#tripiAssistant
+#tripiAssistantMessages:has(
+    #tripiAssistantWelcome:not([hidden])
+) {
+    overflow-y: hidden !important;
+}
+
+/* 4. Welcome */
+#tripiAssistant
+#tripiAssistantWelcome:not([hidden]) {
+    position: relative !important;
+    isolation: isolate;
+
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 75px 12px 72px !important;
+
+    border: none !important;
+    border-radius: 18px !important;
+
+    background: linear-gradient(
+        180deg,
+        #fcfdf9 0%,
+        #fffaf3 72%,
+        #edf5e7 100%
+    ) !important;
+
+    overflow: hidden !important;
+}
+
+/* Noi dung nam tren sticker */
+#tripiAssistant
+#tripiAssistantWelcome
+> .tripi-3d-scene {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+> :not(.tripi-3d-scene) {
+    position: relative;
+    z-index: 2;
+}
+
+/* 5. Phan tieu de */
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-welcome-title {
+    width: 100% !important;
+    max-width: 340px !important;
+
+    margin: 0 auto 18px !important;
+    padding: 0 !important;
+
+    text-align: center !important;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-welcome-title > span {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    margin: 0 0 10px !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: .4px !important;
+}
+
+/* Sua loi chu tieng Viet bi tach */
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-welcome-title h3 {
+    display: block !important;
+    width: 100% !important;
+
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+
+    font-family: Arial, "Segoe UI", sans-serif !important;
+    font-size: 23px !important;
+    font-weight: 700 !important;
+
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    word-spacing: 0 !important;
+
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+
+    text-align: center !important;
+    text-align-last: center !important;
+
+    color: #203f2d !important;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-welcome-title p {
+    max-width: 315px !important;
+    margin: 0 auto !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+
+    letter-spacing: 0 !important;
+    word-spacing: normal !important;
+    text-align: center !important;
+
+    color: #7e8c80 !important;
+}
+
+/* 6. Bon nut goi y: 2 cot x 2 hang */
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-suggestions {
+    display: grid !important;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+    align-items: stretch;
+
+    width: 100% !important;
+    gap: 9px !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-suggestion {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    grid-column: auto !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+
+    margin: 0 !important;
+    padding: 10px 9px !important;
+    gap: 7px !important;
+
+    border: 1px solid #dce8da !important;
+    border-radius: 14px !important;
+
+    background: rgba(255,255,255,.97) !important;
+
+    text-align: left !important;
+}
+
+/* Khong cho nut cuoi chiem 2 cot */
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-suggestion:last-child {
+    grid-column: auto !important;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-suggestion-emoji {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+
+    background: transparent !important;
+    font-size: 17px !important;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-suggestion strong {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    font-weight: 700 !important;
+}
+
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-suggestion small,
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-assistant-suggestion > i {
+    display: none !important;
+}
+
+/* 7. Sticker mini */
+#tripiAssistant .tripi-3d-mini-camera {
+    top: 10px !important;
+    left: 5% !important;
+    --size: 52px;
+}
+
+#tripiAssistant .tripi-3d-mini-plane {
+    top: 10px !important;
+    right: 5% !important;
+    --size: 60px;
+}
+
+#tripiAssistant .tripi-3d-mini-cloud {
+    top: 28px !important;
+    right: 37% !important;
+    --size: 35px;
+}
+
+#tripiAssistant .tripi-3d-mini-sparkle {
+    top: 62px !important;
+    left: 23% !important;
+    --size: 18px;
+}
+
+/* Nui nam sat day welcome */
+#tripiAssistant
+#tripiAssistantWelcome
+.tripi-3d-landscape {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 65px !important;
+    opacity: .75;
+}
+
+/* 8. O nhap tin nhan */
+#tripiAssistant .tripi-assistant-composer {
+    flex: 0 0 auto !important;
+    padding: 10px 12px !important;
+}
+
+#tripiAssistant .tripi-assistant-input-wrap {
+    padding: 8px 10px !important;
+    border-radius: 18px !important;
+}
+
+#tripiAssistant #tripiAssistantInput {
+    min-height: 35px !important;
+    max-height: 100px !important;
+    font-size: 12px !important;
+}
+
+#tripiAssistant #tripiAssistantSend {
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+}
+
+#tripiAssistant .tripi-assistant-input-help,
+#tripiAssistant .tripi-assistant-footer-links {
+    font-size: 9px !important;
+}
+
+/* 9. Man hinh thap */
+@media (max-height: 750px) {
+    #tripiAssistant
+    #tripiAssistantWelcome:not([hidden]) {
+        padding: 58px 10px 55px !important;
+    }
+
+    #tripiAssistant
+    #tripiAssistantWelcome
+    .tripi-assistant-welcome-title {
+        margin-bottom: 10px !important;
+    }
+
+    #tripiAssistant
+    #tripiAssistantWelcome
+    .tripi-assistant-welcome-title h3 {
+        font-size: 20px !important;
+    }
+
+    #tripiAssistant
+    #tripiAssistantWelcome
+    .tripi-assistant-suggestion {
+        min-height: 45px !important;
+        padding: 7px !important;
+    }
+
+    #tripiAssistant
+    #tripiAssistantWelcome
+    .tripi-3d-landscape {
+        height: 42px !important;
+    }
+}
+
+/* 10. Dien thoai */
+@media (max-width: 575px) {
+    #tripiAssistant {
+        --tripi-width: 100vw;
+    }
+
+    #tripiAssistant #tripiAssistantPanel {
+        width: 100vw !important;
+    }
+
+    #tripiAssistant
+    #tripiAssistantWelcome:not([hidden]) {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+}

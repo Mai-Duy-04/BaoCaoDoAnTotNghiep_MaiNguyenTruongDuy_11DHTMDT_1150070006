@@ -1,595 +1,1443 @@
+
 @model TourWebApp.Data.Models.Tour
 @using TourWebApp.Data.Models
+@using System.Globalization
+
 @{
     ViewData["Title"] = Model.TenTour;
 
+    var today = DateOnly.FromDateTime(DateTime.Today);
+
     var lichList = Model.LichKhoiHanhs
-        .Where(l => l.NgayKhoiHanh >= DateOnly.FromDateTime(DateTime.Today))
+        .Where(l => l.NgayKhoiHanh >= today)
         .OrderBy(l => l.NgayKhoiHanh)
         .ThenBy(l => l.GioKhoiHanh)
         .ToList();
 
     var giaList = Model.TourGiaChiTiets.ToList();
 
-    decimal giaNguoiLon =
-        (decimal)((giaList.FirstOrDefault(g => TourPriceAudience.IsAdult(g.DoiTuong))?.Gia)
-        ?? (Model.GiaKhuyenMai ?? 0));
+    var giaNguoiLon = (decimal)(
+        giaList.FirstOrDefault(g =>
+            TourPriceAudience.IsAdult(g.DoiTuong))?.Gia
+        ?? Model.GiaKhuyenMai
+        ?? 0
+    );
 
-    decimal giaTreEm =
-        (decimal)((giaList.FirstOrDefault(g => TourPriceAudience.IsChild(g.DoiTuong))?.Gia)
-        ?? 0);
+    var giaTreEmChiTiet = giaList.FirstOrDefault(g =>
+        TourPriceAudience.IsChild(g.DoiTuong));
 
-    decimal giaEmBe =
-        (decimal)((giaList.FirstOrDefault(g => TourPriceAudience.IsInfant(g.DoiTuong))?.Gia)
-        ?? 0);
+    var giaEmBeChiTiet = giaList.FirstOrDefault(g =>
+        TourPriceAudience.IsInfant(g.DoiTuong));
 
-    var tourLienQuan = ViewBag.TourLienQuan as List<Tour>;
+    var giaTreEm = (decimal)(giaTreEmChiTiet?.Gia ?? 0);
+    var giaEmBe = (decimal)(giaEmBeChiTiet?.Gia ?? 0);
+
+    var tourLienQuan = ViewBag.TourLienQuan as List<Tour>
+        ?? new List<Tour>();
+
     var idTaiKhoan = Context.Session.GetInt32("IdTaiKhoan");
-    var wishlistIds = ViewBag.WishlistIds as HashSet<int> ?? new HashSet<int>();
+
+    var wishlistIds = ViewBag.WishlistIds as HashSet<int>
+        ?? new HashSet<int>();
+
     var daYeuThich = wishlistIds.Contains(Model.IdTour);
 
-    int ExtractSoNgay(string thoigian)
+    var binhLuans = ViewBag.BinhLuanTour as List<BinhLuanTour>
+        ?? new List<BinhLuanTour>();
+
+    var sortCmt = ViewBag.SortCmt as string ?? "new";
+    var soBinhLuan = ViewBag.BinhLuanCount ?? 0;
+
+    int ExtractSoNgay(string thoiGian)
     {
-        if (string.IsNullOrWhiteSpace(thoigian)) return 0;
+        if (string.IsNullOrWhiteSpace(thoiGian))
+            return 0;
 
-        var so = new string(thoigian.TakeWhile(char.IsDigit).ToArray());
-        if (int.TryParse(so, out var soNgay))
-            return soNgay;
+        var digits = new string(
+            thoiGian.Trim()
+                .TakeWhile(char.IsDigit)
+                .ToArray()
+        );
 
-        return 0;
+        return int.TryParse(digits, out var result)
+            ? result
+            : 0;
     }
 
     var hinhList = (Model.HinhTours ?? new List<HinhTour>())
         .OrderBy(h => h.ThuTu)
-        .Select(h => TourImagePathHelper.NormalizeTourImagePath(h.UrlHinh))
+        .Select(h =>
+            TourImagePathHelper.NormalizeTourImagePath(h.UrlHinh))
         .Where(url => !string.IsNullOrWhiteSpace(url))
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .ToList();
 
-    var hinhDaiDien = TourImagePathHelper.NormalizeTourImagePath(Model.HinhAnh);
+    var hinhDaiDien =
+        TourImagePathHelper.NormalizeTourImagePath(Model.HinhAnh);
+
     var hinhChinh = !string.IsNullOrWhiteSpace(hinhDaiDien)
         ? hinhDaiDien
         : hinhList.FirstOrDefault() ?? "vungtau.jpg";
 
-    if (!hinhList.Contains(hinhChinh, StringComparer.OrdinalIgnoreCase))
+    if (!hinhList.Contains(
+        hinhChinh,
+        StringComparer.OrdinalIgnoreCase))
     {
         hinhList.Insert(0, hinhChinh);
     }
 
-    var lichMacDinh = lichList.FirstOrDefault();
-    var soNgayTour = ExtractSoNgay(Model.ThoiGian ?? string.Empty);
+    var lichMacDinh = lichList
+        .FirstOrDefault(l => l.SoChoConLai > 0)
+        ?? lichList.FirstOrDefault();
 
-    DateOnly? ngayKetThucMacDinh = null;
-    if (lichMacDinh != null && soNgayTour > 0)
+    var soNgayTour = ExtractSoNgay(Model.ThoiGian ?? "");
+
+    var soNgayTimeline = soNgayTour > 0
+        ? Math.Min(soNgayTour, 30)
+        : 0;
+
+    var giaHienThi = Model.GiaKhuyenMai ?? giaNguoiLon;
+
+    var coGiaGoc = Model.GiaGoc.HasValue
+        && Model.GiaGoc.Value > giaHienThi;
+
+    var coLichSapToi = lichList.Any();
+
+    string TenNgay(int index, int total)
     {
-        ngayKetThucMacDinh = lichMacDinh.NgayKhoiHanh.AddDays(soNgayTour - 1);
+        if (total == 1)
+            return "Khởi hành và trải nghiệm";
+
+        if (index == 0)
+            return "Khởi hành và di chuyển";
+
+        if (index == total - 1)
+            return "Kết thúc hành trình";
+
+        return "Tham quan và trải nghiệm";
     }
 
-    var soNgayTimeline = soNgayTour > 0 ? Math.Min(soNgayTour, 7) : 3;
-    var fallbackTitles = new[]
+    string MoTaNgay(int index, int total)
     {
-        "Khởi hành & di chuyển",
-        "Khám phá điểm đến",
-        "Trải nghiệm địa phương",
-        "Mua sắm & thư giãn",
-        "Kết thúc hành trình"
-    };
+        if (total == 1)
+        {
+            return "Khởi hành, tham quan và trải nghiệm theo chương trình tour trong ngày. Chi tiết điểm tham quan sẽ được cập nhật theo lịch trình chính thức.";
+        }
+
+        if (index == 0)
+        {
+            return "Tập trung tại điểm hẹn, khởi hành theo lịch đã chọn và bắt đầu chuyến đi.";
+        }
+
+        if (index == total - 1)
+        {
+            return "Hoàn thành chương trình tham quan và trở về điểm kết thúc hành trình.";
+        }
+
+        return "Tiếp tục tham quan các điểm đến theo chương trình. Chi tiết hoạt động sẽ được cập nhật theo lịch trình chính thức.";
+    }
 }
 
-<link rel="stylesheet" href="~/css/tour-detail.css" asp-append-version="true" />
+<link rel="stylesheet"
+      href="~/css/tour-detail.css"
+      asp-append-version="true" />
 
+<link rel="stylesheet"
+      href="~/css/tour-comments-compact.css"
+      asp-append-version="true" />
+      
 <main class="tour-detail-page">
-    <section class="tour-detail-hero" style="background-image:url('@TourImagePathHelper.ToTourImageSrc(hinhChinh)')">
+
+    <!-- ================================================
+         HERO
+    ================================================= -->
+
+    <section class="tour-detail-hero"
+             style="background-image: url('@TourImagePathHelper.ToTourImageSrc(hinhChinh)')">
+
         <div class="tour-detail-hero-overlay"></div>
+
         <div class="container tour-detail-container tour-detail-hero-content">
-            <nav class="tour-detail-breadcrumb" aria-label="breadcrumb">
+
+            <nav class="tour-detail-breadcrumb"
+                 aria-label="Đường dẫn điều hướng">
+
                 <ol>
-                    <li><a href="/">Trang chủ</a></li>
-                    <li><a href="/Tour/TatCa">Tours</a></li>
+                    <li>
+                        <a href="/">
+                            <i class="fa-solid fa-house me-1"></i>
+                            Trang chủ
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/Tour/TatCa">Tour du lịch</a>
+                    </li>
+
                     <li aria-current="page">@Model.TenTour</li>
                 </ol>
+
             </nav>
 
-            <h1 class="tour-detail-title">@Model.TenTour</h1>
+            <h1 class="tour-detail-title">
+                @Model.TenTour
+            </h1>
 
             <div class="tour-detail-chip-row">
-                <span class="tour-detail-chip"><i class="fa-solid fa-barcode"></i> @Model.MaTour</span>
-                <span class="tour-detail-chip"><i class="fa-solid fa-location-dot"></i> @Model.DiaDiem</span>
-                <span class="tour-detail-chip"><i class="fa-regular fa-clock"></i> @Model.ThoiGian</span>
-                <span class="tour-detail-chip"><i class="fa-solid fa-bus"></i> @Model.PhuongTien</span>
+
+                <span class="tour-detail-chip">
+                    <i class="fa-solid fa-barcode"></i>
+                    @Model.MaTour
+                </span>
+
+                <span class="tour-detail-chip">
+                    <i class="fa-solid fa-location-dot"></i>
+                    @Model.DiaDiem
+                </span>
+
+                <span class="tour-detail-chip">
+                    <i class="fa-regular fa-clock"></i>
+                    @Model.ThoiGian
+                </span>
+
+                <span class="tour-detail-chip">
+                    <i class="fa-solid fa-bus"></i>
+                    @Model.PhuongTien
+                </span>
+
             </div>
 
-            <div class="tour-detail-hero-bottom">
-                <div class="tour-detail-price-wrap">
-                    <span class="tour-detail-price-label">Giá từ</span>
-                    <strong class="tour-detail-price-main">@string.Format("{0:N0} đ / khách", Model.GiaKhuyenMai)</strong>
-                </div>
-                <div class="tour-detail-hero-actions">
-                    <button type="button" class="btn tour-detail-btn-primary scroll-btn" data-target="lichkhoihanh">
-                        <i class="fa-solid fa-calendar-days"></i> Xem lịch khởi hành
-                    </button>
-                    <a href="/contact" class="btn tour-detail-btn-outline">Yêu cầu tư vấn</a>
-                </div>
-            </div>
         </div>
+
     </section>
 
     <div class="container tour-detail-container">
-        @if (TempData["Error"] != null) { <div class="alert alert-danger mt-3">@TempData["Error"]</div> }
-        @if (TempData["Success"] != null) { <div class="alert alert-success mt-3">@TempData["Success"]</div> }
-        @if (TempData["Info"] != null) { <div class="alert alert-info mt-3">@TempData["Info"]</div> }
-        <section class="tour-detail-top-grid">
-            <div class="tour-detail-gallery-card">
-                <div class="tour-detail-main-image-wrap">
-                    <img id="main-img"
-                         src="@TourImagePathHelper.ToTourImageSrc(hinhChinh)"
-                         class="tour-main-img"
-                         alt="@Model.TenTour" />
-                </div>
 
-                <div class="tour-detail-thumb-track" role="list">
-                    @if (hinhList.Any())
+        <!-- THÔNG BÁO -->
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger mt-3">
+                @TempData["Error"]
+            </div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-3">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-info mt-3">
+                @TempData["Info"]
+            </div>
+        }
+
+        <!-- ============================================
+             GALLERY + PRICE
+        ============================================= -->
+
+        <section class="tour-detail-top-grid">
+
+            <!-- GALLERY -->
+
+            <div class="tour-detail-gallery-card">
+
+                <div class="tour-detail-gallery-stage">
+
+                    <div class="tour-detail-main-image-wrap">
+
+                        <img id="main-img"
+                             class="tour-main-img"
+                             src="@TourImagePathHelper.ToTourImageSrc(hinhChinh)"
+                             alt="@Model.TenTour" />
+
+                    </div>
+
+                    @if (hinhList.Count > 1)
                     {
-                        var thumbIndex = 0;
-                        foreach (var hinh in hinhList)
-                        {
-                            <button type="button"
-                                    class="tour-detail-thumb-btn"
-                                    aria-label="Ảnh tour @(thumbIndex + 1)">
-                                <img src="@TourImagePathHelper.ToTourImageSrc(hinh)"
-                                     class="tour-thumb thumb-img @(thumbIndex == 0 ? "is-active" : "")"
-                                     onclick="changeMainImage(this.src)"
-                                     alt="@Model.TenTour - ảnh @(thumbIndex + 1)" />
-                            </button>
-                            thumbIndex++;
-                        }
-                    }
-                    else
-                    {
-                        <button type="button" class="tour-detail-thumb-btn" aria-label="Ảnh tour mặc định">
-                            <img src="@TourImagePathHelper.ToTourImageSrc(hinhChinh)"
-                                 class="tour-thumb thumb-img is-active"
-                                 onclick="changeMainImage(this.src)"
-                                 alt="@Model.TenTour" />
+                        <button type="button"
+                                class="tour-detail-gallery-arrow prev"
+                                aria-label="Ảnh trước">
+
+                            <i class="fa-solid fa-chevron-left"></i>
+
+                        </button>
+
+                        <button type="button"
+                                class="tour-detail-gallery-arrow next"
+                                aria-label="Ảnh tiếp theo">
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
                         </button>
                     }
+
+                    <span class="tour-detail-gallery-count">
+                        1 / @hinhList.Count
+                    </span>
+
                 </div>
+
+                <div class="tour-detail-thumb-track"
+                     role="list"
+                     aria-label="Thư viện ảnh tour">
+
+                    @for (var i = 0; i < hinhList.Count; i++)
+                    {
+                        var hinh = hinhList[i];
+
+                        <button type="button"
+                                class="tour-detail-thumb-btn"
+                                aria-label="Xem ảnh @(i + 1)"
+                                aria-pressed="@(i == 0 ? "true" : "false")">
+
+                            <img class="tour-thumb thumb-img @(i == 0 ? "is-active" : "")"
+                                 src="@TourImagePathHelper.ToTourImageSrc(hinh)"
+                                 alt="@Model.TenTour - ảnh @(i + 1)" />
+
+                        </button>
+                    }
+
+                </div>
+
             </div>
 
-            <aside class="tour-detail-booking-card tour-price-box">
-                <span class="tour-detail-price-label">Giá từ</span>
-                <h3 class="tour-detail-booking-price">@string.Format("{0:N0} đ", Model.GiaKhuyenMai)</h3>
+            <!-- PRICE CARD -->
 
-                @if ((Model.GiaGoc ?? 0) > (Model.GiaKhuyenMai ?? 0))
+            <aside class="tour-detail-booking-card tour-price-box">
+
+                <span class="tour-detail-price-label">
+                    Giá tour từ / khách
+                </span>
+
+                <h2 class="tour-detail-booking-price">
+                    @string.Format("{0:N0} đ", giaHienThi)
+                </h2>
+
+                @if (coGiaGoc)
                 {
-                    <p class="tour-detail-booking-old-price">@string.Format("{0:N0} đ", Model.GiaGoc)</p>
+                    <p class="tour-detail-booking-old-price">
+                        @string.Format("{0:N0} đ", Model.GiaGoc)
+                    </p>
                 }
 
                 <ul class="tour-detail-booking-meta">
-                    <li><span>Mã tour</span><strong>@Model.MaTour</strong></li>
-                    <li><span>Khởi hành</span><strong>@Model.DiaDiem</strong></li>
-                    <li><span>Thời gian</span><strong>@Model.ThoiGian</strong></li>
-                    <li><span>Phương tiện</span><strong>@Model.PhuongTien</strong></li>
+
+                    <li>
+                        <span>
+                            <i class="fa-solid fa-barcode me-1"></i>
+                            Mã tour
+                        </span>
+
+                        <strong>@Model.MaTour</strong>
+                    </li>
+
+                    <li>
+                        <span>
+                            <i class="fa-solid fa-location-dot me-1"></i>
+                            Khởi hành
+                        </span>
+
+                        <strong>@Model.DiaDiem</strong>
+                    </li>
+
+                    <li>
+                        <span>
+                            <i class="fa-regular fa-clock me-1"></i>
+                            Thời gian
+                        </span>
+
+                        <strong>@Model.ThoiGian</strong>
+                    </li>
+
+                    <li>
+                        <span>
+                            <i class="fa-solid fa-bus me-1"></i>
+                            Phương tiện
+                        </span>
+
+                        <strong>@Model.PhuongTien</strong>
+                    </li>
+
                 </ul>
 
-                <button type="button" class="btn tour-detail-btn-primary w-100 scroll-btn" data-target="lichkhoihanh">
-                    <i class="fa-solid fa-calendar-check"></i> Xem lịch khởi hành
+                @if (lichMacDinh != null)
+                {
+                    <p class="small text-success mb-3">
+
+                        <i class="fa-solid fa-calendar-check me-1"></i>
+
+                        Lịch gần nhất:
+
+                        <strong>
+                            @lichMacDinh.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                        </strong>
+
+                    </p>
+                }
+                else
+                {
+                    <p class="small text-muted mb-3">
+
+                        <i class="fa-regular fa-calendar-xmark me-1"></i>
+
+                        Hiện chưa có lịch khởi hành sắp tới.
+
+                    </p>
+                }
+
+                <button type="button"
+                        class="btn tour-detail-btn-primary w-100 scroll-btn"
+                        data-target="lichkhoihanh">
+
+                    <i class="fa-regular fa-calendar-days"></i>
+
+                    Xem lịch & đặt tour
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
                 </button>
-                <a href="/contact" class="btn tour-detail-btn-outline w-100 mt-2">Liên hệ tư vấn</a>
-                <form asp-controller="Wishlist" asp-action="Toggle" method="post" class="mt-2">
+
+                <a href="/contact"
+                   class="btn tour-detail-btn-outline w-100 mt-2">
+
+                    <i class="fa-solid fa-headset"></i>
+                    Liên hệ tư vấn
+
+                </a>
+
+                <form asp-controller="Wishlist"
+                      asp-action="Toggle"
+                      method="post"
+                      class="mt-2">
+
                     @Html.AntiForgeryToken()
-                    <input type="hidden" name="idTour" value="@Model.IdTour" />
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                    <button type="submit" class="btn tour-detail-btn-outline w-100">
-                        <i class="fa-regular @(daYeuThich ? "fa-heart" : "fa-heart")"></i>
-                        @(daYeuThich ? "Bỏ yêu thích" : "Lưu yêu thích")
+
+                    <input type="hidden"
+                           name="idTour"
+                           value="@Model.IdTour" />
+
+                    <input type="hidden"
+                           name="returnUrl"
+                           value="@Context.Request.Path@Context.Request.QueryString" />
+
+                    <button type="submit"
+                            class="btn tour-detail-btn-outline w-100">
+
+                        <i class="@(daYeuThich ? "fa-solid" : "fa-regular") fa-heart"></i>
+
+                        @(daYeuThich
+                            ? "Bỏ yêu thích"
+                            : "Lưu yêu thích")
+
                     </button>
+
                 </form>
 
                 @if (idTaiKhoan == null)
                 {
                     <div class="tour-detail-auth-hint">
-                        <a href="/TaiKhoan/DangNhap">Đăng nhập</a>
-                        <span>/</span>
-                        <a href="/TaiKhoan/DangKy">Đăng ký</a>
-                        <span>để đặt tour nhanh hơn</span>
+
+                        <a href="/TaiKhoan/DangNhap">
+                            Đăng nhập
+                        </a>
+
+                        /
+
+                        <a href="/TaiKhoan/DangKy">
+                            Đăng ký
+                        </a>
+
+                        để lưu tour yêu thích và đặt tour nhanh hơn.
+
                     </div>
                 }
+
             </aside>
+
         </section>
 
-        <section class="tour-detail-quick-strip">
-            <article class="tour-detail-quick-card">
-                <i class="fa-regular fa-clock"></i>
-                <div>
-                    <span>Thời gian</span>
-                    <strong>@Model.ThoiGian</strong>
-                </div>
-            </article>
-            <article class="tour-detail-quick-card">
-                <i class="fa-solid fa-location-dot"></i>
-                <div>
-                    <span>Điểm khởi hành</span>
-                    <strong>@Model.DiaDiem</strong>
-                </div>
-            </article>
-            <article class="tour-detail-quick-card">
-                <i class="fa-solid fa-bus"></i>
-                <div>
-                    <span>Phương tiện</span>
-                    <strong>@Model.PhuongTien</strong>
-                </div>
-            </article>
-            <article class="tour-detail-quick-card">
-                <i class="fa-solid fa-users"></i>
-                <div>
-                    <span>Số chỗ gần nhất</span>
-                    <strong>@(lichMacDinh?.SoChoConLai ?? 0) chỗ</strong>
-                </div>
-            </article>
-        </section>
+        <!-- ============================================
+             FIVE NAVIGATION TABS
+        ============================================= -->
 
         <div class="tour-detail-tab-wrap">
-            <ul class="tour-tab-nav" role="tablist">
-                <li class="active" data-target="tongquan">Tổng quan</li>
-                <li data-target="lichkhoihanh">Lịch & giá</li>
-                <li data-target="hanhtrinh">Hành trình</li>
-                <li data-target="gia">Chính sách giá</li>
-                <li data-target="huy">Hủy tour</li>
-                <li data-target="khac">Thông tin khác</li>
-                <li data-target="binhluan">Bình luận (@(ViewBag.BinhLuanCount ?? 0))</li>
+
+            <ul class="tour-tab-nav"
+                aria-label="Các mục thông tin tour">
+
+                <li class="active"
+                    data-target="tongquan">
+
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    Tổng quan
+
+                </li>
+
+                <li data-target="lichkhoihanh">
+
+                    <i class="fa-regular fa-calendar-days"></i>
+                    Lịch & đặt tour
+
+                </li>
+
+                <li data-target="hanhtrinh">
+
+                    <i class="fa-solid fa-route"></i>
+                    Hành trình
+
+                </li>
+
+                <li data-target="chinhsach">
+
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Chính sách & lưu ý
+
+                </li>
+
+                <li data-target="binhluan">
+
+                    <i class="fa-regular fa-comments"></i>
+                    Bình luận (@soBinhLuan)
+
+                </li>
+
             </ul>
+
         </div>
 
-        <section class="tour-section tour-detail-section" id="tongquan">
-            <div class="tour-detail-section-card">
-                <div class="tour-detail-section-head">
-                    <h2>Tổng quan chuyến đi</h2>
-                    <p>Thông tin quan trọng trước khi bạn quyết định đặt tour.</p>
+        <!-- ============================================
+             OVERVIEW
+        ============================================= -->
+
+        <section class="tour-section tour-detail-section"
+                 id="tongquan">
+
+            <div class="tour-detail-overview-layout">
+
+                <div class="tour-detail-section-card">
+
+                    <div class="tour-detail-section-head">
+
+                        <h2>
+                            <i class="fa-solid fa-leaf me-2"></i>
+                            Tổng quan tour
+                        </h2>
+
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.MoTa))
+                    {
+                        <p class="tour-detail-overview-text">
+                            @Model.MoTa
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="tour-detail-overview-text">
+                            Khám phá hành trình @Model.TenTour
+                            cùng HappyTrip.
+                        </p>
+                    }
+
+                    <div class="tour-detail-overview-grid">
+
+                        <div>
+                            <span>
+                                <i class="fa-regular fa-clock me-1"></i>
+                                Thời gian
+                            </span>
+                            <strong>@Model.ThoiGian</strong>
+                        </div>
+
+                        <div>
+                            <span>
+                                <i class="fa-solid fa-bus me-1"></i>
+                                Phương tiện
+                            </span>
+                            <strong>@Model.PhuongTien</strong>
+                        </div>
+
+                        <div>
+                            <span>
+                                <i class="fa-solid fa-calendar-days me-1"></i>
+                                Lịch gần nhất
+                            </span>
+
+                            <strong>
+                                @(lichMacDinh == null
+                                    ? "Chưa có lịch"
+                                    : lichMacDinh.NgayKhoiHanh.ToString("dd/MM/yyyy"))
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>
+                                <i class="fa-solid fa-location-dot me-1"></i>
+                                Điểm đến
+                            </span>
+                            <strong>@Model.DiaDiem</strong>
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <p class="tour-detail-overview-text">@Model.MoTa</p>
+                <div class="tour-detail-section-card">
 
-                <div class="tour-detail-overview-grid">
-                    <div><span>Điểm khởi hành</span><strong>@Model.DiaDiem</strong></div>
-                    <div><span>Thời gian</span><strong>@Model.ThoiGian</strong></div>
-                    <div><span>Phương tiện</span><strong>@Model.PhuongTien</strong></div>
-                    <div><span>Mã tour</span><strong>@Model.MaTour</strong></div>
+                    <div class="tour-detail-highlight-box">
+
+                        <h3>
+                            <i class="fa-solid fa-star"></i>
+                            Điểm nổi bật
+                        </h3>
+
+                        <ul>
+                            <li>
+                                Khám phá những điểm đến đặc trưng
+                                trong chương trình tour.
+                            </li>
+
+                            <li>
+                                Tìm hiểu văn hóa và trải nghiệm
+                                đời sống địa phương.
+                            </li>
+
+                            <li>
+                                Hành trình @Model.ThoiGian,
+                                di chuyển bằng @Model.PhuongTien.
+                            </li>
+
+                            <li>
+                                Có thể liên hệ HappyTrip để
+                                được tư vấn chương trình chi tiết.
+                            </li>
+                        </ul>
+
+                    </div>
+
                 </div>
 
-                <div class="tour-detail-highlight-box">
-                    <h3>Điểm nổi bật</h3>
-                    <ul>
-                        <li>Lịch trình được tối ưu để không bị quá tải khi di chuyển.</li>
-                        <li>Hướng dẫn viên đồng hành xuyên suốt hành trình.</li>
-                        <li>Dịch vụ hỗ trợ nhanh trong suốt chuyến đi.</li>
-                    </ul>
-                </div>
             </div>
+
         </section>
 
-        <section class="tour-section tour-detail-section" id="lichkhoihanh">
+        <!-- ============================================
+             DEPARTURE & BOOKING
+        ============================================= -->
+
+        <section class="tour-section tour-detail-section"
+                 id="lichkhoihanh">
+
             <div class="tour-detail-section-card">
+
                 <div class="tour-detail-section-head">
-                    <h2>Lịch khởi hành & tính giá tour</h2>
-                    <p>Chọn lịch phù hợp và xem tổng chi phí theo số lượng khách.</p>
+
+                    <h2>
+                        <i class="fa-regular fa-calendar-days me-2"></i>
+                        Lịch khởi hành & giá tour
+                    </h2>
+
+                    <p>
+                        Tham khảo lịch khởi hành,
+                        lựa chọn số khách và xem chi phí dự kiến.
+                    </p>
+
                 </div>
 
-                @if (!lichList.Any())
+                @if (!coLichSapToi)
                 {
                     <div class="tour-detail-empty-state">
+
                         <i class="fa-regular fa-calendar-xmark"></i>
-                        <h4>Chưa có lịch khởi hành cho tour này.</h4>
-                        <p>Vui lòng liên hệ tư vấn để được cập nhật lịch gần nhất.</p>
+
+                        <h4>
+                            Hiện chưa có lịch khởi hành sắp tới
+                        </h4>
+
+                        <p>
+                            Tour này chưa được cập nhật ngày khởi hành
+                            trong thời gian tới. HappyTrip sẽ hỗ trợ
+                            tư vấn khi có lịch mới.
+                        </p>
+
+                        <a href="/contact"
+                           class="btn tour-detail-btn-outline mt-3">
+
+                            <i class="fa-solid fa-headset"></i>
+                            Liên hệ tư vấn
+
+                        </a>
+
                     </div>
                 }
                 else
                 {
-                    var lichGanNhat = lichList.FirstOrDefault(x => x.SoChoConLai > 0) ?? lichList.First();
+                    var lichGanNhat = lichMacDinh!;
 
                     DateOnly? ngayKetThuc = null;
-                    int soNgay = ExtractSoNgay(Model.ThoiGian ?? "");
-                    if (soNgay > 0)
+
+                    if (soNgayTour > 0)
                     {
-                        ngayKetThuc = lichGanNhat.NgayKhoiHanh.AddDays(soNgay - 1);
+                        ngayKetThuc = lichGanNhat.NgayKhoiHanh
+                            .AddDays(soNgayTour - 1);
                     }
 
-                    <div class="row g-4">
-                        <div class="col-xl-7">
-                            <div class="tour-detail-schedule-card">
-                                <h3>Chọn ngày khởi hành</h3>
+                    <div class="row g-3">
 
-                                <div class="tour-detail-schedule-head-row">
-                                    <span>Ngày</span>
-                                    <span>Giờ</span>
-                                    <span>Số chỗ còn</span>
-                                    <span>Trạng thái</span>
-                                </div>
+                        <!-- SCHEDULE -->
+
+                        <div class="col-xl-7">
+
+                            <div class="tour-detail-schedule-card h-100">
+
+                                <h3>
+                                    <i class="fa-regular fa-calendar-check me-2"></i>
+                                    Chọn ngày khởi hành
+                                </h3>
 
                                 <div class="tour-detail-schedule-list tour-departure-calendar">
-                                    @foreach (var thang in lichList.GroupBy(x => new { x.NgayKhoiHanh.Year, x.NgayKhoiHanh.Month }))
+
+                                    @foreach (var thang in lichList.GroupBy(
+                                        x => new
+                                        {
+                                            x.NgayKhoiHanh.Year,
+                                            x.NgayKhoiHanh.Month
+                                        }))
                                     {
-                                        <h4 class="tour-calendar-month">Tháng @thang.Key.Month/@thang.Key.Year</h4>
+                                        <h4 class="tour-calendar-month">
+                                            Tháng @thang.Key.Month/@thang.Key.Year
+                                        </h4>
+
                                         <div class="tour-calendar-grid">
+
                                             @foreach (var lichItem in thang)
                                             {
-                                                var isSelected = lichItem.IdLich == lichGanNhat.IdLich;
-                                                var isFull = lichItem.SoChoConLai <= 0;
-                                                var status = isFull ? "Hết chỗ" : lichItem.SoChoConLai <= 5 ? "Sắp hết chỗ" : "Còn chỗ";
-                                                var rowClass = $"lich-row {(isSelected ? "lich-selected" : "")} {(isFull ? "lich-full" : "")}";
-                                                <button type="button" class="@rowClass"
-                                                     data-idlich="@lichItem.IdLich"
-                                                     data-ngay="@lichItem.NgayKhoiHanh.ToString("dd/MM/yyyy")"
-                                                     data-gio="@((lichItem.GioKhoiHanh?.ToString("HH:mm") ?? "--"))"
-                                                     data-socho="@lichItem.SoChoConLai"
-                                                     data-trangthai="@status">
-                                                    <span class="tour-calendar-day">@lichItem.NgayKhoiHanh.Day</span>
-                                                    <span>@lichItem.NgayKhoiHanh.ToString("ddd", new System.Globalization.CultureInfo("vi-VN"))</span>
-                                                    <span>@(lichItem.GioKhoiHanh?.ToString("HH:mm") ?? "--")</span>
-                                                    <span class="tour-detail-status">@status · @lichItem.SoChoConLai chỗ</span>
+                                                var isSelected =
+                                                    lichItem.IdLich == lichGanNhat.IdLich;
+
+                                                var isFull =
+                                                    lichItem.SoChoConLai <= 0;
+
+                                                var status = isFull
+                                                    ? "Hết chỗ"
+                                                    : lichItem.SoChoConLai <= 5
+                                                        ? "Sắp hết chỗ"
+                                                        : "Còn chỗ";
+
+                                                var rowClass =
+                                                    $"lich-row {(isSelected ? "lich-selected" : "")} {(isFull ? "lich-full" : "")}";
+
+                                                <button type="button"
+                                                        class="@rowClass"
+                                                        data-idlich="@lichItem.IdLich"
+                                                        data-ngay="@lichItem.NgayKhoiHanh.ToString("dd/MM/yyyy")"
+                                                        data-gio="@(lichItem.GioKhoiHanh?.ToString("HH:mm") ?? "--")"
+                                                        data-socho="@lichItem.SoChoConLai"
+                                                        data-trangthai="@status">
+
+                                                    <span class="tour-calendar-day">
+                                                        @lichItem.NgayKhoiHanh.Day
+                                                    </span>
+
+                                                    <span>
+                                                        @lichItem.NgayKhoiHanh.ToString(
+                                                            "ddd",
+                                                            new CultureInfo("vi-VN"))
+                                                    </span>
+
+                                                    <span>
+                                                        <i class="fa-regular fa-clock me-1"></i>
+                                                        @(lichItem.GioKhoiHanh?.ToString("HH:mm") ?? "--")
+                                                    </span>
+
+                                                    <span class="tour-detail-status">
+                                                        @status · @lichItem.SoChoConLai chỗ
+                                                    </span>
+
                                                 </button>
                                             }
+
                                         </div>
                                     }
+
                                 </div>
+
                             </div>
+
                         </div>
 
+                        <!-- CALCULATOR -->
+
                         <div class="col-xl-5">
+
                             <div class="tour-calc-box tour-detail-calc-card"
                                  data-idtour="@Model.IdTour"
                                  data-adult="@giaNguoiLon"
                                  data-child="@giaTreEm"
                                  data-baby="@giaEmBe"
-                                 data-user='@Context.Session.GetInt32("IdTaiKhoan")'>
+                                 data-user="@idTaiKhoan">
 
-                                <input type="hidden" id="selectedLich" value="@lichGanNhat.IdLich" />
-                                <input type="hidden" id="songay" value="@ExtractSoNgay(Model.ThoiGian ?? "")" />
+                                <input type="hidden"
+                                       id="selectedLich"
+                                       value="@lichGanNhat.IdLich" />
 
-                                <h3>Tạm tính chuyến đi</h3>
+                                <input type="hidden"
+                                       id="songay"
+                                       value="@soNgayTour" />
+
+                                <h3>
+                                    <i class="fa-solid fa-calculator me-2"></i>
+                                    Tạm tính chuyến đi
+                                </h3>
 
                                 <div class="tour-detail-calc-info">
-                                    <p><span>Ngày khởi hành</span><strong id="thoigian_ngay">@lichGanNhat.NgayKhoiHanh.ToString("dd/MM/yyyy")</strong></p>
-                                    <p><span>Giờ khởi hành</span><strong id="thoigian_gio">@((lichGanNhat.GioKhoiHanh?.ToString("HH:mm") ?? "--"))</strong></p>
-                                    <p><span>Ngày kết thúc</span><strong id="thoigian_ketthuc">@((ngayKetThuc?.ToString("dd/MM/yyyy") ?? ""))</strong></p>
-                                    <p><span>Trạng thái</span><strong id="thoigian_trangthai">@lichGanNhat.TrangThai</strong></p>
-                                    <p><span>Còn lại</span><strong id="thoigian_socho">@lichGanNhat.SoChoConLai</strong></p>
-                                    <p><span>Mã tour</span><strong>@Model.MaTour</strong></p>
+
+                                    <p>
+                                        <span>Ngày khởi hành</span>
+                                        <strong id="thoigian_ngay">
+                                            @lichGanNhat.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Giờ khởi hành</span>
+                                        <strong id="thoigian_gio">
+                                            @(lichGanNhat.GioKhoiHanh?.ToString("HH:mm") ?? "--")
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Ngày kết thúc</span>
+                                        <strong id="thoigian_ketthuc">
+                                            @(ngayKetThuc?.ToString("dd/MM/yyyy") ?? "--")
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Trạng thái</span>
+                                        <strong id="thoigian_trangthai">
+                                            @(lichGanNhat.SoChoConLai <= 0
+                                                ? "Hết chỗ"
+                                                : lichGanNhat.SoChoConLai <= 5
+                                                    ? "Sắp hết chỗ"
+                                                    : "Còn chỗ")
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Còn lại</span>
+                                        <strong id="thoigian_socho">
+                                            @lichGanNhat.SoChoConLai
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Mã tour</span>
+                                        <strong>@Model.MaTour</strong>
+                                    </p>
+
                                 </div>
 
                                 <div class="tour-detail-price-list">
+
                                     <h4>Giá theo đối tượng</h4>
-                                    <p><span>Người lớn</span><strong>@string.Format("{0:N0} đ", giaNguoiLon)</strong></p>
-                                    <p><span>Trẻ em</span><strong>@string.Format("{0:N0} đ", giaTreEm)</strong></p>
-                                    <p><span>Em bé</span><strong>@string.Format("{0:N0} đ", giaEmBe)</strong></p>
+
+                                    <p>
+                                        <span>Người lớn</span>
+                                        <strong>
+                                            @string.Format("{0:N0} đ", giaNguoiLon)
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Trẻ em</span>
+                                        <strong>
+                                            @(giaTreEmChiTiet == null
+                                                ? "Chưa cập nhật"
+                                                : string.Format("{0:N0} đ", giaTreEm))
+                                        </strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Em bé</span>
+                                        <strong>
+                                            @(giaEmBeChiTiet == null
+                                                ? "Chưa cập nhật"
+                                                : string.Format("{0:N0} đ", giaEmBe))
+                                        </strong>
+                                    </p>
+
                                 </div>
 
                                 <div class="tour-detail-qty-list">
+
                                     <h4>Số lượng khách</h4>
 
-                                    <div class="tour-detail-qty-row">
-                                        <label for="adultQty">Người lớn</label>
-                                        <div class="qty-group">
-                                            <button type="button" id="adultMinus" class="qty-btn">-</button>
-                                            <input id="adultQty" class="qty-input" type="number" value="1" min="0" />
-                                            <button type="button" id="adultPlus" class="qty-btn">+</button>
-                                        </div>
-                                    </div>
+                                    <!-- ADULT -->
 
                                     <div class="tour-detail-qty-row">
-                                        <label for="childQty">Trẻ em</label>
+
+                                        <label for="adultQty">
+                                            Người lớn
+                                        </label>
+
                                         <div class="qty-group">
-                                            <button type="button" id="childMinus" class="qty-btn">-</button>
-                                            <input id="childQty" class="qty-input" type="number" value="0" min="0" />
-                                            <button type="button" id="childPlus" class="qty-btn">+</button>
+
+                                            <button type="button"
+                                                    id="adultMinus"
+                                                    class="qty-btn"
+                                                    aria-label="Giảm người lớn">
+                                                −
+                                            </button>
+
+                                            <input type="number"
+                                                   id="adultQty"
+                                                   class="qty-input"
+                                                   value="1"
+                                                   min="0" />
+
+                                            <button type="button"
+                                                    id="adultPlus"
+                                                    class="qty-btn"
+                                                    aria-label="Tăng người lớn">
+                                                +
+                                            </button>
+
                                         </div>
+
                                     </div>
 
+                                    <!-- CHILD -->
+
                                     <div class="tour-detail-qty-row">
-                                        <label for="babyQty">Em bé</label>
+
+                                        <label for="childQty">
+                                            Trẻ em
+                                        </label>
+
                                         <div class="qty-group">
-                                            <button type="button" id="babyMinus" class="qty-btn">-</button>
-                                            <input id="babyQty" class="qty-input" type="number" value="0" min="0" />
-                                            <button type="button" id="babyPlus" class="qty-btn">+</button>
+
+                                            <button type="button"
+                                                    id="childMinus"
+                                                    class="qty-btn"
+                                                    aria-label="Giảm trẻ em">
+                                                −
+                                            </button>
+
+                                            <input type="number"
+                                                   id="childQty"
+                                                   class="qty-input"
+                                                   value="0"
+                                                   min="0"
+                                                   disabled="@(giaTreEmChiTiet == null)" />
+
+                                            <button type="button"
+                                                    id="childPlus"
+                                                    class="qty-btn"
+                                                    disabled="@(giaTreEmChiTiet == null)"
+                                                    aria-label="Tăng trẻ em">
+                                                +
+                                            </button>
+
                                         </div>
+
                                     </div>
+
+                                    <!-- BABY -->
+
+                                    <div class="tour-detail-qty-row">
+
+                                        <label for="babyQty">
+                                            Em bé
+                                        </label>
+
+                                        <div class="qty-group">
+
+                                            <button type="button"
+                                                    id="babyMinus"
+                                                    class="qty-btn"
+                                                    aria-label="Giảm em bé">
+                                                −
+                                            </button>
+
+                                            <input type="number"
+                                                   id="babyQty"
+                                                   class="qty-input"
+                                                   value="0"
+                                                   min="0"
+                                                   disabled="@(giaEmBeChiTiet == null)" />
+
+                                            <button type="button"
+                                                    id="babyPlus"
+                                                    class="qty-btn"
+                                                    disabled="@(giaEmBeChiTiet == null)"
+                                                    aria-label="Tăng em bé">
+                                                +
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                    @if (giaTreEmChiTiet == null || giaEmBeChiTiet == null)
+                                    {
+                                        <p class="small text-muted mb-0">
+                                            Những nhóm khách chưa có giá
+                                            cần được tư vấn trước khi đặt.
+                                        </p>
+                                    }
+
                                 </div>
 
                                 <div class="tour-detail-total-box">
-                                    <p><span>Tổng khách</span><strong id="totalGuest"></strong></p>
-                                    <p><span>Tổng tiền</span><strong id="totalAmount" class="tour-detail-total-amount"></strong></p>
+
+                                    <p>
+                                        <span>Tổng khách</span>
+                                        <strong id="totalGuest">1</strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Tổng tiền tạm tính</span>
+                                        <strong id="totalAmount"
+                                                class="tour-detail-total-amount">
+                                            @string.Format("{0:N0} đ", giaNguoiLon)
+                                        </strong>
+                                    </p>
+
                                 </div>
 
-                                <div id="seatWarning" class="alert alert-warning mt-3 mb-0 d-none"></div>
+                                <div id="seatWarning"
+                                     class="alert alert-warning mt-3 mb-0 d-none">
+                                </div>
 
-                                <button id="bookingButton" type="button" class="btn tour-detail-btn-primary w-100 mt-3" onclick="goToBooking()">
-                                    Đặt tour
+                                <button id="bookingButton"
+                                        type="button"
+                                        class="btn tour-detail-btn-primary w-100 mt-3"
+                                        onclick="goToBooking()">
+
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    Đặt tour ngay
+
                                 </button>
-                                <form id="waitlistForm" asp-controller="DatTour" asp-action="ThamGiaDanhSachCho" method="post" class="d-none mt-3">
+
+                                <!-- WAITLIST: GIỮ NGUYÊN -->
+
+                                <form id="waitlistForm"
+                                      asp-controller="DatTour"
+                                      asp-action="ThamGiaDanhSachCho"
+                                      method="post"
+                                      class="d-none mt-3">
+
                                     @Html.AntiForgeryToken()
-                                    <input id="waitlistScheduleId" type="hidden" name="idLich" value="@lichGanNhat.IdLich" />
-                                    <input id="waitlistGuestCount" type="hidden" name="soKhach" value="1" />
-                                    <button type="submit" class="btn btn-outline-warning w-100">
-                                        <i class="fa-solid fa-list"></i> Tham gia danh sách chờ
+
+                                    <input id="waitlistScheduleId"
+                                           type="hidden"
+                                           name="idLich"
+                                           value="@lichGanNhat.IdLich" />
+
+                                    <input id="waitlistGuestCount"
+                                           type="hidden"
+                                           name="soKhach"
+                                           value="1" />
+
+                                    <button type="submit"
+                                            class="btn btn-outline-warning w-100">
+
+                                        <i class="fa-solid fa-list me-1"></i>
+                                        Tham gia danh sách chờ
+
                                     </button>
+
                                 </form>
+
                             </div>
+
                         </div>
+
                     </div>
                 }
+
             </div>
+
         </section>
 
-        <section class="tour-section tour-detail-section" id="hanhtrinh">
+        <!-- ============================================
+             ITINERARY
+        ============================================= -->
+
+        <section class="tour-section tour-detail-section"
+                 id="hanhtrinh">
+
             <div class="tour-detail-section-card">
+
                 <div class="tour-detail-section-head">
-                    <h2>Hành trình du lịch</h2>
-                    <p>Kế hoạch tham khảo theo thời lượng tour @Model.ThoiGian.</p>
+
+                    <h2>
+                        <i class="fa-solid fa-route me-2"></i>
+                        Hành trình chi tiết
+                    </h2>
+
+                    <p>
+                        Thông tin tham khảo cho hành trình
+                        @Model.ThoiGian.
+                    </p>
+
                 </div>
 
-                <ol class="tour-detail-timeline">
-                    @for (var i = 0; i < soNgayTimeline; i++)
-                    {
-                        var tieuDe = i < fallbackTitles.Length ? fallbackTitles[i] : "Trải nghiệm hành trình";
-                        <li class="tour-detail-timeline-item">
-                            <span class="tour-detail-timeline-dot"></span>
-                            <div class="tour-detail-timeline-card">
-                                <h4>Ngày @(i + 1): @tieuDe</h4>
-                                <p>
-                                    @(i == 0
-                                        ? "Khởi hành theo lịch đã chọn, bắt đầu hành trình với các điểm tham quan nổi bật."
-                                        : i == soNgayTimeline - 1
-                                            ? "Kết thúc chương trình, trả khách theo lịch và lưu giữ những khoảnh khắc đáng nhớ."
-                                            : "Tiếp tục khám phá điểm đến, trải nghiệm văn hóa địa phương và hoạt động đặc trưng trong ngày.")
-                                </p>
-                            </div>
-                        </li>
-                    }
-                </ol>
-
-                <div class="tour-detail-prose">
-                    <h4>Mô tả chi tiết</h4>
-                    <p>@Model.MoTa</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="tour-section tour-detail-section" id="gia">
-            <div class="tour-detail-section-card">
-                <div class="tour-detail-section-head">
-                    <h2>Chính sách giá</h2>
-                    <p>Giá được niêm yết theo từng nhóm khách hàng.</p>
-                </div>
-
-                @if (!giaList.Any())
+                @if (soNgayTimeline > 0)
                 {
-                    <div class="tour-detail-empty-state">
-                        <i class="fa-solid fa-receipt"></i>
-                        <h4>Chưa có dữ liệu giá chi tiết</h4>
-                        <p>Vui lòng liên hệ HappyTrip để nhận báo giá mới nhất cho tour này.</p>
-                    </div>
+                    <ol class="tour-detail-timeline">
+
+                        @for (var i = 0; i < soNgayTimeline; i++)
+                        {
+                            var tieuDe = TenNgay(i, soNgayTimeline);
+                            var noiDung = MoTaNgay(i, soNgayTimeline);
+                            var contentId = $"tourDayContent{i}";
+
+                            <li class="tour-detail-timeline-item">
+
+                                <span class="tour-detail-timeline-dot"></span>
+
+                                <div class="tour-detail-timeline-card">
+
+                                    <button type="button"
+                                            class="tour-detail-day-toggle"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@contentId"
+                                            aria-expanded="@(i == 0 ? "true" : "false")"
+                                            aria-controls="@contentId">
+
+                                        <span>
+                                            Ngày @(i + 1):
+                                            @tieuDe
+                                        </span>
+
+                                        <i class="fa-solid fa-chevron-down"></i>
+
+                                    </button>
+
+                                    <div id="@contentId"
+                                         class="collapse @(i == 0 ? "show" : "")">
+
+                                        <div class="tour-detail-day-content">
+                                            @noiDung
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </li>
+                        }
+
+                    </ol>
+
+                    <p class="small text-muted mt-3 mb-0">
+                        Đây là lịch trình tham khảo, chưa phải
+                        chương trình chi tiết được xác nhận
+                        theo từng ngày.
+                    </p>
                 }
                 else
                 {
-                    <div class="tour-detail-price-policy-grid">
-                        @foreach (var g in giaList)
-                        {
-                            <article class="tour-detail-price-policy-card">
-                                <span class="tour-detail-price-policy-label">Đối tượng</span>
-                                <h4>@TourPriceAudience.GetDisplayName(g.DoiTuong)</h4>
-                                <p class="tour-detail-price-policy-price">@string.Format("{0:N0} đ", g.Gia)</p>
-                                <p class="tour-detail-price-policy-note">@(string.IsNullOrWhiteSpace(g.GhiChu) ? "Áp dụng theo chương trình tour hiện hành." : g.GhiChu)</p>
-                            </article>
-                        }
+                    <div class="tour-detail-empty-state">
+
+                        <i class="fa-solid fa-route"></i>
+
+                        <h4>Chưa cập nhật lịch trình</h4>
+
+                        <p>
+                            Vui lòng liên hệ HappyTrip để nhận
+                            thông tin hành trình chi tiết.
+                        </p>
+
                     </div>
                 }
+
+                @if (!string.IsNullOrWhiteSpace(Model.MoTa))
+                {
+                    <div class="tour-detail-prose">
+
+                        <h4>Giới thiệu hành trình</h4>
+
+                        <p>@Model.MoTa</p>
+
+                    </div>
+                }
+
             </div>
+
         </section>
 
-        <section class="tour-section tour-detail-section" id="huy">
+        <!-- ============================================
+             POLICIES
+        ============================================= -->
+
+        <section class="tour-section tour-detail-section"
+                 id="chinhsach">
+
             <div class="tour-detail-section-card">
+
                 <div class="tour-detail-section-head">
-                    <h2>Chính sách hủy / phạt</h2>
-                    <p>Vui lòng cân nhắc mốc thời gian để tránh phát sinh chi phí.</p>
+
+                    <h2>
+                        <i class="fa-solid fa-shield-halved me-2"></i>
+                        Chính sách & lưu ý
+                    </h2>
+
+                    <p>
+                        Các thông tin cần tham khảo trước
+                        khi xác nhận đặt tour.
+                    </p>
+
                 </div>
 
-                <div class="tour-detail-policy-grid">
-                    <article class="tour-detail-policy-card">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <h4>Trước 15 ngày</h4>
-                        <p>Hoàn 100% giá tour.</p>
-                    </article>
-                    <article class="tour-detail-policy-card">
-                        <i class="fa-solid fa-percent"></i>
-                        <h4>7 - 14 ngày</h4>
-                        <p>Phí hủy 50% tổng giá trị đơn.</p>
-                    </article>
-                    <article class="tour-detail-policy-card">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        <h4>3 - 6 ngày</h4>
-                        <p>Phí hủy 75% tổng giá trị đơn.</p>
-                    </article>
-                    <article class="tour-detail-policy-card">
-                        <i class="fa-solid fa-ban"></i>
-                        <h4>Dưới 2 ngày</h4>
-                        <p>Phí hủy 100% tổng giá trị đơn.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
+                <div class="tour-detail-policy-unified">
 
-        <section class="tour-section tour-detail-section" id="khac">
-            <div class="tour-detail-section-card">
-                <div class="tour-detail-section-head">
-                    <h2>Thông tin khác</h2>
-                    <p>Một số lưu ý cần biết trước ngày khởi hành.</p>
-                </div>
+                    <!-- PRICES -->
 
-                <div class="tour-detail-checklist-grid">
-                    <article class="tour-detail-checklist-card">
-                        <h4><i class="fa-solid fa-suitcase-rolling"></i> Bao gồm</h4>
-                        <ul>
-                            <li>Vé tham quan theo chương trình.</li>
-                            <li>Xe đưa đón trong suốt lịch trình.</li>
-                            <li>Hướng dẫn viên đồng hành.</li>
-                        </ul>
-                    </article>
-                    <article class="tour-detail-checklist-card">
-                        <h4><i class="fa-solid fa-circle-minus"></i> Không bao gồm</h4>
-                        <ul>
-                            <li>Chi tiêu cá nhân ngoài chương trình.</li>
-                            <li>Tiền tip cho tài xế / hướng dẫn viên.</li>
-                            <li>Các dịch vụ phát sinh theo nhu cầu riêng.</li>
-                        </ul>
-                    </article>
-                    <article class="tour-detail-checklist-card">
-                        <h4><i class="fa-solid fa-id-card"></i> Lưu ý</h4>
-                        <ul>
-                            <li>Vui lòng mang CCCD còn hiệu lực khi đi tour.</li>
-                            <li>Đến điểm hẹn trước giờ khởi hành ít nhất 15 phút.</li>
-                            <li>Liên hệ tư vấn nếu cần hỗ trợ đặc biệt cho trẻ nhỏ/người lớn tuổi.</li>
-                        </ul>
-                    </article>
-                </div>
-            </div>
-        </section>
+                    <div id="gia">
 
-        @{
-            var binhLuans = ViewBag.BinhLuanTour as List<BinhLuanTour> ?? new List<BinhLuanTour>();
-            var sortCmt = ViewBag.SortCmt as string ?? "new";
-        }
+                        <h3 class="h6 fw-bold mb-3"
+                            style="color:var(--travel-green)">
 
-        <section class="tour-section tour-detail-section" id="binhluan">
-            <div class="tour-detail-section-card">
-                <div class="tour-detail-comment-head">
-                    <div>
-                        <h2>Bình luận tour (@(ViewBag.BinhLuanCount ?? 0))</h2>
-                        <p>Ý kiến thực tế từ khách đã trải nghiệm tour.</p>
+                            <i class="fa-solid fa-tags me-2"></i>
+                            Giá theo đối tượng
+
+                        </h3>
+
+                        @if (!giaList.Any())
+                        {
+                            <div class="tour-detail-empty-state">
+
+                                <i class="fa-solid fa-receipt"></i>
+
+                                <h4>
+                                    Chưa có bảng giá chi tiết
+                                </h4>
+
+                                <p>
+                                    Liên hệ HappyTrip để được
+                                    báo giá cho từng đối tượng.
+                                </p>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="tour-detail-price-policy-grid">
+
+                                @foreach (var g in giaList)
+                                {
+                                    <article class="tour-detail-price-policy-card">
+
+                                        <span class="tour-detail-price-policy-label">
+                                            Đối tượng
+                                        </span>
+
+                                        <h4>
+                                            @TourPriceAudience.GetDisplayName(g.DoiTuong)
+                                        </h4>
+
+                                        <p class="tour-detail-price-policy-price">
+                                            @string.Format("{0:N0} đ", g.Gia)
+                                        </p>
+
+                                        <p class="tour-detail-price-policy-note">
+                                            @(string.IsNullOrWhiteSpace(g.GhiChu)
+                                                ? "Áp dụng theo bảng giá của chương trình tour."
+                                                : g.GhiChu)
+                                        </p>
+
+                                    </article>
+                                }
+
+                            </div>
+                        }
+
                     </div>
 
-                    <select id="sortComment" class="form-select w-auto">
-                        <option value="new" selected="@(sortCmt == "new")">Mới nhất</option>
-                        <option value="old" selected="@(sortCmt == "old")">Cũ nhất</option>
+                    <!-- THREE POLICY CARDS -->
+
+                    <div class="tour-detail-policy-unified-grid">
+
+                        <article class="tour-detail-checklist-card">
+
+                            <h4>
+                                <i class="fa-solid fa-wallet"></i>
+                                Dịch vụ bao gồm
+                            </h4>
+
+                            <ul>
+                                <li>Vé tham quan theo chương trình.</li>
+                                <li>Xe đưa đón trong lịch trình.</li>
+                                <li>Hướng dẫn viên đồng hành.</li>
+                            </ul>
+
+                        </article>
+
+                        <article class="tour-detail-checklist-card">
+
+                            <h4>
+                                <i class="fa-solid fa-circle-minus"></i>
+                                Dịch vụ không bao gồm
+                            </h4>
+
+                            <ul>
+                                <li>Chi tiêu cá nhân ngoài chương trình.</li>
+                                <li>Tiền tip tài xế và hướng dẫn viên.</li>
+                                <li>Các dịch vụ phát sinh theo yêu cầu.</li>
+                            </ul>
+
+                        </article>
+
+                        <article class="tour-detail-checklist-card"
+                                 id="huy">
+
+                            <h4>
+                                <i class="fa-solid fa-shield-halved"></i>
+                                Chính sách hủy tour
+                            </h4>
+
+                            <ul>
+                                <li>Trước 15 ngày: hoàn 100% giá tour.</li>
+                                <li>Từ 7–14 ngày: phí hủy 50%.</li>
+                                <li>Từ 3–6 ngày: phí hủy 75%.</li>
+                                <li>Dưới 2 ngày: phí hủy 100%.</li>
+                            </ul>
+
+                        </article>
+
+                    </div>
+
+                    <!-- NOTE -->
+
+                    <details class="tour-detail-policy-accordion"
+                             id="khac">
+
+                        <summary>
+
+                            <span>
+                                <i class="fa-solid fa-circle-info me-2"></i>
+                                Những lưu ý trước chuyến đi
+                            </span>
+
+                        </summary>
+
+                        <div class="tour-detail-policy-accordion-body">
+
+                            <ul class="mb-0">
+
+                                <li>
+                                    Mang theo giấy tờ tùy thân
+                                    hợp lệ khi tham gia tour.
+                                </li>
+
+                                <li>
+                                    Có mặt tại điểm hẹn trước giờ
+                                    khởi hành ít nhất 15 phút.
+                                </li>
+
+                                <li>
+                                    Liên hệ HappyTrip nếu cần hỗ trợ
+                                    đặc biệt cho trẻ nhỏ hoặc người lớn tuổi.
+                                </li>
+
+                                <li>
+                                    Kiểm tra thông tin đặt tour,
+                                    số lượng khách và giá trước khi thanh toán.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </details>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ============================================
+             COMMENTS
+        ============================================= -->
+
+        <section class="tour-section tour-detail-section"
+                 id="binhluan">
+
+            <div class="tour-detail-section-card">
+
+                <div class="tour-detail-comment-head">
+
+                    <div>
+
+                        <h2>
+                            <i class="fa-regular fa-comments me-2"></i>
+                            Bình luận (@soBinhLuan)
+                        </h2>
+
+                        <p>
+                            Chia sẻ ý kiến và trải nghiệm về tour.
+                        </p>
+
+                    </div>
+
+                    <select id="sortComment"
+                            class="form-select w-auto"
+                            aria-label="Sắp xếp bình luận">
+
+                        <option value="new"
+                                selected="@(sortCmt == "new")">
+                            Mới nhất
+                        </option>
+
+                        <option value="old"
+                                selected="@(sortCmt == "old")">
+                            Cũ nhất
+                        </option>
+
                     </select>
+
                 </div>
 
                 <div class="tour-detail-comment-form-wrap">
+
                     @if (idTaiKhoan == null)
                     {
                         <div class="tour-detail-login-alert">
+
                             <i class="fa-solid fa-circle-info"></i>
+
                             <div>
                                 Bạn cần
-                                <a asp-controller="TaiKhoan" asp-action="DangNhap">đăng nhập</a>
+                                <a asp-controller="TaiKhoan"
+                                   asp-action="DangNhap">
+                                    đăng nhập
+                                </a>
                                 để bình luận tour.
                             </div>
+
                         </div>
                     }
                     else
                     {
-                        <form asp-controller="Tour" asp-action="ThemBinhLuanTour" method="post" class="tour-detail-comment-form">
+                        <form asp-controller="Tour"
+                              asp-action="ThemBinhLuanTour"
+                              method="post"
+                              class="tour-detail-comment-form">
+
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="idTour" value="@Model.IdTour" />
+
+                            <input type="hidden"
+                                   name="idTour"
+                                   value="@Model.IdTour" />
 
                             <textarea name="noiDung"
                                       class="form-control auto-grow"
@@ -598,129 +1446,247 @@
                                       required></textarea>
 
                             <div class="d-flex justify-content-end mt-3">
-                                <button class="btn tour-detail-btn-primary px-4">Gửi bình luận</button>
+
+                                <button type="submit"
+                                        class="btn tour-detail-btn-primary px-4">
+
+                                    <i class="fa-solid fa-paper-plane me-1"></i>
+                                    Gửi bình luận
+
+                                </button>
+
                             </div>
+
                         </form>
                     }
+
                 </div>
 
                 @if (!binhLuans.Any())
                 {
                     <div class="tour-detail-empty-state mt-3">
+
                         <i class="fa-regular fa-comments"></i>
+
                         <h4>Chưa có bình luận nào</h4>
-                        <p>Hãy là người đầu tiên chia sẻ cảm nhận về tour này.</p>
+
+                        <p>
+                            Hãy là người đầu tiên chia sẻ
+                            cảm nhận về tour này.
+                        </p>
+
                     </div>
                 }
                 else
                 {
                     <div class="tour-detail-comment-list">
+
                         @foreach (var bl in binhLuans)
                         {
-                            <article class="tour-detail-comment-card @(string.IsNullOrWhiteSpace(bl.PhanHoiAdm) ? string.Empty : "has-admin-reply")">
+                            <article class="tour-detail-comment-card @(string.IsNullOrWhiteSpace(bl.PhanHoiAdm) ? "" : "has-admin-reply")">
+
                                 <div class="tour-detail-comment-user">
-                                    <img src="~/img/icons/user.png" alt="@bl.Ten" />
+
+                                    <img src="~/img/icons/user.png"
+                                         alt="@bl.Ten" />
+
                                     <div>
+
                                         <h5>@bl.Ten</h5>
-                                        <span>@bl.NgayBL.ToString("dd/MM/yyyy HH:mm")</span>
+
+                                        <span>
+                                            @bl.NgayBL.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+
                                     </div>
+
                                 </div>
 
-                                <p class="tour-detail-comment-content">@bl.NoiDung</p>
+                                <p class="tour-detail-comment-content">
+                                    @bl.NoiDung
+                                </p>
 
                                 @if (!string.IsNullOrWhiteSpace(bl.PhanHoiAdm))
                                 {
                                     <div class="tour-detail-admin-reply">
+
                                         <strong>Admin phản hồi</strong>
+
                                         <p>@bl.PhanHoiAdm</p>
+
                                     </div>
                                 }
+
                             </article>
                         }
+
                     </div>
                 }
+
             </div>
+
         </section>
 
-        @if (tourLienQuan != null && tourLienQuan.Any())
+        <!-- ============================================
+             RELATED TOURS
+        ============================================= -->
+
+        @if (tourLienQuan.Any())
         {
             <section class="tour-detail-related-wrap">
+
                 <div class="tour-detail-related-head">
-                    <h2>Tour liên quan</h2>
-                    <p>Gợi ý thêm các hành trình cùng nhóm điểm đến.</p>
+
+                    <h2>
+                        <i class="fa-solid fa-layer-group me-2"></i>
+                        Tour liên quan
+                    </h2>
+
+                    <p>
+                        Khám phá thêm những hành trình dành cho bạn.
+                    </p>
+
                 </div>
 
-                <div class="row g-4">
+                <div class="tour-detail-related-horizontal">
+
                     @foreach (var t in tourLienQuan)
                     {
-                        var lichGanNhat = t.LichKhoiHanhs
+                        var lichLienQuan = t.LichKhoiHanhs
+                            .Where(l => l.NgayKhoiHanh >= today)
                             .OrderBy(l => l.NgayKhoiHanh)
+                            .ThenBy(l => l.GioKhoiHanh)
                             .FirstOrDefault();
 
-                        <div class="col-xl-4 col-md-6">
-                            <article class="tour-detail-related-card">
-                                <div class="tour-detail-related-media">
-                                    <img src="@TourImagePathHelper.ToTourImageSrc(t.HinhAnh)" alt="@t.TenTour" class="related-img" />
-                                    @if (lichGanNhat != null)
+                        <article class="tour-detail-related-card">
+
+                            <div class="tour-detail-related-media">
+
+                                <img src="@TourImagePathHelper.ToTourImageSrc(t.HinhAnh)"
+                                     alt="@t.TenTour"
+                                     class="related-img"
+                                     loading="lazy" />
+
+                            </div>
+
+                            <div class="tour-detail-related-body">
+
+                                <h4 title="@t.TenTour">
+                                    @t.TenTour
+                                </h4>
+
+                                <p class="tour-detail-related-time">
+
+                                    <i class="fa-regular fa-clock me-1"></i>
+                                    @t.ThoiGian
+
+                                </p>
+
+                                <ul class="tour-detail-related-meta">
+
+                                    <li>
+                                        <span>Điểm đến</span>
+                                        <strong>@t.DiaDiem</strong>
+                                    </li>
+
+                                    <li>
+                                        <span>Lịch gần nhất</span>
+                                        <strong>
+                                            @(lichLienQuan == null
+                                                ? "Chưa có lịch"
+                                                : lichLienQuan.NgayKhoiHanh.ToString("dd/MM/yyyy"))
+                                        </strong>
+                                    </li>
+
+                                </ul>
+
+                                <div class="tour-detail-related-price">
+
+                                    <span class="price-km">
+                                        @string.Format("{0:N0} đ", t.GiaKhuyenMai)
+                                    </span>
+
+                                    @if ((t.GiaGoc ?? 0) > (t.GiaKhuyenMai ?? 0))
                                     {
-                                        <span class="tour-detail-related-badge">@lichGanNhat.NgayKhoiHanh.ToString("dd/MM/yyyy")</span>
+                                        <span class="price-old">
+                                            @string.Format("{0:N0} đ", t.GiaGoc)
+                                        </span>
                                     }
+
                                 </div>
 
-                                <div class="tour-detail-related-body">
-                                    <h4>@t.TenTour</h4>
-                                    <p class="tour-detail-related-time">@t.ThoiGian</p>
+                                <a asp-controller="Tour"
+                                   asp-action="ChiTiet"
+                                   asp-route-id="@t.IdTour"
+                                   class="btn tour-detail-btn-primary related-btn">
 
-                                    <ul class="tour-detail-related-meta">
-                                        <li><span>Mã tour</span><strong>@t.MaTour</strong></li>
-                                        <li><span>Điểm đến</span><strong>@t.DiaDiem</strong></li>
-                                        @if (lichGanNhat != null)
-                                        {
-                                            <li><span>Giờ KH</span><strong>@(lichGanNhat.GioKhoiHanh?.ToString("HH:mm") ?? "--")</strong></li>
-                                            <li><span>Còn lại</span><strong>@lichGanNhat.SoChoConLai chỗ</strong></li>
-                                            <li><span>Trạng thái</span><strong>@lichGanNhat.TrangThai</strong></li>
-                                        }
-                                        <li><span>Phương tiện</span><strong>@t.PhuongTien</strong></li>
-                                    </ul>
+                                    Xem chi tiết
+                                    <i class="fa-solid fa-arrow-right"></i>
 
-                                    <div class="tour-detail-related-price">
-                                        <span class="price-km">@string.Format("{0:N0} đ", t.GiaKhuyenMai)</span>
-                                        <span class="price-old">@string.Format("{0:N0} đ", t.GiaGoc)</span>
-                                    </div>
+                                </a>
 
-                                    <a asp-controller="Tour"
-                                       asp-action="ChiTiet"
-                                       asp-route-id="@t.IdTour"
-                                       class="btn tour-detail-btn-primary w-100 related-btn">
-                                        Xem chi tiết
-                                    </a>
-                                </div>
-                            </article>
-                        </div>
+                            </div>
+
+                        </article>
                     }
+
                 </div>
+
             </section>
         }
+
     </div>
 
-    <div class="modal fade" id="loginWarningModal" tabindex="-1" aria-hidden="true">
+    <!-- ================================================
+         LOGIN WARNING MODAL
+    ================================================= -->
+
+    <div class="modal fade"
+         id="loginWarningModal"
+         tabindex="-1"
+         aria-hidden="true">
+
         <div class="modal-dialog modal-dialog-centered">
+
             <div class="modal-content tour-detail-login-modal">
+
                 <div class="modal-body">
+
                     <div class="tour-detail-login-modal-icon">
                         <i class="fa-solid fa-user-lock"></i>
                     </div>
+
                     <h5>Bạn chưa đăng nhập</h5>
-                    <p>Vui lòng đăng nhập để tiếp tục đặt tour và lưu thông tin nhanh hơn.</p>
+
+                    <p>
+                        Vui lòng đăng nhập để tiếp tục đặt tour
+                        và lưu thông tin nhanh hơn.
+                    </p>
 
                     <div class="tour-detail-login-modal-actions">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <a id="btnGoLogin" class="btn tour-detail-btn-primary">Đăng nhập</a>
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Hủy
+                        </button>
+
+                        <a id="btnGoLogin"
+                           class="btn tour-detail-btn-primary">
+                            Đăng nhập
+                        </a>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 </main>
 
-<script src="~/js/tour-detail.js" asp-append-version="true"></script>
+<script src="~/js/tour-detail.js"
+        asp-append-version="true"></script>

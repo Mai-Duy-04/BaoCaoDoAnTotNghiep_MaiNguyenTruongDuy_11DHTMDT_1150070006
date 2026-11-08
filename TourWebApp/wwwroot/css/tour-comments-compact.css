@@ -1,0 +1,341 @@
+
+/* =====================================================
+   HAPPYTRIP - PREMIUM COMPACT COMMENTS
+   File: wwwroot/css/tour-comments-compact.css
+   Chỉ áp dụng cho phần bình luận trang Chi tiết tour
+   ===================================================== */
+
+/* Khung bình luận tổng thể */
+
+.tour-detail-page #binhluan > .tour-detail-section-card {
+    padding: 28px 32px;
+    background: #fff;
+    border: 1px solid #eee9e0;
+    border-radius: 22px;
+    box-shadow: 0 12px 30px rgba(30, 49, 35, .055);
+}
+
+/* Tiêu đề */
+
+.tour-detail-page .tour-detail-comment-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.tour-detail-page .tour-detail-comment-head h2 {
+    margin: 0 0 5px;
+    color: #203e30;
+    font-size: 1.45rem;
+    font-weight: 700;
+}
+
+.tour-detail-page .tour-detail-comment-head h2 i {
+    color: #65856c;
+}
+
+.tour-detail-page .tour-detail-comment-head p {
+    margin: 0;
+    color: #8a918a;
+    font-size: .86rem;
+}
+
+.tour-detail-page #sortComment {
+    min-width: 138px;
+    padding: 10px 36px 10px 14px;
+    border: 1px solid #e7e5dc;
+    border-radius: 12px;
+    background-color: #fff;
+    color: #415649;
+    font-size: .86rem;
+    box-shadow: none;
+}
+
+.tour-detail-page #sortComment:focus {
+    border-color: #8bab91;
+    box-shadow: 0 0 0 3px rgba(83, 137, 89, .11);
+}
+
+/* Thông báo đăng nhập */
+
+.tour-detail-page .tour-detail-comment-form-wrap {
+    padding: 13px 17px;
+    border: 1px solid #ece9e1;
+    border-radius: 13px;
+    background: #faf9f6;
+}
+
+.tour-detail-page .tour-detail-login-alert {
+    gap: 10px;
+    color: #67766c;
+    font-size: .86rem;
+}
+
+.tour-detail-page .tour-detail-login-alert i {
+    color: #718f78;
+}
+
+.tour-detail-page .tour-detail-login-alert a {
+    color: #286043;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Danh sách bình luận */
+
+.tour-detail-page .tour-detail-comment-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+/* Card bình luận */
+
+.tour-detail-page .tour-detail-comment-card,
+.tour-detail-page .tour-detail-comment-card.has-admin-reply {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    column-gap: 13px;
+    row-gap: 0;
+
+    width: 100%;
+    max-width: 860px;
+    padding: 19px 21px;
+
+    background: #fff;
+    border: 1px solid #e9e9e3;
+    border-radius: 18px;
+
+    box-shadow: 0 5px 19px rgba(24, 50, 33, .045);
+
+    transition:
+        border-color .22s ease,
+        box-shadow .22s ease,
+        transform .22s ease;
+}
+
+.tour-detail-page .tour-detail-comment-card:hover {
+    border-color: #d7e2d7;
+    box-shadow: 0 10px 25px rgba(24, 50, 33, .075);
+    transform: translateY(-2px);
+}
+
+/* Avatar và thông tin người bình luận */
+
+.tour-detail-page .tour-detail-comment-user {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    column-gap: 13px;
+    align-items: center;
+
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.tour-detail-page .tour-detail-comment-user img {
+    width: 42px;
+    height: 42px;
+
+    object-fit: cover;
+    border: 2px solid #e6eee4;
+    border-radius: 50%;
+
+    background: #f5f7f3;
+}
+
+.tour-detail-page .tour-detail-comment-user h5 {
+    margin: 0 0 4px;
+    color: #203e30;
+    font-size: .94rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.tour-detail-page .tour-detail-comment-user span {
+    display: block;
+    color: #969e96;
+    font-size: .75rem;
+    line-height: 1.4;
+}
+
+/* Nội dung bình luận nằm dưới tên, không dưới avatar */
+
+.tour-detail-page .tour-detail-comment-content {
+    grid-column: 2;
+    min-width: 0;
+
+    margin: 7px 0 0;
+
+    color: #49594e;
+    font-size: .9rem;
+    font-weight: 400;
+    line-height: 1.7;
+
+    overflow-wrap: anywhere;
+}
+
+/* Phản hồi HappyTrip, nhỏ và nhẹ như một reply */
+
+.tour-detail-page .tour-detail-admin-reply {
+    grid-column: 2;
+    min-width: 0;
+
+    margin-top: 12px;
+    padding: 12px 14px;
+
+    background: #f5f7f2;
+    border: 1px solid #e5ebe1;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.tour-detail-page .tour-detail-admin-reply strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #315b42;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.tour-detail-page .tour-detail-admin-reply strong::before {
+    content: "↳";
+    color: #809a80;
+    font-size: 1.1rem;
+}
+
+.tour-detail-page .tour-detail-admin-reply p {
+    margin: 6px 0 0;
+
+    color: #657267;
+    font-size: .84rem;
+    line-height: 1.65;
+
+    overflow-wrap: anywhere;
+}
+
+/* Form viết bình luận */
+
+.tour-detail-page .tour-detail-comment-form .form-control {
+    min-height: 78px;
+    padding: 12px 14px;
+
+    background: #fff;
+    border: 1px solid #e5e5dc;
+    border-radius: 12px;
+
+    color: #334c3a;
+    font-size: .9rem;
+    line-height: 1.65;
+}
+
+.tour-detail-page .tour-detail-comment-form .form-control:focus {
+    border-color: #81aa88;
+    box-shadow: 0 0 0 3px rgba(81, 138, 89, .1);
+}
+
+.tour-detail-page .tour-detail-comment-form .tour-detail-btn-primary {
+    min-height: 39px;
+    padding: 9px 18px;
+    font-size: .84rem;
+}
+
+/* Trạng thái chưa có bình luận */
+
+.tour-detail-page #binhluan .tour-detail-empty-state {
+    max-width: 860px;
+    min-height: 125px;
+    margin-inline: auto;
+    padding: 20px;
+
+    background: #faf9f6;
+    border: 1px dashed #e7e5dc;
+    border-radius: 14px;
+}
+
+.tour-detail-page #binhluan .tour-detail-empty-state i {
+    font-size: 1.3rem;
+    color: #819c86;
+}
+
+.tour-detail-page #binhluan .tour-detail-empty-state h4 {
+    font-size: .98rem;
+}
+
+.tour-detail-page #binhluan .tour-detail-empty-state p {
+    font-size: .84rem;
+}
+
+/* Tablet */
+
+@media (max-width: 991px) {
+    .tour-detail-page #binhluan > .tour-detail-section-card {
+        padding: 23px;
+    }
+
+    .tour-detail-page .tour-detail-comment-card {
+        max-width: 100%;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 767px) {
+    .tour-detail-page #binhluan > .tour-detail-section-card {
+        padding: 19px 15px;
+        border-radius: 16px;
+    }
+
+    .tour-detail-page .tour-detail-comment-head {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .tour-detail-page .tour-detail-comment-head h2 {
+        font-size: 1.2rem;
+    }
+
+    .tour-detail-page .tour-detail-comment-card,
+    .tour-detail-page .tour-detail-comment-card.has-admin-reply {
+        grid-template-columns: 36px minmax(0, 1fr);
+        column-gap: 10px;
+        padding: 15px 12px;
+        border-radius: 14px;
+    }
+
+    .tour-detail-page .tour-detail-comment-user {
+        grid-template-columns: 36px minmax(0, 1fr);
+        column-gap: 10px;
+    }
+
+    .tour-detail-page .tour-detail-comment-user img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .tour-detail-page .tour-detail-comment-content {
+        font-size: .86rem;
+        line-height: 1.65;
+    }
+
+    .tour-detail-page .tour-detail-admin-reply {
+        padding: 11px;
+    }
+
+    .tour-detail-page .tour-detail-admin-reply p {
+        font-size: .82rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tour-detail-page .tour-detail-comment-card {
+        transition: none;
+        transform: none !important;
+    }
+}
