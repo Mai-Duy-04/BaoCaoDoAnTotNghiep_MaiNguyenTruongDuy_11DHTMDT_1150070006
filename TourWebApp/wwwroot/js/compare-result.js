@@ -1,223 +1,640 @@
-(function () {
-  "use strict";
 
-  const STORAGE_KEY = "tour_compare_ids";
+/* =========================================================
+   HAPPYTRIP - TOUR COMPARE RESULT
+   Trang kết quả so sánh tour
+   ========================================================= */
 
-  // ── Root elements ──────────────────────────────────────────
-  const matrix = document.getElementById("tourCompareTable");
-  if (!matrix) return;
+(() => {
+    "use strict";
 
-  const compareInsight    = document.getElementById("compareInsight");
-  const sortPriceBtn      = document.getElementById("sortPriceBtn");
-  const sortViewBtn       = document.getElementById("sortViewBtn");
-  const toggleSameRowsBtn = document.getElementById("toggleSameRowsBtn");
-  const copyLinkBtn       = document.getElementById("copyCompareLinkBtn");
+    const STORAGE_KEY = "tour_compare_ids";
+    const SAVED_KEY = "happytrip_saved_comparison";
 
-  let hideSame  = false;
-  let priceAsc  = true;
-  let viewDesc  = true;
+    const MAX_TOURS = 4;
+    const TOUR_LIST_URL = "/Tour/TatCa";
+    const COMPARE_URL = "/Tour/SoSanh";
 
-  // ── Helpers ────────────────────────────────────────────────
+    const page = document.getElementById("happyTripCompare");
 
-  /** All rows in the matrix */
-  function getRows() {
-    return Array.from(matrix.querySelectorAll(".cmp-matrix__row"));
-  }
+    if (!page) return;
 
-  /** Header tour-card elements (hold data-* attributes) */
-  function getTourHeaders() {
-    return Array.from(matrix.querySelectorAll(".cmp-tour-header"));
-  }
+    const elements = {
+        share: document.getElementById("cmpShare"),
+        save: document.getElementById("cmpSave"),
+        restore: document.getElementById("cmpRestore"),
+        clear: document.getElementById("cmpClear"),
+        toggleSame: document.getElementById("cmpToggleSame"),
+        cards: document.getElementById("cmpTourCards"),
+        table: document.getElementById("tourCompareTable"),
+        toast: document.getElementById("cmpToast")
+    };
 
-  /** Ordered list of tour ids from current header order */
-  function getCurrentIds() {
-    return getTourHeaders().map(h => Number(h.dataset.tourId));
-  }
+    let toastTimer = null;
+    let sameRowsHidden = false;
 
-  // ── Column reorder ─────────────────────────────────────────
-  /**
-   * Reorder tour columns in every row to match `orderedIds`.
-   * Works on .cmp-matrix__col elements (all except the first label cell).
-   */
-  function applyColumnOrder(orderedIds) {
-    getRows().forEach(row => {
-      const cols = Array.from(row.querySelectorAll(".cmp-matrix__col, .cmp-tour-header"));
-      if (cols.length === 0) return;
+    /* =====================================================
+       01. STORAGE HELPERS
+       ===================================================== */
 
-      // Build id→element map using header row for cells that don't carry tour-id
-      // For the header row cols carry data-tour-id directly.
-      // For data rows we match positionally via header order before reorder.
-      const headerRow = matrix.querySelector(".cmp-matrix__row--header");
-      const headerCols = Array.from(headerRow.querySelectorAll(".cmp-tour-header"));
-      const posById = {};
-      headerCols.forEach((h, i) => { posById[Number(h.dataset.tourId)] = i; });
+    function normalizeIds(value) {
+        let list = value;
 
-      // Sort by orderedIds using position index
-      const dataCols = Array.from(row.querySelectorAll(".cmp-matrix__col, .cmp-tour-header"));
-      if (dataCols.length === 0) return;
-
-      const sorted = orderedIds.map(id => dataCols[posById[id]]).filter(Boolean);
-      const parent = dataCols[0].parentElement;
-      sorted.forEach(el => parent.appendChild(el));
-    });
-  }
-
-  // ── Best-value highlighting ────────────────────────────────
-  function refreshBestHighlights() {
-    const headerCols = getTourHeaders();
-
-    getRows().forEach(row => {
-      const kind = row.dataset.rowKind;
-      if (kind !== "numeric-low" && kind !== "numeric-high") return;
-
-      const cols = Array.from(row.querySelectorAll(".cmp-matrix__col"));
-      cols.forEach(c => c.classList.remove("is-best"));
-
-      const values = cols.map(c => Number(c.dataset.value ?? 0));
-      const target = kind === "numeric-low"
-        ? Math.min(...values)
-        : Math.max(...values);
-
-      cols.forEach(c => {
-        if (Number(c.dataset.value ?? 0) === target) {
-          // Don't highlight "0 seats" as best for numeric-high
-          if (kind === "numeric-high" && target === 0) return;
-          c.classList.add("is-best");
+        if (typeof list === "string") {
+            list = list.split(",");
         }
-      });
-    });
-  }
 
-  // ── Same-row toggle ────────────────────────────────────────
-  function applyHideSame() {
-    getRows().forEach(row => {
-      const kind = row.dataset.rowKind;
-      if (kind === "header" || kind === "action") return;
+        if (!Array.isArray(list)) {
+            return [];
+        }
 
-      const vals = Array.from(row.querySelectorAll(".cmp-matrix__col"))
-        .map(c => c.textContent.trim());
-      const allSame = vals.length > 1 && vals.every(v => v === vals[0]);
-      row.classList.toggle("is-hidden-same", hideSame && allSame);
-    });
-  }
+        const ids = [];
 
-  // ── Insight cards ──────────────────────────────────────────
-  function renderInsights() {
-    if (!compareInsight) return;
+        for (const item of list) {
+            const id = Number(item);
 
-    const headers = getTourHeaders();
-    if (headers.length === 0) return;
+            if (
+                Number.isSafeInteger(id) &&
+                id > 0 &&
+                !ids.includes(id)
+            ) {
+                ids.push(id);
+            }
 
-    // Resolve tour name: name text is in .cmp-tour-header__name inside the header col
-    const tours = headers.map(h => ({
-      id:    Number(h.dataset.tourId),
-      name:  (h.querySelector(".cmp-tour-header__name")?.textContent ?? "").trim(),
-      price: Number(h.dataset.price ?? 0),
-      views: Number(h.dataset.views ?? 0),
-      seats: Number(h.dataset.seats ?? 0),
-    }));
+            if (ids.length >= MAX_TOURS) {
+                break;
+            }
+        }
 
-    const minPrice = Math.min(...tours.map(t => t.price));
-    const maxViews = Math.max(...tours.map(t => t.views));
-    const maxSeats = Math.max(...tours.map(t => t.seats));
-
-    const cheapest  = tours.filter(t => t.price === minPrice).map(t => t.name);
-    const hottest   = tours.filter(t => t.views === maxViews).map(t => t.name);
-
-    // Warnings: sold-out, nearly-sold-out, overpriced
-    const warnings = tours.flatMap(t => {
-      const w = [];
-      if (t.seats <= 0)              w.push(`${t.name}: hết chỗ`);
-      else if (t.seats <= 3)         w.push(`${t.name}: sắp hết chỗ`);
-      if (t.price > minPrice * 1.6)  w.push(`${t.name}: giá cao hơn mặt bằng`);
-      return w;
-    });
-
-    const spacious = tours.filter(t => t.seats === maxSeats && t.seats > 0).map(t => t.name);
-    const slotText = warnings.length
-      ? warnings.join("; ")
-      : (spacious.length ? `${spacious.join(", ")} còn nhiều chỗ` : "Đang cập nhật");
-
-    compareInsight.innerHTML = `
-      <article class="cmp-insight-card">
-        <p class="cmp-insight-card__label">Giá tốt nhất</p>
-        <p class="cmp-insight-card__value">${cheapest.join(", ")}${cheapest.length > 1 ? " (đồng hạng)" : ""}</p>
-      </article>
-      <article class="cmp-insight-card">
-        <p class="cmp-insight-card__label">Phổ biến nhất</p>
-        <p class="cmp-insight-card__value">${hottest.join(", ")}${hottest.length > 1 ? " (đồng hạng)" : ""}</p>
-      </article>
-      <article class="cmp-insight-card${warnings.length ? " cmp-insight-card--warning" : ""}">
-        <p class="cmp-insight-card__label">Tình trạng chỗ</p>
-        <p class="cmp-insight-card__value">${slotText}</p>
-      </article>
-    `;
-  }
-
-  // ── Sort buttons ───────────────────────────────────────────
-  sortPriceBtn?.addEventListener("click", () => {
-    const ids = getTourHeaders()
-      .map(h => ({ id: Number(h.dataset.tourId), price: Number(h.dataset.price ?? 0) }))
-      .sort((a, b) => priceAsc ? a.price - b.price : b.price - a.price)
-      .map(x => x.id);
-
-    applyColumnOrder(ids);
-    refreshBestHighlights();
-    renderInsights();
-    priceAsc = !priceAsc;
-  });
-
-  sortViewBtn?.addEventListener("click", () => {
-    const ids = getTourHeaders()
-      .map(h => ({ id: Number(h.dataset.tourId), views: Number(h.dataset.views ?? 0) }))
-      .sort((a, b) => viewDesc ? b.views - a.views : a.views - b.views)
-      .map(x => x.id);
-
-    applyColumnOrder(ids);
-    refreshBestHighlights();
-    renderInsights();
-    viewDesc = !viewDesc;
-  });
-
-  // ── Hide same rows ─────────────────────────────────────────
-  toggleSameRowsBtn?.addEventListener("click", () => {
-    hideSame = !hideSame;
-    applyHideSame();
-    toggleSameRowsBtn.textContent = hideSame ? "Hiện tất cả dòng" : "Ẩn dòng giống nhau";
-  });
-
-  // ── Copy link ──────────────────────────────────────────────
-  copyLinkBtn?.addEventListener("click", async () => {
-    const ids = getCurrentIds().filter(Boolean);
-    const url = `${location.origin}/Tour/SoSanh?ids=${ids.join(",")}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      copyLinkBtn.textContent = "Đã copy ✓";
-      setTimeout(() => { copyLinkBtn.textContent = "Copy link"; }, 1500);
-    } catch {
-      window.prompt("Copy link so sánh:", url);
+        return ids;
     }
-  });
 
-  // ── Remove tour ────────────────────────────────────────────
-  matrix.addEventListener("click", e => {
-    const btn = e.target.closest(".remove-compare-item");
-    if (!btn) return;
+    function storageGet(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (error) {
+            console.warn(
+                "[HappyTrip] Không thể đọc localStorage:",
+                error
+            );
 
-    const removeId = Number(btn.dataset.tourId);
-    if (!removeId) return;
-
-    const remaining = getCurrentIds().filter(id => id !== removeId);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
-
-    if (remaining.length < 2) {
-      location.href = "/Tour/TatCa";
-      return;
+            return null;
+        }
     }
-    location.href = `/Tour/SoSanh?ids=${remaining.join(",")}`;
-  });
 
-  // ── Init ───────────────────────────────────────────────────
-  refreshBestHighlights();
-  renderInsights();
+    function storageSet(key, value) {
+        try {
+            localStorage.setItem(key, value);
+            return true;
+        } catch (error) {
+            console.warn(
+                "[HappyTrip] Không thể ghi localStorage:",
+                error
+            );
+
+            return false;
+        }
+    }
+
+    function setCompareIds(ids) {
+        const normalized = normalizeIds(ids);
+
+        storageSet(
+            STORAGE_KEY,
+            JSON.stringify(normalized)
+        );
+
+        return normalized;
+    }
+
+    function getCompareIds() {
+        try {
+            return normalizeIds(
+                JSON.parse(storageGet(STORAGE_KEY) || "[]")
+            );
+        } catch {
+            return [];
+        }
+    }
+
+    /* =====================================================
+       02. GET CURRENT TOUR IDS
+       ===================================================== */
+
+    function getPageIds() {
+        if (!elements.cards) return [];
+
+        const cards = elements.cards.querySelectorAll(
+            ".ht-compare-tour[data-tour-id]"
+        );
+
+        return normalizeIds(
+            Array.from(cards, card => card.dataset.tourId)
+        );
+    }
+
+    function getUrlIds() {
+        const params = new URLSearchParams(
+            window.location.search
+        );
+
+        return normalizeIds(params.get("ids") || "");
+    }
+
+    function getCurrentIds() {
+        const pageIds = getPageIds();
+
+        if (pageIds.length > 0) {
+            return pageIds;
+        }
+
+        return getUrlIds();
+    }
+
+    function buildCompareUrl(ids) {
+        const normalized = normalizeIds(ids);
+
+        if (normalized.length < 2) {
+            return TOUR_LIST_URL;
+        }
+
+        return (
+            COMPARE_URL +
+            "?ids=" +
+            encodeURIComponent(normalized.join(","))
+        );
+    }
+
+    function navigateToCompare(ids) {
+        const normalized = setCompareIds(ids);
+
+        window.location.assign(
+            buildCompareUrl(normalized)
+        );
+    }
+
+    function syncCurrentComparison() {
+        const pageIds = getPageIds();
+
+        if (pageIds.length > 0) {
+            setCompareIds(pageIds);
+            return;
+        }
+
+        // Trang lỗi / không có tour:
+        // không tự ghi đè danh sách đang lưu.
+        const urlIds = getUrlIds();
+
+        if (urlIds.length > 0) {
+            setCompareIds(urlIds);
+        }
+    }
+
+    /* =====================================================
+       03. TOAST
+       ===================================================== */
+
+    function showToast(message) {
+        const toast = elements.toast;
+
+        if (!toast) {
+            console.log("[HappyTrip]", message);
+            return;
+        }
+
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+        }
+
+        toast.textContent = message;
+        toast.classList.add("is-visible");
+
+        toastTimer = window.setTimeout(() => {
+            toast.classList.remove("is-visible");
+        }, 3000);
+    }
+
+    /* =====================================================
+       04. COPY URL
+       ===================================================== */
+
+    async function copyToClipboard(value) {
+        if (
+            navigator.clipboard &&
+            window.isSecureContext
+        ) {
+            try {
+                await navigator.clipboard.writeText(value);
+                return true;
+            } catch (error) {
+                console.warn(
+                    "[HappyTrip] Clipboard API thất bại:",
+                    error
+                );
+            }
+        }
+
+        const textarea = document.createElement("textarea");
+
+        textarea.value = value;
+        textarea.readOnly = true;
+
+        Object.assign(textarea.style, {
+            position: "fixed",
+            left: "-9999px",
+            top: "0",
+            opacity: "0"
+        });
+
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+
+        let copied = false;
+
+        try {
+            copied = document.execCommand("copy");
+        } catch {
+            copied = false;
+        }
+
+        textarea.remove();
+
+        return copied;
+    }
+
+    /* =====================================================
+       05. SHARE COMPARISON
+       ===================================================== */
+
+    async function shareComparison() {
+        const ids = getCurrentIds();
+
+        if (ids.length < 2) {
+            showToast(
+                "Vui lòng chọn ít nhất 2 tour để chia sẻ."
+            );
+            return;
+        }
+
+        const url = new URL(
+            buildCompareUrl(ids),
+            window.location.origin
+        ).href;
+
+        const success = await copyToClipboard(url);
+
+        showToast(
+            success
+                ? "Đã sao chép liên kết so sánh!"
+                : "Không thể sao chép liên kết."
+        );
+    }
+
+    /* =====================================================
+       06. SAVE COMPARISON
+       ===================================================== */
+
+    function readSavedComparison() {
+        try {
+            const raw = storageGet(SAVED_KEY);
+
+            if (!raw) {
+                return null;
+            }
+
+            const data = JSON.parse(raw);
+
+            if (!data || typeof data !== "object") {
+                return null;
+            }
+
+            const ids = normalizeIds(data.ids);
+
+            if (ids.length < 2) {
+                return null;
+            }
+
+            return {
+                ids,
+                savedAt: data.savedAt || null
+            };
+        } catch {
+            return null;
+        }
+    }
+
+    function updateRestoreButton() {
+        if (!elements.restore) return;
+
+        const saved = readSavedComparison();
+
+        elements.restore.hidden = !saved;
+    }
+
+    function saveComparison() {
+        const ids = getCurrentIds();
+
+        if (ids.length < 2) {
+            showToast(
+                "Cần ít nhất 2 tour để lưu so sánh."
+            );
+            return;
+        }
+
+        const saved = {
+            ids,
+            savedAt: new Date().toISOString()
+        };
+
+        const success = storageSet(
+            SAVED_KEY,
+            JSON.stringify(saved)
+        );
+
+        if (!success) {
+            showToast(
+                "Không thể lưu so sánh trên trình duyệt."
+            );
+            return;
+        }
+
+        setCompareIds(ids);
+        updateRestoreButton();
+
+        showToast(
+            "Đã lưu danh sách so sánh!"
+        );
+    }
+
+    /* =====================================================
+       07. RESTORE COMPARISON
+       ===================================================== */
+
+    function restoreComparison() {
+        const saved = readSavedComparison();
+
+        if (!saved) {
+            showToast(
+                "Chưa có danh sách so sánh được lưu."
+            );
+            return;
+        }
+
+        navigateToCompare(saved.ids);
+    }
+
+    /* =====================================================
+       08. REMOVE ONE TOUR
+       ===================================================== */
+
+    function removeTour(id) {
+        const tourId = Number(id);
+
+        if (
+            !Number.isSafeInteger(tourId) ||
+            tourId <= 0
+        ) {
+            return;
+        }
+
+        const currentIds = getCurrentIds();
+
+        if (!currentIds.includes(tourId)) {
+            return;
+        }
+
+        const remainingIds = currentIds.filter(
+            currentId => currentId !== tourId
+        );
+
+        setCompareIds(remainingIds);
+
+        if (remainingIds.length >= 2) {
+            window.location.assign(
+                buildCompareUrl(remainingIds)
+            );
+            return;
+        }
+
+        // Còn dưới 2 tour:
+        // quay lại danh sách để chọn tiếp.
+        window.location.assign(TOUR_LIST_URL);
+    }
+
+    function bindRemoveButtons() {
+        const buttons = page.querySelectorAll(
+            ".remove-compare-item[data-tour-id]"
+        );
+
+        buttons.forEach(button => {
+            button.addEventListener("click", () => {
+                removeTour(button.dataset.tourId);
+            });
+        });
+    }
+
+    /* =====================================================
+       09. CLEAR ALL
+       ===================================================== */
+
+    function clearComparison() {
+        const ids = getCurrentIds();
+
+        if (ids.length === 0) {
+            showToast(
+                "Danh sách so sánh đang trống."
+            );
+            return;
+        }
+
+        const confirmed = window.confirm(
+            "Bạn có muốn xóa tất cả tour đang so sánh không?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        setCompareIds([]);
+
+        // Bản được lưu bằng nút "Lưu so sánh"
+        // vẫn được giữ để người dùng mở lại.
+        window.location.assign(TOUR_LIST_URL);
+    }
+
+    /* =====================================================
+       10. HIDE SAME CRITERIA
+       ===================================================== */
+
+    function normalizeValue(value) {
+        return String(value ?? "")
+            .trim()
+            .replace(/\s+/g, " ")
+            .toLocaleLowerCase("vi-VN");
+    }
+
+    function isSameRow(row) {
+        const cells = Array.from(
+            row.querySelectorAll(
+                ".ht-compare-table__cell"
+            )
+        );
+
+        if (cells.length < 2) {
+            return false;
+        }
+
+        const values = cells.map(cell => {
+            const raw = cell.getAttribute("data-value");
+
+            return normalizeValue(
+                raw !== null
+                    ? raw
+                    : cell.textContent
+            );
+        });
+
+        return values.every(
+            value => value === values[0]
+        );
+    }
+
+    function updateSameButton() {
+        const button = elements.toggleSame;
+
+        if (!button) {
+            return;
+        }
+
+        button.replaceChildren();
+
+        const icon = document.createElement("i");
+
+        icon.className = sameRowsHidden
+            ? "fa-solid fa-eye"
+            : "fa-solid fa-eye-slash";
+
+        const text = document.createTextNode(
+            sameRowsHidden
+                ? " Hiện tất cả tiêu chí"
+                : " Ẩn dòng giống nhau"
+        );
+
+        button.append(icon, text);
+
+        button.setAttribute(
+            "aria-pressed",
+            String(sameRowsHidden)
+        );
+    }
+
+    function toggleSameCriteria() {
+        const table = elements.table;
+
+        if (!table) {
+            return;
+        }
+
+        sameRowsHidden = !sameRowsHidden;
+
+        const rows = table.querySelectorAll(
+            ".ht-compare-table__row"
+        );
+
+        let hiddenCount = 0;
+
+        rows.forEach(row => {
+            if (row.dataset.rowKind === "header") {
+                return;
+            }
+
+            const shouldHide =
+                sameRowsHidden && isSameRow(row);
+
+            row.classList.toggle(
+                "is-same-hidden",
+                shouldHide
+            );
+
+            if (shouldHide) {
+                hiddenCount++;
+            }
+        });
+
+        updateSameButton();
+
+        if (sameRowsHidden) {
+            showToast(
+                hiddenCount
+                    ? `Đã ẩn ${hiddenCount} tiêu chí giống nhau.`
+                    : "Không có tiêu chí giống nhau để ẩn."
+            );
+        } else {
+            showToast(
+                "Đã hiển thị tất cả tiêu chí."
+            );
+        }
+    }
+
+    /* =====================================================
+       11. EVENTS
+       ===================================================== */
+
+    function bindEvents() {
+        elements.share?.addEventListener(
+            "click",
+            shareComparison
+        );
+
+        elements.save?.addEventListener(
+            "click",
+            saveComparison
+        );
+
+        elements.restore?.addEventListener(
+            "click",
+            restoreComparison
+        );
+
+        elements.clear?.addEventListener(
+            "click",
+            clearComparison
+        );
+
+        elements.toggleSame?.addEventListener(
+            "click",
+            toggleSameCriteria
+        );
+
+        bindRemoveButtons();
+    }
+
+    /* =====================================================
+       12. INITIALIZE
+       ===================================================== */
+
+    function initialize() {
+        syncCurrentComparison();
+
+        updateRestoreButton();
+        updateSameButton();
+
+        bindEvents();
+
+        console.log(
+            "[HappyTrip] Compare Result ready:",
+            getCurrentIds()
+        );
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            { once: true }
+        );
+    } else {
+        initialize();
+    }
 })();

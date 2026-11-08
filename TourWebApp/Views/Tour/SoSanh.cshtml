@@ -1,147 +1,703 @@
+
 @model List<TourWebApp.Models.ViewModels.TourCompareVM>
+@using TourWebApp.Helpers
+@using System.Text.RegularExpressions
 
 @{
-    ViewData["Title"] = "So sánh tour";
+    ViewData["Title"] = "So sánh tour | HappyTrip";
+
+    var tours = Model
+        ?? new List<TourWebApp.Models.ViewModels.TourCompareVM>();
+
+    var validPrices = tours
+        .Where(t => t.GiaNguoiLon.HasValue
+            && t.GiaNguoiLon.Value > 0)
+        .Select(t => t.GiaNguoiLon!.Value)
+        .ToList();
+
+    decimal? minPrice = validPrices.Any()
+        ? validPrices.Min()
+        : null;
+
+    decimal? maxPrice = validPrices.Any()
+        ? validPrices.Max()
+        : null;
+
+    decimal? priceDifference = validPrices.Count >= 2
+        ? maxPrice - minPrice
+        : null;
+
+    var durationValues = tours
+        .Select(t =>
+        {
+            var match = Regex.Match(
+                t.ThoiGian ?? "",
+                @"\d+"
+            );
+
+            return match.Success
+                && int.TryParse(match.Value, out int days)
+                    ? (int?)days
+                    : null;
+        })
+        .Where(d => d.HasValue)
+        .Select(d => d!.Value)
+        .ToList();
+
+    int? dayDifference = durationValues.Count >= 2
+        ? durationValues.Max() - durationValues.Min()
+        : null;
+
+    var heroImage = tours.Count > 0
+        ? TourImagePathHelper.ToTourImageSrc(tours[0].HinhAnh)
+        : "";
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/tour-compare.css" asp-append-version="true" />
+    <link rel="stylesheet"
+          href="~/css/tour-compare.css"
+          asp-append-version="true" />
 }
 
-<div class="cmp-page">
+<div class="ht-compare-page"
+     id="happyTripCompare"
+     style="--compare-columns:@tours.Count">
 
-    <div class="cmp-hero">
-        <div class="cmp-hero__left">
-            <p class="cmp-hero__eyebrow">COMPARE CENTER</p>
-            <h1 class="cmp-hero__title">So sánh tour</h1>
-            <p class="cmp-hero__subtitle">Đối chiếu giá, lịch trình, phương tiện và tình trạng chỗ của các tour đã chọn.</p>
+    <!-- HERO -->
+
+    <section class="ht-compare-hero"
+             aria-labelledby="htCompareTitle">
+
+        <div class="ht-compare-hero__image"
+             style="background-image:url('@heroImage')">
         </div>
-        <div class="cmp-hero__actions">
-            <button id="sortPriceBtn" type="button" class="cmp-btn cmp-btn--secondary">Sắp xếp giá</button>
-            <button id="sortViewBtn" type="button" class="cmp-btn cmp-btn--secondary">Sắp xếp lượt xem</button>
-            <button id="toggleSameRowsBtn" type="button" class="cmp-btn cmp-btn--primary">Ẩn dòng giống nhau</button>
-            <button id="copyCompareLinkBtn" type="button" class="cmp-btn cmp-btn--secondary">Copy link</button>
+
+        <div class="ht-compare-hero__veil"></div>
+
+        <div class="ht-compare-shell ht-compare-hero__inner">
+
+            <div class="ht-compare-hero__content">
+
+                <span class="ht-compare-eyebrow">
+                    <i class="fa-solid fa-compass"></i>
+                    HAPPYTRIP · SO SÁNH TOUR
+                </span>
+
+                <h1 id="htCompareTitle">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    So sánh chuyến đi của bạn
+                </h1>
+
+                <p>
+                    Khám phá sự khác biệt để chọn
+                    hành trình phù hợp nhất.
+                </p>
+
+            </div>
+
         </div>
-    </div>
 
-    @if (Model == null || Model.Count < 2)
-    {
-        <div class="cmp-empty">Cần ít nhất 2 tour để so sánh.</div>
-    }
-    else
-    {
-        <div id="compareInsight" class="cmp-insights"></div>
+    </section>
 
-        <div class="cmp-matrix-card">
-            <div class="cmp-matrix-scroll">
-                <div class="cmp-matrix" id="tourCompareTable">
+    <!-- MAIN -->
 
-                    <div class="cmp-matrix__row cmp-matrix__row--header" data-row-kind="header">
-                        <div class="cmp-matrix__label cmp-matrix__label--header"></div>
-                        @foreach (var t in Model)
+    <div class="ht-compare-shell ht-compare-main">
+
+        <!-- TOOLBAR -->
+
+        <div class="ht-compare-toolbar">
+
+            <a asp-controller="Tour"
+               asp-action="TatCa"
+               class="ht-compare-button ht-compare-button--back">
+
+                <i class="fa-solid fa-arrow-left"></i>
+                Quay lại danh sách tour
+
+            </a>
+
+            <div class="ht-compare-toolbar__right">
+
+                <button type="button"
+                        class="ht-compare-button"
+                        id="cmpShare">
+
+                    <i class="fa-solid fa-share-nodes"></i>
+                    Chia sẻ
+
+                </button>
+
+                <button type="button"
+                        class="ht-compare-button"
+                        id="cmpSave">
+
+                    <i class="fa-regular fa-bookmark"></i>
+                    Lưu so sánh
+
+                </button>
+
+                <button type="button"
+                        class="ht-compare-button"
+                        id="cmpRestore"
+                        hidden>
+
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    Mở bản đã lưu
+
+                </button>
+
+                <button type="button"
+                        class="ht-compare-button ht-compare-button--danger"
+                        id="cmpClear">
+
+                    <i class="fa-regular fa-trash-can"></i>
+                    Xóa tất cả
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- EMPTY STATE -->
+
+        @if (tours.Count < 2)
+        {
+            <div class="ht-compare-empty">
+
+                <i class="fa-regular fa-map"></i>
+
+                <h2>Chọn ít nhất 2 tour để so sánh</h2>
+
+                <p>
+                    Bạn có thể chọn tối đa 4 tour
+                    trong danh sách HappyTrip.
+                </p>
+
+                <a asp-controller="Tour"
+                   asp-action="TatCa"
+                   class="ht-compare-button ht-compare-button--solid">
+
+                    Khám phá các tour
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </a>
+
+            </div>
+        }
+        else
+        {
+            <div class="ht-compare-layout">
+
+                <!-- OVERVIEW -->
+
+                <aside class="ht-compare-overview">
+
+                    <h2>
+                        <i class="fa-solid fa-chart-simple"></i>
+                        Tổng quan so sánh
+                    </h2>
+
+                    <div class="ht-compare-overview__stat">
+
+                        <span class="ht-compare-overview__icon">
+                            <i class="fa-solid fa-tags"></i>
+                        </span>
+
+                        <span>
+
+                            <small>Chênh lệch giá</small>
+
+                            <strong>
+                                @(priceDifference.HasValue
+                                    ? string.Format(
+                                        "{0:N0}đ",
+                                        priceDifference.Value)
+                                    : "Chưa đủ dữ liệu")
+                            </strong>
+
+                        </span>
+
+                    </div>
+
+                    <div class="ht-compare-overview__stat">
+
+                        <span class="ht-compare-overview__icon">
+                            <i class="fa-regular fa-clock"></i>
+                        </span>
+
+                        <span>
+
+                            <small>Chênh lệch thời gian</small>
+
+                            <strong>
+                                @(dayDifference.HasValue
+                                    ? $"{dayDifference.Value} ngày"
+                                    : "Chưa xác định")
+                            </strong>
+
+                        </span>
+
+                    </div>
+
+                    <div class="ht-compare-overview__stat">
+
+                        <span class="ht-compare-overview__icon">
+                            <i class="fa-solid fa-suitcase-rolling"></i>
+                        </span>
+
+                        <span>
+
+                            <small>Đang so sánh</small>
+
+                            <strong>
+                                @tours.Count tour
+                            </strong>
+
+                        </span>
+
+                    </div>
+
+                    <div class="ht-compare-overview__landscape"
+                         aria-hidden="true">
+
+                        <span class="ht-compare-overview__sun"></span>
+
+                        <span class="ht-compare-overview__mountain ht-compare-overview__mountain--back"></span>
+
+                        <span class="ht-compare-overview__mountain ht-compare-overview__mountain--front"></span>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                    </div>
+
+                </aside>
+
+                <!-- RIGHT CONTENT -->
+
+                <div class="ht-compare-content">
+
+                    <!-- TOUR CARDS -->
+
+                    <div class="ht-compare-cards"
+                         id="cmpTourCards">
+
+                        @for (int i = 0; i < tours.Count; i++)
                         {
-                            <div class="cmp-matrix__col cmp-tour-header"
-                                 data-tour-id="@t.IdTour"
-                                 data-price="@(t.GiaNguoiLon ?? 0)"
-                                 data-views="@t.LuotXem"
-                                 data-seats="@t.SoChoConLai">
-                                <img class="cmp-tour-header__img"
-                                     src="@TourImagePathHelper.ToTourImageSrc(t.HinhAnh)"
-                                     alt="@t.TenTour" />
-                                <p class="cmp-tour-header__name">@t.TenTour</p>
-                                <p class="cmp-tour-header__meta">@t.DiaDiem &middot; @t.ThoiGian</p>
-                                <p class="cmp-tour-header__price">@((t.GiaNguoiLon ?? 0).ToString("N0"))đ</p>
+                            var t = tours[i];
+
+                            var hasPrice =
+                                t.GiaNguoiLon.HasValue
+                                && t.GiaNguoiLon.Value > 0;
+
+                            var isCheapest =
+                                hasPrice
+                                && minPrice.HasValue
+                                && t.GiaNguoiLon == minPrice.Value
+                                && maxPrice > minPrice;
+
+                            <article class="ht-compare-tour"
+                                     data-tour-id="@t.IdTour"
+                                     data-price="@(hasPrice ? t.GiaNguoiLon : null)"
+                                     data-views="@t.LuotXem">
+
+                                <!-- PHOTO -->
+
+                                <div class="ht-compare-tour__photo">
+
+                                    <img src="@TourImagePathHelper.ToTourImageSrc(t.HinhAnh)"
+                                         alt="Hình ảnh tour @t.TenTour"
+                                         loading="lazy" />
+
+                                    <span class="ht-compare-tour__number">
+
+                                        <i class="fa-solid fa-suitcase-rolling"></i>
+                                        Tour @(i + 1)
+
+                                    </span>
+
+                                    <button type="button"
+                                            class="ht-compare-tour__remove remove-compare-item"
+                                            data-tour-id="@t.IdTour"
+                                            title="Bỏ tour khỏi so sánh"
+                                            aria-label="Bỏ tour @t.TenTour khỏi so sánh">
+
+                                        <i class="fa-solid fa-xmark"></i>
+
+                                    </button>
+
+                                </div>
+
+                                <!-- BODY -->
+
+                                <div class="ht-compare-tour__body">
+
+                                    <h3 title="@t.TenTour">
+                                        @t.TenTour
+                                    </h3>
+
+                                    <div class="ht-compare-tour__meta">
+
+                                        <i class="fa-solid fa-location-dot"></i>
+
+                                        <span title="@t.DiaDiem">
+                                            @(string.IsNullOrWhiteSpace(t.DiaDiem)
+                                                ? "Chưa cập nhật tuyến đi"
+                                                : t.DiaDiem)
+                                        </span>
+
+                                    </div>
+
+                                    <div class="ht-compare-tour__meta">
+
+                                        <i class="fa-regular fa-calendar-days"></i>
+
+                                        <span>
+                                            @(string.IsNullOrWhiteSpace(t.ThoiGian)
+                                                ? "Chưa cập nhật thời lượng"
+                                                : t.ThoiGian)
+                                        </span>
+
+                                    </div>
+
+                                    <div class="ht-compare-tour__meta">
+
+                                        <i class="fa-solid fa-bus-simple"></i>
+
+                                        <span>
+                                            @(string.IsNullOrWhiteSpace(t.PhuongTien)
+                                                ? "Chưa cập nhật phương tiện"
+                                                : t.PhuongTien)
+                                        </span>
+
+                                    </div>
+
+                                    <!-- PRICE AND BUTTON -->
+
+                                    <div class="ht-compare-tour__footer">
+
+                                        <div class="ht-compare-tour__price">
+
+                                            <small>Giá / khách</small>
+
+                                            <strong>
+                                                @(hasPrice
+                                                    ? string.Format(
+                                                        "{0:N0}đ",
+                                                        t.GiaNguoiLon!.Value)
+                                                    : "Liên hệ")
+                                            </strong>
+
+                                        </div>
+
+                                        @if (isCheapest)
+                                        {
+                                            <span class="ht-compare-tour__best">
+
+                                                <i class="fa-solid fa-award"></i>
+                                                Giá thấp hơn
+
+                                            </span>
+                                        }
+
+                                        <a asp-controller="Tour"
+                                           asp-action="ChiTiet"
+                                           asp-route-id="@t.IdTour"
+                                           class="ht-compare-button ht-compare-button--solid">
+
+                                            Xem chi tiết
+                                            <i class="fa-solid fa-arrow-right"></i>
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+                        }
+
+                    </div>
+
+                    <!-- COMPARISON TABLE -->
+
+                    <section class="ht-compare-details"
+                             aria-labelledby="htCompareDetailsTitle">
+
+                        <div class="ht-compare-details__head">
+
+                            <h2 id="htCompareDetailsTitle">
+
+                                <i class="fa-solid fa-list-check"></i>
+                                Chi tiết đối chiếu
+
+                            </h2>
+
+                            <button type="button"
+                                    class="ht-compare-button ht-compare-button--small"
+                                    id="cmpToggleSame">
+
+                                <i class="fa-solid fa-eye-slash"></i>
+                                Ẩn dòng giống nhau
+
+                            </button>
+
+                        </div>
+
+                        <div class="ht-compare-table-scroll">
+
+                            <div class="ht-compare-table"
+                                 id="tourCompareTable">
+
+                                <!-- TABLE HEADER -->
+
+                                <div class="ht-compare-table__row ht-compare-table__row--header"
+                                     data-row-kind="header">
+
+                                    <div class="ht-compare-table__label">
+                                        Tiêu chí
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-tour-id="@t.IdTour"
+                                             title="@t.TenTour">
+
+                                            @t.TenTour
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- TOUR CODE -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="text">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-solid fa-hashtag"></i>
+                                        Mã tour
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-value="@t.MaTour">
+
+                                            @t.MaTour
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- ROUTE -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="text">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-solid fa-route"></i>
+                                        Tuyến đi
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-value="@t.DiaDiem">
+
+                                            @(string.IsNullOrWhiteSpace(t.DiaDiem)
+                                                ? "Chưa cập nhật"
+                                                : t.DiaDiem)
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- DURATION -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="text">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-regular fa-calendar-days"></i>
+                                        Thời gian
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-value="@t.ThoiGian">
+
+                                            @(string.IsNullOrWhiteSpace(t.ThoiGian)
+                                                ? "Chưa cập nhật"
+                                                : t.ThoiGian)
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- TRANSPORT -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="text">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-solid fa-bus-simple"></i>
+                                        Phương tiện
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-value="@t.PhuongTien">
+
+                                            @(string.IsNullOrWhiteSpace(t.PhuongTien)
+                                                ? "Chưa cập nhật"
+                                                : t.PhuongTien)
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- PRICE -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="price">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-solid fa-tag"></i>
+                                        Giá / khách
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        var hasPrice =
+                                            t.GiaNguoiLon.HasValue
+                                            && t.GiaNguoiLon.Value > 0;
+
+                                        var isBest =
+                                            hasPrice
+                                            && minPrice.HasValue
+                                            && maxPrice > minPrice
+                                            && t.GiaNguoiLon == minPrice.Value;
+
+                                        <div class="ht-compare-table__cell ht-compare-table__cell--price @(isBest ? "is-best" : "")"
+                                             data-value="@(hasPrice ? t.GiaNguoiLon : null)">
+
+                                            @(hasPrice
+                                                ? string.Format(
+                                                    "{0:N0}đ",
+                                                    t.GiaNguoiLon!.Value)
+                                                : "Liên hệ")
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- SEATS -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="seats">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-solid fa-users"></i>
+                                        Chỗ khả dụng
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-value="@t.SoChoConLai">
+
+                                            @if (t.SoChoConLai > 0)
+                                            {
+                                                <span class="ht-compare-status ht-compare-status--open">
+
+                                                    Còn @t.SoChoConLai chỗ
+
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="ht-compare-status ht-compare-status--unknown">
+
+                                                    Chưa có chỗ khả dụng
+
+                                                </span>
+                                            }
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                                <!-- VIEWS -->
+
+                                <div class="ht-compare-table__row"
+                                     data-row-kind="views">
+
+                                    <div class="ht-compare-table__label">
+
+                                        <i class="fa-regular fa-eye"></i>
+                                        Lượt xem
+
+                                    </div>
+
+                                    @foreach (var t in tours)
+                                    {
+                                        <div class="ht-compare-table__cell"
+                                             data-value="@t.LuotXem">
+
+                                            @t.LuotXem.ToString("N0")
+
+                                        </div>
+                                    }
+
+                                </div>
+
                             </div>
-                        }
-                    </div>
 
-                    <div class="cmp-matrix__row" data-row-kind="text">
-                        <div class="cmp-matrix__label">Mã tour</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col">@t.MaTour</div>
-                        }
-                    </div>
+                        </div>
 
-                    <div class="cmp-matrix__row" data-row-kind="text">
-                        <div class="cmp-matrix__label">Điểm đến</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col">@t.DiaDiem</div>
-                        }
-                    </div>
-
-                    <div class="cmp-matrix__row" data-row-kind="text">
-                        <div class="cmp-matrix__label">Thời gian</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col">@t.ThoiGian</div>
-                        }
-                    </div>
-
-                    <div class="cmp-matrix__row" data-row-kind="text">
-                        <div class="cmp-matrix__label">Phương tiện</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col">@t.PhuongTien</div>
-                        }
-                    </div>
-
-                    <div class="cmp-matrix__row" data-row-kind="numeric-low">
-                        <div class="cmp-matrix__label">Giá người lớn</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col cmp-matrix__col--price" data-value="@(t.GiaNguoiLon ?? 0)">
-                                @((t.GiaNguoiLon ?? 0).ToString("N0"))đ
-                            </div>
-                        }
-                    </div>
-
-                    <div class="cmp-matrix__row" data-row-kind="numeric-high">
-                        <div class="cmp-matrix__label">Số chỗ còn</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col" data-value="@t.SoChoConLai">
-                                @if (t.SoChoConLai <= 0)
-                                {
-                                    <span class="cmp-badge-danger">Hết chỗ</span>
-                                }
-                                else
-                                {
-                                    @t.SoChoConLai
-                                }
-                            </div>
-                        }
-                    </div>
-
-                    <div class="cmp-matrix__row" data-row-kind="numeric-high">
-                        <div class="cmp-matrix__label">Lượt xem</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col" data-value="@t.LuotXem">@t.LuotXem</div>
-                        }
-                    </div>
-
-                    <div class="cmp-matrix__row cmp-matrix__row--action" data-row-kind="action">
-                        <div class="cmp-matrix__label">Hành động</div>
-                        @foreach (var t in Model)
-                        {
-                            <div class="cmp-matrix__col cmp-matrix__col--action">
-                                <a asp-controller="Tour" asp-action="ChiTiet" asp-route-id="@t.IdTour"
-                                   class="cmp-btn cmp-btn--primary">Xem chi tiết</a>
-                                <button type="button"
-                                        class="cmp-btn cmp-btn--danger remove-compare-item"
-                                        data-tour-id="@t.IdTour">Bỏ</button>
-                            </div>
-                        }
-                    </div>
+                    </section>
 
                 </div>
+
             </div>
-        </div>
-    }
+        }
+
+    </div>
+
+    <!-- TOAST -->
+
+    <div class="ht-compare-toast"
+         id="cmpToast"
+         role="status"
+         aria-live="polite">
+    </div>
+
 </div>
 
 @section Scripts {
-    <script src="~/js/compare-result.js" asp-append-version="true"></script>
+    <script src="~/js/compare-result.js"
+            asp-append-version="true"></script>
 }

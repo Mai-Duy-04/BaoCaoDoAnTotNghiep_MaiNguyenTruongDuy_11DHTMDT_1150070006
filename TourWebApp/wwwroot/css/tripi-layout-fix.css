@@ -1,0 +1,752 @@
+
+/* ========================================================
+   HAPPYTRIP - TRIPI FULLSCREEN LAYOUT V3
+   File: wwwroot/css/tripi-layout-fix.css
+
+   Muc tieu:
+   - Trang chao full width, gan full viewport height
+   - Tieu de khong bi gian chu
+   - 4 goi y thanh 2 cot
+   - Ket qua: chat trai, tour phai
+   - Mobile: xep doc
+   - Khong anh huong logic chatbot
+   ======================================================== */
+
+:root {
+    --tripi-layout-green: #1b3c2a;
+    --tripi-layout-cream: #fffaf3;
+    --tripi-layout-border: #d8e4d5;
+    --tripi-nav-height: 76px;
+}
+
+/* ========================================================
+   1. MO RONG KHUNG TRANG TRIPI
+   ======================================================== */
+
+body:has(#tripiChatPage) {
+    overflow-x: clip;
+}
+
+body:has(#tripiChatPage) .travel-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body:has(#tripiChatPage) .travel-main > .container,
+body:has(#tripiChatPage) .travel-main > .travel-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#tripiChatPage {
+    box-sizing: border-box !important;
+    display: block;
+    position: relative;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#tripiChatPage *,
+#tripiChatPage *::before,
+#tripiChatPage *::after {
+    box-sizing: border-box;
+}
+
+#tripiChatPage .tripi-container,
+#tripiChatPage .tripi-world-workspace {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin: 0 !important;
+}
+
+/* ========================================================
+   2. TRANG CHAO TOAN MAN HINH
+   ======================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-world-workspace {
+    display: block !important;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-world-chat {
+    display: flex;
+    flex-direction: column;
+
+    position: relative;
+    isolation: isolate;
+
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+
+    min-height: calc(100svh - var(--tripi-nav-height));
+    height: auto !important;
+
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 40%,
+            #ffffff 9%,
+            #fffaf4 64%,
+            #eef5e9 100%
+        ) !important;
+}
+
+/* Header giu nguyen logo cao */
+#tripiChatPage.tripi-mode-home
+.tripi-chat-header {
+    position: relative;
+    z-index: 10;
+
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    flex: 0 0 auto;
+}
+
+/* Noi dung chinh */
+#tripiChatPage.tripi-mode-home
+.tripi-chat-messages {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center !important;
+
+    position: relative;
+    z-index: 4;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    flex: 1 0 auto;
+    min-height: 690px;
+    height: auto !important;
+
+    margin: 0 auto !important;
+    padding: 55px 210px 170px !important;
+
+    overflow: visible !important;
+    background: transparent !important;
+}
+
+/* Man chao nam giua */
+#tripiChatPage.tripi-mode-home
+.tripi-welcome {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: min(100%, 850px) !important;
+    max-width: 850px !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+}
+
+/* ========================================================
+   3. TIEU DE GIONG MAU
+   ======================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 100% !important;
+    max-width: 800px !important;
+
+    margin: 0 auto 26px !important;
+    padding: 0 !important;
+
+    text-align: center !important;
+    text-align-last: center !important;
+}
+
+/* Nhan Tripi AI */
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+    max-width: 100%;
+
+    margin: 0 auto 18px;
+    padding: 9px 20px;
+
+    border-radius: 100px;
+
+    background: #edf6e8;
+    color: #376a48;
+
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Sua loi gian chu, xuong dong ky la */
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading h3 {
+    display: block;
+
+    width: 100% !important;
+    max-width: 790px !important;
+
+    margin: 0 auto 18px !important;
+    padding: 0 !important;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif !important;
+
+    font-size: clamp(40px, 4vw, 62px) !important;
+    font-weight: 700 !important;
+    font-style: normal;
+
+    line-height: 1.12 !important;
+    letter-spacing: -0.035em !important;
+    word-spacing: normal !important;
+    white-space: normal !important;
+
+    text-align: center !important;
+    text-align-last: center !important;
+    text-justify: none !important;
+    text-wrap: balance;
+
+    overflow-wrap: normal;
+    word-break: normal;
+
+    color: var(--tripi-layout-green) !important;
+}
+
+/* Mo ta */
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading p {
+    width: 100%;
+    max-width: 670px;
+
+    margin: 0 auto !important;
+
+    color: #66766e !important;
+
+    font-family: Arial, sans-serif;
+    font-size: 16px !important;
+    font-weight: 400;
+    line-height: 1.65 !important;
+
+    text-align: center !important;
+    text-align-last: center !important;
+    word-spacing: normal !important;
+}
+
+/* ========================================================
+   4. O NHAP CHINH GIUA
+   ======================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome > .tripi-chat-composer {
+    position: relative;
+    z-index: 8;
+
+    display: block;
+
+    width: min(100%, 760px) !important;
+    max-width: 760px !important;
+
+    margin: 30px auto 0 !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-compose-box {
+    width: 100%;
+    min-height: 82px;
+
+    border: 1.5px solid #527f5d !important;
+    border-radius: 46px !important;
+
+    background: #fff !important;
+
+    box-shadow:
+        0 12px 26px rgba(22, 55, 35, .11) !important;
+}
+
+/* ========================================================
+   5. GOI Y 2 COT - KHONG CHE NUI
+   ======================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-grid {
+    position: relative;
+    z-index: 9;
+
+    display: grid !important;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+    align-items: stretch;
+    justify-items: stretch;
+
+    width: min(100%, 640px) !important;
+    max-width: 640px !important;
+
+    margin: 28px auto 0 !important;
+    padding: 0 !important;
+
+    column-gap: 16px !important;
+    row-gap: 12px !important;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    width: 100% !important;
+    min-width: 0;
+
+    min-height: 48px;
+    margin: 0 !important;
+    padding: 10px 16px !important;
+
+    border: 1px solid #c4d8c1 !important;
+    border-radius: 100px !important;
+
+    background: rgba(255, 255, 255, .97) !important;
+
+    box-shadow:
+        0 5px 12px rgba(31, 69, 39, .08);
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 18px rgba(31, 69, 39, .13);
+}
+
+/* Giu chu nut goi y de doc */
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-text {
+    min-width: 0;
+    text-align: center;
+}
+
+/* ========================================================
+   6. STICKER VA PHONG CANH
+   ======================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-scene.tripi-3d-full {
+    position: absolute !important;
+    inset: 0 !important;
+
+    z-index: 1 !important;
+    pointer-events: none !important;
+
+    overflow: hidden !important;
+}
+
+/* Sticker nam hai canh */
+#tripiChatPage.tripi-mode-home
+.tripi-3d-camera-left {
+    top: 17%;
+    left: 9%;
+    --size: 145px;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-passport-left {
+    top: 41%;
+    left: 5%;
+    --size: 155px;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-signpost-left {
+    left: 4%;
+    bottom: 8%;
+    --size: 128px;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-airplane-right {
+    top: 12%;
+    right: 13%;
+    --size: 150px;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-map-right {
+    top: 39%;
+    right: 7%;
+    --size: 142px;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-3d-suitcase-right {
+    right: 9%;
+    bottom: 13%;
+    --size: 142px;
+}
+
+/* Nui sat day, khong phu len nut */
+#tripiChatPage.tripi-mode-home
+.tripi-3d-landscape {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 158px !important;
+
+    z-index: 0;
+    opacity: .82;
+    pointer-events: none;
+}
+
+/* ========================================================
+   7. CHUYEN SANG CHAT VA KET QUA
+   ======================================================== */
+
+/* Trang home va trang results dung chung chieu ngang */
+#tripiChatPage.tripi-mode-chat,
+#tripiChatPage.tripi-mode-results {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Khi tim tour: hai cot tren desktop */
+@media (min-width: 851px) {
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-workspace {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(350px, 39fr)
+            minmax(0, 61fr) !important;
+
+        align-items: stretch;
+        gap: 20px !important;
+
+        width: 100% !important;
+        max-width: none !important;
+
+        padding: 18px 24px 24px !important;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-chat {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0;
+
+        height: calc(
+            100svh - var(--tripi-nav-height) - 42px
+        ) !important;
+
+        min-height: 570px;
+
+        overflow: hidden;
+        border-radius: 22px;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-chat-messages {
+        flex: 1 1 auto;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+    }
+
+    /* Khung ket qua ben phai */
+    #tripiChatPage.tripi-mode-results
+    #tripiTourResults {
+        width: 100% !important;
+        min-width: 0;
+        max-width: none !important;
+
+        height: calc(
+            100svh - var(--tripi-nav-height) - 42px
+        );
+
+        min-height: 570px;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        border-radius: 22px;
+    }
+}
+
+/* Khi chi chat binh thuong */
+#tripiChatPage.tripi-mode-chat
+.tripi-world-workspace {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+/* Trang tri khong xuat hien trong hoi thoai */
+#tripiChatPage.tripi-mode-chat
+.tripi-3d-scene,
+#tripiChatPage.tripi-mode-results
+.tripi-3d-scene {
+    display: none !important;
+}
+
+/* ========================================================
+   8. LAPTOP VA TABLET NGANG
+   ======================================================== */
+
+@media (min-width: 851px) and (max-width: 1250px) {
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        padding:
+            55px 145px 175px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: clamp(
+            37px, 4.1vw, 54px
+        ) !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-camera-left,
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-airplane-right {
+        --size: 100px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-passport-left,
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-map-right {
+        --size: 105px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-signpost-left,
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-suitcase-right {
+        --size: 95px;
+    }
+}
+
+/* ========================================================
+   9. DIEN THOAI
+   ======================================================== */
+
+@media (max-width: 850px) {
+    #tripiChatPage.tripi-mode-home
+    .tripi-world-chat {
+        min-height: calc(100svh - 66px);
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        min-height: 630px;
+        padding:
+            105px 20px 145px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome {
+        width: 100% !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: clamp(
+            32px, 7.8vw, 45px
+        ) !important;
+
+        letter-spacing: -.03em !important;
+        line-height: 1.16 !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading p {
+        font-size: 14px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        column-gap: 8px !important;
+        row-gap: 10px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion {
+        min-height: 46px;
+        padding: 9px 5px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-text {
+        font-size: 12px;
+    }
+
+    /* Giam sticker tren mobile */
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-camera-left {
+        top: 8%;
+        left: 2%;
+        --size: 54px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-airplane-right {
+        top: 8%;
+        right: 2%;
+        --size: 60px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-passport-left,
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-signpost-left,
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-map-right,
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-suitcase-right {
+        display: none;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-3d-landscape {
+        height: 110px !important;
+    }
+
+    /* Ket qua tour xep duoi chat */
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-workspace {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+
+        width: 100%;
+        max-width: none;
+
+        padding: 10px !important;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-chat,
+    #tripiChatPage.tripi-mode-results
+    #tripiTourResults {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0;
+
+        height: auto;
+        border-radius: 18px;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-chat {
+        height: min(76svh, 760px);
+        min-height: 430px;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-chat-messages {
+        min-height: 0 !important;
+        overflow-y: auto !important;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    #tripiTourResults {
+        overflow: visible;
+        scroll-margin-top: 15px;
+    }
+
+    #tripiChatPage
+    #tripiChatForm {
+        scroll-margin-top: 20px;
+    }
+}
+
+/* ========================================================
+   10. MAN HINH DIEN THOAI NHO
+   ======================================================== */
+
+@media (max-width: 420px) {
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        padding:
+            100px 15px 145px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: 31px !important;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-compose-box {
+        min-height: 72px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-text {
+        font-size: 11px;
+    }
+}
+
+/* ========================================================
+   11. ACCESSIBILITY
+   ======================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    #tripiChatPage .tripi-3d-sticker {
+        animation: none !important;
+        will-change: auto !important;
+    }
+
+    #tripiChatPage
+    .tripi-suggestion {
+        transition: none !important;
+    }
+}

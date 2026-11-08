@@ -1,6 +1,22 @@
 @{
     var layoutPath = Context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
-    var isAuthLayout = layoutPath.StartsWith("/taikhoan/dangnhap") || layoutPath.StartsWith("/taikhoan/dangky");
+
+    var isAuthLayout =
+        layoutPath.StartsWith("/taikhoan/dangnhap") ||
+        layoutPath.StartsWith("/taikhoan/dangky");
+
+    var isTripiFullPage =
+        layoutPath == "/tripi-chat" ||
+        layoutPath.StartsWith("/tripi-chat/");
+
+    // Chỉ hiển thị sidebar Tripi trên các trang du lịch.
+    // Trang đăng nhập, đăng ký và chat toàn màn hình
+    // không hiển thị thêm sidebar nổi.
+    var showTripiAssistant = !isAuthLayout && !isTripiFullPage;
+
+    // Nạp bộ quản lý phiên cho cả sidebar và chat toàn màn hình.
+    var loadTripiSession = showTripiAssistant || isTripiFullPage;
+
     var toastSuccess = TempData["ToastSuccess"] as string;
     var toastError = TempData["ToastError"] as string;
     var toastInfo = TempData["ToastInfo"] as string;
@@ -9,26 +25,76 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - HappyTrip</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tai+Heritage+Pro&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/travel-modern.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/deal-hot.css" asp-append-version="true" />
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Tai+Heritage+Pro&display=swap"
+          rel="stylesheet" />
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/travel-modern.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/deal-hot.css"
+          asp-append-version="true" />
+
+    @* CSS cho cửa sổ Tripi AI *@
+    @if (showTripiAssistant)
+    {
+        <link rel="stylesheet"
+              href="~/css/tripi-assistant.css"
+              asp-append-version="true" />
+    }
+@if (loadTripiSession)
+{
+    <link rel="stylesheet"
+          href="~/css/tripi-decor.css"
+          asp-append-version="true" />
+}
     @await RenderSectionAsync("Styles", required: false)
 </head>
+
 <body class="travel-body @(isAuthLayout ? "auth-layout" : "")">
+
+    @* ===== NAVBAR ===== *@
     <partial name="~/Views/Shared/TravelComponents/_Navbar.cshtml" />
 
-    @if (!string.IsNullOrWhiteSpace(toastSuccess) || !string.IsNullOrWhiteSpace(toastError) || !string.IsNullOrWhiteSpace(toastInfo))
+    @* ===== TOAST ===== *@
+    @if (!string.IsNullOrWhiteSpace(toastSuccess) ||
+         !string.IsNullOrWhiteSpace(toastError) ||
+         !string.IsNullOrWhiteSpace(toastInfo))
     {
-        var toastType = !string.IsNullOrWhiteSpace(toastError) ? "error" : (!string.IsNullOrWhiteSpace(toastInfo) ? "info" : "success");
-        var toastMessage = toastError ?? toastInfo ?? toastSuccess;
-        <div class="app-toast app-toast-@toastType" role="status" aria-live="polite">
+        var toastType =
+            !string.IsNullOrWhiteSpace(toastError)
+                ? "error"
+                : (!string.IsNullOrWhiteSpace(toastInfo)
+                    ? "info"
+                    : "success");
+
+        var toastMessage =
+            toastError ?? toastInfo ?? toastSuccess;
+
+        <div class="app-toast app-toast-@toastType"
+             role="status"
+             aria-live="polite">
+
             <span class="app-toast-icon">
                 @if (toastType == "error")
                 {
@@ -43,22 +109,65 @@
                     <i class="fa-solid fa-circle-check"></i>
                 }
             </span>
+
             <span>@toastMessage</span>
-            <button type="button" class="app-toast-close" aria-label="Đóng thông báo">
+
+            <button type="button"
+                    class="app-toast-close"
+                    aria-label="Đóng thông báo">
+
                 <i class="fa-solid fa-xmark"></i>
+
             </button>
         </div>
     }
 
+    @* ===== MAIN CONTENT ===== *@
     <main class="travel-main">
         @RenderBody()
     </main>
 
+    @* ===== FOOTER ===== *@
     <partial name="~/Views/Shared/TravelComponents/_Footer.cshtml" />
 
+    @* ===== TRIPI AI ASSISTANT ===== *@
+    @if (showTripiAssistant)
+    {
+        <partial name="~/Views/Shared/TravelComponents/_TripiAssistant.cshtml" />
+    }
+
+    @* ===== JAVASCRIPT CHUNG ===== *@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/travel-modern.js" asp-append-version="true"></script>
-    <script src="~/js/deal-hot.js" asp-append-version="true" defer></script>
+
+    <script src="~/js/travel-modern.js"
+            asp-append-version="true"></script>
+
+    <script src="~/js/deal-hot.js"
+            asp-append-version="true"
+            defer></script>
+
+    @* ===== PHIÊN HỘI THOẠI TRIPI DÙNG CHUNG ===== *@
+    @if (loadTripiSession)
+    {
+        <script src="~/js/tripi-session.js"
+                asp-append-version="true"></script>
+    }
+
+    @* ===== SIDEBAR TRIPI AI ===== *@
+    @if (showTripiAssistant)
+    {
+        <script src="~/js/tripi-assistant.js"
+                asp-append-version="true"
+                defer></script>
+    }
+@if (loadTripiSession)
+{
+    <script src="~/js/tripi-decor.js"
+            asp-append-version="true"
+            defer></script>
+}
+    @* ===== CSS / JS RIÊNG CỦA TỪNG TRANG ===== *@
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

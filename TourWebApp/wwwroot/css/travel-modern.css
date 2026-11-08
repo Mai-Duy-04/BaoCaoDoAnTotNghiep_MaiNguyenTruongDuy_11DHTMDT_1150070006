@@ -1526,3 +1526,46 @@ h6 {
         transition: none;
     }
 }
+
+/* ======================================
+   HAPPYTRIP - MOBILE NAVBAR TOGGLER
+   ====================================== */
+
+.travel-navbar .travel-navbar-toggler {
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+    padding: 0;
+
+    color: #f5ead8;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;
+    background: transparent;
+}
+
+.travel-navbar .travel-navbar-toggler i {
+    display: inline-block;
+    font-size: 21px;
+    line-height: 1;
+    color: inherit;
+}
+
+.travel-navbar .travel-navbar-toggler:focus-visible {
+    outline: 2px solid #ead3b4;
+    outline-offset: 3px;
+    box-shadow: none;
+}
+
+@media (max-width: 991.98px) {
+    .travel-navbar .travel-navbar-toggler {
+        display: inline-flex;
+        margin-left: auto;
+    }
+
+    .travel-navbar #travelMainNav {
+        width: 100%;
+    }
+}

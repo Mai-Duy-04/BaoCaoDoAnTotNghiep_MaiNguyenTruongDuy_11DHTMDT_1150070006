@@ -1,0 +1,356 @@
+
+.ht-ai-confirm[hidden] {
+    display: none !important;
+}
+
+.ht-ai-confirm {
+    --ht-confirm-green: #355745;
+    --ht-confirm-green-dark: #294536;
+    --ht-confirm-gold: #b59260;
+    --ht-confirm-cream: #fffaf2;
+    --ht-confirm-text: #293b30;
+    --ht-confirm-muted: #69776d;
+    --ht-confirm-border: #e8e1d4;
+
+    position: relative;
+    margin-top: 24px;
+    padding: 26px;
+    overflow: hidden;
+    background: linear-gradient(
+        135deg,
+        #fffdf8 0%,
+        #faf5e9 100%
+    );
+    border: 1px solid var(--ht-confirm-border);
+    border-radius: 22px;
+    box-shadow: 0 12px 35px rgba(53, 87, 69, 0.08);
+    color: var(--ht-confirm-text);
+    animation: htConfirmAppear 0.35s ease both;
+}
+
+.ht-ai-confirm::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--ht-confirm-green),
+        var(--ht-confirm-gold)
+    );
+}
+
+.ht-ai-confirm-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 23px;
+}
+
+.ht-ai-confirm-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    color: #ffffff;
+    background: var(--ht-confirm-green);
+    box-shadow: 0 6px 16px rgba(53, 87, 69, 0.16);
+    font-size: 21px;
+}
+
+.ht-ai-confirm-heading {
+    min-width: 0;
+}
+
+.ht-ai-confirm-heading > span {
+    display: block;
+    margin: 2px 0 7px;
+    color: var(--ht-confirm-gold);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.ht-ai-confirm-heading h3 {
+    margin: 0 0 7px;
+    color: var(--ht-confirm-green-dark);
+    font-family: inherit;
+    font-size: clamp(19px, 2.2vw, 25px);
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.ht-ai-confirm-heading p {
+    margin: 0;
+    color: var(--ht-confirm-muted);
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.ht-ai-confirm-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.ht-ai-confirm-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+    padding: 17px;
+    background: #ffffff;
+    border: 1px solid #ebe6dc;
+    border-radius: 15px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.ht-ai-confirm-item:hover {
+    transform: translateY(-2px);
+    border-color: #d4c5a9;
+    box-shadow: 0 6px 16px rgba(53, 87, 69, 0.06);
+}
+
+.ht-ai-confirm-item-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+    background: #f1f4ee;
+    color: var(--ht-confirm-green);
+    font-size: 16px;
+}
+
+.ht-ai-confirm-item:nth-child(2) .ht-ai-confirm-item-icon {
+    background: #fff0eb;
+    color: #bc7965;
+}
+
+.ht-ai-confirm-item:nth-child(3) .ht-ai-confirm-item-icon {
+    background: #fbf2df;
+    color: #b48c4f;
+}
+
+.ht-ai-confirm-item:nth-child(4) .ht-ai-confirm-item-icon {
+    background: #eef2f8;
+    color: #6f87a4;
+}
+
+.ht-ai-confirm-item > div {
+    flex: 1;
+    min-width: 0;
+}
+
+.ht-ai-confirm-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--ht-confirm-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ht-ai-confirm-item strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--ht-confirm-text);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+.ht-ai-confirm-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 23px;
+}
+
+.ht-ai-confirm-primary,
+.ht-ai-confirm-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 12px 20px;
+    border-radius: 13px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.ht-ai-confirm-primary {
+    flex: 1;
+    min-width: 190px;
+    color: #ffffff;
+    background: var(--ht-confirm-green);
+    border: 1px solid var(--ht-confirm-green);
+    box-shadow: 0 5px 14px rgba(53, 87, 69, 0.13);
+}
+
+.ht-ai-confirm-primary:hover {
+    color: #ffffff;
+    background: var(--ht-confirm-green-dark);
+    border-color: var(--ht-confirm-green-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 7px 18px rgba(53, 87, 69, 0.19);
+}
+
+.ht-ai-confirm-secondary {
+    flex: 0 1 auto;
+    color: var(--ht-confirm-green);
+    background: #ffffff;
+    border: 1px solid #cdd8cb;
+}
+
+.ht-ai-confirm-secondary:hover {
+    color: var(--ht-confirm-green-dark);
+    background: #f1f5ed;
+    border-color: #a7bda6;
+    transform: translateY(-1px);
+}
+
+.ht-ai-confirm-primary:focus-visible,
+.ht-ai-confirm-secondary:focus-visible {
+    outline: 3px solid rgba(181, 146, 96, 0.55);
+    outline-offset: 3px;
+}
+
+.ht-ai-confirm-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.ht-ai-confirm-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px dashed #dfd8cc;
+    color: var(--ht-confirm-muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.ht-ai-confirm-note i {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: var(--ht-confirm-gold);
+}
+
+@keyframes htConfirmAppear {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .ht-ai-confirm {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .ht-ai-confirm-header {
+        gap: 12px;
+    }
+
+    .ht-ai-confirm-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        font-size: 18px;
+    }
+
+    .ht-ai-confirm-grid {
+        gap: 10px;
+    }
+
+    .ht-ai-confirm-item {
+        padding: 13px;
+        gap: 9px;
+    }
+
+    .ht-ai-confirm-item-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+
+    .ht-ai-confirm-item strong {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .ht-ai-confirm {
+        margin-top: 18px;
+        padding: 17px;
+    }
+
+    .ht-ai-confirm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ht-ai-confirm-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ht-ai-confirm-primary,
+    .ht-ai-confirm-secondary {
+        width: 100%;
+        min-width: 0;
+        flex: none;
+    }
+
+    .ht-ai-confirm-heading h3 {
+        font-size: 19px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ht-ai-confirm {
+        animation: none;
+    }
+
+    .ht-ai-confirm-item,
+    .ht-ai-confirm-primary,
+    .ht-ai-confirm-secondary {
+        transition: none;
+    }
+
+    .ht-ai-confirm-item:hover,
+    .ht-ai-confirm-primary:hover,
+    .ht-ai-confirm-secondary:hover {
+        transform: none;
+    }
+}

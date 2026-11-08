@@ -1,0 +1,2208 @@
+
+/* ==========================================================
+   HAPPYTRIP - TRIPI AI CHAT
+   FILE: wwwroot/css/tripi-chat.css
+
+   VERSION: CLEAN LAYOUT
+
+   1. Trang chao full viewport
+   2. Hoi thoai
+   3. Ket qua tour 38% / 62%
+   4. Responsive
+   5. Khong can thiep backend
+   ========================================================== */
+
+#tripiChatPage {
+    --tp-green: #294b36;
+    --tp-dark: #1d3b2a;
+    --tp-light: #edf5e9;
+    --tp-cream: #fffaf4;
+    --tp-border: #dae7d7;
+    --tp-muted: #78877d;
+    --tp-orange: #d89a57;
+
+    --tp-navbar-height: 72px;
+
+    display: block;
+    position: relative;
+
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+
+    margin: 0;
+    padding: 0;
+
+    color: var(--tp-dark);
+    background: var(--tp-cream);
+
+    font-family: Arial, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#tripiChatPage *,
+#tripiChatPage *::before,
+#tripiChatPage *::after {
+    box-sizing: border-box;
+}
+
+#tripiChatPage [hidden] {
+    display: none !important;
+}
+
+#tripiChatPage button,
+#tripiChatPage textarea,
+#tripiChatPage input {
+    font-family: inherit;
+}
+
+#tripiChatPage button {
+    cursor: pointer;
+}
+
+#tripiChatPage button:disabled {
+    cursor: not-allowed;
+}
+
+#tripiChatPage img {
+    max-width: 100%;
+}
+
+#tripiChatPage a {
+    text-decoration: none;
+}
+
+#tripiChatPage .tripi-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* ==========================================================
+   01. FULL WIDTH CONTAINER
+   ========================================================== */
+
+body:has(#tripiChatPage) {
+    overflow-x: hidden;
+}
+
+/* An footer HappyTrip chi tren trang Tripi AI */
+body:has(#tripiChatPage) .travel-footer {
+    display: none !important;
+}
+
+/* Khong de margin cua footer tao khoang trong */
+body:has(#tripiChatPage) .travel-main {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+body:has(#tripiChatPage) .travel-main {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+body:has(#tripiChatPage) .travel-main > .container,
+body:has(#tripiChatPage) .travel-main > .travel-container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+#tripiChatPage .tripi-container,
+#tripiChatPage .tripi-world-container {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#tripiChatPage .tripi-world-hero {
+    display: none !important;
+}
+
+/* ==========================================================
+   02. WORKSPACE
+   ========================================================== */
+
+#tripiChatPage .tripi-world-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+
+    margin: 0;
+    padding: 0;
+}
+
+#tripiChatPage .tripi-world-chat {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-width: 0;
+
+    height: min(780px, calc(100dvh - 120px));
+    min-height: 500px;
+
+    margin: 0;
+    padding: 0;
+
+    border: 1px solid var(--tp-border);
+    border-radius: 20px;
+
+    background: #ffffff;
+
+    overflow: hidden;
+}
+
+#tripiChatPage .tripi-world-results {
+    display: none;
+}
+
+/* ==========================================================
+   03. HEADER
+   ========================================================== */
+
+#tripiChatPage .tripi-chat-header {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+    min-height: 70px;
+
+    padding: 11px 20px;
+
+    border-bottom: 1px solid #e8eee6;
+
+    background: #ffffff;
+}
+
+#tripiChatPage .tripi-chat-identity {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+#tripiChatPage .tripi-chat-avatar {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 46px;
+
+    width: 46px;
+    height: 46px;
+
+    padding: 4px;
+
+    border: 1px solid #f2dfc4;
+    border-radius: 14px;
+
+    background: #fff0dc;
+
+    overflow: hidden;
+}
+
+#tripiChatPage .tripi-chat-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#tripiChatPage .tripi-chat-identity-text {
+    min-width: 0;
+}
+
+#tripiChatPage .tripi-chat-identity-text h2 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin: 0 0 3px;
+
+    color: var(--tp-dark);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+#tripiChatPage .tripi-ai-label {
+    padding: 3px 7px;
+
+    border-radius: 7px;
+
+    background: #fff0dd;
+    color: #bf7937;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-chat-identity-text p {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin: 0;
+
+    color: #849589;
+    font-size: 11px;
+}
+
+#tripiChatPage .tripi-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #57ae76;
+}
+
+#tripiChatPage .tripi-header-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 39px;
+    padding: 9px 14px;
+
+    border: 1px solid #dce9dc;
+    border-radius: 11px;
+
+    background: #f4faf3;
+    color: #346b47;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#tripiChatPage .tripi-header-button:hover {
+    background: #e8f4e6;
+}
+
+#tripiChatPage .tripi-world-chat-status {
+    flex: 0 0 auto;
+
+    padding: 9px 17px;
+
+    border-bottom: 1px solid #e5eee4;
+
+    background: #f1f7ee;
+    color: #588064;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ==========================================================
+   04. MESSAGES
+   ========================================================== */
+
+#tripiChatPage .tripi-chat-messages {
+    position: relative;
+
+    display: block;
+
+    flex: 1 1 0;
+    min-height: 0;
+
+    width: 100%;
+
+    margin: 0;
+    padding: 22px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+
+    background: #fcfdfb;
+}
+
+#tripiChatPage .tripi-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    width: 100%;
+    margin: 0 0 18px;
+}
+
+#tripiChatPage .tripi-message-avatar {
+    flex: 0 0 34px;
+
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 3px;
+
+    border-radius: 11px;
+    background: #fff0db;
+}
+
+#tripiChatPage .tripi-message-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#tripiChatPage .tripi-message-body {
+    min-width: 0;
+    max-width: 87%;
+}
+
+#tripiChatPage .tripi-message-author {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin: 0 0 5px;
+
+    color: #3c7250;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-message-author span {
+    color: #9bab9e;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+#tripiChatPage .tripi-message-bubble {
+    width: fit-content;
+    max-width: 100%;
+
+    padding: 13px 15px;
+
+    border: 1px solid #e1eade;
+    border-radius: 5px 17px 17px 17px;
+
+    background: #f0f6ed;
+    color: #36523e;
+
+    font-size: 13px;
+    line-height: 1.8;
+
+    overflow-wrap: anywhere;
+}
+
+#tripiChatPage .tripi-message-bubble p {
+    margin: 0 0 9px;
+}
+
+#tripiChatPage .tripi-message-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+#tripiChatPage .tripi-message-bubble strong {
+    color: #286746;
+}
+
+#tripiChatPage .tripi-message-user {
+    justify-content: flex-end;
+}
+
+#tripiChatPage .tripi-message-user .tripi-message-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    max-width: 88%;
+}
+
+#tripiChatPage .tripi-message-user .tripi-message-author {
+    justify-content: flex-end;
+}
+
+#tripiChatPage .tripi-message-user .tripi-message-bubble {
+    border-color: var(--tp-green);
+    border-radius: 17px 5px 17px 17px;
+
+    background: var(--tp-green);
+    color: #ffffff;
+}
+
+#tripiChatPage .tripi-message-user
+.tripi-message-bubble strong {
+    color: #ffffff;
+}
+
+#tripiChatPage .tripi-ai-paragraph {
+    margin: 0 0 9px;
+}
+
+#tripiChatPage .tripi-ai-heading {
+    margin: 12px 0 7px;
+
+    color: #286747;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-ai-list {
+    padding-left: 22px;
+    margin: 8px 0;
+}
+
+#tripiChatPage .tripi-ai-list li {
+    margin-bottom: 5px;
+}
+
+#tripiChatPage .tripi-message-bubble code {
+    padding: 2px 5px;
+    border-radius: 5px;
+
+    background: #dce9dc;
+    color: #305b40;
+}
+
+/* ==========================================================
+   05. RAG SOURCES
+   ========================================================== */
+
+#tripiChatPage .tripi-rag-sources {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px 12px;
+
+    border: 1px solid #dce9db;
+    border-radius: 12px;
+
+    background: #f4faf2;
+    color: #5a7d62;
+
+    font-size: 11px;
+}
+
+#tripiChatPage .tripi-rag-source-heading {
+    margin-bottom: 6px;
+
+    color: #34754f;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-rag-source-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+
+    padding: 7px 0;
+
+    border-top: 1px solid #e2ece0;
+}
+
+#tripiChatPage .tripi-rag-source-item span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#tripiChatPage .tripi-rag-source-item small {
+    white-space: nowrap;
+    color: #96a599;
+}
+
+/* ==========================================================
+   06. WELCOME BASE
+   ========================================================== */
+
+#tripiChatPage .tripi-welcome {
+    width: 100%;
+    margin: 0 auto;
+    padding: 18px;
+
+    border: 1px solid #e0e9dd;
+    border-radius: 18px;
+
+    background: #f9fcf8;
+}
+
+#tripiChatPage .tripi-welcome-heading {
+    margin: 0 0 18px;
+    text-align: center;
+}
+
+#tripiChatPage .tripi-welcome-heading > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #458055;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-welcome-heading h3 {
+    margin: 12px 0;
+
+    color: var(--tp-dark);
+
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+#tripiChatPage .tripi-welcome-heading p {
+    margin: 0;
+
+    color: #758678;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+/* ==========================================================
+   07. SUGGESTIONS BASE
+   ========================================================== */
+
+#tripiChatPage .tripi-suggestion-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 11px;
+}
+
+#tripiChatPage .tripi-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+
+    padding: 11px;
+
+    border: 1px solid #deeadc;
+    border-radius: 14px;
+
+    background: #fff;
+    color: var(--tp-green);
+
+    text-align: left;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+#tripiChatPage .tripi-suggestion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(28, 76, 43, .08);
+}
+
+#tripiChatPage .tripi-suggestion-icon {
+    flex: 0 0 32px;
+
+    display: grid;
+    place-items: center;
+
+    width: 32px;
+    height: 32px;
+
+    border-radius: 9px;
+    background: #fff0df;
+
+    color: var(--tp-orange);
+}
+
+#tripiChatPage .tripi-suggestion-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+
+    min-width: 0;
+}
+
+#tripiChatPage .tripi-suggestion-text strong {
+    color: #335e42;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-suggestion-text small {
+    color: #8b9b8f;
+    font-size: 10px;
+}
+
+#tripiChatPage .tripi-suggestion-arrow {
+    color: #9cad9e;
+    font-size: 11px;
+}
+
+/* ==========================================================
+   08. CHAT COMPOSER
+   ========================================================== */
+
+#tripiChatPage .tripi-chat-composer {
+    flex: 0 0 auto;
+
+    width: 100%;
+    margin: 0;
+    padding: 14px 17px;
+
+    border-top: 1px solid #e9f0e8;
+    background: #ffffff;
+}
+
+#tripiChatPage .tripi-chat-composer form {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#tripiChatPage .tripi-compose-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    min-height: 65px;
+
+    padding: 9px 10px 9px 18px;
+
+    border: 1.5px solid #bbd2bf;
+    border-radius: 36px;
+
+    background: #ffffff;
+}
+
+#tripiChatPage .tripi-compose-box:focus-within {
+    border-color: #508b64;
+}
+
+#tripiChatPage #tripiMessageInput {
+    display: block;
+    flex: 1 1 auto;
+
+    width: 100%;
+    min-width: 0;
+
+    min-height: 42px;
+    max-height: 135px;
+    height: 42px;
+
+    margin: 0;
+    padding: 8px 2px;
+
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+
+    background: transparent;
+    color: #304e3d;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    resize: none;
+    overflow-y: auto;
+}
+
+#tripiChatPage #tripiMessageInput::placeholder {
+    color: #a0ada3;
+}
+
+#tripiChatPage #tripiSendButton {
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 44px;
+
+    width: 44px;
+    height: 44px;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: var(--tp-green);
+    color: #fff;
+
+    font-size: 17px;
+}
+
+#tripiChatPage #tripiSendButton:hover:not(:disabled) {
+    background: #346b4d;
+}
+
+#tripiChatPage #tripiSendButton:disabled {
+    background: #b4c6b9;
+}
+
+#tripiChatPage .tripi-composer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    margin-top: 8px;
+
+    color: #95a498;
+    font-size: 10px;
+}
+
+#tripiChatPage .tripi-chat-error {
+    margin-top: 9px;
+    padding: 10px 12px;
+
+    border: 1px solid #eed1c8;
+    border-radius: 10px;
+
+    background: #fff1eb;
+    color: #b45346;
+}
+
+#tripiChatPage .tripi-chat-disclaimer {
+    margin: 8px 0 0;
+
+    color: #a1aea2;
+    font-size: 10px;
+    text-align: center;
+}
+
+/* ==========================================================
+   09. TYPING
+   ========================================================== */
+
+#tripiChatPage .tripi-typing {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin: 0 0 13px;
+}
+
+#tripiChatPage .tripi-typing-bubble {
+    display: flex;
+    gap: 5px;
+
+    padding: 12px 14px;
+
+    border: 1px solid #deeadc;
+    border-radius: 15px;
+
+    background: #edf6e9;
+}
+
+#tripiChatPage .tripi-typing-bubble span {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+    background: #78a889;
+
+    animation: tpTyping 1.2s ease-in-out infinite;
+}
+
+#tripiChatPage .tripi-typing-bubble span:nth-child(2) {
+    animation-delay: .15s;
+}
+
+#tripiChatPage .tripi-typing-bubble span:nth-child(3) {
+    animation-delay: .3s;
+}
+
+#tripiChatPage .tripi-typing small {
+    color: #90a394;
+    font-size: 11px;
+}
+
+/* ==========================================================
+   10. HOME - FULL VIEWPORT
+
+   Chi dung cho trang chao.
+   Khong anh huong trang results.
+   ========================================================== */
+
+#tripiChatPage.tripi-mode-home {
+    width: 100%;
+    max-width: none;
+
+    min-height: 0;
+    height: auto;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+}
+
+#tripiChatPage.tripi-mode-home .tripi-container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-world-workspace {
+    display: block;
+
+    width: 100%;
+    max-width: none;
+
+    margin: 0;
+    padding: 0;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-world-chat {
+    position: relative;
+    isolation: isolate;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    min-height: 0;
+
+    min-height: 0;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    border-radius: 0;
+
+    box-shadow: none;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 39%,
+            #ffffff 4%,
+            #fffaf4 66%,
+            #eef4e8 100%
+        );
+
+    overflow: hidden;
+}
+
+/* Khong can header chat thu hai tren man chao */
+
+#tripiChatPage.tripi-mode-home
+.tripi-chat-header,
+#tripiChatPage.tripi-mode-home
+.tripi-world-chat-status {
+    display: none;
+}
+
+/* Welcome chiem phan giua man hinh */
+
+#tripiChatPage.tripi-mode-home
+.tripi-chat-messages {
+    position: relative;
+    z-index: 3;
+
+    display: flex;
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 0;
+    height: 100%;
+
+    margin: 0;
+
+    padding:
+        42px
+        24px
+        115px;
+
+    overflow: hidden;
+    background: transparent;
+}
+
+/* Khong hien bong bong chao cu tren home */
+
+#tripiChatPage.tripi-mode-home
+.tripi-chat-messages > .tripi-message-assistant:not([data-tripi-dynamic]) {
+    display: none;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: min(100%, 790px);
+    max-width: 790px;
+
+    margin: 0 auto;
+    padding: 0;
+
+    border: 0;
+    border-radius: 0;
+
+    background: transparent;
+}
+
+/* ==========================================================
+   11. HOME TYPOGRAPHY - TIENG VIET
+   ========================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading {
+    width: 100%;
+    max-width: 760px;
+
+    margin: 0 auto 17px;
+    padding: 0;
+
+    text-align: center;
+    text-align-last: center;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    width: fit-content;
+    max-width: 100%;
+
+    margin: 0 auto 14px;
+    padding: 7px 15px;
+
+    border: 1px solid #dcebd7;
+    border-radius: 100px;
+
+    background: #edf6e8;
+    color: #39734c;
+
+    font-family: Arial, "Segoe UI", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+
+    line-height: 1.4;
+    letter-spacing: .4px;
+    word-spacing: normal;
+}
+
+/* Khong dung Georgia / Times New Roman cho tieu de */
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading h3 {
+    display: block;
+
+    width: 100%;
+    max-width: 760px;
+
+    margin: 0 auto 13px;
+    padding: 0;
+
+    font-family:
+        Arial,
+        "Segoe UI",
+        sans-serif;
+
+    font-size: clamp(32px, 3.1vw, 46px);
+    font-weight: 700;
+    font-style: normal;
+
+    line-height: 1.2;
+
+    letter-spacing: 0;
+    word-spacing: 0;
+
+    white-space: normal;
+
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+
+    text-align: center;
+    text-align-last: center;
+    text-justify: none;
+
+    text-wrap: wrap;
+
+    color: #203f2d;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome-heading p {
+    display: block;
+
+    width: 100%;
+    max-width: 610px;
+
+    margin: 0 auto;
+    padding: 0;
+
+    font-family: Arial, "Segoe UI", sans-serif;
+
+    font-size: 14px;
+    font-weight: 400;
+
+    line-height: 1.6;
+    letter-spacing: 0;
+    word-spacing: normal;
+
+    text-align: center;
+    text-align-last: center;
+
+    color: #77867b;
+}
+
+/* ==========================================================
+   12. HOME COMPOSER
+   ========================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-welcome > .tripi-chat-composer {
+    position: relative;
+    z-index: 6;
+
+    width: min(100%, 740px);
+    max-width: 740px;
+
+    margin: 22px auto 0;
+    padding: 0;
+
+    border: 0;
+    background: transparent;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-compose-box {
+    min-height: 68px;
+
+    padding: 8px 10px 8px 19px;
+
+    border: 1.5px solid #64896a;
+    border-radius: 42px;
+
+    background: #fff;
+
+    box-shadow:
+        0 8px 24px rgba(31, 73, 42, .08);
+}
+
+#tripiChatPage.tripi-mode-home
+#tripiMessageInput {
+    min-height: 38px;
+    height: 38px;
+
+    font-size: 14px;
+}
+
+#tripiChatPage.tripi-mode-home
+#tripiSendButton {
+    background: var(--tp-green);
+}
+
+/* ==========================================================
+   13. HOME SUGGESTIONS
+   ========================================================== */
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-grid {
+    position: relative;
+    z-index: 6;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    width: min(100%, 600px);
+    max-width: 600px;
+
+    gap: 10px 12px;
+
+    margin: 20px auto 0;
+    padding: 0;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+
+    margin: 0;
+    padding: 9px 13px;
+    gap: 8px;
+
+    border: 1px solid #c4d9c1;
+    border-radius: 100px;
+
+    background: rgba(255,255,255,.97);
+
+    box-shadow:
+        0 4px 12px rgba(31, 73, 42, .06);
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-icon {
+    flex: 0 0 23px;
+
+    display: grid;
+    place-items: center;
+
+    width: 23px;
+    height: 23px;
+
+    border: 0;
+    background: transparent;
+
+    color: var(--tp-orange);
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-text {
+    flex: 1;
+    min-width: 0;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-text strong {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-text small,
+#tripiChatPage.tripi-mode-home
+.tripi-suggestion-arrow {
+    display: none;
+}
+
+/* Footer phu cua trang lon khong chiem chieu cao home */
+
+#tripiChatPage.tripi-mode-home
+.tripi-world-bottom {
+    display: none;
+}
+
+/* ==========================================================
+   14. CHAT MODE
+   ========================================================== */
+
+#tripiChatPage.tripi-mode-chat {
+    padding: 18px 22px 30px;
+    background: #f8fbf7;
+}
+
+#tripiChatPage.tripi-mode-chat
+.tripi-world-workspace {
+    width: min(100%, 960px);
+    margin: 0 auto;
+}
+
+#tripiChatPage.tripi-mode-chat
+.tripi-world-chat {
+    height: calc(100dvh - 120px);
+    min-height: 500px;
+
+    box-shadow:
+        0 12px 35px rgba(28,72,43,.06);
+}
+
+#tripiChatPage.tripi-mode-chat
+.tripi-chat-composer {
+    margin-top: auto;
+}
+
+/* ==========================================================
+   15. RESULTS MODE - CHAT 38% / TOUR 62%
+   ========================================================== */
+
+#tripiChatPage.tripi-mode-results {
+    width: 100%;
+    max-width: none;
+
+    padding: 88px 22px 28px;
+
+    background: #f8fbf7;
+}
+
+#tripiChatPage.tripi-mode-results
+.tripi-world-workspace {
+    display: grid;
+
+    grid-template-columns:
+        minmax(330px, 38fr)
+        minmax(0, 62fr);
+
+    align-items: stretch;
+
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+
+    gap: 18px;
+}
+
+#tripiChatPage.tripi-mode-results
+.tripi-world-chat {
+    position: sticky;
+
+    /* Navbar HappyTrip cao khoang 63px */
+    top: 80px;
+
+    width: 100%;
+    min-width: 0;
+
+    height: calc(100dvh - 110px);
+    min-height: 500px;
+
+    overflow: hidden;
+}
+
+#tripiChatPage.tripi-mode-results
+.tripi-chat-messages {
+    flex: 1 1 0;
+    min-height: 0;
+
+    overflow-y: auto;
+}
+
+#tripiChatPage.tripi-mode-results
+.tripi-chat-composer {
+    margin-top: auto;
+}
+
+#tripiChatPage.tripi-mode-results
+.tripi-world-results {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 500px;
+
+    height: auto;
+
+    border: 1px solid var(--tp-border);
+    border-radius: 20px;
+
+    background: #fff;
+
+    box-shadow:
+        0 12px 35px rgba(28,75,43,.06);
+
+    overflow: hidden;
+}
+
+/* ==========================================================
+   16. RESULTS HEADER
+   ========================================================== */
+
+#tripiChatPage .tripi-world-results-heading,
+#tripiChatPage .tripi-world-preferences {
+    display: none;
+}
+
+#tripiChatPage .tripi-world-recommendations-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 22px 24px;
+
+    border-bottom: 1px solid #e5eee3;
+
+    background:
+        linear-gradient(
+            110deg,
+            #ecf7e9,
+            #fff8eb
+        );
+}
+
+#tripiChatPage .tripi-results-heading-content {
+    min-width: 0;
+}
+
+#tripiChatPage .tripi-results-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #538366;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+#tripiChatPage .tripi-world-recommendations-heading h2 {
+    margin: 8px 0 6px;
+
+    color: #214b34;
+
+    font-size: clamp(20px, 2vw, 27px);
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+#tripiChatPage .tripi-results-subtitle {
+    max-width: 600px;
+    margin: 0;
+
+    color: #7c9181;
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+#tripiChatPage .tripi-world-live-label {
+    flex: 0 0 auto;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 12px;
+
+    border: 1px solid #dbe9d9;
+    border-radius: 100px;
+
+    background: #fff;
+    color: #43805a;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* ==========================================================
+   17. RESULTS CONTAINER
+   ========================================================== */
+
+#tripiChatPage .tripi-world-recommendations {
+    width: 100%;
+    min-height: 240px;
+    background: #fff;
+}
+
+#tripiChatPage #tripiTourResults {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    width: 100%;
+    min-height: 240px;
+
+    gap: 17px;
+    margin: 0;
+    padding: 22px;
+
+    overflow: visible;
+}
+
+#tripiChatPage .tripi-tour-count {
+    color: #458058;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* ==========================================================
+   18. EMPTY RESULTS
+   ========================================================== */
+
+#tripiChatPage .tripi-tour-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: min(100%, 440px);
+
+    margin: 35px auto;
+    padding: 27px 22px;
+
+    border: 1px dashed #cee2cf;
+    border-radius: 18px;
+
+    background: #f8fcf6;
+
+    text-align: center;
+}
+
+#tripiChatPage .tripi-tour-empty-icon {
+    display: grid;
+    place-items: center;
+
+    width: 62px;
+    height: 62px;
+
+    margin-bottom: 14px;
+
+    border-radius: 19px;
+    background: #e8f5e5;
+
+    color: #53966b;
+    font-size: 26px;
+}
+
+#tripiChatPage .tripi-tour-empty h4 {
+    margin: 0 0 8px;
+
+    color: #326149;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-tour-empty p {
+    margin: 0;
+
+    color: #819485;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* ==========================================================
+   19. TOUR CARDS
+   ========================================================== */
+
+#tripiChatPage .tripi-tour-card {
+    display: grid;
+
+    grid-template-columns:
+        minmax(160px, 34%)
+        minmax(0, 1fr);
+
+    width: 100%;
+    min-width: 0;
+    min-height: 235px;
+
+    border: 1px solid #dfe9de;
+    border-radius: 18px;
+
+    background: #fff;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 23px rgba(29,72,42,.06);
+}
+
+#tripiChatPage .tripi-tour-card-selected {
+    border-color: #75b589;
+
+    box-shadow:
+        0 0 0 2px rgba(95,174,118,.12);
+}
+
+#tripiChatPage .tripi-tour-card-image {
+    position: relative;
+
+    display: block;
+    width: 100%;
+    min-height: 235px;
+
+    background: #dfeee2;
+
+    overflow: hidden;
+}
+
+#tripiChatPage .tripi-tour-card-image img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+    min-height: 235px;
+
+    object-fit: cover;
+    object-position: center;
+}
+
+#tripiChatPage .tripi-tour-card-image > i {
+    display: grid;
+    place-items: center;
+
+    width: 100%;
+    height: 100%;
+
+    color: #7dad8c;
+    font-size: 40px;
+}
+
+#tripiChatPage .tripi-tour-score {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+
+    padding: 8px 11px;
+
+    border-radius: 10px;
+
+    background: #fff;
+    color: #347549;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    box-shadow:
+        0 5px 14px rgba(32,67,40,.15);
+}
+
+#tripiChatPage .tripi-tour-card-content {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-width: 0;
+
+    padding: 18px 19px;
+}
+
+#tripiChatPage .tripi-tour-card-content h4 {
+    margin: 0 0 10px;
+
+    color: #24523a;
+
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.45;
+
+    overflow-wrap: anywhere;
+}
+
+#tripiChatPage .tripi-tour-card-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 8px 14px;
+
+    margin: 0 0 11px;
+
+    color: #809185;
+    font-size: 11px;
+}
+
+#tripiChatPage .tripi-tour-card-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#tripiChatPage .tripi-tour-card-meta i {
+    color: #d59a5e;
+}
+
+#tripiChatPage .tripi-tour-reasons {
+    width: 100%;
+
+    margin: 0 0 12px;
+    padding: 10px 12px;
+
+    border: 1px solid #e6eee3;
+    border-radius: 11px;
+
+    background: #f6faf4;
+}
+
+#tripiChatPage .tripi-tour-reasons p {
+    margin: 5px 0;
+
+    color: #62806b;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+#tripiChatPage .tripi-tour-card-price {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    width: 100%;
+
+    margin: auto 0 12px;
+    padding-top: 12px;
+
+    border-top: 1px solid #e7eee5;
+}
+
+#tripiChatPage .tripi-tour-card-price strong {
+    color: #c77d3c;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-tour-card-price a {
+    color: #34774e;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-select-tour {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 42px;
+
+    padding: 10px 14px;
+
+    border: 1px solid var(--tp-green);
+    border-radius: 11px;
+
+    background: var(--tp-green);
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+#tripiChatPage .tripi-select-tour:hover {
+    background: #326b4d;
+}
+
+#tripiChatPage .tripi-tour-card-selected
+.tripi-select-tour {
+    border-color: #b7dabc;
+
+    background: #e9f5e9;
+    color: #286445;
+}
+
+/* ==========================================================
+   20. SEARCHING
+   ========================================================== */
+
+#tripiChatPage .tripi-world-searching {
+    margin: 18px 22px 0;
+    padding: 19px;
+
+    border: 1px dashed #b8d8bf;
+    border-radius: 17px;
+
+    background: #f0f8ec;
+
+    text-align: center;
+}
+
+#tripiChatPage .tripi-world-searching-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    margin-bottom: 10px;
+}
+
+#tripiChatPage .tripi-world-searching-art > i {
+    color: #d7944e;
+    font-size: 25px;
+}
+
+#tripiChatPage .tripi-world-searching-art span {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+    background: #dba56b;
+
+    animation: tpTyping 1.15s ease-in-out infinite;
+}
+
+#tripiChatPage .tripi-world-searching strong {
+    display: block;
+
+    color: #36704e;
+    font-size: 13px;
+}
+
+#tripiChatPage .tripi-world-searching p {
+    margin: 6px 0 0;
+
+    color: #819684;
+    font-size: 12px;
+}
+
+/* ==========================================================
+   21. FOOTERS
+   ========================================================== */
+
+#tripiChatPage .tripi-world-results-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: auto;
+    padding: 15px 22px;
+
+    border-top: 1px solid #eaf0e8;
+
+    background: #f8fbf6;
+
+    color: #758978;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+#tripiChatPage .tripi-world-results-footer > i {
+    color: #d99a5a;
+    font-size: 16px;
+}
+
+#tripiChatPage .tripi-world-results-footer strong {
+    color: #36744f;
+}
+
+#tripiChatPage .tripi-world-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    gap: 12px 25px;
+
+    width: 100%;
+    padding: 18px 12px;
+
+    color: #859889;
+}
+
+#tripiChatPage .tripi-world-bottom span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    font-size: 11px;
+}
+
+#tripiChatPage .tripi-world-bottom i {
+    color: #db9857;
+}
+
+/* ==========================================================
+   22. MOBILE NAVIGATION
+   ========================================================== */
+
+#tripiChatPage .tripi-mobile-view-results,
+#tripiChatPage .tripi-mobile-back-chat {
+    display: none;
+}
+
+/* ==========================================================
+   23. ANIMATIONS
+   ========================================================== */
+
+@keyframes tpTyping {
+    0%, 60%, 100% {
+        opacity: .4;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes tpPanelIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes tpMessageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#tripiChatPage
+.tripi-message[data-tripi-dynamic="true"] {
+    animation: tpMessageEnter .3s ease both;
+}
+
+#tripiChatPage.tripi-mode-results
+.tripi-world-results {
+    animation: tpPanelIn .4s ease both;
+}
+
+/* ==========================================================
+   24. DESKTOP SMALL
+   ========================================================== */
+
+@media (min-width: 851px) and (max-width: 1250px) {
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        padding: 32px 120px 100px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: clamp(31px, 3.5vw, 42px);
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-workspace {
+        grid-template-columns:
+            minmax(310px, 42fr)
+            minmax(0, 58fr);
+
+        gap: 14px;
+    }
+
+    #tripiChatPage .tripi-tour-card {
+        grid-template-columns:
+            minmax(150px, 36%)
+            minmax(0, 1fr);
+    }
+}
+
+/* ==========================================================
+   25. MAN HINH THAP
+   ========================================================== */
+
+@media (min-width: 851px) and (max-height: 760px) {
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        padding: 24px 20px 75px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading {
+        margin-bottom: 11px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: clamp(28px, 3vw, 37px);
+        margin-bottom: 9px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome > .tripi-chat-composer {
+        margin-top: 13px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-grid {
+        margin-top: 12px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-compose-box {
+        min-height: 58px;
+    }
+}
+
+/* ==========================================================
+   26. TABLET / MOBILE
+   ========================================================== */
+
+@media (max-width: 850px) {
+    #tripiChatPage {
+        --tp-navbar-height: 65px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-world-chat {
+        height: auto;
+        min-height: calc(100svh - 65px);
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        height: auto;
+        min-height: 0;
+
+        padding: 110px 17px 130px;
+
+        overflow: visible;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: clamp(29px, 5.7vw, 39px);
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading p {
+        font-size: 13px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 9px;
+    }
+
+    #tripiChatPage.tripi-mode-chat,
+    #tripiChatPage.tripi-mode-results {
+        padding: 10px;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-workspace {
+        display: flex;
+        flex-direction: column;
+
+        gap: 14px;
+    }
+
+    #tripiChatPage.tripi-mode-chat
+    .tripi-world-chat,
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-chat {
+        position: relative;
+        top: auto;
+
+        width: 100%;
+
+        height: min(700px, 80dvh);
+        min-height: 430px;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-world-results {
+        width: 100%;
+        min-height: 350px;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-mobile-view-results {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        width: calc(100% - 28px);
+        margin: 9px 14px;
+        padding: 11px;
+
+        border: 1px solid #b6d9bc;
+        border-radius: 12px;
+
+        background: #ebf6ec;
+        color: #2e6746;
+
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    #tripiChatPage.tripi-mode-results
+    .tripi-mobile-back-chat {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        min-height: 44px;
+        padding: 11px;
+
+        border-radius: 12px;
+
+        background: var(--tp-green);
+        color: #fff;
+
+        font-size: 12px;
+        font-weight: 700;
+    }
+}
+
+/* ==========================================================
+   27. MOBILE SMALL
+   ========================================================== */
+
+@media (max-width: 600px) {
+    #tripiChatPage.tripi-mode-home
+    .tripi-chat-messages {
+        padding: 100px 14px 120px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-welcome-heading h3 {
+        font-size: clamp(28px, 7vw, 35px);
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion {
+        min-height: 45px;
+        padding: 8px 7px;
+        gap: 5px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-icon {
+        flex-basis: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    #tripiChatPage.tripi-mode-home
+    .tripi-suggestion-text strong {
+        font-size: 10px;
+    }
+
+    #tripiChatPage .tripi-chat-header {
+        min-height: 65px;
+        padding: 10px 12px;
+    }
+
+    #tripiChatPage .tripi-chat-avatar {
+        flex-basis: 39px;
+        width: 39px;
+        height: 39px;
+    }
+
+    #tripiChatPage .tripi-chat-messages {
+        padding: 15px 12px;
+    }
+
+    #tripiChatPage .tripi-chat-composer {
+        padding: 11px;
+    }
+
+    #tripiChatPage .tripi-tour-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #tripiChatPage .tripi-tour-card-image {
+        height: 200px;
+        min-height: 200px;
+    }
+
+    #tripiChatPage .tripi-tour-card-image img {
+        height: 100%;
+        min-height: 0;
+    }
+
+    #tripiChatPage .tripi-tour-card-content {
+        padding: 15px;
+    }
+
+    #tripiChatPage .tripi-world-recommendations-heading {
+        padding: 16px 14px;
+    }
+
+    #tripiChatPage #tripiTourResults {
+        padding: 14px;
+    }
+}
+
+/* ==========================================================
+   28. ACCESSIBILITY
+   ========================================================== */
+
+#tripiChatPage button:focus-visible,
+#tripiChatPage a:focus-visible,
+#tripiChatPage textarea:focus-visible {
+    outline: 3px solid rgba(74,150,98,.45);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #tripiChatPage *,
+    #tripiChatPage *::before,
+    #tripiChatPage *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Can chinh trang Tripi sat day man hinh */
+body:has(#tripiChatPage) {
+    margin: 0 !important;
+}
+
+body:has(#tripiChatPage) .travel-main {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+
+body:has(#tripiChatPage) .travel-footer {
+    display: none !important;
+}
+
+#tripiChatPage.tripi-mode-home {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-world-chat {
+    height: 100dvh !important;
+    min-height: 0 !important;
+}
+
+#tripiChatPage.tripi-mode-home
+.tripi-chat-messages {
+    min-height: 0 !important;
+}

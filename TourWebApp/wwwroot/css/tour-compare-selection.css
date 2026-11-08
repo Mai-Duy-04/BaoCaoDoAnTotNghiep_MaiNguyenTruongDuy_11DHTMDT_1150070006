@@ -1,0 +1,645 @@
+/* =========================================================
+   HAPPYTRIP - TOUR COMPARE SELECTION
+   Floating Mini Comparison Bar - Style A
+   ========================================================= */
+
+/* ==============================
+   01. COMPARE BUTTON ON TOUR CARD
+   ============================== */
+
+.ht-travel-catalog .compare-toggle-btn,
+.ht-travel-catalog .ht-tour-compare {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 16px;
+
+    border: 1px solid #d4e2d6;
+    border-radius: 12px;
+
+    background: #f4f8f2;
+    color: #285a40;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+}
+
+.ht-travel-catalog .compare-toggle-btn i,
+.ht-travel-catalog .ht-tour-compare i {
+    font-size: 14px;
+    transition: transform .2s ease;
+}
+
+.ht-travel-catalog .compare-toggle-btn:hover,
+.ht-travel-catalog .ht-tour-compare:hover {
+    background: #e8f3e8;
+    color: #1b4e35;
+    border-color: #9dc5a9;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 5px 15px rgba(23, 78, 44, .10);
+}
+
+.ht-travel-catalog .compare-toggle-btn:hover i {
+    transform: scale(1.12);
+}
+
+/* Selected */
+
+.ht-travel-catalog .compare-toggle-btn.active,
+.ht-travel-catalog .compare-toggle-btn.is-selected,
+.ht-travel-catalog .ht-tour-compare.active,
+.ht-travel-catalog .ht-tour-compare.is-selected {
+    background: #dff1e2;
+    color: #1c6741;
+    border-color: #91cda4;
+
+    box-shadow: inset 0 0 0 1px rgba(29, 105, 64, .08);
+}
+
+.ht-travel-catalog .compare-toggle-btn.is-selected i,
+.ht-travel-catalog .compare-toggle-btn.active i {
+    color: #278b50;
+}
+
+.ht-travel-catalog .compare-toggle-btn.is-selected:hover,
+.ht-travel-catalog .compare-toggle-btn.active:hover {
+    background: #d3ebd8;
+    border-color: #6db889;
+}
+
+/* Keyboard focus */
+
+.ht-travel-catalog .compare-toggle-btn:focus-visible {
+    outline: 3px solid rgba(37, 119, 72, .24);
+    outline-offset: 3px;
+}
+
+/* ==============================
+   02. FLOATING COMPARE BAR
+   ============================== */
+
+.ht-travel-catalog #compareBar.compare-bar {
+    position: fixed;
+
+    left: 50%;
+    right: auto;
+    bottom: 25px;
+    top: auto;
+
+    z-index: 1050;
+
+    display: block;
+
+    width: min(500px, calc(100vw - 36px));
+    max-width: 500px;
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+    border: 0;
+    border-radius: 20px;
+
+    box-shadow: none;
+
+    transform: translateX(-50%);
+}
+
+.ht-travel-catalog #compareBar.compare-bar[hidden] {
+    display: none !important;
+}
+
+/* Floating content */
+
+.ht-travel-catalog .compare-bar__content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 76px;
+    padding: 13px 15px;
+
+    background: #ffffff;
+
+    border: 1px solid #e1e9dd;
+    border-radius: 20px;
+
+    box-shadow:
+        0 15px 45px rgba(16, 54, 35, .19),
+        0 4px 14px rgba(16, 54, 35, .06);
+
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* ==============================
+   03. SELECTED COUNT
+   ============================== */
+
+.ht-travel-catalog #compareCount {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    flex: 1;
+    min-width: 0;
+
+    margin: 0;
+    padding: 0;
+
+    color: #173f30;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+
+    white-space: normal;
+}
+
+/* Compare symbol */
+
+.ht-travel-catalog #compareCount::before {
+    content: "\f362";
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    width: 39px;
+    height: 39px;
+
+    background: #eaf3e8;
+    color: #2c6b47;
+
+    border-radius: 12px;
+
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 17px;
+}
+
+/* ==============================
+   04. COMPARE NOW BUTTON
+   ============================== */
+
+.ht-travel-catalog #compareNowBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    flex-shrink: 0;
+
+    min-height: 43px;
+    padding: 11px 19px;
+    margin: 0;
+
+    color: #ffffff;
+    background: #174b35;
+
+    border: 1px solid #174b35;
+    border-radius: 999px;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+
+    box-shadow: 0 4px 11px rgba(17, 75, 47, .13);
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.ht-travel-catalog #compareNowBtn::after {
+    content: "\f061";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 11px;
+}
+
+.ht-travel-catalog #compareNowBtn:hover:not(:disabled) {
+    color: #ffffff;
+    background: #246747;
+
+    border-color: #246747;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 17px rgba(17, 75, 47, .20);
+}
+
+/* Not enough tours */
+
+.ht-travel-catalog #compareNowBtn:disabled {
+    color: #8a9a8b;
+    background: #e8ede7;
+
+    border-color: #e8ede7;
+
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.ht-travel-catalog #compareNowBtn:disabled::after {
+    display: none;
+}
+
+/* ==============================
+   05. CLEAR BUTTON
+   ============================== */
+
+.ht-travel-catalog #clearCompareBtn {
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    color: #7e8b80;
+    background: #f3f5f1;
+
+    border: 1px solid #e5ebe3;
+    border-radius: 50%;
+
+    font-size: 0;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+.ht-travel-catalog #clearCompareBtn::before {
+    content: "\f00d";
+
+    font-family: "Font Awesome 6 Free";
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.ht-travel-catalog #clearCompareBtn:hover {
+    color: #bb443b;
+    background: #fff0ed;
+
+    border-color: #f0cfc8;
+
+    transform: rotate(90deg);
+}
+
+.ht-travel-catalog #clearCompareBtn:focus-visible,
+.ht-travel-catalog #compareNowBtn:focus-visible {
+    outline: 3px solid rgba(37, 119, 72, .25);
+    outline-offset: 3px;
+}
+
+/* ==============================
+   06. BAR APPEARANCE
+   ============================== */
+
+@keyframes htCompareBarAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 18px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+.ht-travel-catalog #compareBar.has-selection {
+    animation: htCompareBarAppear .28s ease both;
+}
+
+/* ==============================
+   07. THREE OR FOUR TOUR STATES
+   ============================== */
+
+.ht-travel-catalog #compareBar.has-selection
+.compare-bar__content {
+    transition:
+        box-shadow .2s ease,
+        border-color .2s ease;
+}
+
+.ht-travel-catalog #compareBar.has-selection:hover
+.compare-bar__content {
+    border-color: #c8ddcb;
+
+    box-shadow:
+        0 18px 50px rgba(16, 54, 35, .21),
+        0 5px 15px rgba(16, 54, 35, .07);
+}
+
+/* ==============================
+   08. RESPONSIVE TABLET
+   ============================== */
+
+@media (max-width: 900px) {
+    .ht-travel-catalog #compareBar.compare-bar {
+        bottom: 19px;
+
+        width: min(470px, calc(100vw - 30px));
+    }
+
+    .ht-travel-catalog .compare-bar__content {
+        min-height: 72px;
+        gap: 10px;
+        padding: 12px;
+    }
+}
+
+/* ==============================
+   09. RESPONSIVE MOBILE
+   ============================== */
+
+@media (max-width: 600px) {
+    .ht-travel-catalog #compareBar.compare-bar {
+        left: 50%;
+        bottom: 18px;
+
+        width: calc(100vw - 28px);
+        max-width: none;
+    }
+
+    .ht-travel-catalog .compare-bar__content {
+        gap: 9px;
+        min-height: 68px;
+
+        padding: 10px;
+
+        border-radius: 17px;
+    }
+
+    .ht-travel-catalog #compareCount {
+        gap: 7px;
+        font-size: 12px;
+    }
+
+    .ht-travel-catalog #compareCount::before {
+        width: 33px;
+        height: 33px;
+
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    .ht-travel-catalog #compareNowBtn {
+        min-height: 39px;
+        padding: 9px 12px;
+
+        font-size: 11px;
+    }
+
+    .ht-travel-catalog #compareNowBtn::after {
+        display: none;
+    }
+
+    .ht-travel-catalog #clearCompareBtn {
+        width: 33px;
+        height: 33px;
+
+        min-width: 33px;
+        min-height: 33px;
+    }
+
+    .ht-travel-catalog #clearCompareBtn::before {
+        font-size: 13px;
+    }
+}
+
+/* ==============================
+   10. SMALL MOBILE
+   ============================== */
+
+@media (max-width: 390px) {
+    .ht-travel-catalog #compareBar.compare-bar {
+        width: calc(100vw - 20px);
+    }
+
+    .ht-travel-catalog .compare-bar__content {
+        gap: 6px;
+        padding: 9px 8px;
+    }
+
+    .ht-travel-catalog #compareCount {
+        font-size: 11px;
+    }
+
+    .ht-travel-catalog #compareCount::before {
+        width: 29px;
+        height: 29px;
+        font-size: 12px;
+    }
+
+    .ht-travel-catalog #compareNowBtn {
+        padding: 9px 10px;
+        font-size: 10px;
+    }
+}
+
+/* ==============================
+   11. REDUCED MOTION
+   ============================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .ht-travel-catalog .compare-toggle-btn,
+    .ht-travel-catalog #compareBar,
+    .ht-travel-catalog #compareNowBtn,
+    .ht-travel-catalog #clearCompareBtn {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ===========================================
+   HAPPYTRIP - FIX CARD TOUR ACTIONS
+   =========================================== */
+
+.ht-travel-catalog .ht-ticket-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 9px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: none !important;
+}
+
+.ht-travel-catalog .ht-ticket-actions > a,
+.ht-travel-catalog .ht-ticket-actions > button {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Nut chinh: Kham pha tour */
+
+.ht-travel-catalog .ht-ticket-actions .ht-tour-detail {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+
+    min-height: 45px !important;
+    padding: 11px 15px !important;
+
+    background: #234b38 !important;
+    color: #ffffff !important;
+
+    border: 1px solid #234b38 !important;
+    border-radius: 11px !important;
+
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    white-space: normal !important;
+    overflow: visible !important;
+
+    transition:
+        background .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease !important;
+}
+
+.ht-travel-catalog .ht-ticket-actions .ht-tour-detail:hover {
+    background: #316b4b !important;
+    border-color: #316b4b !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(24, 77, 46, .17);
+}
+
+.ht-travel-catalog .ht-ticket-actions .ht-tour-detail i {
+    flex-shrink: 0;
+    font-size: 12px;
+}
+
+/* Nut phu: Them so sanh */
+
+.ht-travel-catalog .ht-ticket-actions .ht-tour-compare {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 9px !important;
+
+    min-height: 42px !important;
+    padding: 10px 12px !important;
+
+    color: #47745b !important;
+    background: #ffffff !important;
+
+    border: 1px solid #dce8dd !important;
+    border-radius: 11px !important;
+
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+    text-align: center !important;
+    overflow: visible !important;
+
+    box-shadow: none !important;
+}
+
+.ht-travel-catalog .ht-ticket-actions .ht-tour-compare:hover {
+    color: #1d6340 !important;
+    background: #f0f7ef !important;
+    border-color: #a5cdb0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Trang thai da them */
+
+.ht-travel-catalog .ht-ticket-actions
+.ht-tour-compare.is-selected,
+.ht-travel-catalog .ht-ticket-actions
+.ht-tour-compare.active {
+    color: #17613b !important;
+    background: #e4f4e8 !important;
+    border-color: #a0d5b0 !important;
+}
+
+.ht-travel-catalog .ht-ticket-actions
+.ht-tour-compare.is-selected:hover,
+.ht-travel-catalog .ht-ticket-actions
+.ht-tour-compare.active:hover {
+    background: #d9eedf !important;
+}
+
+/* Giu cac nut trong cot gia */
+
+.ht-travel-catalog .ht-ticket-booking {
+    min-width: 0 !important;
+}
+
+.ht-travel-catalog .ht-ticket-actions
+.ht-tour-compare i {
+    flex-shrink: 0;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .ht-travel-catalog .ht-ticket-actions {
+        gap: 8px !important;
+    }
+
+    .ht-travel-catalog .ht-ticket-actions
+    .ht-tour-detail {
+        min-height: 43px !important;
+    }
+
+    .ht-travel-catalog .ht-ticket-actions
+    .ht-tour-compare {
+        min-height: 40px !important;
+    }
+}
