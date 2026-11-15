@@ -1,85 +1,909 @@
+
 @model TourWebApp.Data.Models.Tour
+@using System.Net
+@using System.Text.RegularExpressions
+@using System.Globalization
+
 @{
-    ViewData["Title"] = "Chi tiết tour";
     Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chi tiết tour";
+
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+
+    var images = Model.HinhTours?
+        .OrderBy(x => x.ThuTu)
+        .ToList();
+
+    var firstImage = images != null && images.Any()
+        ? TourImagePathHelper.ToTourImageSrc(images.First().UrlHinh)
+        : !string.IsNullOrWhiteSpace(Model.HinhAnh)
+            ? TourImagePathHelper.ToTourImageSrc(Model.HinhAnh)
+            : Url.Content("~/img/no-image.png");
+
+    var originalPrice = Model.GiaGoc ?? 0m;
+    var sellingPrice = Model.GiaKhuyenMai ?? originalPrice;
+    var discountPercent = Model.PhanTramGiam ?? 0;
+    var hasDiscount = discountPercent > 0;
+
+    var typeName = Model.IdLoaiTourNavigation?.TenLoai
+        ?? "Chưa phân loại";
+
+    var description = Model.MoTa ?? "";
+
+    // Chuyển Markdown cơ bản thành HTML an toàn.
+    // Encode trước để nội dung không thể chèn HTML tùy ý.
+    var safeDescription = WebUtility.HtmlEncode(description)
+        .Replace("\r\n", "\n")
+        .Replace("\r", "\n");
+
+    // Tách các phần lịch trình nếu nội dung nhập liền nhau.
+    safeDescription = Regex.Replace(
+        safeDescription,
+        @"(?<!^)(?=\*\*Ngày\s+\d+\s*:)",
+        "\n\n",
+        RegexOptions.IgnoreCase
+    );
+
+    safeDescription = Regex.Replace(
+        safeDescription,
+        @"(?<!^)(?=\*\*Điểm nổi bật\s*:)",
+        "\n\n",
+        RegexOptions.IgnoreCase
+    );
+
+    // Chuyển **chữ đậm** thành strong.
+    safeDescription = Regex.Replace(
+        safeDescription,
+        @"\*\*(.+?)\*\*",
+        "<strong>$1</strong>",
+        RegexOptions.Singleline
+    );
+
+    // Giữ các đoạn văn thay vì dồn hết thành một khối.
+    safeDescription = Regex.Replace(
+        safeDescription,
+        @"\n{3,}",
+        "\n\n"
+    );
+
+    var descriptionParagraphs = Regex.Split(
+        safeDescription.Trim(),
+        @"\n\s*\n"
+    )
+    .Where(x => !string.IsNullOrWhiteSpace(x))
+    .ToList();
 }
 
-            <div class="container-fluid">
-                <h3 class="mb-3">Chi tiết tour</h3>
+<style>
+    /* ============================================
+       HAPPYTRIP ADMIN - TOUR DETAIL
+       ============================================ */
 
-                <div class="card shadow-sm p-4">
-                    <div class="row">
-                       <div class="col-md-4 text-center">
-                            @if (Model.HinhTours != null && Model.HinhTours.Any())
-                            {
-                                foreach (var hinh in Model.HinhTours.OrderBy(x => x.ThuTu))
-                                {
-                                    <img src="@TourImagePathHelper.ToTourImageSrc(hinh.UrlHinh)"
-                                        class="img-fluid rounded shadow mb-3"
-                                        style="max-height:220px; object-fit:cover;"
-                                        alt="@hinh.MoTa" />
-                                }
-                            }
-                            else
-                            {
-                                <img src="@Url.Content("~/img/no-image.png")"
-                                    class="img-fluid rounded shadow"
-                                    style="max-height:220px; object-fit:cover;" />
-                            }
-                        </div>
+    .ht-detail {
+        --detail-green: #208951;
+        --detail-dark: #1b5238;
+        --detail-muted: #7b9181;
+        --detail-border: #e1ebdd;
 
+        width: min(100%, 1400px);
+        min-width: 0;
+        margin: 0 auto;
+        padding: 9px 2px 30px;
+        color: var(--detail-dark);
+        font-family: "Plus Jakarta Sans",
+                     "Segoe UI", Arial, sans-serif;
+    }
 
-            <div class="col-md-8">
-                <h4 class="fw-bold">@Model.TenTour</h4>
-                <p><strong>Loại tour:</strong>@Model.IdLoaiTourNavigation?.TenLoai</p>
-                <p><strong>Địa điểm:</strong> @Model.DiaDiem</p>
-                <p><strong>Thời gian:</strong> @Model.ThoiGian</p>
-                <p><strong>Phương tiện:</strong> 
-                    @(string.IsNullOrWhiteSpace(Model.PhuongTien) ? "Chưa cập nhật" : Model.PhuongTien)
-                </p>
+    .ht-detail *,
+    .ht-detail *::before,
+    .ht-detail *::after {
+        box-sizing: border-box;
+    }
 
-                <p>
-                    <strong>Giá gốc:</strong>
-                    <span class="text-secondary text-decoration-line-through">
-                        @String.Format("{0:N0}đ", Model.GiaGoc)
-                    </span>
-                </p>
+    .ht-detail a {
+        text-decoration: none;
+    }
 
-                <p>
-                    <strong>Giá khuyến mãi:</strong>
-                    <span class="text-danger fw-bold">
-                        @String.Format("{0:N0}đ", Model.GiaKhuyenMai)
-                    </span>
-                </p>
+    /* HEADER */
 
-                <p><strong>% Giảm:</strong> @Model.PhanTramGiam %</p>
+    .ht-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
 
-                <p><strong>Lượt xem:</strong> @Model.LuotXem</p>
-                <p><strong>Đã đặt:</strong> @Model.SoNguoiDaDat người</p>
-                <p><strong>Trạng thái:</strong>
-                    @if (Model.TrangThai)
+    .ht-detail-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 7px;
+        color: #379466;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.1px;
+    }
+
+    .ht-detail-header h1 {
+        margin: 0 0 6px;
+        color: #1b5538;
+        font-size: clamp(24px, 2.3vw, 31px);
+        font-weight: 800;
+        letter-spacing: -.5px;
+    }
+
+    .ht-detail-header p {
+        margin: 0;
+        color: #849789;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .ht-detail-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    .ht-detail-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ht-detail .ht-detail-action.back {
+        color: #4e755b;
+        background: white;
+        border: 1px solid #dce9d9;
+    }
+
+    .ht-detail .ht-detail-action.edit {
+        color: white;
+        background: #288e56;
+        border: 1px solid #288e56;
+    }
+
+    .ht-detail .ht-detail-action:hover {
+        filter: brightness(.96);
+    }
+
+    /* MAIN CARD */
+
+    .ht-detail-main {
+        display: grid;
+        grid-template-columns:
+            minmax(0, 1.05fr)
+            minmax(0, 1fr);
+        gap: 22px;
+        padding: 19px;
+        border: 1px solid var(--detail-border);
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 8px 24px rgba(31, 76, 46, .055);
+    }
+
+    /* IMAGE GALLERY */
+
+    .ht-detail-gallery {
+        min-width: 0;
+    }
+
+    .ht-detail-hero {
+        position: relative;
+        height: 330px;
+        overflow: hidden;
+        border-radius: 15px;
+        background: #e8f3e5;
+    }
+
+    .ht-detail-hero img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ht-detail-image-label {
+        position: absolute;
+        top: 13px;
+        left: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.96);
+        color: #2b7950;
+        font-size: 10px;
+        font-weight: 800;
+        box-shadow: 0 4px 13px rgba(0,0,0,.07);
+    }
+
+    .ht-detail-thumbnails {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        gap: 9px;
+        margin-top: 10px;
+    }
+
+    .ht-detail-thumbnail {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 82px;
+        overflow: hidden;
+        padding: 0;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        background: #edf6e9;
+        cursor: pointer;
+    }
+
+    .ht-detail-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ht-detail-thumbnail.active {
+        border-color: #27995c;
+        box-shadow: 0 0 0 2px #e2f4e2;
+    }
+
+    .ht-detail-thumbnail:focus-visible {
+        outline: 3px solid #9acda8;
+        outline-offset: 3px;
+    }
+
+    .ht-detail-gallery-caption {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 11px;
+        color: #829889;
+        font-size: 11px;
+    }
+
+    /* INFO */
+
+    .ht-detail-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .ht-detail-code-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .ht-detail-code {
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: #f1f7ec;
+        color: #527c5c;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-detail-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-detail-status i {
+        font-size: 6px;
+    }
+
+    .ht-detail-status.active {
+        background: #e2f6e6;
+        color: #25874d;
+    }
+
+    .ht-detail-status.inactive {
+        background: #fff0e4;
+        color: #bd7956;
+    }
+
+    .ht-detail-tour-name {
+        margin: 0 0 12px;
+        color: #174f34;
+        font-size: clamp(20px, 1.6vw, 25px);
+        font-weight: 800;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-detail-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        align-self: flex-start;
+        padding: 7px 11px;
+        border-radius: 9px;
+        color: #347c50;
+        background: #eef8eb;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-detail-category i {
+        color: #e1ad31;
+    }
+
+    .ht-detail-route {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 16px 0;
+        padding: 12px 13px;
+        border: 1px solid #e4efe0;
+        border-radius: 12px;
+        background: #f7fbf4;
+        color: #426d4d;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.65;
+    }
+
+    .ht-detail-route i {
+        margin-top: 3px;
+        color: #e2ac31;
+    }
+
+    .ht-detail-route span {
+        overflow-wrap: anywhere;
+    }
+
+    .ht-detail-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .ht-detail-info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid #e7eee4;
+        border-radius: 11px;
+        background: #fcfdfa;
+    }
+
+    .ht-detail-info-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 35px;
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        background: #e8f5e8;
+        color: #31915a;
+        font-size: 14px;
+    }
+
+    .ht-detail-info-item > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .ht-detail-info-item small {
+        color: #8b9d8e;
+        font-size: 10px;
+    }
+
+    .ht-detail-info-item strong {
+        color: #335d42;
+        font-size: 12px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    /* PRICE */
+
+    .ht-detail-price-panel {
+        margin-top: auto;
+        padding: 16px 17px;
+        border: 1px solid #d6e9d3;
+        border-radius: 14px;
+        background: linear-gradient(115deg, #edf8e9, #fff9e9);
+    }
+
+    .ht-detail-price-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 7px;
+        color: #5d8668;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-detail-discount {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 9px;
+        border-radius: 8px;
+        background: #fff0cb;
+        color: #b57a24;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-detail-price-value {
+        color: #17834a;
+        font-size: clamp(23px, 2.1vw, 30px);
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .ht-detail-price-original {
+        margin-top: 6px;
+        color: #879a89;
+        font-size: 11px;
+    }
+
+    .ht-detail-price-original del {
+        margin-left: 5px;
+    }
+
+    /* DESCRIPTION */
+
+    .ht-detail-description-section {
+        margin-top: 18px;
+        padding: 22px 24px;
+        border: 1px solid #e1ebdc;
+        border-radius: 19px;
+        background: white;
+        box-shadow: 0 7px 21px rgba(31, 76, 46, .04);
+    }
+
+    .ht-detail-section-title {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 17px;
+        padding-bottom: 13px;
+        border-bottom: 1px solid #e9f0e6;
+    }
+
+    .ht-detail-section-title i {
+        color: #dca92e;
+        font-size: 18px;
+    }
+
+    .ht-detail-section-title h2 {
+        margin: 0;
+        color: #1f563b;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .ht-detail-description {
+        color: #4b6755;
+        font-size: 13px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-detail-description p {
+        margin: 0 0 14px;
+    }
+
+    .ht-detail-description p:last-child {
+        margin-bottom: 0;
+    }
+
+    .ht-detail-description strong {
+        color: #215d3d;
+        font-weight: 800;
+    }
+
+    .ht-detail-no-description {
+        color: #8a9b8e;
+        font-size: 12px;
+        font-style: italic;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1050px) {
+        .ht-detail-main {
+            grid-template-columns: minmax(0,1fr);
+        }
+
+        .ht-detail-hero {
+            height: 350px;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .ht-detail-main {
+            padding: 12px;
+            gap: 16px;
+        }
+
+        .ht-detail-hero {
+            height: 230px;
+        }
+
+        .ht-detail-thumbnails {
+            gap: 6px;
+        }
+
+        .ht-detail-thumbnail {
+            height: 65px;
+        }
+
+        .ht-detail-info-grid {
+            grid-template-columns: minmax(0,1fr);
+        }
+
+        .ht-detail-description-section {
+            padding: 17px 15px;
+        }
+
+        .ht-detail-actions {
+            width: 100%;
+        }
+
+        .ht-detail-action {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="ht-detail">
+
+    <!-- HEADER -->
+    <header class="ht-detail-header">
+
+        <div>
+            <div class="ht-detail-eyebrow">
+                <i class="fa-solid fa-route"></i>
+                HAPPYTRIP · THÔNG TIN HÀNH TRÌNH
+            </div>
+
+            <h1>Chi tiết tour du lịch</h1>
+
+            <p>
+                Xem hình ảnh, thông tin kinh doanh
+                và nội dung hành trình.
+            </p>
+        </div>
+
+        <div class="ht-detail-actions">
+
+            <a asp-controller="QuanTri"
+               asp-action="QuanLyTour"
+               class="ht-detail-action back">
+
+                <i class="fa-solid fa-arrow-left"></i>
+                Danh sách tour
+            </a>
+
+            <a asp-controller="QuanTri"
+               asp-action="SuaTour"
+               asp-route-id="@Model.IdTour"
+               class="ht-detail-action edit">
+
+                <i class="fa-solid fa-pen"></i>
+                Chỉnh sửa tour
+            </a>
+
+        </div>
+    </header>
+
+    <!-- MAIN INFORMATION -->
+    <section class="ht-detail-main">
+
+        <!-- PHOTO GALLERY -->
+        <div class="ht-detail-gallery">
+
+            <div class="ht-detail-hero">
+
+                <img id="htDetailMainImage"
+                     src="@firstImage"
+                     alt="Hình ảnh tour @Model.TenTour" />
+
+                <span class="ht-detail-image-label">
+                    <i class="fa-solid fa-camera"></i>
+                    Thư viện hình ảnh
+                </span>
+
+            </div>
+
+            @if (images != null && images.Count > 0)
+            {
+                <div class="ht-detail-thumbnails"
+                     id="htDetailThumbnails">
+
+                    @{
+                        int photoIndex = 0;
+                    }
+
+                    @foreach (var image in images)
                     {
-                        <span class="badge bg-success">Hiển thị</span>
+                        var imageSource =
+                            TourImagePathHelper.ToTourImageSrc(
+                                image.UrlHinh
+                            );
+
+                        <button type="button"
+                                class="ht-detail-thumbnail @(photoIndex == 0 ? "active" : "")"
+                                data-image-src="@imageSource"
+                                aria-label="Xem ảnh tour số @(photoIndex + 1)"
+                                aria-pressed="@(photoIndex == 0 ? "true" : "false")">
+
+                            <img src="@imageSource"
+                                 alt="Ảnh @Model.TenTour số @(photoIndex + 1)"
+                                 loading="lazy" />
+                        </button>
+
+                        photoIndex++;
+                    }
+
+                </div>
+
+                <div class="ht-detail-gallery-caption">
+                    <i class="fa-solid fa-images"></i>
+                    @images.Count hình ảnh · Nhấn vào ảnh nhỏ để xem
+                </div>
+            }
+            else
+            {
+                <div class="ht-detail-gallery-caption">
+                    <i class="fa-solid fa-image"></i>
+                    Chưa có ảnh bổ sung
+                </div>
+            }
+
+        </div>
+
+        <!-- TOUR INFORMATION -->
+        <div class="ht-detail-info">
+
+            <div class="ht-detail-code-row">
+
+                <span class="ht-detail-code">
+                    <i class="fa-solid fa-hashtag"></i>
+                    @Model.MaTour
+                </span>
+
+                @if (Model.TrangThai)
+                {
+                    <span class="ht-detail-status active">
+                        <i class="fa-solid fa-circle"></i>
+                        Đang bán
+                    </span>
+                }
+                else
+                {
+                    <span class="ht-detail-status inactive">
+                        <i class="fa-solid fa-circle"></i>
+                        Ngưng bán
+                    </span>
+                }
+
+            </div>
+
+            <h2 class="ht-detail-tour-name">
+                @Model.TenTour
+            </h2>
+
+            <span class="ht-detail-category">
+                <i class="fa-solid fa-tags"></i>
+                @typeName
+            </span>
+
+            <div class="ht-detail-route">
+                <i class="fa-solid fa-location-dot"></i>
+
+                <span>
+                    @(string.IsNullOrWhiteSpace(Model.DiaDiem)
+                        ? "Chưa cập nhật tuyến điểm"
+                        : Model.DiaDiem)
+                </span>
+            </div>
+
+            <div class="ht-detail-info-grid">
+
+                <div class="ht-detail-info-item">
+                    <span class="ht-detail-info-icon">
+                        <i class="fa-regular fa-clock"></i>
+                    </span>
+
+                    <div>
+                        <small>Thời gian</small>
+                        <strong>
+                            @(string.IsNullOrWhiteSpace(Model.ThoiGian)
+                                ? "Chưa cập nhật"
+                                : Model.ThoiGian)
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="ht-detail-info-item">
+                    <span class="ht-detail-info-icon">
+                        <i class="fa-solid fa-plane"></i>
+                    </span>
+
+                    <div>
+                        <small>Phương tiện</small>
+                        <strong>
+                            @(string.IsNullOrWhiteSpace(Model.PhuongTien)
+                                ? "Chưa cập nhật"
+                                : Model.PhuongTien)
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="ht-detail-info-item">
+                    <span class="ht-detail-info-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </span>
+
+                    <div>
+                        <small>Khách đã đặt</small>
+                        <strong>
+                            @Model.SoNguoiDaDat.ToString("N0", vi)
+                            khách
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="ht-detail-info-item">
+                    <span class="ht-detail-info-icon">
+                        <i class="fa-solid fa-eye"></i>
+                    </span>
+
+                    <div>
+                        <small>Lượt xem</small>
+                        <strong>
+                            @Model.LuotXem.ToString("N0", vi)
+                        </strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PRICE -->
+            <div class="ht-detail-price-panel">
+
+                <div class="ht-detail-price-title">
+
+                    <span>GIÁ BÁN HIỆN TẠI</span>
+
+                    @if (hasDiscount)
+                    {
+                        <span class="ht-detail-discount">
+                            <i class="fa-solid fa-tag"></i>
+                            Giảm @discountPercent%
+                        </span>
+                    }
+
+                </div>
+
+                <div class="ht-detail-price-value">
+                    @sellingPrice.ToString("N0", vi) đ
+                </div>
+
+                <div class="ht-detail-price-original">
+
+                    @if (hasDiscount)
+                    {
+                        <span>Giá gốc:</span>
+                        <del>@originalPrice.ToString("N0", vi) đ</del>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">Ẩn</span>
+                        <span>Giá gốc:</span>
+                        <span>@originalPrice.ToString("N0", vi) đ</span>
                     }
-                </p>
+
+                </div>
+
             </div>
+
+        </div>
+    </section>
+
+    <!-- DESCRIPTION -->
+    <section class="ht-detail-description-section">
+
+        <div class="ht-detail-section-title">
+            <i class="fa-solid fa-book-open"></i>
+            <h2>Giới thiệu & lịch trình tour</h2>
         </div>
 
-        <hr />
+        @if (descriptionParagraphs.Count > 0)
+        {
+            <div class="ht-detail-description">
 
-        <h5>Mô tả tour</h5>
-        <div class="bg-light p-3 rounded">
-            @Html.Raw(Model.MoTa)
-        </div>
+                @foreach (var paragraph in descriptionParagraphs)
+                {
+                    var paragraphHtml = paragraph.Replace(
+                        "\n",
+                        "<br />"
+                    );
 
-        <div class="mt-4">
-            <a asp-action="QuanLyTour" class="btn btn-secondary">
-                Quay lại danh sách
-            </a>
-        </div>
-    </div>
+                    <p>@Html.Raw(paragraphHtml)</p>
+                }
+
+            </div>
+        }
+        else
+        {
+            <p class="ht-detail-no-description">
+                Tour này chưa có nội dung mô tả.
+            </p>
+        }
+
+    </section>
+
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const mainImage = document.getElementById(
+        "htDetailMainImage"
+    );
+
+    const thumbnails = document.querySelectorAll(
+        "#htDetailThumbnails .ht-detail-thumbnail"
+    );
+
+    if (!mainImage || thumbnails.length === 0) {
+        return;
+    }
+
+    thumbnails.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            const source = button.dataset.imageSrc;
+
+            if (!source) return;
+
+            mainImage.src = source;
+
+            thumbnails.forEach(function (item) {
+                item.classList.remove("active");
+                item.setAttribute("aria-pressed", "false");
+            });
+
+            button.classList.add("active");
+            button.setAttribute("aria-pressed", "true");
+
+        });
+
+    });
+
+});
+</script>

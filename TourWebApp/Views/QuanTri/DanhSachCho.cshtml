@@ -1,70 +1,750 @@
+
 @model List<TourWebApp.Models.ViewModels.DanhSachChoAdminVM>
+
 @{
     ViewData["Title"] = "Danh sách chờ";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    var danhSach = Model ?? new List<TourWebApp.Models.ViewModels.DanhSachChoAdminVM>();
+
+    var tong = danhSach.Count;
+    var dangCho = danhSach.Count(x => x.TrangThai == "Đang chờ");
+    var daLienHe = danhSach.Count(x =>
+        x.TrangThai == "Đã liên hệ" ||
+        x.TrangThai == "Đã thông báo");
+    var daDat = danhSach.Count(x => x.TrangThai == "Đã đặt");
+
+    int? idLich = ViewBag.IdLich as int?;
+
+    string BadgeClass(string trangThai) => trangThai switch
+    {
+        "Đang chờ" => "waiting",
+        "Đã thông báo" => "notified",
+        "Đã liên hệ" => "contacted",
+        "Đã đặt" => "booked",
+        "Đã hủy" => "cancelled",
+        _ => "cancelled"
+    };
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h3 class="mb-1"><i class="fa-solid fa-list-ol"></i> Danh sách khách chờ chỗ</h3>
-        <p class="text-muted mb-0">Khách đăng ký khi lịch khởi hành đã full slot.</p>
-    </div>
-    <a asp-action="DanhSachLich" class="btn btn-outline-primary">Quản lý lịch</a>
-</div>
+<style>
+    .ht-wait {
+        --w-green: #18794c;
+        --w-dark: #184733;
+        --w-muted: #7a9181;
+        --w-line: #e4ede4;
+        color: var(--w-dark);
+        font-family: inherit;
+    }
 
-@if (TempData["ThongBao"] != null)
-{
-    <div class="alert alert-success">@TempData["ThongBao"]</div>
-}
+    .ht-wait * {
+        box-sizing: border-box;
+    }
 
-<div class="card shadow-sm border-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Khách hàng</th>
-                    <th>Tour / lịch</th>
-                    <th>Số khách</th>
-                    <th>Đăng ký lúc</th>
-                    <th>Trạng thái</th>
-                    <th>Cập nhật</th>
-                </tr>
-            </thead>
-            <tbody>
-            @if (!Model.Any())
-            {
-                <tr><td colspan="6" class="text-center text-muted py-5">Chưa có khách trong danh sách chờ.</td></tr>
-            }
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        <strong>@item.HoTen</strong><br />
-                        <small>@item.SoDienThoai · @item.Email</small>
-                    </td>
-                    <td>
-                        <strong>@item.TenTour</strong><br />
-                        <small>Lịch @item.NgayKhoiHanh.ToString("dd/MM/yyyy")</small>
-                    </td>
-                    <td><span class="badge bg-primary">@item.SoKhach</span></td>
-                    <td>@item.NgayDangKy.ToString("HH:mm dd/MM/yyyy")</td>
-                    <td><span class="badge @(item.TrangThai == "Đang chờ" ? "bg-warning text-dark" : "bg-secondary")">@item.TrangThai</span></td>
-                    <td>
-                        <form asp-action="CapNhatDanhSachCho" method="post" class="d-flex gap-2">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@item.IdDanhSachCho" />
-                            <select name="trangThai" class="form-select form-select-sm">
-                                @foreach (var status in new[] { "Đang chờ", "Đã thông báo", "Đã liên hệ", "Đã đặt", "Đã hủy" })
-                                {
-                                    <option value="@status" selected="@(item.TrangThai == status)">@status</option>
-                                }
-                            </select>
-                            <button class="btn btn-sm btn-primary" type="submit">Lưu</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
+    .ht-wait-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+    .ht-wait-eyebrow {
+        color: #278052;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .ht-wait-title {
+        margin: 0;
+        font-size: clamp(23px, 2.4vw, 30px);
+        font-weight: 800;
+        letter-spacing: -.8px;
+        color: #164832;
+    }
+
+    .ht-wait-subtitle {
+        color: var(--w-muted);
+        margin: 7px 0 0;
+        font-size: 13px;
+    }
+
+    .ht-wait-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 11px 16px;
+        background: white;
+        color: #18794c;
+        border: 1px solid #b9dac4;
+        border-radius: 11px;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none;
+        transition: .2s;
+    }
+
+    .ht-wait-btn:hover {
+        background: #eaf6ed;
+        color: #126b42;
+    }
+
+    .ht-wait-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .ht-wait-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 19px;
+        background: white;
+        border: 1px solid var(--w-line);
+        border-radius: 15px;
+    }
+
+    .ht-wait-stat-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #7c9082;
+        margin-bottom: 9px;
+    }
+
+    .ht-wait-stat-number {
+        font-size: 27px;
+        line-height: 1;
+        font-weight: 800;
+        color: #204b36;
+    }
+
+    .ht-wait-stat-icon {
+        width: 41px;
+        height: 41px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: #edf7ef;
+        color: #238052;
+        flex-shrink: 0;
+    }
+
+    .ht-wait-stat:nth-child(2) .ht-wait-stat-icon {
+        background: #fff6df;
+        color: #ba841b;
+    }
+
+    .ht-wait-stat:nth-child(3) .ht-wait-stat-icon {
+        background: #edf4ff;
+        color: #4c7ac4;
+    }
+
+    .ht-wait-panel {
+        background: white;
+        border: 1px solid var(--w-line);
+        border-radius: 17px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(32, 91, 56, .035);
+    }
+
+    .ht-wait-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 13px;
+        padding: 19px 20px;
+        border-bottom: 1px solid var(--w-line);
+    }
+
+    .ht-wait-toolbar h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: #204b36;
+    }
+
+    .ht-wait-tools {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .ht-wait-search,
+    .ht-wait-filter {
+        background: #fcfdfb;
+        border: 1px solid #e0e9df;
+        border-radius: 10px;
+        outline: none;
+        color: #285441;
+        font-size: 12px;
+        padding: 10px 12px;
+        min-height: 39px;
+    }
+
+    .ht-wait-search {
+        width: 220px;
+        max-width: 100%;
+    }
+
+    .ht-wait-search:focus,
+    .ht-wait-filter:focus {
+        border-color: #46a878;
+    }
+
+    .ht-wait-table-wrap {
+        overflow-x: auto;
+    }
+
+    .ht-wait-table {
+        width: 100%;
+        min-width: 930px;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .ht-wait-table thead {
+        background: #f4f9f3;
+    }
+
+    .ht-wait-table th {
+        padding: 14px 16px;
+        color: #486a54;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .ht-wait-table td {
+        padding: 17px 16px;
+        border-bottom: 1px solid #edf2eb;
+        vertical-align: middle;
+        font-size: 12px;
+    }
+
+    .ht-wait-table tbody tr:hover {
+        background: #fcfefb;
+    }
+
+    .ht-wait-person {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .ht-wait-avatar {
+        width: 39px;
+        height: 39px;
+        background: #e8f5eb;
+        color: #18794c;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        font-weight: 800;
+    }
+
+    .ht-wait-primary {
+        font-size: 12px;
+        font-weight: 800;
+        color: #214b36;
+        margin-bottom: 4px;
+    }
+
+    .ht-wait-secondary {
+        font-size: 11px;
+        color: #829487;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-wait-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 8px;
+        padding: 6px 9px;
+        background: #eef6ef;
+        color: #287c50;
+        font-weight: 800;
+    }
+
+    .ht-wait-badge {
+        display: inline-flex;
+        padding: 7px 10px;
+        border-radius: 7px;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ht-wait-badge.waiting {
+        background: #fff3d8;
+        color: #aa781c;
+    }
+
+    .ht-wait-badge.notified,
+    .ht-wait-badge.contacted {
+        background: #eaf2ff;
+        color: #477ab6;
+    }
+
+    .ht-wait-badge.booked {
+        background: #e7f6eb;
+        color: #178047;
+    }
+
+    .ht-wait-badge.cancelled {
+        background: #f3f3f3;
+        color: #858585;
+    }
+
+    .ht-wait-action {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+    }
+
+    .ht-wait-action select {
+        width: 130px;
+        min-width: 130px;
+        font-size: 11px;
+        border: 1px solid #dfebdf;
+        border-radius: 8px;
+        padding: 8px;
+        background: white;
+        color: #315740;
+    }
+
+    .ht-wait-save {
+        padding: 9px 12px;
+        background: #19834f;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ht-wait-save:hover {
+        background: #11663d;
+    }
+
+    .ht-wait-empty {
+        text-align: center;
+        padding: 55px 18px 60px;
+    }
+
+    .ht-wait-empty-icon {
+        width: 65px;
+        height: 65px;
+        margin: 0 auto 18px;
+        display: grid;
+        place-items: center;
+        background: #edf7ef;
+        color: #31935f;
+        border-radius: 19px;
+        font-size: 25px;
+    }
+
+    .ht-wait-empty h3 {
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .ht-wait-empty p {
+        color: #87998c;
+        font-size: 12px;
+        max-width: 390px;
+        margin: 0 auto 18px;
+        line-height: 1.8;
+    }
+
+    .ht-wait-footnote {
+        padding: 14px 20px;
+        color: #849687;
+        font-size: 11px;
+        background: #fcfdfb;
+        border-top: 1px solid #edf2eb;
+    }
+
+    @@media (max-width: 1150px) {
+        .ht-wait-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .ht-wait-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px;
+        }
+
+        .ht-wait-stat {
+            padding: 13px;
+        }
+
+        .ht-wait-stat-icon {
+            width: 34px;
+            height: 34px;
+        }
+
+        .ht-wait-stat-number {
+            font-size: 22px;
+        }
+
+        .ht-wait-tools,
+        .ht-wait-search,
+        .ht-wait-filter {
+            width: 100%;
+        }
+
+        .ht-wait-toolbar {
+            padding: 15px;
+        }
+    }
+</style>
+
+<section class="ht-wait">
+
+    <div class="ht-wait-header">
+        <div>
+            <div class="ht-wait-eyebrow">
+                QUẢN LÝ KINH DOANH
+            </div>
+
+            <h1 class="ht-wait-title">
+                Danh sách chờ
+            </h1>
+
+            <p class="ht-wait-subtitle">
+                Theo dõi khách hàng đăng ký khi lịch khởi hành hết chỗ.
+            </p>
+        </div>
+
+        <a asp-controller="QuanTri"
+           asp-action="DanhSachLich"
+           class="ht-wait-btn">
+            <i class="fa-regular fa-calendar-check"></i>
+            Quản lý lịch khởi hành
+        </a>
     </div>
-</div>
+
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="alert alert-success border-0 rounded-3 mb-3"
+             role="status">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            @TempData["ThongBao"]
+        </div>
+    }
+
+    <div class="ht-wait-stats">
+
+        <div class="ht-wait-stat">
+            <div>
+                <div class="ht-wait-stat-label">
+                    Tổng đăng ký
+                </div>
+                <div class="ht-wait-stat-number">@tong</div>
+            </div>
+            <div class="ht-wait-stat-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+
+        <div class="ht-wait-stat">
+            <div>
+                <div class="ht-wait-stat-label">
+                    Đang chờ
+                </div>
+                <div class="ht-wait-stat-number">@dangCho</div>
+            </div>
+            <div class="ht-wait-stat-icon">
+                <i class="fa-regular fa-clock"></i>
+            </div>
+        </div>
+
+        <div class="ht-wait-stat">
+            <div>
+                <div class="ht-wait-stat-label">
+                    Đã thông báo / liên hệ
+                </div>
+                <div class="ht-wait-stat-number">@daLienHe</div>
+            </div>
+            <div class="ht-wait-stat-icon">
+                <i class="fa-solid fa-phone-volume"></i>
+            </div>
+        </div>
+
+        <div class="ht-wait-stat">
+            <div>
+                <div class="ht-wait-stat-label">
+                    Đã đặt
+                </div>
+                <div class="ht-wait-stat-number">@daDat</div>
+            </div>
+            <div class="ht-wait-stat-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="ht-wait-panel">
+
+        <div class="ht-wait-toolbar">
+
+            <h2>
+                <i class="fa-solid fa-list-check me-2"
+                   style="color:#208451"></i>
+                Khách hàng đăng ký
+            </h2>
+
+            <div class="ht-wait-tools">
+
+                <input id="waitSearch"
+                       class="ht-wait-search"
+                       type="search"
+                       placeholder="Tìm khách hàng, tour..."
+                       aria-label="Tìm trong danh sách chờ" />
+
+                <select id="waitStatus"
+                        class="ht-wait-filter"
+                        aria-label="Lọc trạng thái">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Đang chờ">Đang chờ</option>
+                    <option value="Đã thông báo">Đã thông báo</option>
+                    <option value="Đã liên hệ">Đã liên hệ</option>
+                    <option value="Đã đặt">Đã đặt</option>
+                    <option value="Đã hủy">Đã hủy</option>
+                </select>
+
+            </div>
+        </div>
+
+        @if (!danhSach.Any())
+        {
+            <div class="ht-wait-empty">
+                <div class="ht-wait-empty-icon">
+                    <i class="fa-regular fa-calendar-check"></i>
+                </div>
+
+                <h3>Chưa có khách trong danh sách chờ</h3>
+
+                <p>
+                    Khi có khách đăng ký chờ cho lịch khởi hành
+                    đã hết chỗ, thông tin sẽ hiển thị tại đây.
+                </p>
+
+                <a asp-controller="QuanTri"
+                   asp-action="DanhSachLich"
+                   class="ht-wait-btn">
+                    Xem lịch khởi hành
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="ht-wait-table-wrap">
+                <table class="ht-wait-table">
+                    <thead>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <th>Tour / Lịch</th>
+                            <th>Số khách</th>
+                            <th>Đăng ký</th>
+                            <th>Trạng thái</th>
+                            <th>Cập nhật</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in danhSach)
+                        {
+                            <tr class="wait-row"
+                                data-search="@($"{item.HoTen} {item.Email} {item.SoDienThoai} {item.TenTour}")"
+                                data-status="@item.TrangThai">
+
+                                <td>
+                                    <div class="ht-wait-person">
+                                        <div class="ht-wait-avatar">
+                                            <i class="fa-regular fa-user"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="ht-wait-primary">
+                                                @item.HoTen
+                                            </div>
+                                            <div class="ht-wait-secondary">
+                                                @item.SoDienThoai
+                                            </div>
+                                            <div class="ht-wait-secondary">
+                                                @item.Email
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="ht-wait-primary">
+                                        @item.TenTour
+                                    </div>
+                                    <div class="ht-wait-secondary">
+                                        <i class="fa-regular fa-calendar me-1"></i>
+                                        @item.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="ht-wait-count">
+                                        <i class="fa-solid fa-user-group"></i>
+                                        @item.SoKhach
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="ht-wait-primary">
+                                        @item.NgayDangKy.ToString("dd/MM/yyyy")
+                                    </div>
+                                    <div class="ht-wait-secondary">
+                                        @item.NgayDangKy.ToString("HH:mm")
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="ht-wait-badge @BadgeClass(item.TrangThai)">
+                                        @item.TrangThai
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <form asp-controller="QuanTri"
+                                          asp-action="CapNhatDanhSachCho"
+                                          method="post"
+                                          class="ht-wait-action">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@item.IdDanhSachCho" />
+
+                                        <select name="trangThai"
+                                                aria-label="Trạng thái của @item.HoTen">
+
+                                            @foreach (var status in new[]
+                                            {
+                                                "Đang chờ",
+                                                "Đã thông báo",
+                                                "Đã liên hệ",
+                                                "Đã đặt",
+                                                "Đã hủy"
+                                            })
+                                            {
+                                                <option value="@status"
+                                                        selected="@(item.TrangThai == status)">
+                                                    @status
+                                                </option>
+                                            }
+
+                                        </select>
+
+                                        <button class="ht-wait-save"
+                                                type="submit">
+                                            <i class="fa-solid fa-check"></i>
+                                            Lưu
+                                        </button>
+                                    </form>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="waitNoResults"
+                 class="ht-wait-empty"
+                 style="display:none">
+                <h3>Không tìm thấy kết quả phù hợp</h3>
+                <p>Thử tìm bằng tên khách, email hoặc tên tour.</p>
+            </div>
+        }
+
+        <div class="ht-wait-footnote">
+            <i class="fa-solid fa-circle-info me-1"></i>
+            Danh sách chờ không tự tạo đơn đặt tour hoặc giữ chỗ.
+            Việc đặt tour cần thực hiện theo luồng đặt chỗ thông thường.
+        </div>
+
+    </div>
+
+</section>
+
+<script>
+    (() => {
+        "use strict";
+
+        const search = document.getElementById("waitSearch");
+        const status = document.getElementById("waitStatus");
+        const rows = Array.from(
+            document.querySelectorAll(".wait-row")
+        );
+        const noResults =
+            document.getElementById("waitNoResults");
+
+        if (!search || !status) return;
+
+        const normalize = value =>
+            String(value || "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d")
+                .replace(/Đ/g, "D")
+                .toLowerCase()
+                .trim();
+
+        function applyFilters() {
+            const keyword = normalize(search.value);
+            const selectedStatus = status.value;
+
+            let visible = 0;
+
+            rows.forEach(row => {
+                const content = normalize(row.dataset.search);
+                const rowStatus = row.dataset.status || "";
+
+                const matched =
+                    content.includes(keyword) &&
+                    (!selectedStatus || selectedStatus === rowStatus);
+
+                row.hidden = !matched;
+                row.style.display = matched ? "" : "none";
+
+                if (matched) visible++;
+            });
+
+            if (noResults) {
+                noResults.style.display =
+                    visible === 0 ? "block" : "none";
+            }
+        }
+
+        search.addEventListener("input", applyFilters);
+        status.addEventListener("change", applyFilters);
+    })();
+</script>

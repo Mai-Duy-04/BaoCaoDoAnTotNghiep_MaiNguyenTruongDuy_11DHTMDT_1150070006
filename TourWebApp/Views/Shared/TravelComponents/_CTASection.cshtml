@@ -1,13 +1,919 @@
+
 @model CtaSectionModel
 
-<section class="final-cta" style="background-image: url('@Model.BackgroundImageUrl');">
-    <div class="final-cta-overlay"></div>
-    <div class="container travel-container final-cta-content">
-        <h2>@Model.Title</h2>
-        <p>@Model.Subtitle</p>
-        <div class="hero-actions">
-            <a href="@Model.PrimaryButtonUrl" class="btn travel-btn travel-btn-primary">@Model.PrimaryButtonText</a>
-            <a href="@Model.SecondaryButtonUrl" class="btn travel-btn travel-btn-outline">@Model.SecondaryButtonText</a>
+<section class="htcta-section"
+         aria-labelledby="htcta-title">
+
+    <div class="htcta-inner">
+
+        <!-- BÊN TRÁI: NỘI DUNG CTA -->
+        <div class="htcta-content">
+
+            <div class="htcta-ribbon">
+                <span class="htcta-ribbon-icon">
+                    <i class="fa-solid fa-mountain-sun"></i>
+                </span>
+
+                <span>
+                    CHUYẾN ĐI TIẾP THEO ĐANG CHỜ BẠN
+                </span>
+            </div>
+
+            <h2 id="htcta-title">
+                Xách ba lô lên,
+                <span class="htcta-title-line">
+                    <span class="htcta-orange">
+                        HappyTrip
+                    </span>
+                    lo phần còn lại!
+                </span>
+            </h2>
+
+            <p class="htcta-description">
+                Chọn điểm đến, sở thích và ngân sách để
+                chúng tôi gợi ý hành trình phù hợp nhất
+                dành riêng cho bạn.
+            </p>
+
+            <div class="htcta-actions">
+
+                <a href="@Model.PrimaryButtonUrl"
+                   class="htcta-btn htcta-btn-primary">
+
+                    <span class="htcta-btn-icon">
+                        <i class="fa-solid fa-robot"></i>
+                    </span>
+
+                    <span>@Model.PrimaryButtonText</span>
+
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+                <a href="@Model.SecondaryButtonUrl"
+                   class="htcta-btn htcta-btn-secondary">
+
+                    <i class="fa-solid fa-list-ul"></i>
+
+                    <span>@Model.SecondaryButtonText</span>
+                </a>
+
+            </div>
+
+            <span class="htcta-left-spark htcta-left-spark-one"
+                  aria-hidden="true">✦</span>
+
+            <span class="htcta-left-spark htcta-left-spark-two"
+                  aria-hidden="true">✧</span>
+
         </div>
+
+        <!-- BÊN PHẢI: POSTCARD DU LỊCH -->
+        <div class="htcta-visual">
+
+            <!-- LÁ NHIỆT ĐỚI -->
+            <div class="htcta-leaf htcta-leaf-one"
+                 aria-hidden="true">
+                <svg viewBox="0 0 145 190">
+                    <path d="M17 181 Q76 95 92 12"
+                          fill="none"
+                          stroke="#398148"
+                          stroke-width="6"
+                          stroke-linecap="round"/>
+
+                    <path d="M63 113
+                             C5 90 1 40 28 18
+                             C70 42 81 74 63 113Z"
+                          fill="#69AA49"/>
+
+                    <path d="M78 75
+                             C77 23 113 2 140 14
+                             C137 58 112 83 78 75Z"
+                          fill="#87BB5D"/>
+
+                    <path d="M46 143
+                             C10 153 1 126 8 102
+                             C40 99 58 116 46 143Z"
+                          fill="#9BC86C"/>
+                </svg>
+            </div>
+
+            <div class="htcta-leaf htcta-leaf-two"
+                 aria-hidden="true">
+                <svg viewBox="0 0 145 190">
+                    <path d="M17 181 Q76 95 92 12"
+                          fill="none"
+                          stroke="#398148"
+                          stroke-width="6"
+                          stroke-linecap="round"/>
+
+                    <path d="M63 113
+                             C5 90 1 40 28 18
+                             C70 42 81 74 63 113Z"
+                          fill="#69AA49"/>
+
+                    <path d="M78 75
+                             C77 23 113 2 140 14
+                             C137 58 112 83 78 75Z"
+                          fill="#87BB5D"/>
+
+                    <path d="M46 143
+                             C10 153 1 126 8 102
+                             C40 99 58 116 46 143Z"
+                          fill="#9BC86C"/>
+                </svg>
+            </div>
+
+            <!-- ĐƯỜNG BAY NÉT ĐỨT -->
+            <div class="htcta-flight"
+                 aria-hidden="true">
+
+                <svg viewBox="0 0 230 100"
+                     fill="none">
+
+                    <path d="M5 78
+                             C42 12 73 110 113 45
+                             S172 16 220 31"
+                          stroke="#F0A523"
+                          stroke-width="3"
+                          stroke-dasharray="7 8"
+                          stroke-linecap="round"/>
+                </svg>
+
+                <i class="fa-solid fa-plane"></i>
+            </div>
+
+            <!-- POSTCARD LỚN -->
+            <div class="htcta-postcard htcta-postcard-main">
+
+                <span class="htcta-tape htcta-tape-main"
+                      aria-hidden="true"></span>
+
+                <div class="htcta-photo">
+                    <img src="@Model.BackgroundImageUrl"
+                         alt="Điểm đến du lịch miền Nam"
+                         loading="lazy" />
+                </div>
+
+                <div class="htcta-postcard-caption">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>TP. Hồ Chí Minh</span>
+                </div>
+
+            </div>
+
+            <!-- POSTCARD NHỎ -->
+            <div class="htcta-postcard htcta-postcard-small">
+
+                <span class="htcta-tape htcta-tape-small"
+                      aria-hidden="true"></span>
+
+                <div class="htcta-photo">
+                    <img src="/img/home/biendao.jpg"
+                         alt="Khám phá du lịch miền Nam"
+                         loading="lazy" />
+                </div>
+
+                <div class="htcta-postcard-caption">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Miền Nam</span>
+                </div>
+
+            </div>
+
+            <!-- STICKER GHIM VỊ TRÍ -->
+            <span class="htcta-pin"
+                  aria-hidden="true">
+                <i class="fa-solid fa-location-dot"></i>
+            </span>
+
+            <!-- STICKER MÁY ẢNH -->
+            <span class="htcta-camera"
+                  aria-hidden="true">
+                <i class="fa-solid fa-camera"></i>
+            </span>
+
+            <!-- NGÔI SAO TRANG TRÍ -->
+            <span class="htcta-star htcta-star-one"
+                  aria-hidden="true">✦</span>
+
+            <span class="htcta-star htcta-star-two"
+                  aria-hidden="true">✧</span>
+
+            <span class="htcta-star htcta-star-three"
+                  aria-hidden="true">✦</span>
+
+        </div>
+
     </div>
+
+    <!-- ĐƯỜNG SÓNG NỐI FOOTER -->
+    <div class="htcta-wave-wrap" aria-hidden="true">
+
+        <svg class="htcta-wave"
+             viewBox="0 0 1440 120"
+             preserveAspectRatio="none">
+
+            <path d="M0 45
+                     C175 10 270 96 470 76
+                     S760 23 930 69
+                     S1210 97 1440 26
+                     L1440 120
+                     L0 120Z"
+                  fill="#FFDA70"/>
+
+            <path d="M0 75
+                     C185 30 275 110 465 96
+                     S775 46 956 85
+                     S1220 110 1440 51
+                     L1440 120
+                     L0 120Z"
+                  fill="#3C9969"/>
+
+            <path d="M0 101
+                     C155 60 305 125 485 110
+                     S750 71 965 104
+                     S1240 116 1440 79
+                     L1440 120
+                     L0 120Z"
+                  fill="#173F33"/>
+        </svg>
+
+    </div>
+
 </section>
+
+<style>
+    /* =========================================
+       HAPPYTRIP - FINAL CTA SCRAPBOOK
+       ========================================= */
+
+    .htcta-section,
+    .htcta-section * {
+        box-sizing: border-box;
+    }
+
+    .htcta-section {
+        --htcta-green: #123F32;
+        --htcta-orange: #E96C1F;
+        --htcta-yellow: #FFD34D;
+
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        padding: 60px 0 105px;
+        background:
+            radial-gradient(
+                ellipse at 10% 0%,
+                rgba(255, 231, 171, .33),
+                transparent 45%
+            ),
+            #FFF9EF;
+    }
+
+    .htcta-inner {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns:
+            minmax(0, 51%)
+            minmax(0, 49%);
+        align-items: center;
+        gap: 8px;
+        width: min(1320px, calc(100% - 60px));
+        min-height: 370px;
+        margin: 0 auto;
+    }
+
+    /* =========================================
+       LEFT CONTENT
+       ========================================= */
+
+    .htcta-content {
+        position: relative;
+        z-index: 5;
+        min-width: 0;
+        padding: 8px 0 18px;
+    }
+
+    .htcta-ribbon {
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        max-width: 100%;
+        min-height: 38px;
+        margin-bottom: 24px;
+        padding: 6px 23px 6px 10px;
+        border-radius: 7px 23px 13px 7px;
+        background: linear-gradient(
+            100deg,
+            #10533E 0%,
+            #17654B 72%,
+            #237659 100%
+        );
+        color: #FFFFFF;
+        box-shadow: 3px 4px 0 rgba(236, 174, 54, .3);
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: .04em;
+        transform: rotate(-2deg);
+    }
+
+    .htcta-ribbon-icon {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 28px;
+        flex-shrink: 0;
+        color: #F8D052;
+        font-size: 21px;
+    }
+
+    .htcta-content h2 {
+        margin: 0 0 20px;
+        color: var(--htcta-green);
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: clamp(35px, 3.5vw, 50px);
+        font-weight: 900;
+        letter-spacing: -.035em;
+        line-height: 1.15;
+    }
+
+    .htcta-title-line {
+        display: block;
+    }
+
+    .htcta-orange {
+        position: relative;
+        display: inline-block;
+        color: var(--htcta-orange);
+    }
+
+    .htcta-orange::after {
+        content: "";
+        position: absolute;
+        left: 12%;
+        right: 10%;
+        bottom: -8px;
+        height: 7px;
+        border-radius: 50%;
+        background: #F8BF22;
+        transform: rotate(-3deg);
+    }
+
+    .htcta-description {
+        max-width: 555px;
+        margin: 0 0 29px;
+        color: #35594B;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.75;
+    }
+
+    /* =========================================
+       BUTTONS
+       ========================================= */
+
+    .htcta-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .htcta-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 55px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 850;
+        line-height: 1.4;
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+            transform .25s ease,
+            box-shadow .25s ease,
+            background .25s ease;
+    }
+
+    .htcta-btn-primary {
+        border: 2px solid #F6B71F;
+        background: linear-gradient(
+            180deg,
+            #FFE16B,
+            #FFC72A
+        );
+        color: #134332;
+        box-shadow:
+            0 5px 0 #D99B1B,
+            0 7px 12px rgba(65, 71, 38, .12);
+    }
+
+    .htcta-btn-primary:hover {
+        background: #FFD44A;
+        color: #134332;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 0 #D99B1B;
+    }
+
+    .htcta-btn-icon {
+        font-size: 21px;
+    }
+
+    .htcta-btn-secondary {
+        border: 2px solid #185541;
+        background: rgba(255, 254, 248, .9);
+        color: #174A3A;
+    }
+
+    .htcta-btn-secondary:hover {
+        background: #E5F1DC;
+        color: #174A3A;
+        transform: translateY(-3px);
+    }
+
+    .htcta-left-spark {
+        position: absolute;
+        color: #E9AC30;
+        pointer-events: none;
+    }
+
+    .htcta-left-spark-one {
+        top: 22%;
+        right: 10%;
+        font-size: 26px;
+    }
+
+    .htcta-left-spark-two {
+        bottom: 7%;
+        left: -15px;
+        font-size: 22px;
+    }
+
+    /* =========================================
+       RIGHT VISUAL / POSTCARDS
+       ========================================= */
+
+    .htcta-visual {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+        height: 390px;
+    }
+
+    .htcta-postcard {
+        position: absolute;
+        padding: 12px 12px 8px;
+        border: 1px solid #EEE8DF;
+        border-radius: 14px;
+        background: #FFFFFF;
+        box-shadow:
+            0 16px 24px rgba(39, 59, 44, .18);
+        transition:
+            transform .3s ease,
+            box-shadow .3s ease;
+    }
+
+    .htcta-postcard-main {
+        z-index: 3;
+        top: 55px;
+        left: 8%;
+        width: 67%;
+        height: 296px;
+        transform: rotate(-8deg);
+    }
+
+    .htcta-postcard-small {
+        z-index: 4;
+        top: 117px;
+        right: 0;
+        width: 41%;
+        height: 224px;
+        transform: rotate(9deg);
+    }
+
+    .htcta-postcard-main:hover {
+        transform: translateY(-6px) rotate(-5deg);
+    }
+
+    .htcta-postcard-small:hover {
+        transform: translateY(-6px) rotate(6deg);
+    }
+
+    .htcta-photo {
+        width: 100%;
+        height: calc(100% - 36px);
+        overflow: hidden;
+        border-radius: 7px;
+        background: #E5EDDB;
+    }
+
+    .htcta-photo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .htcta-postcard-caption {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        height: 36px;
+        color: #183E32;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .htcta-postcard-caption i {
+        color: #EB6544;
+    }
+
+    /* BĂNG KEO POSTCARD */
+
+    .htcta-tape {
+        position: absolute;
+        z-index: 5;
+        width: 87px;
+        height: 25px;
+        background: #F7D574;
+        opacity: .92;
+        clip-path: polygon(
+            0 10%,
+            100% 0,
+            97% 90%,
+            3% 100%
+        );
+    }
+
+    .htcta-tape-main {
+        top: -10px;
+        left: 39%;
+        transform: rotate(-6deg);
+    }
+
+    .htcta-tape-small {
+        top: -10px;
+        left: 37%;
+        width: 70px;
+        transform: rotate(8deg);
+    }
+
+    /* =========================================
+       STICKERS
+       ========================================= */
+
+    .htcta-leaf {
+        position: absolute;
+        z-index: 1;
+        width: 150px;
+        height: 190px;
+        pointer-events: none;
+    }
+
+    .htcta-leaf svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .htcta-leaf-one {
+        top: 0;
+        right: 1%;
+        transform: rotate(24deg);
+    }
+
+    .htcta-leaf-two {
+        bottom: 5px;
+        left: -10px;
+        transform: rotate(-43deg) scale(.8);
+    }
+
+    .htcta-flight {
+        position: absolute;
+        z-index: 2;
+        top: -13px;
+        left: 6%;
+        width: 195px;
+        height: 90px;
+        pointer-events: none;
+    }
+
+    .htcta-flight svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .htcta-flight i {
+        position: absolute;
+        top: 3px;
+        right: -4px;
+        color: #EE8E18;
+        font-size: 30px;
+        transform: rotate(-26deg);
+    }
+
+    .htcta-pin {
+        position: absolute;
+        z-index: 6;
+        top: 17px;
+        right: 26%;
+        color: #F14E36;
+        font-size: 48px;
+        filter: drop-shadow(
+            0 4px 2px rgba(59, 50, 40, .15)
+        );
+        transform: rotate(9deg);
+        pointer-events: none;
+    }
+
+    .htcta-camera {
+        position: absolute;
+        z-index: 7;
+        bottom: 24px;
+        left: 0;
+        display: grid;
+        place-items: center;
+        width: 79px;
+        height: 69px;
+        border: 6px solid #FFFFFF;
+        border-radius: 17px;
+        background: #F9C24C;
+        color: #127659;
+        font-size: 33px;
+        box-shadow:
+            0 8px 15px rgba(43, 63, 47, .17);
+        transform: rotate(-13deg);
+        pointer-events: none;
+    }
+
+    .htcta-star {
+        position: absolute;
+        z-index: 6;
+        color: #F2AF25;
+        pointer-events: none;
+        animation: htctaTwinkle 3.5s ease-in-out infinite;
+    }
+
+    .htcta-star-one {
+        top: 7px;
+        right: 7%;
+        font-size: 22px;
+    }
+
+    .htcta-star-two {
+        right: -9px;
+        bottom: 60px;
+        font-size: 32px;
+        animation-delay: 1s;
+    }
+
+    .htcta-star-three {
+        left: 29%;
+        bottom: 0;
+        font-size: 20px;
+        animation-delay: 1.8s;
+    }
+
+    @@keyframes htctaTwinkle {
+        0%, 100% {
+            opacity: .4;
+            transform: scale(.8);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+    }
+
+    /* =========================================
+       BOTTOM WAVES
+       ========================================= */
+
+    .htcta-wave-wrap {
+        position: absolute;
+        z-index: 1;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 105px;
+        pointer-events: none;
+    }
+
+    .htcta-wave {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* =========================================
+       LAPTOP
+       ========================================= */
+
+    @@media (max-width: 1199px) {
+        .htcta-inner {
+            width: calc(100% - 42px);
+        }
+
+        .htcta-content h2 {
+            font-size: clamp(32px, 3.6vw, 42px);
+        }
+
+        .htcta-description {
+            font-size: 14px;
+        }
+
+        .htcta-btn {
+            padding: 12px 15px;
+            font-size: 12px;
+        }
+
+        .htcta-visual {
+            height: 340px;
+        }
+
+        .htcta-postcard-main {
+            height: 265px;
+        }
+
+        .htcta-postcard-small {
+            height: 200px;
+        }
+
+        .htcta-leaf {
+            width: 125px;
+        }
+    }
+
+    /* =========================================
+       TABLET
+       ========================================= */
+
+    @@media (max-width: 900px) {
+        .htcta-section {
+            padding: 46px 0 85px;
+        }
+
+        .htcta-inner {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            max-width: 660px;
+        }
+
+        .htcta-content {
+            padding: 0;
+        }
+
+        .htcta-content h2 {
+            font-size: clamp(33px, 5vw, 45px);
+        }
+
+        .htcta-visual {
+            max-width: 590px;
+            height: 330px;
+            margin: 0 auto;
+        }
+
+        .htcta-postcard-main {
+            width: 63%;
+        }
+
+        .htcta-postcard-small {
+            right: 2%;
+            width: 38%;
+        }
+    }
+
+    /* =========================================
+       MOBILE
+       ========================================= */
+
+    @@media (max-width: 600px) {
+        .htcta-section {
+            padding: 39px 0 80px;
+        }
+
+        .htcta-inner {
+            width: calc(100% - 30px);
+        }
+
+        .htcta-ribbon {
+            gap: 6px;
+            padding: 6px 12px 6px 4px;
+            font-size: 9px;
+        }
+
+        .htcta-content h2 {
+            font-size: clamp(29px, 7vw, 39px);
+        }
+
+        .htcta-description {
+            font-size: 13px;
+        }
+
+        .htcta-actions {
+            gap: 11px;
+        }
+
+        .htcta-btn {
+            min-height: 48px;
+            padding: 11px 15px;
+            font-size: 11px;
+        }
+
+        .htcta-visual {
+            height: 265px;
+        }
+
+        .htcta-postcard-main {
+            top: 32px;
+            left: 4%;
+            width: 67%;
+            height: 210px;
+        }
+
+        .htcta-postcard-small {
+            top: 80px;
+            right: 0;
+            width: 43%;
+            height: 164px;
+        }
+
+        .htcta-postcard-caption {
+            font-size: 10px;
+        }
+
+        .htcta-photo {
+            height: calc(100% - 36px);
+        }
+
+        .htcta-camera {
+            bottom: 4px;
+            width: 59px;
+            height: 53px;
+            font-size: 25px;
+        }
+
+        .htcta-pin {
+            right: 20%;
+            font-size: 36px;
+        }
+
+        .htcta-flight {
+            top: -15px;
+            left: 0;
+            width: 140px;
+        }
+
+        .htcta-leaf {
+            width: 95px;
+            height: 120px;
+        }
+
+        .htcta-wave-wrap {
+            height: 70px;
+        }
+    }
+
+    @@media (max-width: 390px) {
+        .htcta-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .htcta-btn {
+            width: 100%;
+            white-space: normal;
+        }
+
+        .htcta-postcard-main {
+            height: 185px;
+        }
+
+        .htcta-postcard-small {
+            height: 145px;
+        }
+
+        .htcta-visual {
+            height: 240px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .htcta-star {
+            animation: none;
+        }
+
+        .htcta-postcard,
+        .htcta-btn {
+            transition: none;
+        }
+    }
+</style>

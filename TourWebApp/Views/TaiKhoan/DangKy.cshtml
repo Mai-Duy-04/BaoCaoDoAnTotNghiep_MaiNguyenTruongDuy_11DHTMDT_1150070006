@@ -1,53 +1,949 @@
-﻿@{
-    ViewData["Title"] = "Đăng ký";
+﻿
+@{
+    ViewData["Title"] = "Đăng ký tài khoản - HappyTrip";
 }
 
-<link rel="stylesheet" href="~/css/auth.css" />
+<style>
+    /* ============================================
+       HAPPYTRIP REGISTER - MINIMAL TRAVEL
+       ============================================ */
 
-<div class="auth-bg">
-    <div class="auth-container">
-        <div class="auth-box">
-            <h2>Tạo tài khoản mới</h2>
-            <p>Đăng ký để trải nghiệm cùng HappyTrip</p>
+    .ht-register-page,
+    .ht-register-page * {
+        box-sizing: border-box;
+    }
+
+    .ht-register-page {
+        --ht-green: #09683c;
+        --ht-deep: #164b35;
+        --ht-muted: #748778;
+        --ht-yellow: #f4bc2d;
+
+        width: 100%;
+        min-height: calc(100vh - 80px);
+        min-height: calc(100dvh - 80px);
+        padding: 16px 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        background:
+            radial-gradient(
+                ellipse at 92% 0%,
+                rgba(210, 234, 189, .55),
+                transparent 35%
+            ),
+            linear-gradient(
+                115deg,
+                #fdfefb 0%,
+                #f9fbf5 52%,
+                #f0f6e7 100%
+            );
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .ht-register-page::before {
+        content: "";
+        position: absolute;
+        top: -125px;
+        right: -95px;
+        width: 290px;
+        height: 290px;
+        background: #d9edc8;
+        filter: blur(90px);
+        opacity: .55;
+        pointer-events: none;
+    }
+
+    .ht-register-page::after {
+        content: "";
+        position: absolute;
+        left: -110px;
+        bottom: -140px;
+        width: 430px;
+        height: 280px;
+        background: #d6e9d6;
+        filter: blur(90px);
+        opacity: .7;
+        pointer-events: none;
+    }
+
+    .ht-register-shell {
+        width: min(1120px, 100%);
+        display: grid;
+        grid-template-columns: minmax(0, .85fr) minmax(0, 1fr);
+        gap: clamp(28px, 5vw, 78px);
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============================================
+       LEFT: BRAND STORY
+       ============================================ */
+
+    .ht-register-story {
+        min-width: 0;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        padding: 15px 0 35px;
+    }
+
+    .ht-register-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        width: max-content;
+        color: #09683c;
+        text-decoration: none;
+        font-size: clamp(24px, 2.8vw, 34px);
+        font-weight: 800;
+        letter-spacing: -1.4px;
+        margin-bottom: clamp(35px, 7vh, 76px);
+    }
+
+    .ht-register-brand i {
+        color: #f1b51d;
+        font-size: .95em;
+        transform: rotate(-12deg);
+    }
+
+    .ht-register-story-title {
+        margin: 0;
+        color: #263d30;
+        font-size: clamp(29px, 3vw, 45px);
+        line-height: 1.38;
+        font-weight: 400;
+        letter-spacing: -1.5px;
+    }
+
+    .ht-register-story-title strong {
+        display: block;
+        color: #08713e;
+        font-size: clamp(47px, 5.2vw, 76px);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -3px;
+    }
+
+    .ht-register-story-title span {
+        display: block;
+        color: #164b35;
+        font-size: clamp(27px, 3vw, 43px);
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .ht-register-title-line {
+        width: 165px;
+        height: 6px;
+        margin: 13px 0 24px 100px;
+        border-radius: 100%;
+        background: #f4bc2d;
+        transform: rotate(-7deg);
+    }
+
+    .ht-register-story-description {
+        color: #3b5845;
+        font-size: clamp(12px, 1.2vw, 15px);
+        line-height: 1.9;
+        margin: 0 0 28px;
+        font-weight: 500;
+    }
+
+    .ht-register-benefits {
+        display: flex;
+        gap: 23px;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .ht-register-benefit {
+        min-width: 0;
+        text-align: center;
+        color: #29533a;
+        font-size: 11px;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+
+    .ht-register-benefit i {
+        display: block;
+        margin-bottom: 9px;
+        color: #0c7443;
+        font-size: 23px;
+    }
+
+    .ht-register-landscape {
+        width: 110%;
+        position: absolute;
+        left: -8%;
+        bottom: -67px;
+        opacity: .65;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    /* ============================================
+       RIGHT: REGISTER CARD
+       ============================================ */
+
+    .ht-register-card {
+        width: 100%;
+        min-width: 0;
+        max-width: 570px;
+        justify-self: end;
+        position: relative;
+        padding: clamp(20px, 3vh, 32px)
+                 clamp(24px, 3.4vw, 42px);
+        background: rgba(255, 254, 250, .97);
+        border: 1px solid rgba(225, 233, 219, .9);
+        border-radius: 25px;
+        box-shadow:
+            0 18px 55px rgba(38, 80, 48, .09),
+            0 3px 12px rgba(38, 80, 48, .025);
+        overflow: hidden;
+    }
+
+    .ht-register-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .ht-register-card::after {
+        content: "";
+        position: absolute;
+        bottom: -74px;
+        right: -55px;
+        width: 220px;
+        height: 130px;
+        border-radius: 50%;
+        background: #e0eed8;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .ht-register-card-heading {
+        text-align: center;
+        margin-bottom: clamp(12px, 2vh, 20px);
+    }
+
+    .ht-register-user-icon {
+        width: 44px;
+        height: 44px;
+        margin: 0 auto 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #e5f3e4;
+        color: #167248;
+        font-size: 20px;
+    }
+
+    .ht-register-card-heading h1 {
+        margin: 0 0 5px;
+        font-size: clamp(20px, 2vw, 27px);
+        font-weight: 800;
+        line-height: 1.4;
+        color: #124d33;
+        letter-spacing: -.65px;
+    }
+
+    .ht-register-card-heading p {
+        margin: 0;
+        color: #7a8a7d;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    /* ============================================
+       FORM FIELDS
+       ============================================ */
+
+    .ht-register-form {
+        width: 100%;
+    }
+
+    .ht-register-field {
+        margin-bottom: clamp(9px, 1.35vh, 13px);
+    }
+
+    .ht-register-field label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.4;
+        color: #344e3c;
+    }
+
+    .ht-register-input-wrap {
+        position: relative;
+    }
+
+    .ht-register-input-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 41px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #197447;
+        background: #edf5e9;
+        border: 1px solid #dce9d8;
+        border-radius: 9px 0 0 9px;
+        pointer-events: none;
+        font-size: 15px;
+    }
+
+    .ht-register-input-wrap input {
+        display: block;
+        width: 100%;
+        height: clamp(36px, 4.8vh, 43px);
+        min-height: 36px;
+        margin: 0;
+        padding: 0 42px 0 52px;
+        border: 1px solid #d9e3d8;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #234735;
+        outline: none;
+        font: 12px "Be Vietnam Pro", Arial, sans-serif;
+        transition: border .2s, box-shadow .2s;
+    }
+
+    .ht-register-input-wrap input::placeholder {
+        color: #9ba89d;
+        opacity: 1;
+    }
+
+    .ht-register-input-wrap input:focus {
+        border-color: #298959;
+        box-shadow: 0 0 0 3px rgba(41, 137, 89, .08);
+    }
+
+    .ht-register-input-wrap:focus-within
+    .ht-register-input-icon {
+        background: #e3f2e4;
+        border-color: #bad8c0;
+    }
+
+    .ht-register-eye {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 33px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        background: none;
+        border: none;
+        border-radius: 7px;
+        color: #8a9b8e;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .ht-register-eye:hover {
+        background: #f0f5ef;
+        color: #187546;
+    }
+
+    .ht-register-error {
+        padding: 10px 12px;
+        margin: 0 0 11px;
+        background: #fff0eb;
+        color: #a23c36;
+        border-radius: 9px;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .ht-register-error[hidden] {
+        display: none !important;
+    }
+
+    .ht-register-submit {
+        width: 100%;
+        height: clamp(39px, 5vh, 46px);
+        margin-top: 7px;
+        border: 0;
+        border-radius: 22px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+        color: #ffffff;
+        background: linear-gradient(
+            100deg,
+            #1d844d,
+            #086b39
+        );
+        font: 800 12px "Be Vietnam Pro", Arial, sans-serif;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(19, 105, 58, .12);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .ht-register-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(19, 105, 58, .18);
+    }
+
+    .ht-register-login {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 11px;
+        color: #647769;
+        line-height: 1.6;
+    }
+
+    .ht-register-login a {
+        color: #087140;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .ht-register-login a:hover {
+        text-decoration: underline;
+    }
+
+    /* ============================================
+       LAPTOPS: COMPACT AT 100% ZOOM
+       ============================================ */
+
+    @@media (min-width: 901px) and (max-height: 740px) {
+        .ht-register-page {
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+        .ht-register-brand {
+            margin-bottom: 20px;
+        }
+
+        .ht-register-card {
+            padding: 14px 29px;
+            border-radius: 19px;
+        }
+
+        .ht-register-card-heading {
+            margin-bottom: 8px;
+        }
+
+        .ht-register-user-icon {
+            width: 34px;
+            height: 34px;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .ht-register-card-heading h1 {
+            font-size: 21px;
+        }
+
+        .ht-register-card-heading p {
+            font-size: 10px;
+        }
+
+        .ht-register-field {
+            margin-bottom: 7px;
+        }
+
+        .ht-register-field label {
+            margin-bottom: 3px;
+            font-size: 10px;
+        }
+
+        .ht-register-input-wrap input {
+            height: 35px;
+            min-height: 35px;
+        }
+
+        .ht-register-submit {
+            height: 38px;
+            margin-top: 5px;
+        }
+
+        .ht-register-login {
+            margin-top: 9px;
+        }
+    }
+
+    /* ============================================
+       TABLET / MOBILE
+       ============================================ */
+
+    @@media (max-width: 900px) {
+        .ht-register-page {
+            min-height: calc(100dvh - 75px);
+            padding: 20px 15px 35px;
+            align-items: flex-start;
+            overflow: visible;
+        }
+
+        .ht-register-shell {
+            display: block;
+            max-width: 510px;
+        }
+
+        .ht-register-story {
+            display: none;
+        }
+
+        .ht-register-card {
+            max-width: 510px;
+            margin: 0 auto;
+            padding: 25px 26px;
+        }
+
+        .ht-register-input-wrap input {
+            height: 43px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .ht-register-page {
+            padding: 12px 10px 25px;
+        }
+
+        .ht-register-card {
+            padding: 22px 18px;
+            border-radius: 18px;
+        }
+
+        .ht-register-card-heading h1 {
+            font-size: 22px;
+        }
+
+        .ht-register-card-heading p {
+            font-size: 10px;
+        }
+
+        .ht-register-field {
+            margin-bottom: 13px;
+        }
+    }
+</style>
+
+<div class="ht-register-page">
+
+    <div class="ht-register-shell">
+
+        <!-- ====================================
+             LEFT - TRAVEL INTRODUCTION
+             ==================================== -->
+
+        <section class="ht-register-story">
+
+            <a href="/"
+               class="ht-register-brand">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>HappyTrip</span>
+            </a>
+
+            <h2 class="ht-register-story-title">
+                Khám phá
+
+                <strong>Việt Nam</strong>
+
+                <span>cùng HappyTrip</span>
+            </h2>
+
+            <div class="ht-register-title-line"></div>
+
+            <p class="ht-register-story-description">
+                Đặt tour – Nhận ưu đãi –<br />
+                Lưu giữ hành trình đáng nhớ.
+            </p>
+
+            <div class="ht-register-benefits">
+
+                <div class="ht-register-benefit">
+                    <i class="fa-solid fa-suitcase-rolling"></i>
+                    Tour đa dạng
+                </div>
+
+                <div class="ht-register-benefit">
+                    <i class="fa-solid fa-tags"></i>
+                    Ưu đãi hấp dẫn
+                </div>
+
+                <div class="ht-register-benefit">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    An toàn &amp; tin cậy
+                </div>
+
+            </div>
+
+            <!-- MINIMAL MOUNTAIN ILLUSTRATION -->
+            <svg class="ht-register-landscape"
+                 viewBox="0 0 550 160"
+                 xmlns="http://www.w3.org/2000/svg"
+                 aria-hidden="true">
+
+                <path d="M0 116 L75 48 L111 81 L165 21 L241 102
+                         L289 56 L346 105 L419 32 L490 88
+                         L550 65 L550 160 L0 160 Z"
+                      fill="#b7d5c1" opacity=".45"/>
+
+                <path d="M0 133 L88 85 L158 114 L243 64
+                         L307 121 L389 80 L455 119
+                         L550 91 L550 160 L0 160 Z"
+                      fill="#7eb394" opacity=".42"/>
+
+                <path d="M0 148 Q80 105 150 140
+                         Q235 105 312 145
+                         Q410 105 550 142
+                         L550 160 L0 160 Z"
+                      fill="#4f956d" opacity=".35"/>
+
+            </svg>
+
+        </section>
+
+        <!-- ====================================
+             RIGHT - REGISTER FORM
+             ==================================== -->
+
+        <section class="ht-register-card">
+
+            <div class="ht-register-card-heading">
+
+                <div class="ht-register-user-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+
+                <h1>Tạo tài khoản mới</h1>
+
+                <p>
+                    Tham gia HappyTrip để đặt tour, nhận ưu đãi<br />
+                    và lưu giữ những hành trình đặc biệt.
+                </p>
+
+            </div>
 
             @if (ViewBag.ThongBao != null)
             {
-                <div class="error-text">@ViewBag.ThongBao</div>
+                <div class="ht-register-error"
+                     role="alert">
+                    @ViewBag.ThongBao
+                </div>
             }
 
-            <form method="post" action="/TaiKhoan/DangKy" onsubmit="return validatePassword()">
-                <div class="form-group">
-                    <input type="text" name="HoTen" placeholder="Họ và tên" required />
+            <form id="htRegisterForm"
+                  class="ht-register-form"
+                  asp-controller="TaiKhoan"
+                  asp-action="DangKy"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <!-- HO TEN -->
+                <div class="ht-register-field">
+
+                    <label for="HoTen">
+                        Họ và tên
+                    </label>
+
+                    <div class="ht-register-input-wrap">
+
+                        <span class="ht-register-input-icon">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+
+                        <input type="text"
+                               id="HoTen"
+                               name="HoTen"
+                               placeholder="Nhập họ và tên"
+                               autocomplete="name"
+                               maxlength="100"
+                               required />
+
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <input type="email" name="Email" placeholder="Email (gmail hoặc happydulich.vn)" required />
+                <!-- EMAIL -->
+                <div class="ht-register-field">
+
+                    <label for="Email">
+                        Địa chỉ email
+                    </label>
+
+                    <div class="ht-register-input-wrap">
+
+                        <span class="ht-register-input-icon">
+                            <i class="fa-regular fa-envelope"></i>
+                        </span>
+
+                        <input type="email"
+                               id="Email"
+                               name="Email"
+                               placeholder="Nhập địa chỉ email"
+                               autocomplete="email"
+                               maxlength="100"
+                               required />
+
+                    </div>
                 </div>
 
-                <div class="form-group password-wrapper">
-                    <input type="password" id="MatKhau" name="MatKhau" placeholder="Mật khẩu" required />
-                    <span class="toggle-password" onclick="togglePassword('MatKhau', this)">
-                        <i class="fas fa-eye"></i>
-                    </span>
+                <!-- SO DIEN THOAI -->
+                <div class="ht-register-field">
+
+                    <label for="SoDienThoai">
+                        Số điện thoại
+                    </label>
+
+                    <div class="ht-register-input-wrap">
+
+                        <span class="ht-register-input-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+
+                        <input type="tel"
+                               id="SoDienThoai"
+                               name="SoDienThoai"
+                               placeholder="Ví dụ: 0912345678"
+                               autocomplete="tel-national"
+                               inputmode="numeric"
+                               minlength="10"
+                               maxlength="10"
+                               pattern="0[35789][0-9]{8}"
+                               title="SĐT phải có đúng 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09."
+                               required />
+
+                    </div>
                 </div>
-                <small id="passwordHelp"></small>
 
-                <div class="form-group password-wrapper">
-                    <input type="password" id="MatKhauNhapLai" name="MatKhauNhapLai" placeholder="Nhập lại mật khẩu" required />
-                    <span class="toggle-password" onclick="togglePassword('MatKhauNhapLai', this)">
-                        <i class="fas fa-eye"></i>
-                    </span>
+                <!-- MAT KHAU -->
+                <div class="ht-register-field">
+
+                    <label for="MatKhau">
+                        Mật khẩu
+                    </label>
+
+                    <div class="ht-register-input-wrap">
+
+                        <span class="ht-register-input-icon">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+
+                        <input type="password"
+                               id="MatKhau"
+                               name="MatKhau"
+                               placeholder="Tạo mật khẩu (ít nhất 8 ký tự)"
+                               minlength="8"
+                               maxlength="100"
+                               autocomplete="new-password"
+                               required />
+
+                        <button type="button"
+                                class="ht-register-eye"
+                                data-target="MatKhau"
+                                aria-label="Hiện mật khẩu">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-login">ĐĂNG KÝ</button>
+                <!-- XAC NHAN MAT KHAU -->
+                <div class="ht-register-field">
 
-                <div class="register-link">
+                    <label for="MatKhauNhapLai">
+                        Xác nhận mật khẩu
+                    </label>
+
+                    <div class="ht-register-input-wrap">
+
+                        <span class="ht-register-input-icon">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+
+                        <input type="password"
+                               id="MatKhauNhapLai"
+                               name="MatKhauNhapLai"
+                               placeholder="Nhập lại mật khẩu"
+                               minlength="8"
+                               maxlength="100"
+                               autocomplete="new-password"
+                               required />
+
+                        <button type="button"
+                                class="ht-register-eye"
+                                data-target="MatKhauNhapLai"
+                                aria-label="Hiện mật khẩu xác nhận">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+
+                    </div>
+                </div>
+
+                <!-- ERROR -->
+                <div id="htRegisterError"
+                     class="ht-register-error"
+                     role="alert"
+                     aria-live="polite"
+                     hidden>
+                </div>
+
+                <!-- SUBMIT -->
+                <button type="submit"
+                        class="ht-register-submit">
+
+                    <i class="fa-solid fa-user-plus"></i>
+
+                    ĐĂNG KÝ TÀI KHOẢN
+
+                </button>
+
+                <!-- LOGIN LINK -->
+                <div class="ht-register-login">
                     Đã có tài khoản?
-                    <a href="/TaiKhoan/DangNhap">Đăng nhập</a>
+
+                    <a asp-controller="TaiKhoan"
+                       asp-action="DangNhap">
+                        Đăng nhập ngay
+                    </a>
                 </div>
+
             </form>
-        </div>
+
+        </section>
+
     </div>
+
 </div>
 
-<script src="~/js/password-validation.js"></script>
+<script>
+    (function () {
+        "use strict";
+
+        const form = document.getElementById(
+            "htRegisterForm"
+        );
+
+        const phone = document.getElementById(
+            "SoDienThoai"
+        );
+
+        const password = document.getElementById(
+            "MatKhau"
+        );
+
+        const confirmPassword = document.getElementById(
+            "MatKhauNhapLai"
+        );
+
+        const errorBox = document.getElementById(
+            "htRegisterError"
+        );
+
+        if (!form) return;
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.hidden = false;
+        }
+
+        function clearError() {
+            errorBox.textContent = "";
+            errorBox.hidden = true;
+        }
+
+        // Chi nhan so, gioi han 10 chu so.
+        phone.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/\D/g, "")
+                .slice(0, 10);
+
+            clearError();
+        });
+
+        // An/hien mat khau.
+        document.querySelectorAll(
+            "#htRegisterForm .ht-register-eye"
+        ).forEach(function (button) {
+
+            button.addEventListener("click", function () {
+                const input = document.getElementById(
+                    this.dataset.target
+                );
+
+                if (!input) return;
+
+                const isHidden = input.type === "password";
+
+                input.type = isHidden
+                    ? "text"
+                    : "password";
+
+                const icon = this.querySelector("i");
+
+                if (icon) {
+                    icon.className = isHidden
+                        ? "fa-regular fa-eye-slash"
+                        : "fa-regular fa-eye";
+                }
+
+                this.setAttribute(
+                    "aria-label",
+                    isHidden
+                        ? "Ẩn mật khẩu"
+                        : "Hiện mật khẩu"
+                );
+            });
+        });
+
+        // Kiem tra form truoc khi dang ky.
+        form.addEventListener("submit", function (event) {
+            clearError();
+
+            const validPhone = /^0[35789][0-9]{8}$/;
+
+            if (!validPhone.test(phone.value)) {
+                event.preventDefault();
+
+                showError(
+                    "Số điện thoại phải có đúng 10 chữ số " +
+                    "và bắt đầu bằng 03, 05, 07, 08 hoặc 09."
+                );
+
+                phone.focus();
+                return;
+            }
+
+            if (password.value.length < 8) {
+                event.preventDefault();
+
+                showError(
+                    "Mật khẩu phải có ít nhất 8 ký tự."
+                );
+
+                password.focus();
+                return;
+            }
+
+            if (password.value !== confirmPassword.value) {
+                event.preventDefault();
+
+                showError(
+                    "Mật khẩu xác nhận không khớp."
+                );
+
+                confirmPassword.focus();
+            }
+        });
+    })();
+</script>

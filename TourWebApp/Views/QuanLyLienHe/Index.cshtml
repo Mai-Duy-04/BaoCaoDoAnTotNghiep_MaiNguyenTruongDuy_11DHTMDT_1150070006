@@ -1,0 +1,210 @@
+
+@model List<TourWebApp.Data.Models.LienHe>
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Quản lý yêu cầu tư vấn";
+
+    var trangThai = ViewBag.TrangThai as string ?? "";
+    int tong = ViewBag.TongYeuCau ?? 0;
+    int chua = ViewBag.ChuaPhanHoi ?? 0;
+    int da = ViewBag.DaPhanHoi ?? 0;
+}
+
+<link rel="stylesheet"
+      href="~/css/quanly-lienhe.css"
+      asp-append-version="true" />
+
+<div class="htlh-page">
+
+    <div class="htlh-heading">
+        <div>
+            <span class="htlh-eyebrow">
+                HAPPYTRIP / CUSTOMER SUPPORT
+            </span>
+
+            <h2>Quản lý yêu cầu tư vấn</h2>
+
+            <p>
+                Tiếp nhận, theo dõi và phản hồi
+                những yêu cầu từ khách hàng.
+            </p>
+        </div>
+
+        <a asp-controller="QuanTri"
+           asp-action="Dashboard"
+           class="htlh-btn htlh-btn-light">
+            <i class="fa-solid fa-arrow-left"></i>
+            Dashboard
+        </a>
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="htlh-stats">
+
+        <a asp-action="Index"
+           class="htlh-stat">
+            <span class="htlh-stat-icon">
+                <i class="fa-solid fa-inbox"></i>
+            </span>
+            <div>
+                <small>Tổng yêu cầu</small>
+                <strong>@tong</strong>
+            </div>
+        </a>
+
+        <a asp-action="Index"
+           asp-route-trangThai="Chưa phản hồi"
+           class="htlh-stat">
+            <span class="htlh-stat-icon warning">
+                <i class="fa-regular fa-clock"></i>
+            </span>
+            <div>
+                <small>Chưa phản hồi</small>
+                <strong>@chua</strong>
+            </div>
+        </a>
+
+        <a asp-action="Index"
+           asp-route-trangThai="Đã phản hồi"
+           class="htlh-stat">
+            <span class="htlh-stat-icon success">
+                <i class="fa-solid fa-circle-check"></i>
+            </span>
+            <div>
+                <small>Đã phản hồi</small>
+                <strong>@da</strong>
+            </div>
+        </a>
+
+    </div>
+
+    <!-- DANH SÁCH -->
+    <div class="htlh-panel">
+
+        <div class="htlh-panel-header">
+            <div>
+                <h3>Danh sách yêu cầu</h3>
+                <p>Thông tin được lấy trực tiếp từ SQL Server.</p>
+            </div>
+
+            <form asp-action="Index"
+                  method="get"
+                  class="htlh-filter">
+
+                <select name="trangThai"
+                        aria-label="Lọc trạng thái">
+                    <option value=""
+                            selected="@(trangThai == "")">
+                        Tất cả trạng thái
+                    </option>
+                    <option value="Chưa phản hồi"
+                            selected="@(trangThai == "Chưa phản hồi")">
+                        Chưa phản hồi
+                    </option>
+                    <option value="Đã phản hồi"
+                            selected="@(trangThai == "Đã phản hồi")">
+                        Đã phản hồi
+                    </option>
+                </select>
+
+                <button type="submit"
+                        class="htlh-btn htlh-btn-primary">
+                    <i class="fa-solid fa-filter"></i>
+                    Lọc
+                </button>
+            </form>
+        </div>
+
+        <div class="htlh-table-scroll">
+
+            <table class="htlh-table">
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Khách hàng</th>
+                        <th>Nội dung yêu cầu</th>
+                        <th>Ngày gửi</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6"
+                                class="htlh-empty">
+                                <i class="fa-regular fa-folder-open"></i>
+                                <p>Chưa có yêu cầu phù hợp.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            bool daPhanHoi =
+                                item.TrangThai == "Đã phản hồi";
+
+                            <tr>
+                                <td>
+                                    <strong>#@item.IdLienHe</strong>
+                                </td>
+
+                                <td>
+                                    <div class="htlh-customer">
+                                        <strong>@item.HoTen</strong>
+                                        <small>@item.Email</small>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="htlh-preview">
+                                        @item.NoiDung
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @item.NgayGui.ToString(
+                                        "dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td>
+                                    @if (daPhanHoi)
+                                    {
+                                        <span class="htlh-status done">
+                                            <i class="fa-solid fa-check"></i>
+                                            Đã phản hồi
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="htlh-status pending">
+                                            <i class="fa-regular fa-clock"></i>
+                                            Chưa phản hồi
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <a asp-action="ChiTiet"
+                                       asp-route-id="@item.IdLienHe"
+                                       class="htlh-btn htlh-btn-primary">
+                                        <i class="fa-regular fa-eye"></i>
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>

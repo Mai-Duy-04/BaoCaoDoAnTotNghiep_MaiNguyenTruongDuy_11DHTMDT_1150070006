@@ -1,0 +1,238 @@
+
+/* =====================================================
+   HAPPYTRIP - COMPACT OVERVIEW AND ITINERARY
+   File: wwwroot/css/tour-detail-content-fix.css
+   ===================================================== */
+
+/* Tong quan: hai khung khong ep cao bang nhau */
+.tour-detail-page #tongquan
+.tour-detail-overview-layout {
+    align-items: start !important;
+    gap: 16px;
+}
+
+.tour-detail-page #tongquan
+.tour-detail-overview-layout > .tour-detail-section-card {
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: start;
+}
+
+.tour-detail-page #tongquan
+.tour-detail-highlight-box {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 20px;
+}
+
+/* Van ban mo ta */
+.tour-detail-page #tongquan
+.tour-detail-overview-text,
+.tour-detail-page #hanhtrinh
+.tour-detail-prose p {
+    display: block;
+    margin: 11px 0 0;
+    color: #4e6855;
+    font-size: 14px;
+    line-height: 1.85;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+/* Thu gon noi dung mac dinh */
+.tour-detail-page
+.ht-content-collapsible.ht-content-collapsed {
+    max-height: 142px !important;
+    overflow: hidden !important;
+    position: relative;
+}
+
+/* Moi truong gan boi fade de bao con noi dung */
+.tour-detail-page
+.ht-content-collapsible.ht-content-collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0),
+        #fff 90%
+    );
+}
+
+/* Nut xem them / thu gon */
+.tour-detail-page .ht-content-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 37px;
+    margin: 13px 0 4px;
+    padding: 8px 13px;
+    border: 1px solid #cfe5d4;
+    border-radius: 999px;
+    background: #edf8f0;
+    color: #207648;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+.tour-detail-page .ht-content-toggle:hover {
+    background: #dff1e4;
+    border-color: #94c6a1;
+}
+
+.tour-detail-page .ht-content-toggle:focus-visible {
+    outline: 3px solid #a7d9b5;
+    outline-offset: 3px;
+}
+
+.tour-detail-page .ht-content-toggle i {
+    font-size: 11px;
+    transition: transform .2s ease;
+}
+
+.tour-detail-page
+.ht-content-toggle[aria-expanded="true"] i {
+    transform: rotate(180deg);
+}
+
+/* Cac thong tin ngan: tranh o qua cao */
+.tour-detail-page #tongquan
+.tour-detail-overview-grid {
+    margin-top: 16px;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 9px;
+}
+
+.tour-detail-page #tongquan
+.tour-detail-overview-grid > div {
+    padding: 11px 13px;
+    min-height: 66px;
+}
+
+.tour-detail-page #tongquan
+.tour-detail-overview-grid strong {
+    font-size: 12px;
+}
+
+/* Hanh trinh chi hien chi tiet tung ngay khi bam */
+.tour-detail-page #hanhtrinh
+.tour-detail-timeline-card {
+    padding: 13px 15px;
+    background: #fff;
+    border: 1px solid #e4ebe2;
+    border-radius: 12px;
+}
+
+.tour-detail-page #hanhtrinh
+.tour-detail-day-toggle {
+    font-size: 13px;
+    min-height: 24px;
+}
+
+.tour-detail-page #hanhtrinh
+.tour-detail-timeline-item {
+    margin-bottom: 10px;
+}
+
+.tour-detail-page #hanhtrinh
+.tour-detail-prose {
+    margin-top: 17px;
+    padding-top: 15px;
+    border-top: 1px solid #e9eee5;
+}
+
+.tour-detail-page #hanhtrinh
+.tour-detail-prose h4 {
+    margin-bottom: 8px;
+    color: #24583c;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+/* Khong de muc dai khi da thu gon */
+.tour-detail-page #hanhtrinh
+.tour-detail-prose.ht-prose-hidden {
+    display: none !important;
+}
+
+/* Nut gioi thieu hanh trinh */
+.tour-detail-page .ht-prose-reveal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 15px;
+    border: 1px solid #e2e9df;
+    border-radius: 11px;
+    background: #fafcf8;
+    color: #285b40;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.tour-detail-page .ht-prose-reveal:hover {
+    background: #edf8ee;
+}
+
+.tour-detail-page .ht-prose-reveal i {
+    color: #578d66;
+    transition: transform .2s ease;
+}
+
+.tour-detail-page
+.ht-prose-reveal[aria-expanded="true"] i {
+    transform: rotate(180deg);
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .tour-detail-page #tongquan
+    .tour-detail-overview-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tour-detail-page #tongquan
+    .tour-detail-overview-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
+    .tour-detail-page #tongquan
+    .tour-detail-overview-text,
+    .tour-detail-page #hanhtrinh
+    .tour-detail-prose p {
+        font-size: 13px;
+        line-height: 1.75;
+    }
+
+    .tour-detail-page
+    .ht-content-collapsible.ht-content-collapsed {
+        max-height: 125px !important;
+    }
+
+    .tour-detail-page
+    .ht-content-toggle {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tour-detail-page .ht-content-toggle,
+    .tour-detail-page .ht-content-toggle i,
+    .tour-detail-page .ht-prose-reveal i {
+        transition: none;
+    }
+}

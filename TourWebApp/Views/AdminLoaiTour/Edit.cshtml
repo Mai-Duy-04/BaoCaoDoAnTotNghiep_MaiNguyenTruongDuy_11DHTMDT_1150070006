@@ -1,30 +1,718 @@
+
 @model TourWebApp.Data.Models.LoaiTour
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "_LayoutAdmin";
     ViewData["Title"] = "Sửa loại tour";
 }
 
-<h3 class="fw-bold mb-3">✏️ Sửa loại tour</h3>
+<style>
+    /* ============================================
+       HAPPYTRIP - EDIT TOUR CATEGORY
+       ============================================ */
 
-<form asp-action="Edit" method="post" class="card shadow-sm border-0">
-    <div class="card-body">
+    .ht-category-edit {
+        --ht-green: #248b55;
+        --ht-dark: #1e563b;
+        --ht-text: #365c43;
+        --ht-muted: #84998a;
+        --ht-border: #e1eadd;
+
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 22px 12px 40px;
+
+        color: var(--ht-text);
+        font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    }
+
+    .ht-category-edit *,
+    .ht-category-edit *::before,
+    .ht-category-edit *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-category-edit a {
+        text-decoration: none;
+    }
+
+    /* HEADER */
+
+    .ht-edit-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 21px;
+    }
+
+    .ht-edit-heading-main {
+        min-width: 0;
+    }
+
+    .ht-edit-eyebrow {
+        display: block;
+        margin-bottom: 8px;
+        color: #6aa17a;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+    }
+
+    .ht-edit-heading h1 {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin: 0 0 7px;
+        font-size: clamp(23px, 2.3vw, 29px);
+        font-weight: 800;
+        color: var(--ht-dark);
+    }
+
+    .ht-edit-heading h1 i {
+        display: grid;
+        place-items: center;
+        width: 41px;
+        height: 41px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        color: #2b8d56;
+        background: #e5f4e7;
+        font-size: 17px;
+    }
+
+    .ht-edit-heading p {
+        margin: 0;
+        color: var(--ht-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .ht-edit-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 39px;
+        padding: 9px 13px;
+        border: 1px solid #dfebdc;
+        border-radius: 10px;
+        background: #fff;
+        color: #568063;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ht-edit-back:hover {
+        color: #21804c;
+        border-color: #a7d1b0;
+    }
+
+    /* CURRENT CATEGORY */
+
+    .ht-edit-current {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 17px;
+        padding: 15px 17px;
+        border: 1px solid #dce9d9;
+        border-radius: 13px;
+        background: linear-gradient(110deg, #fff, #f2f8ee);
+    }
+
+    .ht-edit-current-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 45px;
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        background: #e3f2e4;
+        color: #2d9259;
+        font-size: 18px;
+    }
+
+    .ht-edit-current-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ht-edit-current-info small {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #79a086;
+        letter-spacing: .4px;
+    }
+
+    .ht-edit-current-info strong {
+        display: block;
+        color: #22583c;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-edit-id {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        min-height: 30px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        background: #e5f3e5;
+        color: #39845a;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    /* MAIN CARD */
+
+    .ht-edit-card {
+        overflow: hidden;
+        border: 1px solid #deeadb;
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 9px 28px rgba(29,74,45,.055);
+    }
+
+    .ht-edit-card-header {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 20px 23px;
+        background: linear-gradient(110deg, #f8fcf6, #eff7eb);
+        border-bottom: 1px solid #e3eddf;
+    }
+
+    .ht-edit-card-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 43px;
+        width: 43px;
+        height: 43px;
+        border-radius: 12px;
+        color: #2f975e;
+        background: #e0f1e2;
+        font-size: 18px;
+    }
+
+    .ht-edit-card-header h2 {
+        margin: 0 0 4px;
+        color: #24573d;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .ht-edit-card-header p {
+        margin: 0;
+        color: #829688;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    /* FORM FIELDS */
+
+    .ht-edit-body {
+        padding: 25px 24px;
+    }
+
+    .ht-edit-field {
+        margin-bottom: 21px;
+    }
+
+    .ht-edit-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .ht-edit-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 9px;
+        color: #355e45;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .ht-edit-label i {
+        color: #4c9e6a;
+        font-size: 12px;
+    }
+
+    .ht-required {
+        color: #d35e50;
+    }
+
+    .ht-edit-input,
+    .ht-edit-textarea {
+        display: block;
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dbe8d8;
+        border-radius: 11px;
+        outline: none;
+        background: #fbfdfa;
+        color: #315840;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .ht-edit-input {
+        height: 46px;
+    }
+
+    .ht-edit-textarea {
+        min-height: 125px;
+        resize: vertical;
+        line-height: 1.75;
+    }
+
+    .ht-edit-input::placeholder,
+    .ht-edit-textarea::placeholder {
+        color: #a2b2a3;
+        font-weight: 500;
+    }
+
+    .ht-edit-input:focus,
+    .ht-edit-textarea:focus {
+        border-color: #59ae78;
+        box-shadow: 0 0 0 3px rgba(43,151,88,.09);
+    }
+
+    .ht-edit-hint {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 7px;
+        color: #91a293;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .ht-edit-error {
+        display: block;
+        margin-top: 6px;
+        color: #c65248;
+        font-size: 11px;
+    }
+
+    .ht-edit-validation {
+        padding: 11px 13px;
+        margin-bottom: 18px;
+        border: 1px solid #f1d4cc;
+        border-radius: 9px;
+        background: #fff5f1;
+        color: #ba5349;
+        font-size: 11px;
+    }
+
+    .ht-edit-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 13px 14px;
+        border-radius: 10px;
+        background: #f3f9f0;
+        color: #6c8873;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    .ht-edit-note i {
+        margin-top: 3px;
+        color: #32945d;
+    }
+
+    /* FOOTER */
+
+    .ht-edit-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 13px;
+        padding: 16px 24px;
+        border-top: 1px solid #e9efe5;
+        background: #fcfefb;
+    }
+
+    .ht-edit-footer-hint {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #90a193;
+        font-size: 10px;
+    }
+
+    .ht-edit-footer-hint i {
+        color: #419663;
+    }
+
+    .ht-edit-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .ht-edit-cancel,
+    .ht-edit-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 41px;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ht-edit-cancel {
+        color: #67816d;
+        background: #fff;
+        border: 1px solid #dae6d6;
+    }
+
+    .ht-edit-cancel:hover {
+        background: #f5f9f2;
+    }
+
+    .ht-edit-submit {
+        background: #248d55;
+        border: 1px solid #248d55;
+        color: #fff;
+        box-shadow: 0 5px 13px rgba(36,141,85,.15);
+    }
+
+    .ht-edit-submit:hover {
+        background: #1a7544;
+    }
+
+    .ht-edit-submit:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    @@media (max-width: 600px) {
+        .ht-category-edit {
+            padding: 12px 0 25px;
+        }
+
+        .ht-edit-heading {
+            align-items: flex-start;
+        }
+
+        .ht-edit-heading h1 {
+            font-size: 22px;
+        }
+
+        .ht-edit-back {
+            padding: 9px;
+            font-size: 0;
+        }
+
+        .ht-edit-back i {
+            font-size: 13px;
+        }
+
+        .ht-edit-current {
+            padding: 12px;
+        }
+
+        .ht-edit-body {
+            padding: 19px 16px;
+        }
+
+        .ht-edit-card-header {
+            padding: 17px 16px;
+        }
+
+        .ht-edit-footer {
+            padding: 16px;
+        }
+
+        .ht-edit-footer-hint {
+            width: 100%;
+        }
+
+        .ht-edit-actions {
+            width: 100%;
+        }
+
+        .ht-edit-actions > * {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="ht-category-edit">
+
+    <!-- PAGE HEADER -->
+
+    <header class="ht-edit-heading">
+
+        <div class="ht-edit-heading-main">
+
+            <span class="ht-edit-eyebrow">
+                HAPPYTRIP / TOUR CATEGORIES
+            </span>
+
+            <h1>
+                <i class="fa-solid fa-pen-to-square"></i>
+                Sửa loại tour
+            </h1>
+
+            <p>
+                Cập nhật tên gọi và mô tả
+                của nhóm hành trình hiện có.
+            </p>
+        </div>
+
+        <a asp-controller="AdminLoaiTour"
+           asp-action="Index"
+           class="ht-edit-back">
+
+            <i class="fa-solid fa-arrow-left"></i>
+            Danh sách
+        </a>
+
+    </header>
+
+    <!-- CURRENT CATEGORY -->
+
+    <section class="ht-edit-current">
+
+        <span class="ht-edit-current-icon">
+            <i class="fa-solid fa-layer-group"></i>
+        </span>
+
+        <div class="ht-edit-current-info">
+
+            <small>LOẠI TOUR ĐANG CHỈNH SỬA</small>
+
+            <strong>@Model.TenLoai</strong>
+
+        </div>
+
+        <span class="ht-edit-id">
+            ID #@Model.IdLoaiTour
+        </span>
+
+    </section>
+
+    <!-- EDIT FORM -->
+
+    <form asp-controller="AdminLoaiTour"
+          asp-action="Edit"
+          method="post"
+          id="htEditCategoryForm">
+
+        @Html.AntiForgeryToken()
+
         <input type="hidden" asp-for="IdLoaiTour" />
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Tên loại</label>
-            <input asp-for="TenLoai" class="form-control" />
-            <span asp-validation-for="TenLoai" class="text-danger small"></span>
+        <div class="ht-edit-card">
+
+            <!-- CARD HEADER -->
+
+            <div class="ht-edit-card-header">
+
+                <span class="ht-edit-card-icon">
+                    <i class="fa-solid fa-file-pen"></i>
+                </span>
+
+                <div>
+                    <h2>Chỉnh sửa thông tin loại tour</h2>
+
+                    <p>
+                        Điều chỉnh tên loại hoặc mô tả
+                        mà không thay đổi mã định danh.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- BODY -->
+
+            <div class="ht-edit-body">
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div asp-validation-summary="All"
+                         class="ht-edit-validation"
+                         role="alert"></div>
+                }
+
+                <!-- TEN LOAI TOUR -->
+
+                <div class="ht-edit-field">
+
+                    <label asp-for="TenLoai"
+                           class="ht-edit-label">
+
+                        <i class="fa-solid fa-tag"></i>
+                        Tên loại tour
+                        <span class="ht-required">*</span>
+                    </label>
+
+                    <input asp-for="TenLoai"
+                           class="ht-edit-input"
+                           maxlength="150"
+                           placeholder="Nhập tên loại tour"
+                           autocomplete="off"
+                           required />
+
+                    <span asp-validation-for="TenLoai"
+                          class="ht-edit-error"></span>
+
+                    <div class="ht-edit-hint">
+
+                        <span>
+                            Tên mới sẽ được hiển thị
+                            tại các tour thuộc nhóm này.
+                        </span>
+
+                        <span id="htEditNameCount">0/150</span>
+
+                    </div>
+
+                </div>
+
+                <!-- MO TA -->
+
+                <div class="ht-edit-field">
+
+                    <label asp-for="MoTa"
+                           class="ht-edit-label">
+
+                        <i class="fa-solid fa-align-left"></i>
+                        Mô tả loại tour
+                    </label>
+
+                    <textarea asp-for="MoTa"
+                              class="ht-edit-textarea"
+                              rows="4"
+                              placeholder="Nhập mô tả về đặc trưng của loại tour..."></textarea>
+
+                    <div class="ht-edit-hint">
+
+                        <span>
+                            Mô tả giúp phân biệt
+                            các nhóm tour trong hệ thống.
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- INFO NOTE -->
+
+                <div class="ht-edit-note">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <span>
+                        Thay đổi tên và mô tả
+                        không làm mất các tour đang liên kết.
+                        Mã loại tour được giữ nguyên.
+                        Chủ đề sở thích dùng cho hệ thống
+                        gợi ý AI được quản lý riêng.
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+
+            <div class="ht-edit-footer">
+
+                <span class="ht-edit-footer-hint">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Chỉ lưu thay đổi khi xác nhận.
+                </span>
+
+                <div class="ht-edit-actions">
+
+                    <a asp-controller="AdminLoaiTour"
+                       asp-action="Index"
+                       class="ht-edit-cancel">
+
+                        Hủy bỏ
+                    </a>
+
+                    <button type="submit"
+                            id="htEditSubmit"
+                            class="ht-edit-submit">
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Lưu thay đổi
+
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Mô tả</label>
-            <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
-        </div>
+    </form>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary">Cập nhật</button>
-            <a class="btn btn-secondary" asp-action="Index">Quay lại</a>
-        </div>
-    </div>
-</form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const nameInput = document.getElementById("TenLoai");
+    const counter = document.getElementById("htEditNameCount");
+
+    const form = document.getElementById("htEditCategoryForm");
+    const submitButton = document.getElementById("htEditSubmit");
+
+    function updateCounter() {
+        if (!nameInput || !counter) {
+            return;
+        }
+
+        counter.textContent =
+            nameInput.value.length + "/150";
+    }
+
+    nameInput?.addEventListener("input", updateCounter);
+
+    updateCounter();
+
+    form?.addEventListener("submit", function (event) {
+
+        if (!nameInput || !nameInput.value.trim()) {
+            event.preventDefault();
+
+            nameInput?.focus();
+
+            return;
+        }
+
+        if (submitButton) {
+            submitButton.disabled = true;
+
+            submitButton.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+        }
+    });
+
+});
+</script>

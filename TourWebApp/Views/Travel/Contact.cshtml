@@ -1,81 +1,339 @@
-﻿@model TravelContactViewModel
+﻿
+@model TravelContactViewModel
+
 @{
     ViewData["Title"] = "Liên hệ";
+    var successMessage = TempData["ContactSuccess"] as string;
 }
 
-<main>
-    <section class="page-hero page-hero-contact">
-        <div class="page-hero-overlay"></div>
-        <div class="container travel-container">
-            <span class="section-kicker">Liên hệ</span>
-            <h1>Lên kế hoạch cùng HappyTrip</h1>
-            <p>Gửi nhu cầu điểm đến, số người đi và thời gian dự kiến, tụi mình sẽ tư vấn lịch trình phù hợp.</p>
-        </div>
-    </section>
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/contact-happytrip.css"
+          asp-append-version="true" />
+}
 
-    <section class="travel-section">
-        <div class="container travel-container">
-            <div class="row g-4">
-                <div class="col-lg-7">
-                    <div class="contact-form-card reveal">
-                        <h2>Thông tin chuyến đi của bạn</h2>
-                        <p>HappyTrip sẽ phản hồi với lịch trình gợi ý và mức chi phí phù hợp trong thời gian sớm nhất.</p>
+<main class="ht-contact-page">
 
-                        @if (Model.IsSubmitted)
-                        {
-                            <div class="alert alert-success mt-3" role="alert">@Model.SuccessMessage</div>
-                        }
+    <!-- HERO LIÊN HỆ -->
+    <section class="ht-contact-hero">
+        <div class="ht-contact-container ht-contact-hero-content">
 
-                        <form method="post" action="/contact" novalidate class="mt-4">
-                            @Html.AntiForgeryToken()
-                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label asp-for="Form.Name" class="form-label">Họ và tên</label>
-                                    <input asp-for="Form.Name" class="form-control" />
-                                    <span asp-validation-for="Form.Name" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-6">
-                                    <label asp-for="Form.Email" class="form-label">Email</label>
-                                    <input asp-for="Form.Email" class="form-control" />
-                                    <span asp-validation-for="Form.Email" class="text-danger"></span>
-                                </div>
-                                <div class="col-12">
-                                    <label asp-for="Form.Destination" class="form-label">Điểm đến mong muốn</label>
-                                    <input asp-for="Form.Destination" class="form-control" placeholder="Ví dụ: Phú Quốc, Đà Lạt, Cần Thơ..." />
-                                </div>
-                                <div class="col-12">
-                                    <label asp-for="Form.Message" class="form-label">Nội dung cần tư vấn</label>
-                                    <textarea asp-for="Form.Message" class="form-control" rows="5" placeholder="Mô tả thời gian đi, số lượng người, ngân sách dự kiến và nhu cầu của bạn..."></textarea>
-                                    <span asp-validation-for="Form.Message" class="text-danger"></span>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn travel-btn travel-btn-primary">Gửi yêu cầu tư vấn</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+            <div class="ht-contact-hero-copy">
+                <span class="ht-contact-eyebrow">
+                    <i class="fa-regular fa-paper-plane"></i>
+                    KẾT NỐI CÙNG HAPPYTRIP
+                </span>
+
+                <h1>
+                    Chuyến đi của bạn,
+                    <span>để HappyTrip đồng hành.</span>
+                </h1>
+
+                <p>
+                    Chia sẻ điểm đến và những điều bạn mong muốn.
+                    HappyTrip sẽ tiếp nhận yêu cầu và hỗ trợ
+                    bạn chuẩn bị hành trình phù hợp.
+                </p>
+            </div>
+
+            <div class="ht-contact-hero-art" aria-hidden="true">
+                <div class="ht-contact-art-circle">
+                    <i class="fa-solid fa-map-location-dot"></i>
                 </div>
 
-                <div class="col-lg-5">
-                    <aside class="contact-info-card reveal">
-                        <h3>Thông tin liên hệ</h3>
-                        <p>Đội ngũ tư vấn của HappyTrip luôn sẵn sàng hỗ trợ từ lúc bạn lên ý tưởng đến khi chốt tour.</p>
-                        <ul>
-                            <li><i class="fa-regular fa-envelope"></i> happytrip@gmail.com</li>
-                            <li><i class="fa-solid fa-phone"></i> +84 938 179 170</li>
-                            <li><i class="fa-solid fa-location-dot"></i> Bình Thạnh, TP.HCM</li>
-                        </ul>
-                        <div class="contact-socials">
-                            <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                            <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                            <a href="#" aria-label="Youtube"><i class="fa-brands fa-youtube"></i></a>
-                        </div>
-                    </aside>
+                <div class="ht-contact-art-ticket">
+                    <i class="fa-solid fa-plane-departure"></i>
+                    <span>YOUR NEXT TRIP</span>
+                    <strong>HappyTrip</strong>
                 </div>
             </div>
+
         </div>
     </section>
+
+    <!-- NỘI DUNG -->
+    <section class="ht-contact-main">
+
+        <div class="ht-contact-container">
+
+            <div class="ht-contact-section-heading">
+                <span>CHÚNG MÌNH LUÔN SẴN SÀNG LẮNG NGHE</span>
+                <h2>Bắt đầu hành trình từ một lời nhắn</h2>
+                <p>
+                    Điền thông tin bên dưới để gửi yêu cầu tư vấn
+                    trực tiếp đến hệ thống HappyTrip.
+                </p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(successMessage))
+            {
+                <div class="ht-contact-success"
+                     role="status">
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <div>
+                        <strong>Gửi yêu cầu thành công!</strong>
+                        <p>@successMessage</p>
+                    </div>
+                </div>
+            }
+
+            <div class="ht-contact-grid">
+
+                <!-- FORM -->
+                <div class="ht-contact-form-card">
+
+                    <div class="ht-contact-card-top">
+                        <div>
+                            <span class="ht-contact-small-label">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                ĐĂNG KÝ TƯ VẤN
+                            </span>
+
+                            <h3>Thông tin chuyến đi của bạn</h3>
+
+                            <p>
+                                Hãy chia sẻ kế hoạch, tụi mình
+                                sẽ tiếp nhận yêu cầu của bạn.
+                            </p>
+                        </div>
+
+                        <span class="ht-contact-form-icon"
+                              aria-hidden="true">
+                            <i class="fa-solid fa-route"></i>
+                        </span>
+                    </div>
+
+                    <form asp-controller="Travel"
+                          asp-action="Contact"
+                          method="post"
+                          class="ht-contact-form">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="ht-contact-validation"></div>
+
+                        <div class="ht-contact-fields">
+
+                            <!-- HỌ TÊN -->
+                            <div class="ht-contact-field">
+                                <label asp-for="Form.Name">
+                                    Họ và tên <span>*</span>
+                                </label>
+
+                                <div class="ht-contact-input-wrap">
+                                    <i class="fa-regular fa-user"></i>
+
+                                    <input asp-for="Form.Name"
+                                           placeholder="Nhập họ tên của bạn"
+                                           autocomplete="name"
+                                           maxlength="100"
+                                           required />
+                                </div>
+
+                                <span asp-validation-for="Form.Name"
+                                      class="ht-contact-field-error"></span>
+                            </div>
+
+                            <!-- EMAIL -->
+                            <div class="ht-contact-field">
+                                <label asp-for="Form.Email">
+                                    Email <span>*</span>
+                                </label>
+
+                                <div class="ht-contact-input-wrap">
+                                    <i class="fa-regular fa-envelope"></i>
+
+                                    <input asp-for="Form.Email"
+                                           type="email"
+                                           placeholder="example@gmail.com"
+                                           autocomplete="email"
+                                           maxlength="100"
+                                           required />
+                                </div>
+
+                                <span asp-validation-for="Form.Email"
+                                      class="ht-contact-field-error"></span>
+                            </div>
+
+                            <!-- SỐ ĐIỆN THOẠI -->
+                            <div class="ht-contact-field ht-contact-full">
+                                <label asp-for="Form.Phone">
+                                    Số điện thoại (không bắt buộc)
+                                </label>
+
+                                <div class="ht-contact-input-wrap">
+                                    <i class="fa-solid fa-phone"></i>
+
+                                    <input asp-for="Form.Phone"
+                                           type="tel"
+                                           placeholder="Ví dụ: 0938 179 170"
+                                           autocomplete="tel"
+                                           maxlength="20" />
+                                </div>
+
+                                <span asp-validation-for="Form.Phone"
+                                      class="ht-contact-field-error"></span>
+                            </div>
+
+                            <!-- ĐIỂM ĐẾN -->
+                            <div class="ht-contact-field ht-contact-full">
+                                <label asp-for="Form.Destination">
+                                    Điểm đến mong muốn
+                                </label>
+
+                                <div class="ht-contact-input-wrap">
+                                    <i class="fa-solid fa-location-dot"></i>
+
+                                    <input asp-for="Form.Destination"
+                                           placeholder="Ví dụ: Phú Quốc, Cần Thơ, Tây Ninh..."
+                                           maxlength="100" />
+                                </div>
+
+                                <span asp-validation-for="Form.Destination"
+                                      class="ht-contact-field-error"></span>
+                            </div>
+
+                            <!-- NỘI DUNG TƯ VẤN -->
+                            <div class="ht-contact-field ht-contact-full">
+                                <label asp-for="Form.Message">
+                                    Nội dung cần tư vấn <span>*</span>
+                                </label>
+
+                                <div class="ht-contact-input-wrap ht-contact-textarea">
+                                    <textarea asp-for="Form.Message"
+                                              rows="5"
+                                              maxlength="2000"
+                                              minlength="10"
+                                              required
+                                              placeholder="Bạn dự định đi khi nào, bao nhiêu người, ngân sách và sở thích như thế nào?"></textarea>
+                                </div>
+
+                                <span asp-validation-for="Form.Message"
+                                      class="ht-contact-field-error"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="ht-contact-form-bottom">
+
+                            <p>
+                                <i class="fa-solid fa-lock"></i>
+                                Thông tin được dùng để tiếp nhận
+                                và phản hồi yêu cầu tư vấn.
+                            </p>
+
+                            <button type="submit"
+                                    class="ht-contact-submit">
+                                <i class="fa-regular fa-paper-plane"></i>
+                                Gửi yêu cầu tư vấn
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- THÔNG TIN LIÊN HỆ -->
+                <aside class="ht-contact-side">
+
+                    <div class="ht-contact-info-card">
+
+                        <span class="ht-contact-small-label">
+                            <i class="fa-solid fa-headset"></i>
+                            KẾT NỐI VỚI HAPPYTRIP
+                        </span>
+
+                        <h3>Chúng mình ở đây để giúp bạn</h3>
+
+                        <p>
+                            Cần giải đáp về tour hoặc lịch trình?
+                            Bạn có thể liên hệ trực tiếp qua
+                            các thông tin dưới đây.
+                        </p>
+
+                        <div class="ht-contact-info-list">
+
+                            <!-- EMAIL HỖ TRỢ -->
+                            <a href="mailto:aoi27072004@gmail.com"
+                               class="ht-contact-info-item">
+
+                                <span class="ht-contact-info-icon">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </span>
+
+                                <span>
+                                    <small>Email hỗ trợ</small>
+                                    <strong>aoi27072004@gmail.com</strong>
+                                </span>
+
+                            </a>
+
+                            <!-- ĐIỆN THOẠI -->
+                            <a href="tel:+84938179170"
+                               class="ht-contact-info-item">
+
+                                <span class="ht-contact-info-icon">
+                                    <i class="fa-solid fa-phone"></i>
+                                </span>
+
+                                <span>
+                                    <small>Điện thoại</small>
+                                    <strong>+84 938 179 170</strong>
+                                </span>
+
+                            </a>
+
+                            <!-- KHU VỰC -->
+                            <div class="ht-contact-info-item">
+
+                                <span class="ht-contact-info-icon">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </span>
+
+                                <span>
+                                    <small>Khu vực</small>
+                                    <strong>Bình Thạnh, TP.HCM</strong>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- GỢI Ý TOUR -->
+                    <div class="ht-contact-help-card">
+
+                        <div class="ht-contact-help-icon">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+
+                        <div>
+                            <h4>Muốn tìm tour ngay?</h4>
+                            <p>
+                                Khám phá hành trình phù hợp
+                                với nhu cầu của bạn.
+                            </p>
+
+                            <a href="/goi-y-tour">
+                                Khám phá gợi ý tour
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    </section>
+
 </main>
 
 @section Scripts {

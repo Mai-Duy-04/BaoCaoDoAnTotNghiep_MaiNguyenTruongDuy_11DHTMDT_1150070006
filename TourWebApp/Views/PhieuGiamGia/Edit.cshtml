@@ -1,143 +1,1255 @@
-﻿@model TourWebApp.Data.Models.PhieuGiamGia
+﻿
+@model TourWebApp.Data.Models.PhieuGiamGia
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Sửa phiếu giảm giá";
+
     var dsTour = ViewBag.DsTour as IEnumerable<dynamic>;
     var dsLoaiTour = ViewBag.DsLoaiTour as IEnumerable<dynamic>;
+
+    var phamVi = string.IsNullOrWhiteSpace(Model.PhamViApDung)
+        ? "TatCa"
+        : Model.PhamViApDung;
+
+    var hienTai = DateTime.Now;
+
+    var hetHan = Model.NgayKetThuc.HasValue &&
+        Model.NgayKetThuc.Value < hienTai;
+
+    var chuaBatDau = Model.NgayBatDau.HasValue &&
+        Model.NgayBatDau.Value > hienTai;
+
+    var trangThaiText = !Model.TrangThai
+        ? "Tạm khóa"
+        : hetHan
+            ? "Đã hết hạn"
+            : chuaBatDau
+                ? "Chưa bắt đầu"
+                : "Đang có hiệu lực";
 }
 
-<h3 class="fw-bold mb-3">Sửa phiếu giảm giá - @Model.MaPhieu</h3>
+<style>
+    .htve-page {
+        width: 100%;
+        max-width: 1250px;
+        margin: 0 auto;
+        padding-bottom: 24px;
+        color: #204934;
+        font-family: inherit;
+    }
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <form asp-action="Edit" method="post" class="row g-3">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="IdPhieuGiamGia" />
-            <input type="hidden" asp-for="DaSuDung" />
-            <input type="hidden" asp-for="NgayTao" />
+    .htve-page *,
+    .htve-page *::before,
+    .htve-page *::after {
+        box-sizing: border-box;
+    }
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .htve-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 21px;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="MaPhieu" class="form-label">Mã phiếu</label>
-                <input asp-for="MaPhieu" class="form-control" />
-                <span asp-validation-for="MaPhieu" class="text-danger small"></span>
-            </div>
+    .htve-header h1 {
+        margin: 0 0 7px;
+        color: #174b34;
+        font-size: clamp(23px, 2.3vw, 30px);
+        font-weight: 800;
+        letter-spacing: -.7px;
+    }
 
-            <div class="col-md-8">
-                <label asp-for="TenPhieu" class="form-label">Tên phiếu</label>
-                <input asp-for="TenPhieu" class="form-control" />
-                <span asp-validation-for="TenPhieu" class="text-danger small"></span>
-            </div>
+    .htve-header p {
+        margin: 0;
+        color: #7b9082;
+        font-size: 13px;
+        line-height: 1.6;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="LoaiGiam" class="form-label">Loại giảm</label>
-                <select asp-for="LoaiGiam" class="form-select">
-                    <option value="PhanTram">Phần trăm (%)</option>
-                    <option value="TienMat">Tiền mặt (VND)</option>
-                </select>
-            </div>
+    .htve-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 41px;
+        padding: 9px 14px;
+        border: 1px solid #dce8de;
+        border-radius: 11px;
+        background: #fff;
+        color: #436b51;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="GiaTriGiam" class="form-label">Giá trị giảm</label>
-                <input asp-for="GiaTriGiam" type="number" step="0.01" min="0" class="form-control" />
-                <span asp-validation-for="GiaTriGiam" class="text-danger small"></span>
-            </div>
+    .htve-back:hover {
+        background: #eff8ef;
+        color: #187949;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="DonToiThieu" class="form-label">Đơn tối thiểu</label>
-                <input asp-for="DonToiThieu" type="number" min="0" class="form-control" />
-            </div>
+    .htve-overview {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 15px 19px;
+        margin-bottom: 18px;
+        border: 1px solid #dceade;
+        border-radius: 15px;
+        background: linear-gradient(105deg, #f2faf3, #fffef8);
+    }
 
-            <div class="col-md-3">
-                <label asp-for="GiamToiDa" class="form-label">Giảm tối đa</label>
-                <input asp-for="GiamToiDa" type="number" min="0" class="form-control" />
-            </div>
+    .htve-overview-code {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+        flex: 1;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="NgayBatDau" class="form-label">Ngày bắt đầu</label>
-                <input asp-for="NgayBatDau" type="datetime-local" class="form-control" value="@(Model.NgayBatDau?.ToString("yyyy-MM-ddTHH:mm"))" />
-            </div>
+    .htve-overview-code small {
+        color: #789780;
+        font-size: 10px;
+        font-weight: 700;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="NgayKetThuc" class="form-label">Ngày kết thúc</label>
-                <input asp-for="NgayKetThuc" type="datetime-local" class="form-control" value="@(Model.NgayKetThuc?.ToString("yyyy-MM-ddTHH:mm"))" />
-                <span asp-validation-for="NgayKetThuc" class="text-danger small"></span>
-            </div>
+    .htve-overview-code strong {
+        color: #187746;
+        font-size: 15px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="TongLuotSuDung" class="form-label">Tổng lượt sử dụng</label>
-                <input asp-for="TongLuotSuDung" type="number" min="1" class="form-control" />
-            </div>
+    .htve-overview-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="LuotToiDaMoiTaiKhoan" class="form-label">Lượt mỗi tài khoản</label>
-                <input asp-for="LuotToiDaMoiTaiKhoan" type="number" min="1" class="form-control" />
-                <span asp-validation-for="LuotToiDaMoiTaiKhoan" class="text-danger small"></span>
-            </div>
+    .htve-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 11px;
+        border-radius: 999px;
+        background: #e1f2e5;
+        color: #237747;
+        font-size: 11px;
+        font-weight: 800;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="PhamViApDung" class="form-label">Phạm vi áp dụng</label>
-                <select asp-for="PhamViApDung" class="form-select">
-                    <option value="TatCa">Tất cả tour</option>
-                    <option value="Tour">Theo tour</option>
-                    <option value="LoaiTour">Theo loại tour</option>
-                </select>
-            </div>
+    .htve-chip.gray {
+        background: #e9eeea;
+        color: #708076;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="IdTour" class="form-label">Tour áp dụng</label>
-                <select asp-for="IdTour" class="form-select">
-                    <option value="">-- Chọn tour --</option>
-                    @if (dsTour != null)
-                    {
-                        foreach (var t in dsTour)
-                        {
-                            <option value="@t.IdTour" selected="@t.Selected">@t.TenTour</option>
-                        }
-                    }
-                </select>
-                <span asp-validation-for="IdTour" class="text-danger small"></span>
-            </div>
+    .htve-chip.orange {
+        background: #fff0de;
+        color: #b77b30;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="IdLoaiTour" class="form-label">Loại tour áp dụng</label>
-                <select asp-for="IdLoaiTour" class="form-select">
-                    <option value="">-- Chọn loại tour --</option>
-                    @if (dsLoaiTour != null)
-                    {
-                        foreach (var l in dsLoaiTour)
-                        {
-                            <option value="@l.IdLoaiTour" selected="@l.Selected">@l.TenLoai</option>
-                        }
-                    }
-                </select>
-                <span asp-validation-for="IdLoaiTour" class="text-danger small"></span>
-            </div>
+    .htve-form {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+    }
 
-            <div class="col-12">
-                <label asp-for="MoTa" class="form-label">Mô tả</label>
-                <textarea asp-for="MoTa" rows="3" class="form-control"></textarea>
-            </div>
+    .htve-section {
+        min-width: 0;
+        padding: 23px 25px;
+        border: 1px solid #e3ece3;
+        border-radius: 19px;
+        background: #fff;
+        box-shadow: 0 8px 26px rgba(33, 77, 47, .045);
+    }
 
-            <div class="col-12 form-check ms-2">
-                <input asp-for="TrangThai" class="form-check-input" />
-                <label asp-for="TrangThai" class="form-check-label">Đang hoạt động</label>
-            </div>
+    .htve-section-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 16px;
+        margin-bottom: 21px;
+        border-bottom: 1px solid #edf2ec;
+    }
 
-            <div class="col-12 d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Đã sử dụng: <strong>@Model.DaSuDung</strong> lượt
-                </div>
-                <div class="d-flex gap-2">
-                    <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
-                    <button class="btn btn-primary" type="submit">Cập nhật</button>
-                </div>
-            </div>
-        </form>
+    .htve-section-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: #e8f5eb;
+        color: #238b53;
+        font-size: 18px;
+    }
+
+    .htve-section-icon.gold {
+        background: #fff5dd;
+        color: #d49c22;
+    }
+
+    .htve-section-heading h2 {
+        margin: 0 0 3px;
+        color: #204e37;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .htve-section-heading p {
+        margin: 0;
+        color: #87988c;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htve-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 17px 18px;
+    }
+
+    .htve-col-4 {
+        grid-column: span 4;
+    }
+
+    .htve-col-6 {
+        grid-column: span 6;
+    }
+
+    .htve-col-8 {
+        grid-column: span 8;
+    }
+
+    .htve-col-12 {
+        grid-column: span 12;
+    }
+
+    .htve-field {
+        min-width: 0;
+    }
+
+    .htve-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #355f46;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .htve-required {
+        margin-left: 3px;
+        color: #d77a57;
+    }
+
+    .htve-field .form-control,
+    .htve-field .form-select {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 13px;
+        border: 1px solid #dae7dc;
+        border-radius: 11px;
+        background: #fcfdfb;
+        color: #244d36;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: none;
+    }
+
+    .htve-field .form-control:focus,
+    .htve-field .form-select:focus {
+        border-color: #56ad78;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(50, 150, 85, .1);
+    }
+
+    .htve-field textarea.form-control {
+        min-height: 107px;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+    .htve-field .form-control::placeholder {
+        color: #a0b1a4;
+        font-weight: 400;
+    }
+
+    .htve-hint {
+        display: block;
+        margin-top: 7px;
+        color: #899c8e;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htve-field .text-danger {
+        display: block;
+        margin-top: 6px;
+        font-size: 11px;
+    }
+
+    .htve-summary {
+        padding: 12px 15px;
+        border-radius: 11px;
+        background: #fff0ed;
+        color: #b4493c;
+        font-size: 12px;
+    }
+
+    .htve-summary.validation-summary-valid {
+        display: none;
+    }
+
+    .htve-discount-field {
+        position: relative;
+    }
+
+    .htve-discount-field .form-control {
+        padding-right: 60px;
+        color: #177746;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .htve-discount-unit {
+        position: absolute;
+        right: 13px;
+        top: 37px;
+        color: #74917e;
+        font-size: 11px;
+        font-weight: 800;
+        pointer-events: none;
+    }
+
+    .htve-scope-options {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .htve-scope-choice {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        min-height: 58px;
+        padding: 12px;
+        border: 1px solid #dfe9e0;
+        border-radius: 12px;
+        background: #fafcf9;
+        color: #456c53;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background .2s ease;
+    }
+
+    .htve-scope-choice:has(input:checked) {
+        border-color: #74bd8d;
+        background: #ecf8ef;
+        color: #167a48;
+    }
+
+    .htve-scope-choice input {
+        flex-shrink: 0;
+        accent-color: #258b54;
+    }
+
+    .htve-scope-choice i {
+        color: #3d9965;
+        font-size: 15px;
+    }
+
+    .htve-scope-detail {
+        padding: 17px;
+        border: 1px solid #e2ece1;
+        border-radius: 12px;
+        background: #f8fcf8;
+    }
+
+    .htve-scope-detail[hidden] {
+        display: none !important;
+    }
+
+    .htve-scope-message {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #4b7859;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.6;
+    }
+
+    .htve-scope-message i {
+        color: #279a5a;
+    }
+
+    .htve-status-box {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 16px;
+        border: 1px solid #dbece0;
+        border-radius: 12px;
+        background: #f2faf3;
+    }
+
+    .htve-status-box input {
+        flex-shrink: 0;
+        width: 19px;
+        height: 19px;
+        margin: 0;
+        accent-color: #238d55;
+    }
+
+    .htve-status-box label {
+        display: block;
+        margin-bottom: 3px;
+        color: #226b44;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .htve-status-box small {
+        color: #748d7a;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htve-history {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        border: 1px solid #eee2bc;
+        border-radius: 12px;
+        background: #fffaf0;
+        color: #886b2b;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .htve-history i {
+        margin-top: 3px;
+        color: #c28c27;
+    }
+
+    .htve-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 18px 23px;
+        border: 1px solid #e1eae0;
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    .htve-action-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #86998a;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htve-action-note i {
+        color: #2b9860;
+    }
+
+    .htve-action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .htve-save,
+    .htve-cancel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 19px;
+        border-radius: 11px;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .htve-save {
+        border: 0;
+        background: linear-gradient(135deg, #30a567, #187d4b);
+        color: #fff;
+        box-shadow: 0 5px 14px rgba(37, 141, 81, .15);
+    }
+
+    .htve-save:hover {
+        background: #176f43;
+        color: #fff;
+    }
+
+    .htve-cancel {
+        border: 1px solid #dce8de;
+        background: #fff;
+        color: #52705b;
+    }
+
+    .htve-cancel:hover {
+        background: #f0f7ef;
+        color: #197347;
+    }
+
+    @@media (max-width: 991.98px) {
+        .htve-section {
+            padding: 20px;
+        }
+
+        .htve-col-4 {
+            grid-column: span 6;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .htve-header {
+            flex-direction: column;
+        }
+
+        .htve-grid {
+            gap: 15px;
+        }
+
+        .htve-col-4,
+        .htve-col-6,
+        .htve-col-8 {
+            grid-column: span 12;
+        }
+
+        .htve-section {
+            padding: 17px;
+            border-radius: 14px;
+        }
+
+        .htve-scope-options {
+            grid-template-columns: 1fr;
+        }
+
+        .htve-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .htve-action-buttons {
+            width: 100%;
+        }
+
+        .htve-save,
+        .htve-cancel {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="htve-page">
+
+    <div class="htve-header">
+        <div>
+            <h1>Sửa phiếu giảm giá</h1>
+            <p>
+                Cập nhật thông tin và điều kiện áp dụng
+                cho chương trình ưu đãi hiện tại.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="htve-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            Quay lại danh sách
+        </a>
     </div>
+
+    <div class="htve-overview">
+        <div class="htve-overview-code">
+            <small>ĐANG CHỈNH SỬA MÃ PHIẾU</small>
+            <strong>@Model.MaPhieu</strong>
+        </div>
+
+        <div class="htve-overview-meta">
+            <span class="htve-chip">
+                <i class="fa-solid fa-users"></i>
+                Đã sử dụng: @Model.DaSuDung lượt
+            </span>
+
+            <span class="htve-chip @(hetHan ? "orange" : Model.TrangThai ? "" : "gray")">
+                <i class="fa-solid fa-circle-info"></i>
+                @trangThaiText
+            </span>
+        </div>
+    </div>
+
+    <form asp-action="Edit"
+          method="post"
+          id="htVoucherEditForm"
+          class="htve-form">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="IdPhieuGiamGia" />
+        <input type="hidden" asp-for="DaSuDung" />
+        <input type="hidden" asp-for="NgayTao" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="htve-summary text-danger">
+        </div>
+
+        <section class="htve-section">
+
+            <div class="htve-section-heading">
+                <div class="htve-section-icon">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+
+                <div>
+                    <h2>01. Thông tin cơ bản</h2>
+                    <p>Mã phiếu và tên chương trình ưu đãi.</p>
+                </div>
+            </div>
+
+            <div class="htve-grid">
+
+                <div class="htve-field htve-col-4">
+                    <label asp-for="MaPhieu" class="htve-label">
+                        Mã phiếu
+                        <span class="htve-required">*</span>
+                    </label>
+
+                    <input asp-for="MaPhieu"
+                           class="form-control"
+                           autocomplete="off" />
+
+                    <small class="htve-hint">
+                        Mã phiếu sẽ được chuẩn hóa thành chữ in hoa khi lưu.
+                    </small>
+
+                    <span asp-validation-for="MaPhieu"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-8">
+                    <label asp-for="TenPhieu" class="htve-label">
+                        Tên chương trình ưu đãi
+                        <span class="htve-required">*</span>
+                    </label>
+
+                    <input asp-for="TenPhieu"
+                           class="form-control" />
+
+                    <span asp-validation-for="TenPhieu"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="htve-section">
+
+            <div class="htve-section-heading">
+                <div class="htve-section-icon gold">
+                    <i class="fa-solid fa-percent"></i>
+                </div>
+
+                <div>
+                    <h2>02. Thiết lập giá trị giảm</h2>
+                    <p>Cập nhật mức ưu đãi và điều kiện giá trị đơn hàng.</p>
+                </div>
+            </div>
+
+            <div class="htve-grid">
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="LoaiGiam" class="htve-label">
+                        Loại giảm
+                    </label>
+
+                    <select asp-for="LoaiGiam"
+                            class="form-select"
+                            id="htveLoaiGiam">
+                        <option value="PhanTram">Phần trăm (%)</option>
+                        <option value="TienMat">Tiền mặt (VNĐ)</option>
+                    </select>
+
+                    <span asp-validation-for="LoaiGiam"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-6 htve-discount-field">
+                    <label asp-for="GiaTriGiam" class="htve-label">
+                        Giá trị giảm
+                        <span class="htve-required">*</span>
+                    </label>
+
+                    <input asp-for="GiaTriGiam"
+                           type="number"
+                           step="0.01"
+                           min="0.01"
+                           class="form-control"
+                           id="htveGiaTriGiam" />
+
+                    <span class="htve-discount-unit"
+                          id="htveDiscountUnit">%</span>
+
+                    <span asp-validation-for="GiaTriGiam"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="DonToiThieu" class="htve-label">
+                        Giá trị đơn tối thiểu
+                    </label>
+
+                    <input asp-for="DonToiThieu"
+                           type="number"
+                           min="0"
+                           step="1"
+                           class="form-control" />
+
+                    <small class="htve-hint">
+                        Nhập 0 nếu không yêu cầu giá trị đơn tối thiểu.
+                    </small>
+
+                    <span asp-validation-for="DonToiThieu"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="GiamToiDa" class="htve-label">
+                        Số tiền giảm tối đa
+                    </label>
+
+                    <input asp-for="GiamToiDa"
+                           type="number"
+                           min="0"
+                           step="1"
+                           class="form-control" />
+
+                    <small class="htve-hint">
+                        Để trống nếu không giới hạn số tiền giảm.
+                    </small>
+
+                    <span asp-validation-for="GiamToiDa"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="htve-section">
+
+            <div class="htve-section-heading">
+                <div class="htve-section-icon">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+
+                <div>
+                    <h2>03. Thời hạn và lượt sử dụng</h2>
+                    <p>Điều chỉnh thời hạn và giới hạn sử dụng của phiếu.</p>
+                </div>
+            </div>
+
+            <div class="htve-grid">
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="NgayBatDau" class="htve-label">
+                        Ngày bắt đầu
+                    </label>
+
+                    <input asp-for="NgayBatDau"
+                           type="datetime-local"
+                           class="form-control"
+                           id="htveNgayBatDau"
+                           value="@(Model.NgayBatDau?.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                    <span asp-validation-for="NgayBatDau"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="NgayKetThuc" class="htve-label">
+                        Ngày kết thúc
+                    </label>
+
+                    <input asp-for="NgayKetThuc"
+                           type="datetime-local"
+                           class="form-control"
+                           id="htveNgayKetThuc"
+                           value="@(Model.NgayKetThuc?.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                    <span asp-validation-for="NgayKetThuc"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="TongLuotSuDung" class="htve-label">
+                        Tổng lượt sử dụng
+                    </label>
+
+                    <input asp-for="TongLuotSuDung"
+                           type="number"
+                           min="1"
+                           step="1"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+
+                    <small class="htve-hint">
+                        Đã sử dụng @Model.DaSuDung lượt.
+                        Tổng giới hạn không được nhỏ hơn số lượt đã dùng.
+                    </small>
+
+                    <span asp-validation-for="TongLuotSuDung"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-field htve-col-6">
+                    <label asp-for="LuotToiDaMoiTaiKhoan"
+                           class="htve-label">
+                        Lượt tối đa mỗi tài khoản
+                    </label>
+
+                    <input asp-for="LuotToiDaMoiTaiKhoan"
+                           type="number"
+                           min="1"
+                           step="1"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+
+                    <small class="htve-hint">
+                        Để trống nếu không giới hạn lượt dùng mỗi tài khoản.
+                    </small>
+
+                    <span asp-validation-for="LuotToiDaMoiTaiKhoan"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="htve-section">
+
+            <div class="htve-section-heading">
+                <div class="htve-section-icon gold">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+
+                <div>
+                    <h2>04. Phạm vi áp dụng</h2>
+                    <p>Chọn những tour được áp dụng chương trình ưu đãi.</p>
+                </div>
+            </div>
+
+            <div class="htve-scope-options">
+
+                <label class="htve-scope-choice">
+                    <input type="radio"
+                           name="htveScopeChoice"
+                           value="TatCa"
+                           checked="@(phamVi == "TatCa")" />
+
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Tất cả tour</span>
+                </label>
+
+                <label class="htve-scope-choice">
+                    <input type="radio"
+                           name="htveScopeChoice"
+                           value="Tour"
+                           checked="@(phamVi == "Tour")" />
+
+                    <i class="fa-solid fa-route"></i>
+                    <span>Một tour cụ thể</span>
+                </label>
+
+                <label class="htve-scope-choice">
+                    <input type="radio"
+                           name="htveScopeChoice"
+                           value="LoaiTour"
+                           checked="@(phamVi == "LoaiTour")" />
+
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Theo loại tour</span>
+                </label>
+
+            </div>
+
+            <input asp-for="PhamViApDung"
+                   type="hidden"
+                   id="htvePhamViApDung" />
+
+            <div class="htve-scope-detail"
+                 id="htveScopeAll">
+
+                <div class="htve-scope-message">
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <span>
+                        Phiếu được áp dụng cho tất cả tour
+                        đáp ứng điều kiện ưu đãi.
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="htve-scope-detail"
+                 id="htveScopeTour"
+                 hidden>
+
+                <div class="htve-field">
+                    <label asp-for="IdTour" class="htve-label">
+                        Chọn tour áp dụng
+                    </label>
+
+                    <select asp-for="IdTour"
+                            class="form-select"
+                            id="htveIdTour">
+
+                        <option value="">-- Chọn tour --</option>
+
+                        @if (dsTour != null)
+                        {
+                            foreach (var t in dsTour)
+                            {
+                                <option value="@t.IdTour"
+                                        selected="@t.Selected">
+                                    @t.TenTour
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                    <span asp-validation-for="IdTour"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="htve-scope-detail"
+                 id="htveScopeLoaiTour"
+                 hidden>
+
+                <div class="htve-field">
+                    <label asp-for="IdLoaiTour" class="htve-label">
+                        Chọn loại tour áp dụng
+                    </label>
+
+                    <select asp-for="IdLoaiTour"
+                            class="form-select"
+                            id="htveIdLoaiTour">
+
+                        <option value="">-- Chọn loại tour --</option>
+
+                        @if (dsLoaiTour != null)
+                        {
+                            foreach (var l in dsLoaiTour)
+                            {
+                                <option value="@l.IdLoaiTour"
+                                        selected="@l.Selected">
+                                    @l.TenLoai
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                    <span asp-validation-for="IdLoaiTour"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <span asp-validation-for="PhamViApDung"
+                  class="text-danger small"></span>
+
+        </section>
+
+        <section class="htve-section">
+
+            <div class="htve-section-heading">
+                <div class="htve-section-icon">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <div>
+                    <h2>05. Mô tả và trạng thái</h2>
+                    <p>Thay đổi ghi chú và trạng thái hoạt động của phiếu.</p>
+                </div>
+            </div>
+
+            <div class="htve-grid">
+
+                <div class="htve-field htve-col-12">
+                    <label asp-for="MoTa" class="htve-label">
+                        Mô tả chương trình
+                    </label>
+
+                    <textarea asp-for="MoTa"
+                              rows="4"
+                              class="form-control"
+                              placeholder="Nhập điều kiện và lưu ý sử dụng phiếu..."></textarea>
+
+                    <span asp-validation-for="MoTa"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htve-col-12">
+                    <div class="htve-status-box">
+
+                        <input asp-for="TrangThai"
+                               id="htveTrangThai" />
+
+                        <div>
+                            <label for="htveTrangThai">
+                                Cho phép phiếu hoạt động
+                            </label>
+
+                            <small>
+                                Phiếu vẫn phải đáp ứng thời hạn,
+                                số lượt còn lại và điều kiện áp dụng.
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
+
+                @if (Model.DaSuDung > 0)
+                {
+                    <div class="htve-col-12">
+                        <div class="htve-history">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+
+                            <span>
+                                Phiếu này đã được sử dụng
+                                <strong>@Model.DaSuDung lượt</strong>.
+                                Cần kiểm tra kỹ trước khi thay đổi giá trị
+                                giảm hoặc phạm vi áp dụng.
+                                Các đơn hàng trước đó vẫn được lưu
+                                trong lịch sử hệ thống.
+                            </span>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </section>
+
+        <div class="htve-actions">
+
+            <div class="htve-action-note">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>
+                    Kiểm tra thông tin trước khi lưu thay đổi.
+                </span>
+            </div>
+
+            <div class="htve-action-buttons">
+
+                <a asp-action="Index"
+                   class="htve-cancel">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="htve-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Cập nhật phiếu
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById(
+                "htVoucherEditForm"
+            );
+
+            if (!form) return;
+
+            const scopeInput = document.getElementById(
+                "htvePhamViApDung"
+            );
+
+            const scopeRadios = document.querySelectorAll(
+                'input[name="htveScopeChoice"]'
+            );
+
+            const scopeAll = document.getElementById(
+                "htveScopeAll"
+            );
+
+            const scopeTour = document.getElementById(
+                "htveScopeTour"
+            );
+
+            const scopeLoaiTour = document.getElementById(
+                "htveScopeLoaiTour"
+            );
+
+            const tourSelect = document.getElementById(
+                "htveIdTour"
+            );
+
+            const loaiTourSelect = document.getElementById(
+                "htveIdLoaiTour"
+            );
+
+            const loaiGiam = document.getElementById(
+                "htveLoaiGiam"
+            );
+
+            const giaTriGiam = document.getElementById(
+                "htveGiaTriGiam"
+            );
+
+            const discountUnit = document.getElementById(
+                "htveDiscountUnit"
+            );
+
+            const ngayBatDau = document.getElementById(
+                "htveNgayBatDau"
+            );
+
+            const ngayKetThuc = document.getElementById(
+                "htveNgayKetThuc"
+            );
+
+            const totalUsage = document.getElementById(
+                "TongLuotSuDung"
+            );
+
+            const alreadyUsed = @Model.DaSuDung;
+
+            function updateScope() {
+                const selected = Array.from(scopeRadios)
+                    .find(radio => radio.checked)?.value || "TatCa";
+
+                scopeInput.value = selected;
+
+                scopeAll.hidden = selected !== "TatCa";
+                scopeTour.hidden = selected !== "Tour";
+                scopeLoaiTour.hidden = selected !== "LoaiTour";
+
+                tourSelect.disabled = selected !== "Tour";
+                loaiTourSelect.disabled = selected !== "LoaiTour";
+
+                tourSelect.required = selected === "Tour";
+                loaiTourSelect.required = selected === "LoaiTour";
+            }
+
+            function updateDiscountType() {
+                const isPercentage =
+                    loaiGiam.value === "PhanTram";
+
+                discountUnit.textContent =
+                    isPercentage ? "%" : "VNĐ";
+
+                if (isPercentage) {
+                    giaTriGiam.max = "100";
+                } else {
+                    giaTriGiam.removeAttribute("max");
+                }
+            }
+
+            function validateDates() {
+                ngayKetThuc.setCustomValidity("");
+
+                if (
+                    ngayBatDau.value &&
+                    ngayKetThuc.value &&
+                    ngayKetThuc.value < ngayBatDau.value
+                ) {
+                    ngayKetThuc.setCustomValidity(
+                        "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu."
+                    );
+                }
+            }
+
+            function validateTotalUsage() {
+                if (!totalUsage) return;
+
+                totalUsage.setCustomValidity("");
+
+                if (
+                    totalUsage.value !== "" &&
+                    Number(totalUsage.value) < alreadyUsed
+                ) {
+                    totalUsage.setCustomValidity(
+                        "Tổng lượt sử dụng không được nhỏ hơn số lượt đã dùng."
+                    );
+                }
+            }
+
+            scopeRadios.forEach(function (radio) {
+                radio.addEventListener(
+                    "change",
+                    updateScope
+                );
+            });
+
+            loaiGiam.addEventListener(
+                "change",
+                updateDiscountType
+            );
+
+            ngayBatDau.addEventListener(
+                "input",
+                validateDates
+            );
+
+            ngayKetThuc.addEventListener(
+                "input",
+                validateDates
+            );
+
+            if (totalUsage) {
+                totalUsage.addEventListener(
+                    "input",
+                    validateTotalUsage
+                );
+            }
+
+            form.addEventListener("submit", function () {
+                updateScope();
+                updateDiscountType();
+                validateDates();
+                validateTotalUsage();
+            });
+
+            updateScope();
+            updateDiscountType();
+            validateDates();
+            validateTotalUsage();
+        });
+    </script>
 }

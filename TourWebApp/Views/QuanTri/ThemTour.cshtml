@@ -1,159 +1,891 @@
 @model TourWebApp.Data.Models.Tour
 @{
     Layout = "_LayoutAdmin";
-    var loaiTours = ViewBag.LoaiTours as List<TourWebApp.Data.Models.LoaiTour> ?? new();
+    ViewData["Title"] = "Thêm tour mới";
+
+    var loaiTours = ViewBag.LoaiTours
+        as List<TourWebApp.Data.Models.LoaiTour>
+        ?? new List<TourWebApp.Data.Models.LoaiTour>();
+
+    // Các mã đã đối chiếu với HappyTripDB.
+    // Bước tiếp theo sẽ chuyển danh sách này sang
+    // lấy trực tiếp từ AISoThich trong Controller.
+    var soThichOptions = new[]
+    {
+        new { Code = "BIEN", Name = "Biển đảo", Icon = "fa-water" },
+        new { Code = "NUI", Name = "Núi rừng", Icon = "fa-mountain" },
+        new { Code = "VANHOA", Name = "Văn hóa", Icon = "fa-landmark" },
+        new { Code = "LICHSU", Name = "Lịch sử", Icon = "fa-building-columns" },
+        new { Code = "THANHPHO", Name = "Thành phố", Icon = "fa-city" },
+        new { Code = "CHECKIN", Name = "Check-in", Icon = "fa-camera" },
+        new { Code = "MAOHIEM", Name = "Mạo hiểm", Icon = "fa-person-hiking" },
+        new { Code = "SINHTHAI", Name = "Sinh thái", Icon = "fa-leaf" },
+        new { Code = "SONGNUOC", Name = "Sông nước", Icon = "fa-ship" },
+        new { Code = "AMTHUC", Name = "Ẩm thực", Icon = "fa-utensils" }
+    };
+    
+        var selectedCodes = new HashSet<string>(
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        if (Context.Request.HasFormContentType)
+        {
+            foreach (var code in Context.Request.Form["MaSoThichs"])
+            {
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    selectedCodes.Add(code);
+                }
+            }
+        }
+
 }
 
-<link rel="stylesheet" href="~/css/upload-tour.css" />
+<link rel="stylesheet"
+      href="~/css/upload-tour.css"
+      asp-append-version="true" />
 
-<div class="container-fluid">
-    <h4 class="mb-3 fw-bold">➕ Thêm tour mới</h4>
+<style>
+    /* Chủ đề du lịch - chỉ áp dụng cho trang Thêm tour */
 
-    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.Any(v => v.Errors.Count > 0))
-    {
-        <div class="alert alert-danger">
-            @foreach (var item in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <div>❌ @item.ErrorMessage</div>
-            }
-        </div>
+    .ht-create-topics-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
     }
 
-   <form asp-action="ThemTour" method="post" enctype="multipart/form-data">
-    @Html.AntiForgeryToken()
+    .ht-create-topics-hint {
+        color: #829587;
+        font-size: 11px;
+        line-height: 1.6;
+    }
 
-        <div class="card shadow-sm p-4">
-            <div class="row g-3">
+    .ht-create-topic-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: #eaf6e9;
+        color: #278250;
+        font-size: 11px;
+        font-weight: 800;
+    }
 
-                <div class="col-md-6">
-                    <label class="form-label">Mã tour</label>
-                    <input asp-for="MaTour" class="form-control" />
+    .ht-create-topic-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .ht-create-topic-option {
+        display: block;
+        position: relative;
+        min-width: 0;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .ht-create-topic-option input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .ht-create-topic-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        min-height: 104px;
+        padding: 15px 9px;
+        border: 1.5px solid #dfebdd;
+        border-radius: 14px;
+        background: #fbfdf9;
+        color: #476b50;
+        text-align: center;
+        transition: background .2s, border-color .2s,
+                    box-shadow .2s, transform .2s;
+    }
+
+    .ht-create-topic-content > i {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #eaf5e9;
+        color: #34935e;
+        font-size: 18px;
+    }
+
+    .ht-create-topic-name {
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.45;
+    }
+
+    .ht-create-topic-check {
+        display: none;
+        position: absolute;
+        top: 9px;
+        right: 10px;
+        color: #248b55;
+        font-size: 13px;
+    }
+
+    .ht-create-topic-option:hover .ht-create-topic-content {
+        border-color: #a4d0aa;
+        background: #f3faf0;
+        transform: translateY(-2px);
+    }
+
+    .ht-create-topic-option input:checked
+        + .ht-create-topic-content {
+        border-color: #329b61;
+        background: #e9f7e9;
+        box-shadow: 0 0 0 2px rgba(48, 151, 87, .08);
+        color: #1d7046;
+    }
+
+    .ht-create-topic-option input:checked
+        + .ht-create-topic-content
+        .ht-create-topic-check {
+        display: block;
+    }
+
+    .ht-create-topic-option input:focus-visible
+        + .ht-create-topic-content {
+        outline: 3px solid #8acba0;
+        outline-offset: 3px;
+    }
+
+    .ht-create-topics-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 15px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #fff9eb;
+        color: #8d754b;
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .ht-create-topics-note i {
+        margin-top: 3px;
+        color: #d8aa3c;
+    }
+
+    @@media (max-width: 1250px) {
+        .ht-create-topic-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .ht-create-topic-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .ht-create-topic-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ht-create-topic-content {
+            min-height: 94px;
+        }
+    }
+</style>
+
+<div class="ht-create-tour">
+
+    <header class="ht-create-header">
+        <div>
+            <span class="ht-create-eyebrow">
+                <i class="fa-solid fa-route"></i>
+                HAPPYTRIP · QUẢN LÝ HÀNH TRÌNH
+            </span>
+
+            <h1>Tạo hành trình mới <span>✈</span></h1>
+
+            <p>
+                Hoàn thiện thông tin tour theo từng nhóm.
+                Các trường quan trọng được đánh dấu
+                <strong>*</strong>.
+            </p>
+        </div>
+
+        <a asp-controller="QuanTri"
+           asp-action="QuanLyTour"
+           class="ht-create-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            Quản lý tour
+        </a>
+    </header>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All"
+             class="ht-create-validation"
+             role="alert"></div>
+    }
+
+    <form asp-controller="QuanTri"
+          asp-action="ThemTour"
+          method="post"
+          enctype="multipart/form-data"
+          id="htCreateTourForm">
+
+        @Html.AntiForgeryToken()
+
+        <!-- 01. THONG TIN HANH TRINH -->
+        <section class="ht-create-section">
+
+            <div class="ht-create-section-heading">
+                <span class="ht-create-number">01</span>
+
+                <div>
+                    <h2>Thông tin hành trình</h2>
+                    <p>
+                        Các thông tin chính để nhận biết
+                        và giới thiệu tour.
+                    </p>
                 </div>
 
-               <div class="col-md-6">
-                    <label class="form-label">Tên tour</label>
-                    <input asp-for="TenTour" class="form-control" required />
+                <i class="fa-solid fa-map-location-dot ht-create-heading-icon"></i>
+            </div>
+
+            <div class="ht-create-grid two">
+
+                <div class="ht-create-field">
+                    <label asp-for="MaTour">
+                        Mã tour <em>*</em>
+                    </label>
+
+                    <input asp-for="MaTour"
+                           class="ht-create-input"
+                           maxlength="50"
+                           placeholder="VD: STN084-2026-001"
+                           required />
+
+                    <small>Mã tour phải duy nhất.</small>
+
+                    <span asp-validation-for="MaTour"
+                          class="ht-create-error"></span>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Loại tour</label>
-                    <select asp-for="IdLoaiTour" class="form-select" required>
-                        <option value="">-- Chọn loại tour --</option>
-                        @foreach (var item in loaiTours)
+                <div class="ht-create-field">
+                    <label asp-for="TenTour">
+                        Tên tour <em>*</em>
+                    </label>
+
+                    <input asp-for="TenTour"
+                           class="ht-create-input"
+                           maxlength="200"
+                           placeholder="VD: Khám phá miền Tây 3 ngày 2 đêm"
+                           required />
+
+                    <span asp-validation-for="TenTour"
+                          class="ht-create-error"></span>
+                </div>
+
+                <div class="ht-create-field">
+                    <label asp-for="IdLoaiTour">
+                        Loại tour <em>*</em>
+                    </label>
+
+                    <select asp-for="IdLoaiTour"
+                            class="ht-create-input"
+                            required>
+                        <option value="">
+                            -- Chọn loại tour --
+                        </option>
+
+                        @foreach (var loai in loaiTours)
                         {
-                            <option value="@item.IdLoaiTour">@item.TenLoai</option>
+                            <option value="@loai.IdLoaiTour">
+                                @loai.TenLoai
+                            </option>
                         }
                     </select>
+
+                    <span asp-validation-for="IdLoaiTour"
+                          class="ht-create-error"></span>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Địa điểm</label>
-                    <input asp-for="DiaDiem" class="form-control" />
+                <div class="ht-create-field">
+                    <label asp-for="DiaDiem">
+                        Tuyến điểm / Địa điểm
+                    </label>
+
+                    <input asp-for="DiaDiem"
+                           class="ht-create-input"
+                           maxlength="200"
+                           placeholder="VD: TP.HCM → Cần Thơ → Sóc Trăng" />
+
+                    <small>Nhập theo thứ tự các điểm đến.</small>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Thời gian</label>
-                    <input asp-for="ThoiGian" class="form-control" placeholder="VD: 3N2Đ" />
+                <div class="ht-create-field">
+                    <label asp-for="ThoiGian">
+                        Thời gian
+                    </label>
+
+                    <input asp-for="ThoiGian"
+                           class="ht-create-input"
+                           maxlength="50"
+                           placeholder="VD: 3 ngày 2 đêm" />
                 </div>
 
-               <div class="col-md-6">
-                    <label class="form-label fw-semibold">Phương tiện</label>
-                    <select asp-for="PhuongTien" class="form-select" required>
-                        <option value="">-- Chọn phương tiện --</option>
-                        <option value="Xe du lịch">🚌 Xe du lịch</option>
-                        <option value="Máy bay">✈️ Máy bay</option>
-                        <option value="Tàu hỏa">🚆 Tàu hỏa</option>
-                        <option value="Ca nô">🚤 Ca nô</option>
-                        <option value="Xe máy">🏍 Xe máy</option>
+                <div class="ht-create-field">
+                    <label asp-for="PhuongTien">
+                        Phương tiện <em>*</em>
+                    </label>
+
+                    <select asp-for="PhuongTien"
+                            class="ht-create-input"
+                            required>
+                        <option value="">
+                            -- Chọn phương tiện --
+                        </option>
+                        <option value="Xe du lịch">Xe du lịch</option>
+                        <option value="Máy bay">Máy bay</option>
+                        <option value="Tàu hỏa">Tàu hỏa</option>
+                        <option value="Ca nô">Ca nô</option>
+                        <option value="Xe máy">Xe máy</option>
                     </select>
-                </div>
 
-
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Giá gốc</label>
-                    <input asp-for="GiaGoc" type="number" class="form-control" />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">% Giảm</label>
-                    <input asp-for="PhanTramGiam" class="form-control" id="phanTramGiam" />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Giá khuyến mãi</label>
-                    <input asp-for="GiaKhuyenMai" class="form-control" id="giaKhuyenMai" readonly />
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label">Mô tả</label>
-                    <textarea asp-for="MoTa" rows="4" class="form-control"></textarea>
-                </div>
-
-                <h5 class="fw-bold text-primary mt-4 mb-2">💰 Giá tour theo đối tượng</h5>
-
-                <div class="row">
-
-                    <!-- GIÁ NGƯỜI LỚN -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Giá người lớn *</label>
-                        <input type="number" id="giaNguoiLon" name="GiaNguoiLon"
-                            class="form-control" min="0" required />
-                    </div>
-
-                    <!-- % GIẢM TRẺ EM -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">% giảm cho trẻ em</label>
-                        <input type="range" id="phanTramTreEm" name="PhanTramTreEm" 
-                            min="0" max="100" value="50" class="form-range">
-                        <span id="percentLabel" class="fw-bold text-primary">50%</span>
-                    </div>
-
-                    <!-- GIÁ TRẺ EM (TỰ ĐỘNG TÍNH) -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Giá trẻ em (tự tính)</label>
-                        <input id="giaTreEmPreview" class="form-control" readonly />
-                    </div>
-
-                    <!-- EM BÉ CÓ PHÍ HAY MIỄN PHÍ -->
-                    <div class="col-md-4 mt-3">
-                        <label class="form-label fw-semibold">Em bé</label>
-                        <select id="coPhiEmBe" name="CoPhiEmBe" class="form-select">
-                            <option value="0">Miễn phí</option>
-                            <option value="1">Có tính phí</option>
-                        </select>
-                    </div>
-
-                    <!-- GIÁ EM BÉ -->
-                    <div class="col-md-4 mt-3">
-                        <label class="form-label fw-semibold">Giá em bé</label>
-                        <input id="giaEmBe" name="GiaEmBe" 
-                            type="number" class="form-control" 
-                            value="0" min="0" readonly />
-                    </div>
-
-                </div>
-
-                <div class="col-12 mt-3">
-                    <label class="form-label fw-semibold">Hình ảnh tour</label>
-                    <div id="drop-zone" class="drop-zone mb-3">
-                        <p class="text-muted mb-0">Kéo thả hoặc click để chọn nhiều ảnh</p>
-                        <input type="file" name="HinhAnhFiles" id="fileInput" multiple accept="image/*" hidden />
-                    </div>
+                    <span asp-validation-for="PhuongTien"
+                          class="ht-create-error"></span>
                 </div>
 
             </div>
+        </section>
 
-            <div class="mt-4 text-end">
-                <a asp-action="QuanLyTour" class="btn btn-secondary">Quay lại</a>
-                <button type="submit" class="btn btn-primary px-4">
-                    💾 Lưu tour
-                </button>
-            </div>
+        <!-- 02 + 03. GIA TOUR -->
+        <div class="ht-create-pricing-layout">
+
+            <section class="ht-create-section">
+
+                <div class="ht-create-section-heading">
+                    <span class="ht-create-number">02</span>
+
+                    <div>
+                        <h2>Giá bán & khuyến mãi</h2>
+                        <p>Thiết lập giá công bố của tour.</p>
+                    </div>
+
+                    <i class="fa-solid fa-tags ht-create-heading-icon"></i>
+                </div>
+
+                <div class="ht-create-grid one">
+
+                    <div class="ht-create-field">
+                        <label asp-for="GiaGoc">
+                            Giá gốc (VNĐ)
+                        </label>
+
+                        <div class="ht-create-input-unit">
+                            <input asp-for="GiaGoc"
+                                   type="number"
+                                   min="0"
+                                   step="1"
+                                   class="ht-create-input"
+                                   placeholder="VD: 3500000" />
+                            <span>đ</span>
+                        </div>
+                    </div>
+
+                    <div class="ht-create-field">
+                        <label asp-for="PhanTramGiam">
+                            Giảm giá (%)
+                        </label>
+
+                        <div class="ht-create-input-unit">
+                            <input asp-for="PhanTramGiam"
+                                   id="phanTramGiam"
+                                   type="number"
+                                   min="0"
+                                   max="100"
+                                   step="1"
+                                   class="ht-create-input"
+                                   placeholder="0" />
+                            <span>%</span>
+                        </div>
+                    </div>
+
+                    <div class="ht-create-field">
+                        <label asp-for="GiaKhuyenMai">
+                            Giá khuyến mãi (tự tính)
+                        </label>
+
+                        <div class="ht-create-input-unit">
+                            <input asp-for="GiaKhuyenMai"
+                                   id="giaKhuyenMai"
+                                   type="number"
+                                   class="ht-create-input"
+                                   readonly />
+                            <span>đ</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="ht-create-price-preview">
+                    <small>GIÁ DỰ KIẾN SAU GIẢM</small>
+
+                    <strong id="htFinalPriceText">0 đ</strong>
+
+                    <span id="htDiscountText">
+                        Chưa áp dụng giảm giá
+                    </span>
+                </div>
+
+            </section>
+
+            <section class="ht-create-section">
+
+                <div class="ht-create-section-heading">
+                    <span class="ht-create-number">03</span>
+
+                    <div>
+                        <h2>Giá theo độ tuổi</h2>
+                        <p>Người lớn, trẻ em và em bé.</p>
+                    </div>
+
+                    <i class="fa-solid fa-users ht-create-heading-icon"></i>
+                </div>
+
+                <div class="ht-create-grid one">
+
+                    <div class="ht-create-field">
+                        <label for="giaNguoiLon">
+                            Giá người lớn (VNĐ)
+                        </label>
+
+                        <div class="ht-create-input-unit">
+                            <input id="giaNguoiLon"
+                                   name="GiaNguoiLon"
+                                   type="number"
+                                   class="ht-create-input"
+                                   min="0"
+                                   step="1"
+                                   readonly />
+
+                            <span>đ</span>
+                        </div>
+
+                        <small>Đồng bộ từ giá khuyến mãi.</small>
+                    </div>
+
+                    <div class="ht-create-field">
+                        <div class="ht-create-inline-label">
+                            <label for="phanTramTreEm">
+                                Giảm giá trẻ em
+                            </label>
+                            <strong id="percentLabel">50%</strong>
+                        </div>
+
+                        <input id="phanTramTreEm"
+                               name="PhanTramTreEm"
+                               type="range"
+                               min="0"
+                               max="100"
+                               value="50"
+                               class="ht-create-range"
+                               disabled />
+
+                        <small>
+                            Hiện áp dụng mức cố định 50%.
+                        </small>
+                    </div>
+
+                    <div class="ht-create-field">
+                        <label for="giaTreEmPreview">
+                            Giá trẻ em (tự tính)
+                        </label>
+
+                        <input id="giaTreEmPreview"
+                               class="ht-create-input"
+                               readonly
+                               placeholder="0 đ" />
+                    </div>
+
+                    <div class="ht-create-baby-grid">
+
+                        <div class="ht-create-field">
+                            <label for="coPhiEmBe">
+                                Chính sách em bé
+                            </label>
+
+                            <select id="coPhiEmBe"
+                                    name="CoPhiEmBe"
+                                    class="ht-create-input"
+                                    disabled>
+                                <option value="0" selected>
+                                    Miễn phí
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="ht-create-field">
+                            <label for="giaEmBe">
+                                Giá em bé
+                            </label>
+
+                            <div class="ht-create-input-unit">
+                                <input id="giaEmBe"
+                                       name="GiaEmBe"
+                                       type="number"
+                                       class="ht-create-input"
+                                       value="0"
+                                       min="0"
+                                       readonly />
+
+                                <span>đ</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="ht-create-policy-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>
+                        Hiện tại hệ thống lưu giá người lớn
+                        bằng giá tour sau giảm, trẻ em bằng
+                        50% giá người lớn và em bé miễn phí.
+                    </span>
+                </div>
+
+            </section>
+
         </div>
+
+        <!-- 04. MO TA VA HINH ANH -->
+        <section class="ht-create-section">
+
+            <div class="ht-create-section-heading">
+                <span class="ht-create-number">04</span>
+
+                <div>
+                    <h2>Nội dung & hình ảnh tour</h2>
+                    <p>
+                        Giới thiệu điểm nổi bật và hình ảnh
+                        của hành trình.
+                    </p>
+                </div>
+
+                <i class="fa-solid fa-images ht-create-heading-icon"></i>
+            </div>
+
+            <div class="ht-create-field">
+                <label asp-for="MoTa">
+                    Mô tả tour
+                </label>
+
+                <textarea asp-for="MoTa"
+                          class="ht-create-input ht-create-textarea"
+                          rows="5"
+                          placeholder="Giới thiệu điểm đến, trải nghiệm nổi bật, hoạt động trong chuyến đi..."></textarea>
+            </div>
+
+            <div class="ht-create-upload-group">
+
+                <div class="ht-create-upload-heading">
+                    <label for="fileInput">
+                        Hình ảnh tour
+                    </label>
+
+                    <span>
+                        Chọn nhiều ảnh · kéo thả để sắp xếp
+                    </span>
+                </div>
+
+                <div id="drop-zone"
+                     class="drop-zone"
+                     role="button"
+                     tabindex="0"
+                     aria-label="Chọn hoặc kéo thả hình ảnh tour">
+
+                    <div class="ht-create-upload-intro">
+                        <span class="ht-create-upload-icon">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </span>
+
+                        <strong>Tải hình ảnh hành trình</strong>
+
+                        <p>
+                            Nhấp để chọn ảnh hoặc kéo thả
+                            ảnh từ máy tính vào đây.
+                        </p>
+
+                        <span class="ht-create-upload-hint">
+                            JPG, PNG, WEBP
+                        </span>
+                    </div>
+
+                    <input type="file"
+                           name="HinhAnhFiles"
+                           id="fileInput"
+                           accept="image/*"
+                           multiple
+                           hidden />
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 05. CHU DE VA SO THICH -->
+        <section class="ht-create-section">
+
+            <div class="ht-create-section-heading">
+                <span class="ht-create-number">05</span>
+
+                <div>
+                    <h2>Chủ đề & sở thích du lịch</h2>
+                    <p>
+                        Gắn chủ đề để khách hàng khám phá
+                        tour dễ dàng hơn.
+                    </p>
+                </div>
+
+                <i class="fa-solid fa-compass ht-create-heading-icon"></i>
+            </div>
+
+            <div class="ht-create-topics-heading">
+
+                <span class="ht-create-topics-hint">
+                    Chọn một hoặc nhiều sở thích phù hợp
+                    với nội dung tour.
+                </span>
+
+                <span class="ht-create-topic-count">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="htSelectedTopicCount">0</span>
+                    chủ đề đã chọn
+                </span>
+
+            </div>
+
+            <div class="ht-create-topic-grid">
+
+                @foreach (var item in soThichOptions)
+                {
+                    <label class="ht-create-topic-option">
+
+                        <input type="checkbox"
+                               name="MaSoThichs"
+                               value="@item.Code"
+                               class="ht-create-topic-checkbox"
+                               checked="@(selectedCodes.Contains(item.Code))" />
+
+                        <span class="ht-create-topic-content">
+
+                            <i class="fa-solid @item.Icon"></i>
+
+                            <span class="ht-create-topic-name">
+                                @item.Name
+                            </span>
+
+                            <i class="fa-solid fa-circle-check ht-create-topic-check"></i>
+
+                        </span>
+
+                    </label>
+                }
+
+            </div>
+
+            <div class="ht-create-topics-note">
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>
+                    Loại tour và chủ đề du lịch là hai cách
+                    phân loại khác nhau. Một tour có thể có
+                    nhiều chủ đề. Các lựa chọn ở khu vực
+                    này sẽ được lưu vào bảng
+                    <strong>AITourSoThich</strong>
+                    sau khi hoàn thiện Controller.
+                </span>
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="ht-create-footer">
+
+            <div class="ht-create-footer-info">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>
+                    Kiểm tra thông tin, bảng giá và chủ đề
+                    trước khi lưu.
+                </span>
+            </div>
+
+            <div class="ht-create-footer-actions">
+
+                <a asp-controller="QuanTri"
+                   asp-action="QuanLyTour"
+                   class="ht-create-cancel">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="ht-create-submit">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Lưu tour
+                </button>
+
+            </div>
+
+        </footer>
+
     </form>
+
 </div>
 
-    <script src="~/js/tinh-gia-tour.js"></script>
-    <script src="~/js/gia-tour.js"></script>
-    <script src="~/js/upload-anh-tour.js"></script>
+<script src="~/js/upload-anh-tour.js"
+        asp-append-version="true"></script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("htCreateTourForm");
+    if (!form) return;
+
+    /* =========================================
+       TINH GIA TOUR
+    ========================================= */
+
+    const originalPrice = document.getElementById("GiaGoc");
+    const discount = document.getElementById("phanTramGiam");
+    const salePrice = document.getElementById("giaKhuyenMai");
+
+    const adultPrice = document.getElementById("giaNguoiLon");
+    const childPrice = document.getElementById("giaTreEmPreview");
+
+    const finalPriceText = document.getElementById("htFinalPriceText");
+    const discountText = document.getElementById("htDiscountText");
+
+    const formatter = new Intl.NumberFormat("vi-VN", {
+        maximumFractionDigits: 0
+    });
+
+    function amount(value) {
+        const number = Number(value);
+
+        return Number.isFinite(number)
+            ? Math.max(0, number)
+            : 0;
+    }
+
+    function money(value) {
+        return formatter.format(value) + " đ";
+    }
+
+    function calculatePrices() {
+        const original = amount(originalPrice.value);
+
+        const discountPercent = Math.min(
+            100,
+            Math.max(0, amount(discount.value))
+        );
+
+        const finalPrice = Math.round(
+            original * (1 - discountPercent / 100)
+        );
+
+        const child = Math.round(finalPrice * 0.5);
+
+        salePrice.value = finalPrice;
+        adultPrice.value = finalPrice;
+        childPrice.value = money(child);
+
+        finalPriceText.textContent = money(finalPrice);
+
+        discountText.textContent = discountPercent > 0
+            ? "Tiết kiệm " +
+              money(original - finalPrice) +
+              " (" + discountPercent + "%)"
+            : "Chưa áp dụng giảm giá";
+    }
+
+    originalPrice.addEventListener("input", calculatePrices);
+    discount.addEventListener("input", calculatePrices);
+
+    discount.addEventListener("change", function () {
+        if (this.value !== "") {
+            this.value = Math.min(
+                100,
+                Math.max(0, Math.round(amount(this.value)))
+            );
+        }
+
+        calculatePrices();
+    });
+
+    calculatePrices();
+
+    /* =========================================
+       CHON CHU DE
+    ========================================= */
+
+    const topicCheckboxes = Array.from(
+        document.querySelectorAll(".ht-create-topic-checkbox")
+    );
+
+    const selectedCount = document.getElementById(
+        "htSelectedTopicCount"
+    );
+
+    function updateTopicCount() {
+        const count = topicCheckboxes.filter(
+            checkbox => checkbox.checked
+        ).length;
+
+        selectedCount.textContent = count;
+    }
+
+    topicCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener(
+            "change",
+            updateTopicCount
+        );
+    });
+
+    updateTopicCount();
+
+    /* =========================================
+       HO TRO BAN PHIM CHO KHU TAI ANH
+    ========================================= */
+
+    const zone = document.getElementById("drop-zone");
+
+    if (zone) {
+        zone.addEventListener("keydown", function (event) {
+            if (
+                event.target === zone &&
+                (event.key === "Enter" || event.key === " ")
+            ) {
+                event.preventDefault();
+
+                document.getElementById("fileInput")?.click();
+            }
+        });
+    }
+
+});
+</script>

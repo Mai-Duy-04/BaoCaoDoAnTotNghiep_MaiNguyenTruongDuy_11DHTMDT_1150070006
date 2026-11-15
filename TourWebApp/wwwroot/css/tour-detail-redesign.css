@@ -1,0 +1,720 @@
+
+/* ====================================================
+   HAPPYTRIP TOUR DETAIL - REDESIGN 2026
+   File: wwwroot/css/tour-detail-redesign.css
+
+   Lớp giao diện mới đặt sau tour-detail.css.
+   Giữ nguyên JavaScript, ID, dữ liệu và form đặt tour.
+   ==================================================== */
+
+.tour-detail-page {
+    --ht-green: #176b43;
+    --ht-green-dark: #123f2c;
+    --ht-green-soft: #eaf5ed;
+    --ht-cream: #faf8f2;
+    --ht-ink: #233b2f;
+    --ht-muted: #7c8d80;
+    --ht-line: #e5eae3;
+    --ht-price: #cc503c;
+
+    background: #f8faf7;
+    color: var(--ht-ink);
+    padding-bottom: 55px;
+}
+
+.tour-detail-page .tour-detail-container {
+    width: min(1270px, calc(100% - 48px));
+    max-width: 1270px;
+}
+
+.tour-detail-page a,
+.tour-detail-page button,
+.tour-detail-page input {
+    transition: background-color .2s ease,
+                border-color .2s ease,
+                color .2s ease,
+                box-shadow .2s ease;
+}
+
+/* ====================================================
+   1. HERO - GỌN HƠN
+   ==================================================== */
+
+.tour-detail-page .tour-detail-hero {
+    min-height: 235px;
+    padding: 23px 0 92px;
+    background-position: center 52%;
+}
+
+.tour-detail-page .tour-detail-hero-overlay {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(14,51,34,.90),
+            rgba(14,51,34,.58) 58%,
+            rgba(14,51,34,.26)
+        );
+}
+
+.tour-detail-page .tour-detail-breadcrumb {
+    margin-bottom: 12px;
+}
+
+.tour-detail-page .tour-detail-title {
+    max-width: 980px;
+    margin-bottom: 12px;
+    font-size: clamp(25px, 3vw, 36px);
+    line-height: 1.3;
+    font-weight: 800;
+}
+
+.tour-detail-page .tour-detail-chip-row {
+    gap: 7px;
+}
+
+.tour-detail-page .tour-detail-chip {
+    min-height: 32px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.22);
+    backdrop-filter: blur(4px);
+}
+
+/* ====================================================
+   2. PHOTO GALLERY + PRICE PANEL
+   ==================================================== */
+
+.tour-detail-page .tour-detail-top-grid {
+    grid-template-columns:
+        minmax(0, 1.7fr)
+        minmax(315px, 1fr);
+    gap: 18px;
+    align-items: stretch;
+    margin-top: -70px;
+}
+
+.tour-detail-page .tour-detail-gallery-card,
+.tour-detail-page .tour-detail-booking-card {
+    min-width: 0;
+    border: 1px solid var(--ht-line);
+    border-radius: 21px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(26,61,39,.075);
+}
+
+.tour-detail-page .tour-detail-gallery-card {
+    padding: 12px;
+}
+
+.tour-detail-page .tour-detail-main-image-wrap {
+    border-radius: 14px;
+}
+
+.tour-detail-page .tour-main-img {
+    width: 100%;
+    height: clamp(320px, 34vw, 420px);
+    object-fit: cover;
+    object-position: center;
+}
+
+.tour-detail-page .tour-detail-thumb-track {
+    display: flex;
+    gap: 8px;
+    padding: 1px 1px 3px;
+    margin-top: 9px;
+}
+
+.tour-detail-page .tour-thumb {
+    width: 88px;
+    height: 61px;
+    border-radius: 9px;
+    border-width: 2px;
+}
+
+.tour-detail-page .tour-thumb.is-active {
+    border-color: #208c54;
+}
+
+.tour-detail-page .tour-detail-gallery-arrow {
+    width: 39px;
+    height: 39px;
+    background: rgba(255,255,255,.96);
+    color: var(--ht-green-dark);
+}
+
+.tour-detail-page .tour-price-box {
+    padding: 23px;
+}
+
+.tour-detail-page .tour-detail-price-label {
+    color: var(--ht-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tour-detail-page .tour-detail-booking-price {
+    font-size: clamp(27px, 2.8vw, 36px);
+    color: var(--ht-price);
+    font-weight: 800;
+    letter-spacing: -.045em;
+    margin: 8px 0 9px;
+}
+
+.tour-detail-page .tour-detail-booking-old-price {
+    color: #9ca79c;
+    font-size: 13px;
+}
+
+.tour-detail-page .tour-detail-booking-meta {
+    gap: 12px;
+    margin: 12px 0;
+    padding: 17px 0;
+    border-color: #e9eee7;
+}
+
+.tour-detail-page .tour-detail-booking-meta li {
+    align-items: flex-start;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.tour-detail-page .tour-detail-booking-meta li span {
+    color: #718777;
+}
+
+.tour-detail-page .tour-detail-booking-meta li strong {
+    color: #244b34;
+    max-width: 60%;
+    overflow-wrap: anywhere;
+    text-align: right;
+    font-size: 11px;
+}
+
+.tour-detail-page .tour-detail-btn-primary {
+    min-height: 45px;
+    border-radius: 12px;
+    border-color: #16673f;
+    background: linear-gradient(90deg, #1c8450, #125938);
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 7px 17px rgba(20,107,62,.14);
+}
+
+.tour-detail-page .tour-detail-btn-primary:hover {
+    border-color: #115635;
+    background: #115635;
+    color: #fff;
+}
+
+.tour-detail-page .tour-detail-btn-outline {
+    min-height: 43px;
+    border-radius: 12px;
+    border-color: #bbd4c1;
+    color: #205a3b;
+    background: #fff;
+    font-weight: 700;
+}
+
+.tour-detail-page .tour-detail-btn-outline:hover {
+    background: #f0f8ef;
+    border-color: #68a67c;
+    color: #175a38;
+}
+
+/* ====================================================
+   3. STICKY NAVIGATION
+   ==================================================== */
+
+.tour-detail-page .tour-detail-tab-wrap {
+    position: sticky;
+    top: var(--tour-navbar-height, 82px);
+    z-index: 30;
+    margin: 17px 0;
+    padding: 5px;
+    border: 1px solid #e4ebe2;
+    border-radius: 15px;
+    background: rgba(255,255,255,.97);
+    box-shadow: 0 7px 20px rgba(24,55,35,.065);
+    backdrop-filter: blur(12px);
+}
+
+.tour-detail-page .tour-tab-nav {
+    gap: 5px;
+}
+
+.tour-detail-page .tour-tab-nav li {
+    min-height: 41px;
+    padding: 10px 13px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.tour-detail-page .tour-tab-nav li.active {
+    background: #176b43;
+    color: #fff;
+    box-shadow: 0 4px 11px rgba(23,107,67,.13);
+}
+
+/* ====================================================
+   4. SHARED SECTIONS
+   ==================================================== */
+
+.tour-detail-page .tour-detail-section {
+    scroll-margin-top: 155px;
+    margin-bottom: 16px;
+}
+
+.tour-detail-page .tour-detail-section-card {
+    padding: 23px 24px;
+    border: 1px solid var(--ht-line);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 5px 17px rgba(22,58,34,.035);
+}
+
+.tour-detail-page .tour-detail-section-head {
+    margin-bottom: 19px;
+}
+
+.tour-detail-page .tour-detail-section-head h2 {
+    color: var(--ht-green-dark);
+    font-size: clamp(19px, 2vw, 23px);
+    font-weight: 800;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.tour-detail-page .tour-detail-section-head h2 i {
+    color: #2b935a;
+}
+
+.tour-detail-page .tour-detail-section-head p {
+    font-size: 12px;
+    color: var(--ht-muted);
+}
+
+/* ====================================================
+   5. OVERVIEW
+   ==================================================== */
+
+.tour-detail-page .tour-detail-overview-layout {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 16px;
+}
+
+.tour-detail-page .tour-detail-highlight-box {
+    border-radius: 13px;
+}
+
+.tour-detail-page .tour-detail-highlight-box h3 {
+    color: #20583b;
+}
+
+/* ====================================================
+   6. SCHEDULE & BOOKING
+   Chuyển ngày từ ô nhỏ thành hàng ngang dễ đọc.
+   Không thay data-idlich hoặc logic chọn lịch.
+   ==================================================== */
+
+.tour-detail-page .tour-detail-schedule-card,
+.tour-detail-page .tour-detail-calc-card {
+    height: 100%;
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #e5ebe2;
+    border-radius: 15px;
+    background: #fff;
+}
+
+.tour-detail-page .tour-detail-schedule-card h3,
+.tour-detail-page .tour-detail-calc-card h3 {
+    color: var(--ht-green-dark);
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.tour-detail-page .tour-calendar-month {
+    margin: 18px 0 10px;
+    padding: 8px 11px;
+    border-radius: 9px;
+    background: #eaf5ec;
+    color: #1c7446;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* Danh sách 1 lịch / 1 dòng */
+
+.tour-detail-page .tour-calendar-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.tour-detail-page .tour-calendar-grid .lich-row {
+    display: grid;
+    grid-template-columns: 43px minmax(30px, .6fr)
+                           minmax(48px, .75fr)
+                           minmax(100px, 1.6fr);
+    align-items: center;
+    gap: 7px;
+    min-height: 65px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #e3ebe1;
+    background: #fff;
+    color: #315e43;
+    text-align: left;
+}
+
+.tour-detail-page .tour-calendar-grid .lich-row:hover {
+    background: #f7fbf5;
+    border-color: #8ac19b;
+}
+
+.tour-detail-page .tour-calendar-grid .lich-row.lich-selected {
+    background: #ecf8ee !important;
+    border-color: #278c56 !important;
+    box-shadow: 0 0 0 1px rgba(39,140,86,.12);
+}
+
+.tour-detail-page .tour-calendar-day {
+    display: grid;
+    place-items: center;
+    width: 39px;
+    height: 39px;
+    background: #eaf5eb;
+    border-radius: 10px;
+    color: #247e4d;
+    font-size: 18px;
+    font-weight: 850;
+}
+
+.tour-detail-page .lich-selected .tour-calendar-day {
+    background: #d4eeda;
+}
+
+.tour-detail-page .tour-calendar-grid .lich-row > span {
+    min-width: 0;
+}
+
+.tour-detail-page .tour-calendar-grid .tour-detail-status {
+    justify-self: end;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: right;
+    color: #2c8753;
+}
+
+.tour-detail-page .tour-calendar-grid .lich-full {
+    opacity: .63;
+}
+
+.tour-detail-page .tour-calendar-grid .lich-full
+.tour-detail-status {
+    color: #bf6b61;
+}
+
+/* ====================================================
+   7. PRICE CALCULATOR
+   ==================================================== */
+
+.tour-detail-page .tour-detail-calc-info,
+.tour-detail-page .tour-detail-price-list,
+.tour-detail-page .tour-detail-qty-list {
+    padding-bottom: 13px;
+    margin-bottom: 13px;
+    border-bottom: 1px solid #e7ede5;
+}
+
+.tour-detail-page .tour-detail-calc-info p,
+.tour-detail-page .tour-detail-price-list p,
+.tour-detail-page .tour-detail-total-box p {
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12px;
+}
+
+.tour-detail-page .tour-detail-calc-info span,
+.tour-detail-page .tour-detail-price-list span,
+.tour-detail-page .tour-detail-total-box span {
+    color: #778d7e;
+}
+
+.tour-detail-page .tour-detail-calc-info strong,
+.tour-detail-page .tour-detail-price-list strong {
+    color: #24553a;
+}
+
+.tour-detail-page .tour-detail-price-list strong {
+    color: var(--ht-price);
+}
+
+.tour-detail-page .tour-detail-price-list h4,
+.tour-detail-page .tour-detail-qty-list h4 {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ht-green-dark);
+}
+
+.tour-detail-page .tour-detail-qty-row {
+    margin-bottom: 9px;
+}
+
+.tour-detail-page .tour-detail-qty-row label {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tour-detail-page .qty-btn {
+    width: 31px;
+    height: 31px;
+    border: 1px solid #dce8dc;
+    border-radius: 8px;
+    background: #f6faf4;
+    color: #2d7650;
+}
+
+.tour-detail-page .qty-btn:hover {
+    background: #e7f4e9;
+}
+
+.tour-detail-page .qty-input {
+    width: 46px;
+    height: 31px;
+    border: 1px solid #dce8dc;
+    border-radius: 8px;
+    background: #fff;
+    color: #235239;
+    text-align: center;
+    font-size: 12px;
+}
+
+.tour-detail-page .tour-detail-total-box {
+    padding: 13px;
+    border: 1px solid #dce9d9;
+    border-radius: 12px;
+    background: linear-gradient(110deg, #f1f8ec, #fffaf0);
+}
+
+.tour-detail-page .tour-detail-total-amount {
+    color: var(--ht-price) !important;
+    font-size: 21px;
+    font-weight: 850;
+}
+
+/* ====================================================
+   8. ITINERARY
+   ==================================================== */
+
+.tour-detail-page .tour-detail-timeline-card {
+    border: 1px solid #e2e9df;
+    border-radius: 12px;
+    background: #fbfcfa;
+    box-shadow: none;
+}
+
+.tour-detail-page .tour-detail-timeline-card:hover {
+    background: #f4faf3;
+    border-color: #b7d9bf;
+}
+
+.tour-detail-page .tour-detail-day-toggle {
+    color: #25573d;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.tour-detail-page .tour-detail-day-content {
+    color: #657c6b;
+    font-size: 12px;
+}
+
+/* ====================================================
+   9. POLICY / ACCORDION
+   ==================================================== */
+
+.tour-detail-page .accordion-item {
+    overflow: hidden;
+    border: 1px solid #e6ebe2;
+    border-radius: 11px;
+    margin-bottom: 8px;
+    background: #fff;
+}
+
+.tour-detail-page .accordion-button {
+    padding: 14px 16px;
+    background: #fff;
+    color: #25543b;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tour-detail-page .accordion-button:not(.collapsed) {
+    background: #edf7ee;
+    color: #18653e;
+    box-shadow: none;
+}
+
+.tour-detail-page .accordion-body {
+    padding: 13px 16px;
+    font-size: 12px;
+    color: #627668;
+    line-height: 1.8;
+}
+
+/* ====================================================
+   10. RELATED TOURS
+   ==================================================== */
+
+.tour-detail-page .tour-detail-related-card {
+    overflow: hidden;
+    border: 1px solid #e2e9df;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(23,65,39,.05);
+}
+
+.tour-detail-page .tour-detail-related-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 11px 24px rgba(23,65,39,.1);
+}
+
+/* ====================================================
+   11. RESPONSIVE
+   ==================================================== */
+
+@media (max-width: 1100px) {
+    .tour-detail-page .tour-detail-top-grid {
+        grid-template-columns:
+            minmax(0, 1.3fr)
+            minmax(290px, 1fr);
+    }
+
+    .tour-detail-page .tour-detail-overview-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tour-detail-page .tour-calendar-grid .lich-row {
+        grid-template-columns: 38px 35px 53px minmax(85px,1fr);
+        gap: 5px;
+    }
+}
+
+@media (max-width: 900px) {
+    .tour-detail-page .tour-detail-top-grid {
+        grid-template-columns: 1fr;
+        margin-top: -65px;
+    }
+
+    .tour-detail-page .tour-main-img {
+        height: clamp(275px, 52vw, 415px);
+    }
+
+    .tour-detail-page .tour-detail-booking-card {
+        position: static;
+        height: auto;
+    }
+
+    .tour-detail-page .tour-detail-tab-wrap {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 650px) {
+    .tour-detail-page .tour-detail-container {
+        width: calc(100% - 24px);
+    }
+
+    .tour-detail-page .tour-detail-hero {
+        min-height: 220px;
+        padding: 19px 0 84px;
+    }
+
+    .tour-detail-page .tour-detail-title {
+        font-size: 23px;
+        line-height: 1.3;
+    }
+
+    .tour-detail-page .tour-detail-gallery-card {
+        padding: 8px;
+        border-radius: 16px;
+    }
+
+    .tour-detail-page .tour-main-img {
+        height: 260px;
+        border-radius: 10px;
+    }
+
+    .tour-detail-page .tour-thumb {
+        width: 71px;
+        height: 51px;
+    }
+
+    .tour-detail-page .tour-price-box {
+        padding: 17px;
+    }
+
+    .tour-detail-page .tour-detail-booking-price {
+        font-size: 27px;
+    }
+
+    .tour-detail-page .tour-detail-section-card {
+        padding: 17px 14px;
+        border-radius: 14px;
+    }
+
+    .tour-detail-page .tour-detail-tab-wrap {
+        margin-top: 12px;
+        border-radius: 12px;
+    }
+
+    .tour-detail-page .tour-tab-nav {
+        min-width: max-content;
+    }
+
+    .tour-detail-page .tour-tab-nav li {
+        min-height: 36px;
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .tour-detail-page .tour-detail-schedule-card,
+    .tour-detail-page .tour-detail-calc-card {
+        padding: 12px;
+    }
+
+    .tour-detail-page .tour-calendar-grid .lich-row {
+        grid-template-columns: 34px 30px 47px minmax(0, 1fr);
+        padding: 9px 7px;
+        gap: 5px;
+    }
+
+    .tour-detail-page .tour-calendar-day {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+
+    .tour-detail-page .tour-calendar-grid .lich-row > span {
+        font-size: 10px;
+    }
+
+    .tour-detail-page .tour-calendar-grid .tour-detail-status {
+        font-size: 9px;
+        line-height: 1.3;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tour-detail-page *,
+    .tour-detail-page *::before,
+    .tour-detail-page *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}

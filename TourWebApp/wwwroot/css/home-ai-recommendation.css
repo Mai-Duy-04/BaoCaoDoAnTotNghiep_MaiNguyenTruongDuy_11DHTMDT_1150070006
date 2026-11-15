@@ -1,490 +1,1196 @@
 
+/* ===================================================
+   HAPPYTRIP - TRIPI AI HOME SHOWCASE
+   Colors: cream, forest green, orange, warm yellow
+   =================================================== */
+
 .ht-home-ai-section {
-    padding: 46px 0 64px;
-    background: #f8f7fc;
-}
-
-.ht-home-ai-banner {
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
-    align-items: center;
-    gap: 20px;
-    min-height: 360px;
-    padding: 38px 54px;
+    padding: 42px 0 65px;
+    background: #faf5ec;
     overflow: hidden;
-    isolation: isolate;
-    border: 1px solid #e8e4f5;
-    border-radius: 30px;
-    background: linear-gradient(
-        110deg,
-        #ffffff 5%,
-        #f7f5ff 55%,
-        #eeeafe 100%
-    );
-    box-shadow: 0 18px 44px rgba(82, 73, 140, .08);
 }
 
-.ht-home-ai-banner::after {
-    position: absolute;
-    z-index: -1;
-    right: -120px;
-    bottom: -230px;
-    width: 460px;
-    height: 460px;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(245, 194, 180, .19),
-        transparent 68%
-    );
-    content: "";
-    pointer-events: none;
+.ht-home-ai-section .ht-ai-container {
+    width: min(1330px, calc(100% - 48px));
+    max-width: 1330px;
+    margin-inline: auto;
 }
 
-.ht-home-ai-decor {
-    position: absolute;
-    z-index: -1;
-    border-radius: 50%;
-    pointer-events: none;
-}
+/* MAIN PAPER CANVAS */
 
-.ht-home-ai-decor-one {
-    top: -95px;
-    left: 30%;
-    width: 210px;
-    height: 210px;
-    background: radial-gradient(
-        circle,
-        rgba(222, 219, 253, .4),
-        transparent 70%
-    );
-}
-
-.ht-home-ai-decor-two {
-    bottom: -100px;
-    left: -100px;
-    width: 230px;
-    height: 230px;
-    background: radial-gradient(
-        circle,
-        rgba(242, 212, 224, .27),
-        transparent 70%
-    );
-}
-
-.ht-home-ai-content {
+.ht-home-ai-section .ht-home-ai-banner {
     position: relative;
-    z-index: 3;
-    min-width: 0;
-}
+    isolation: isolate;
 
-.ht-home-ai-kicker {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns:
+        minmax(235px, .9fr)
+        minmax(310px, 1.15fr)
+        minmax(330px, 1.05fr);
+
     align-items: center;
-    gap: 9px;
-    margin-bottom: 14px;
-    color: #8880c4;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-}
-
-.ht-home-ai-kicker i {
-    color: #9d91d5;
-    font-size: 14px;
-}
-
-.ht-home-ai-content h2 {
-    margin: 0 0 16px;
-    color: #33354f;
-    font-family: "Tai Heritage Pro", "Segoe UI", sans-serif;
-    font-size: clamp(29px, 3.25vw, 44px);
-    font-weight: 800;
-    line-height: 1.25;
-    letter-spacing: -.4px;
-}
-
-.ht-home-ai-content h2 span {
-    display: block;
-    color: #8981c7;
-}
-
-.ht-home-ai-description {
-    max-width: 540px;
-    margin: 0;
-    color: #77798e;
-    font-size: 14px;
-    line-height: 1.85;
-}
-
-.ht-home-ai-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 13px 20px;
-    margin-top: 24px;
-}
-
-.ht-home-ai-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     gap: 18px;
-    min-height: 47px;
-    padding: 11px 20px;
-    border: 1px solid #8179c2;
-    border-radius: 999px;
-    background: linear-gradient(110deg, #7873bb, #a191d8);
-    color: #fff;
-    box-shadow: 0 9px 21px rgba(112, 99, 188, .2);
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
-    transition: transform .25s ease, box-shadow .25s ease;
-}
 
-.ht-home-ai-button:hover {
-    transform: translateY(-3px);
-    color: #fff;
-    box-shadow: 0 15px 29px rgba(112, 99, 188, .3);
-}
-
-.ht-home-ai-button i {
-    transition: transform .25s ease;
-}
-
-.ht-home-ai-button:hover i {
-    transform: translateX(4px);
-}
-
-.ht-home-ai-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    color: #686784;
-    font-size: 12px;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.ht-home-ai-secondary:hover {
-    color: #8179c2;
-}
-
-.ht-home-ai-benefits {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px 20px;
-    margin-top: 24px;
-}
-
-.ht-home-ai-benefits span {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    color: #9694a9;
-    font-size: 11px;
-}
-
-.ht-home-ai-benefits i {
-    color: #a59bd8;
-}
-
-.ht-home-ai-visual {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
-    height: 310px;
-    min-width: 0;
-    isolation: isolate;
+    min-height: 405px;
+    padding: 33px 32px 53px;
+
+    overflow: hidden;
+
+    border: 1px solid #eee4d4;
+    border-radius: 36px;
+
+    background:
+        radial-gradient(
+            circle at 20% 47%,
+            rgba(255, 224, 168, .32),
+            transparent 34%
+        ),
+        radial-gradient(
+            circle at 83% 32%,
+            rgba(224, 241, 204, .28),
+            transparent 37%
+        ),
+        linear-gradient(
+            118deg,
+            #fff9ee 0%,
+            #fffaf3 55%,
+            #f6f7e9 100%
+        );
+
+    box-shadow:
+        0 16px 42px rgba(79, 63, 38, .09);
 }
 
-.ht-home-ai-orbit {
+.ht-home-ai-section .ht-ai-paper-grain {
     position: absolute;
-    z-index: 0;
-    width: 285px;
-    height: 285px;
-    border: 1px solid rgba(144, 134, 203, .22);
-    border-radius: 50%;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-image:
+        radial-gradient(
+            rgba(177, 142, 91, .07) .7px,
+            transparent .7px
+        );
+
+    background-size: 9px 9px;
+    opacity: .33;
+}
+
+.ht-home-ai-section .ht-ai-paper-wave {
+    position: absolute;
+    left: -8%;
+    right: -8%;
+    bottom: -105px;
+    height: 185px;
+    z-index: -1;
+
+    border-radius: 50% 50% 0 0;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 224, 177, .43),
+            rgba(244, 232, 190, .35),
+            rgba(212, 231, 185, .35)
+        );
+
     pointer-events: none;
 }
 
-.ht-home-ai-orbit-two {
-    width: 225px;
-    height: 225px;
-    border-color: rgba(144, 134, 203, .16);
-}
+/* ===================================================
+   LEFT: MASCOT
+   =================================================== */
 
-.ht-home-ai-fox {
+.ht-home-ai-section .ht-home-ai-visual {
     position: relative;
     z-index: 2;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    width: min(100%, 295px);
-    height: 295px;
-    transform-origin: center bottom;
-    animation: ht-home-tripi-float 3.5s ease-in-out infinite;
+
+    width: 100%;
+    min-width: 0;
+    height: 320px;
+    margin-top: -10px;
 }
 
-.ht-home-ai-fox img {
+.ht-home-ai-section .ht-ai-mascot-backlight {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    z-index: -1;
+
+    width: 280px;
+    height: 280px;
+    max-width: 100%;
+
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 222, 166, .58),
+        rgba(255, 235, 196, .18) 55%,
+        transparent 73%
+    );
+
+    transform: translateX(-50%);
+}
+
+.ht-home-ai-section .ht-home-ai-fox {
+    position: relative;
+    z-index: 3;
+
+    display: grid;
+    place-items: center;
+
+    width: min(100%, 300px);
+    height: 300px;
+
+    transform-origin: center bottom;
+    animation: htAiFoxFloat 4s ease-in-out infinite;
+}
+
+.ht-home-ai-section .ht-home-ai-fox img {
     display: block;
     width: 100%;
     height: 100%;
+
     object-fit: contain;
     border: 0;
     border-radius: 0;
     background: transparent;
+
+    filter: drop-shadow(
+        0 16px 13px rgba(120, 76, 39, .13)
+    );
 }
 
-.ht-home-ai-shadow {
+.ht-home-ai-section .ht-home-ai-shadow {
     position: absolute;
-    z-index: 1;
-    bottom: 0;
+    bottom: 4px;
     left: 50%;
-    width: 140px;
-    height: 15px;
+    z-index: 1;
+
+    width: 160px;
+    height: 17px;
+
     border-radius: 50%;
-    background: rgba(77, 67, 116, .16);
-    filter: blur(9px);
+    background: rgba(114, 74, 43, .17);
+    filter: blur(10px);
+
     transform: translateX(-50%);
-    animation: ht-home-tripi-shadow 3.5s ease-in-out infinite;
+    animation: htAiShadow 4s ease-in-out infinite;
 }
 
-.ht-home-ai-star {
+.ht-home-ai-section .ht-ai-sun-doodle {
     position: absolute;
-    z-index: 3;
-    color: #aca1df;
-    pointer-events: none;
-    animation: ht-home-tripi-star 3.3s ease-in-out infinite;
+    top: 21px;
+    left: 3%;
+    z-index: 2;
+
+    color: #efb83b;
+    font-size: 37px;
+    transform: rotate(-12deg);
 }
 
-.ht-home-ai-star-one {
-    top: 13px;
-    right: 55px;
-    font-size: 21px;
-}
-
-.ht-home-ai-star-two {
-    bottom: 36px;
-    left: 31px;
-    color: #eeb5a3;
-    font-size: 18px;
-    animation-delay: -1.5s;
-}
-
-.ht-home-ai-float {
+.ht-home-ai-section .ht-ai-spark {
     position: absolute;
     z-index: 4;
+    color: #edb83b;
+    pointer-events: none;
+
+    animation: htAiSpark 3.2s ease-in-out infinite;
+}
+
+.ht-home-ai-section .ht-ai-spark-left {
+    top: 92px;
+    left: 5%;
+    font-size: 25px;
+}
+
+.ht-home-ai-section .ht-ai-spark-right {
+    top: 77px;
+    right: 4%;
+    font-size: 30px;
+    animation-delay: -1.7s;
+}
+
+/* MINI POLAROID COLLAGE */
+
+.ht-home-ai-section .ht-ai-photo-collage {
+    position: absolute;
+    left: -22px;
+    bottom: -70px;
+    z-index: 5;
+
+    width: 260px;
+    height: 119px;
+
+    pointer-events: none;
+}
+
+.ht-home-ai-section .ht-ai-polaroid {
+    position: absolute;
+
+    width: 135px;
+    height: 112px;
+    padding: 6px 6px 14px;
+
+    background: #fffdf9;
+    border: 1px solid rgba(255,255,255,.9);
+    border-radius: 5px;
+
+    box-shadow:
+        0 8px 17px rgba(49, 47, 29, .17);
+}
+
+.ht-home-ai-section .ht-ai-polaroid img {
+    display: block;
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+.ht-home-ai-section .ht-ai-polaroid-city {
+    left: 0;
+    bottom: 5px;
+    transform: rotate(-10deg);
+}
+
+.ht-home-ai-section .ht-ai-polaroid-market {
+    left: 110px;
+    bottom: -3px;
+    transform: rotate(10deg);
+}
+
+.ht-home-ai-section .ht-ai-tape {
+    position: absolute;
+    top: -11px;
+    left: 33%;
+    z-index: 2;
+
+    width: 49px;
+    height: 20px;
+
+    background: rgba(244, 189, 91, .8);
+    box-shadow: 0 2px 3px rgba(0,0,0,.06);
+    transform: rotate(-5deg);
+}
+
+.ht-home-ai-section .ht-ai-camera-icon {
+    position: absolute;
+    bottom: -10px;
+    left: 135px;
+    z-index: 6;
+
+    display: grid;
+    place-items: center;
+
+    width: 40px;
+    height: 40px;
+
+    border: 3px solid #fff;
+    border-radius: 11px;
+
+    color: #fff;
+    background: #146c60;
+
+    font-size: 21px;
+    transform: rotate(-13deg);
+
+    box-shadow: 0 5px 11px rgba(28,67,57,.19);
+}
+
+/* ===================================================
+   CENTER: CONTENT
+   =================================================== */
+
+.ht-home-ai-section .ht-home-ai-content {
+    position: relative;
+    z-index: 5;
+
+    min-width: 0;
+    padding: 5px 0 0 5px;
+    text-align: left;
+}
+
+.ht-home-ai-section .ht-home-ai-kicker {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 13px;
-    border: 1px solid #e9e5f6;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, .95);
-    color: #777199;
-    box-shadow: 0 8px 22px rgba(86, 74, 135, .09);
+    gap: 9px;
+
+    min-height: 35px;
+    margin: 0 0 17px;
+    padding: 7px 15px;
+
+    border-radius: 999px;
+    background: #ffe098;
+    color: #0b5749;
+
+    box-shadow: 0 5px 13px rgba(191,133,44,.13);
+
+    font-family: "Segoe UI", Arial, sans-serif;
     font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .055em;
+}
+
+.ht-home-ai-section .ht-home-ai-kicker i {
+    color: #db8e18;
+    font-size: 15px;
+}
+
+.ht-home-ai-section .ht-home-ai-content h2 {
+    margin: 0 0 14px;
+    color: #083f34;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: clamp(29px, 2.7vw, 40px);
+    font-weight: 850;
+    line-height: 1.18;
+    letter-spacing: -.045em;
+    text-align: left;
+    text-wrap: balance;
+}
+
+.ht-home-ai-section .ht-home-ai-content h2 span {
+    display: block;
+    margin-top: 5px;
+
+    color: #c97826;
+    font-size: .96em;
+}
+
+.ht-home-ai-section .ht-ai-heading-underline {
+    display: block;
+    width: 145px;
+    height: 14px;
+    margin: -7px 0 16px auto;
+}
+
+.ht-home-ai-section .ht-home-ai-description {
+    max-width: 400px;
+    margin: 0;
+
+    color: #5b685f;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.ht-home-ai-section .ht-home-ai-actions {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin-top: 21px;
+}
+
+.ht-home-ai-section .ht-home-ai-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    min-height: 48px;
+    padding: 12px 21px;
+
+    border: 1px solid #006254;
+    border-radius: 999px;
+
+    background: #006254;
+    color: #fff;
+
+    box-shadow: 0 9px 18px rgba(0,79,65,.15);
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
     font-weight: 800;
+    text-decoration: none;
     white-space: nowrap;
-    animation: ht-home-tripi-card 4s ease-in-out infinite;
+
+    transition:
+        background-color .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
 }
 
-.ht-home-ai-float i {
-    color: #9c8dd4;
+.ht-home-ai-section .ht-home-ai-button:hover {
+    background: #064d43;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0,79,65,.22);
 }
 
-.ht-home-ai-float-one {
-    top: 44px;
-    left: -7px;
+.ht-home-ai-section .ht-home-ai-button:focus-visible,
+.ht-home-ai-section .ht-home-ai-prompt:focus-visible {
+    outline: 3px solid #e8a21b;
+    outline-offset: 4px;
 }
 
-.ht-home-ai-float-two {
-    right: -9px;
-    bottom: 55px;
-    animation-delay: -1.5s;
+.ht-home-ai-section .ht-ai-button-spark {
+    color: #e9a01e;
+    font-size: 31px;
+    transform: rotate(12deg);
 }
 
-.ht-home-ai-visual:hover .ht-home-ai-fox {
-    animation-play-state: paused;
-    transform: translateY(-9px) rotate(3deg) scale(1.04);
+.ht-home-ai-section .ht-home-ai-benefits {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 0;
+
+    margin-top: 20px;
 }
 
-@keyframes ht-home-tripi-float {
+.ht-home-ai-section .ht-home-ai-benefits span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 0 11px;
+
+    color: #425e51;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.ht-home-ai-section .ht-home-ai-benefits span:first-child {
+    padding-left: 0;
+}
+
+.ht-home-ai-section .ht-home-ai-benefits span + span {
+    border-left: 1px solid #d7ccb8;
+}
+
+.ht-home-ai-section .ht-home-ai-benefits i {
+    color: #14745f;
+    font-size: 12px;
+}
+
+/* ===================================================
+   RIGHT: SUGGESTION STICKERS
+   =================================================== */
+
+.ht-home-ai-section .ht-home-ai-explore {
+    position: relative;
+    z-index: 3;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 310px;
+}
+
+.ht-home-ai-section .ht-home-ai-prompts {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 17px;
+
+    width: 100%;
+    padding: 20px 120px 0 0;
+}
+
+.ht-home-ai-section .ht-home-ai-prompt {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    width: max-content;
+    max-width: 100%;
+    min-height: 49px;
+
+    padding: 8px 13px 8px 9px;
+
+    border: 1px solid #efe7d7;
+    border-radius: 999px;
+
+    background: rgba(255,255,255,.97);
+    color: #183e35;
+
+    box-shadow:
+        0 7px 16px rgba(70,56,36,.12);
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 750;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition:
+        translate .25s ease,
+        box-shadow .25s ease;
+}
+
+.ht-home-ai-section .ht-home-ai-prompt:hover {
+    color: #075e4c;
+    translate: 0 -3px;
+    box-shadow: 0 11px 22px rgba(70,56,36,.17);
+}
+
+.ht-home-ai-section .ht-ai-prompt-one {
+    transform: rotate(-4deg);
+}
+
+.ht-home-ai-section .ht-ai-prompt-two {
+    margin-left: 12px;
+    transform: rotate(2deg);
+}
+
+.ht-home-ai-section .ht-ai-prompt-three {
+    margin-left: -4px;
+    transform: rotate(-2deg);
+}
+
+.ht-home-ai-section .ht-ai-prompt-emoji {
+    display: grid;
+    place-items: center;
+    flex: 0 0 29px;
+
+    width: 29px;
+    height: 29px;
+
+    border-radius: 50%;
+    background: #fff4d7;
+    font-size: 19px;
+    line-height: 1;
+}
+
+.ht-home-ai-section .ht-home-ai-prompt > i {
+    color: #b9bfb5;
+    font-size: 9px;
+}
+
+/* ===================================================
+   RIGHT: ILLUSTRATED MAP
+   =================================================== */
+
+.ht-home-ai-section .ht-home-ai-map {
+    position: absolute;
+    top: 10px;
+    right: -18px;
+    z-index: 2;
+
+    width: 180px;
+    height: 300px;
+
+    pointer-events: none;
+}
+
+.ht-home-ai-section .ht-home-ai-map-label {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    z-index: 3;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    transform: rotate(-7deg);
+}
+
+.ht-home-ai-section .ht-home-ai-map-label span {
+    color: #286a56;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .07em;
+}
+
+.ht-home-ai-section .ht-home-ai-map-label strong {
+    color: #ce7727;
+    font-family: Georgia, serif;
+    font-size: 27px;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+}
+
+.ht-home-ai-section .ht-home-ai-map-art {
+    position: absolute;
+    top: 45px;
+    right: 12px;
+
+    width: 145px;
+    height: 215px;
+
+    transform: rotate(8deg);
+}
+
+.ht-home-ai-section .ht-ai-map-palmtree {
+    position: absolute;
+    top: 145px;
+    right: -15px;
+    z-index: 4;
+
+    font-size: 42px;
+    transform: rotate(8deg);
+}
+
+.ht-home-ai-section .ht-ai-map-scooter {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+
+    font-size: 49px;
+    transform: rotate(-8deg);
+}
+
+.ht-home-ai-section .ht-ai-map-boat {
+    position: absolute;
+    bottom: 13px;
+    left: -9px;
+    z-index: 4;
+
+    font-size: 32px;
+}
+
+/* ===================================================
+   FLIGHT PATH AND EXTRA DOODLES
+   =================================================== */
+
+.ht-home-ai-section .ht-home-ai-flight {
+    position: absolute;
+    right: 45px;
+    bottom: 12px;
+    z-index: 2;
+
+    width: 310px;
+    height: 82px;
+
+    opacity: .9;
+    pointer-events: none;
+}
+
+.ht-home-ai-section .ht-ai-flight-plane {
+    position: absolute;
+    right: 27%;
+    bottom: 43px;
+    z-index: 3;
+
+    color: #00715a;
+    font-size: 23px;
+
+    transform: rotate(24deg);
+    pointer-events: none;
+}
+
+.ht-home-ai-section .ht-ai-corner-leaf {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+
+    font-size: 43px;
+    opacity: .85;
+}
+
+.ht-home-ai-section .ht-ai-corner-leaf-left {
+    bottom: -12px;
+    left: -9px;
+    transform: rotate(-35deg);
+}
+
+.ht-home-ai-section .ht-ai-corner-leaf-right {
+    right: -6px;
+    bottom: -13px;
+    transform: rotate(145deg);
+}
+
+/* ===================================================
+   ANIMATIONS
+   =================================================== */
+
+@keyframes htAiFoxFloat {
     0%, 100% {
         transform: translateY(0) rotate(-2deg);
     }
 
     50% {
-        transform: translateY(-12px) rotate(2deg);
+        transform: translateY(-11px) rotate(1deg);
     }
 }
 
-@keyframes ht-home-tripi-shadow {
+@keyframes htAiShadow {
     0%, 100% {
-        opacity: .72;
+        opacity: .7;
         transform: translateX(-50%) scale(1);
     }
 
     50% {
-        opacity: .36;
-        transform: translateX(-50%) scale(.76);
+        opacity: .38;
+        transform: translateX(-50%) scale(.8);
     }
 }
 
-@keyframes ht-home-tripi-card {
+@keyframes htAiSpark {
     0%, 100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-7px);
-    }
-}
-
-@keyframes ht-home-tripi-star {
-    0%, 100% {
-        opacity: .55;
+        opacity: .5;
         transform: scale(.85) rotate(-10deg);
     }
 
     50% {
         opacity: 1;
-        transform: scale(1.18) rotate(12deg);
+        transform: scale(1.2) rotate(12deg);
     }
 }
 
-@media (max-width: 991px) {
-    .ht-home-ai-banner {
-        grid-template-columns: minmax(0, 1fr) 245px;
+/* ===================================================
+   SMALLER DESKTOP
+   =================================================== */
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .ht-home-ai-section .ht-home-ai-banner {
+        grid-template-columns:
+            minmax(175px, .75fr)
+            minmax(265px, 1.2fr)
+            minmax(245px, 1.05fr);
+
         gap: 12px;
-        padding: 32px;
+        padding: 26px 22px 46px;
     }
 
-    .ht-home-ai-content h2 {
-        font-size: 33px;
+    .ht-home-ai-section .ht-home-ai-fox {
+        width: 235px;
+        height: 235px;
     }
 
-    .ht-home-ai-visual {
+    .ht-home-ai-section .ht-home-ai-visual {
+        height: 275px;
+    }
+
+    .ht-home-ai-section .ht-ai-photo-collage {
+        transform: scale(.75);
+        transform-origin: bottom left;
+    }
+
+    .ht-home-ai-section .ht-home-ai-content h2 {
+        font-size: 31px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompts {
+        padding-right: 65px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompt {
+        font-size: 10px;
+        padding-right: 10px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-map {
+        right: -40px;
+        opacity: .8;
+    }
+}
+
+/* ===================================================
+   TABLET
+   =================================================== */
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .ht-home-ai-section .ht-home-ai-banner {
+        grid-template-columns:
+            minmax(185px, .8fr)
+            minmax(0, 1.2fr);
+
+        gap: 12px;
+        padding: 28px 28px 50px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-visual {
         height: 265px;
     }
 
-    .ht-home-ai-fox {
-        width: 245px;
-        height: 245px;
+    .ht-home-ai-section .ht-home-ai-fox {
+        width: 225px;
+        height: 225px;
     }
 
-    .ht-home-ai-orbit {
-        width: 240px;
-        height: 240px;
+    .ht-home-ai-section .ht-ai-photo-collage {
+        bottom: -55px;
+        transform: scale(.67);
+        transform-origin: bottom left;
     }
 
-    .ht-home-ai-orbit-two {
-        width: 185px;
-        height: 185px;
+    .ht-home-ai-section .ht-home-ai-content h2 {
+        font-size: 32px;
     }
 
-    .ht-home-ai-float {
+    .ht-home-ai-section .ht-home-ai-explore {
+        grid-column: 1 / -1;
+        min-height: 110px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompts {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 0;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompt {
+        margin-left: 0;
+    }
+
+    .ht-home-ai-section .ht-home-ai-map {
         display: none;
+    }
+
+    .ht-home-ai-section .ht-home-ai-flight {
+        width: 210px;
+        opacity: .4;
     }
 }
 
+/* ===================================================
+   MOBILE
+   =================================================== */
+
 @media (max-width: 767px) {
     .ht-home-ai-section {
-        padding: 30px 0 42px;
+        padding: 30px 0 45px;
     }
 
-    .ht-home-ai-banner {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 30px 23px 18px;
-        border-radius: 23px;
+    .ht-home-ai-section .ht-ai-container {
+        width: calc(100% - 28px);
     }
 
-    .ht-home-ai-content h2 {
-        font-size: clamp(29px, 7.5vw, 38px);
+    .ht-home-ai-section .ht-home-ai-banner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+
+        min-height: 0;
+        padding: 18px 18px 26px;
+        border-radius: 26px;
+
+        text-align: center;
     }
 
-    .ht-home-ai-description {
-        font-size: 13px;
+    .ht-home-ai-section .ht-home-ai-visual {
+        order: 1;
+        width: 100%;
+        height: 235px;
+        margin: 0 0 24px;
     }
 
-    .ht-home-ai-visual {
-        height: 250px;
-        margin-top: 8px;
+    .ht-home-ai-section .ht-home-ai-fox {
+        width: 205px;
+        height: 205px;
     }
 
-    .ht-home-ai-fox {
-        width: 225px;
-        height: 225px;
+    .ht-home-ai-section .ht-ai-mascot-backlight {
+        width: 210px;
+        height: 210px;
     }
 
-    .ht-home-ai-orbit {
-        width: 225px;
-        height: 225px;
+    .ht-home-ai-section .ht-ai-photo-collage {
+        left: 0;
+        bottom: -37px;
+        transform: scale(.55);
+        transform-origin: bottom left;
     }
 
-    .ht-home-ai-orbit-two {
+    .ht-home-ai-section .ht-ai-sun-doodle {
+        font-size: 28px;
+        left: 12%;
+    }
+
+    .ht-home-ai-section .ht-home-ai-content {
+        order: 2;
+        width: 100%;
+        padding: 4px 0;
+        text-align: center;
+    }
+
+    .ht-home-ai-section .ht-home-ai-kicker {
+        margin-bottom: 15px;
+        font-size: 10px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-content h2 {
+        font-size: clamp(26px, 6.8vw, 35px);
+        text-align: center;
+    }
+
+    .ht-home-ai-section .ht-ai-heading-underline {
+        width: 115px;
+        margin: -5px auto 16px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-description {
+        max-width: 380px;
+        margin-inline: auto;
+        font-size: 12px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-actions {
+        justify-content: center;
+    }
+
+    .ht-home-ai-section .ht-home-ai-benefits {
+        justify-content: center;
+    }
+
+    .ht-home-ai-section .ht-home-ai-benefits span {
+        font-size: 9px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-explore {
+        order: 3;
+        width: 100%;
+        min-height: 0;
+        margin-top: 23px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompts {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 11px;
+
+        padding: 0;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompt {
+        min-height: 39px;
+        margin-left: 0;
+        padding: 7px 11px 7px 7px;
+        font-size: 10px;
+    }
+
+    .ht-home-ai-section .ht-ai-prompt-emoji {
+        width: 25px;
+        height: 25px;
+        flex-basis: 25px;
+        font-size: 16px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-map {
+        display: none;
+    }
+
+    .ht-home-ai-section .ht-home-ai-flight {
+        right: -30px;
+        bottom: -15px;
         width: 170px;
-        height: 170px;
+        opacity: .3;
     }
 
-    .ht-home-ai-star-one {
-        right: 20%;
+    .ht-home-ai-section .ht-ai-flight-plane {
+        display: none;
     }
 
-    .ht-home-ai-star-two {
-        left: 17%;
+    .ht-home-ai-section .ht-ai-corner-leaf {
+        font-size: 29px;
     }
 }
 
 @media (max-width: 420px) {
-    .ht-home-ai-banner {
-        padding: 25px 18px 16px;
+    .ht-home-ai-section .ht-home-ai-banner {
+        padding: 17px 13px 23px;
     }
 
-    .ht-home-ai-kicker {
-        font-size: 9px;
-        letter-spacing: 1px;
+    .ht-home-ai-section .ht-home-ai-content h2 {
+        font-size: 26px;
     }
 
-    .ht-home-ai-button {
-        padding: 10px 15px;
-        font-size: 12px;
-    }
-
-    .ht-home-ai-secondary {
+    .ht-home-ai-section .ht-home-ai-button {
+        min-height: 44px;
+        padding: 10px 14px;
         font-size: 11px;
     }
 
-    .ht-home-ai-benefits {
-        gap: 9px 12px;
+    .ht-home-ai-section .ht-ai-button-spark {
+        font-size: 21px;
     }
 
-    .ht-home-ai-benefits span {
-        font-size: 10px;
+    .ht-home-ai-section .ht-home-ai-benefits span {
+        padding-inline: 7px;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompt > i {
+        display: none;
     }
 }
 
+/* ===================================================
+   ACCESSIBILITY
+   =================================================== */
+
 @media (prefers-reduced-motion: reduce) {
-    .ht-home-ai-fox,
-    .ht-home-ai-shadow,
-    .ht-home-ai-star,
-    .ht-home-ai-float {
+    .ht-home-ai-section .ht-home-ai-fox,
+    .ht-home-ai-section .ht-home-ai-shadow,
+    .ht-home-ai-section .ht-ai-spark {
         animation: none !important;
     }
 
-    .ht-home-ai-button,
-    .ht-home-ai-button i {
+    .ht-home-ai-section .ht-home-ai-button,
+    .ht-home-ai-section .ht-home-ai-prompt {
         transition: none !important;
     }
+}
 
-    .ht-home-ai-visual:hover .ht-home-ai-fox {
-        transform: none;
+/* ==========================================
+   FIX TRIPI HOME - KHÓA BỐ CỤC 3 CỘT
+   ========================================== */
+
+@media (min-width: 992px) {
+
+    .ht-home-ai-section .ht-home-ai-banner {
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 28%)
+            minmax(0, 37%)
+            minmax(0, 35%) !important;
+
+        grid-template-areas:
+            "mascot content explore" !important;
+
+        grid-template-rows: auto !important;
+
+        align-items: center !important;
+        justify-items: stretch !important;
+
+        column-gap: 0 !important;
+
+        min-height: 395px !important;
+        height: auto !important;
+
+        padding: 35px 28px 65px !important;
+    }
+
+    .ht-home-ai-section
+    .ht-home-ai-banner > .ht-home-ai-visual {
+        grid-area: mascot !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+
+        position: relative !important;
+        align-self: center !important;
+
+        width: 100% !important;
+        height: 300px !important;
+
+        margin: 0 !important;
+    }
+
+    .ht-home-ai-section
+    .ht-home-ai-banner > .ht-home-ai-content {
+        grid-area: content !important;
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+
+        position: relative !important;
+        align-self: center !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 0 !important;
+        padding: 0 15px !important;
+
+        text-align: left !important;
+    }
+
+    .ht-home-ai-section
+    .ht-home-ai-banner > .ht-home-ai-explore {
+        grid-area: explore !important;
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+
+        position: relative !important;
+        align-self: center !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 300px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-fox {
+        position: relative !important;
+        width: 275px !important;
+        max-width: 100% !important;
+        height: 275px !important;
+
+        margin: 0 auto !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-content h2 {
+        font-size: clamp(29px, 2.7vw, 39px) !important;
+        line-height: 1.2 !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-prompts {
+        position: relative !important;
+        z-index: 5 !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+
+        gap: 15px !important;
+        padding: 20px 125px 0 0 !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-map {
+        position: absolute !important;
+        top: 0 !important;
+        right: -10px !important;
+        bottom: auto !important;
+        left: auto !important;
+    }
+
+    .ht-home-ai-section .ht-ai-photo-collage {
+        position: absolute !important;
+        left: 0 !important;
+        bottom: -55px !important;
+    }
+}
+
+/* MOBILE / TABLET */
+@media (max-width: 991.98px) {
+
+    .ht-home-ai-section .ht-home-ai-banner {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+
+        grid-template-areas: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-visual {
+        order: 1 !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-content {
+        order: 2 !important;
+    }
+
+    .ht-home-ai-section .ht-home-ai-explore {
+        order: 3 !important;
     }
 }

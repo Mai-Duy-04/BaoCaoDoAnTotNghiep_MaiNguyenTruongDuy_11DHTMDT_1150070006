@@ -51,14 +51,22 @@ public partial class DonDatTour
 
     public string? GhiChu { get; set; }
 
+    [StringLength(255)]
+    public string? DiaChiLienHe { get; set; }
+
     [Column(TypeName = "datetime")]
     public DateTime? NgayHuy { get; set; }
 
     public bool DaThanhToan { get; set; } = false;
+
     public string? TrangThaiThanhToan { get; set; }
+
     public string? MaGiaoDich { get; set; }
+
     public DateTime? NgayThanhToan { get; set; }
+
     public DateTime? HanThanhToan { get; set; }
+
     public string? PhuongThucTT { get; set; }
 
     [ForeignKey("IdLich")]

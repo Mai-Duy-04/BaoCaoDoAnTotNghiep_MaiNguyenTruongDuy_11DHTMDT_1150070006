@@ -1,243 +1,2006 @@
+
 @model List<TourWebApp.Data.Models.LichKhoiHanh>
+@using TourWebApp.Data.Models
+@using System.Globalization
+
 @{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Quản lý lịch khởi hành";
-   Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-   var waitlistCounts = ViewBag.WaitlistCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
-   var tongSucChua = Model.Sum(x => x.SoChoToiDa);
-   var tongConLai = Model.Sum(x => x.SoChoConLai);
-   var tongDangGiu = Math.Max(0, tongSucChua - tongConLai);
-   var sapHetHoacFull = Model.Count(x => x.SoChoConLai <= 5);
+
+    var dsLich = Model ?? new List<LichKhoiHanh>();
+
+    var tours = ViewBag.Tours as IEnumerable<Tour>
+        ?? Enumerable.Empty<Tour>();
+
+    var waitlistCounts = ViewBag.WaitlistCounts
+        as Dictionary<int, int>
+        ?? new Dictionary<int, int>();
+
+    var selectedTourId = ViewBag.IdTour == null
+        ? ""
+        : ViewBag.IdTour.ToString();
+
+    var today = DateOnly.FromDateTime(DateTime.Today);
+
+    var tongLich = dsLich.Count;
+    var tongSucChua = dsLich.Sum(x => x.SoChoToiDa);
+    var tongConLai = dsLich.Sum(x => x.SoChoConLai);
+
+    var tongDaSuDung = Math.Max(
+        0,
+        tongSucChua - tongConLai
+    );
+
+    var lichSapToi = dsLich.Count(x =>
+        x.NgayKhoiHanh >= today);
+
+    var lichSapHet = dsLich.Count(x =>
+        x.NgayKhoiHanh >= today &&
+        x.SoChoConLai <= 5);
+
+    var tongCho = waitlistCounts.Values.Sum();
 }
 
+<style>
+    /* ==========================================
+       HAPPYTRIP - DEPARTURE MANAGEMENT
+       ========================================== */
 
-<h3 class="mb-3"><i class="fa fa-calendar"></i> Quản lý lịch khởi hành</h3>
+    .ht-lich {
+        --ht-primary: #258b55;
+        --ht-dark: #1e5439;
+        --ht-ink: #315b43;
+        --ht-muted: #84998a;
+        --ht-line: #e1eadf;
+        --ht-soft: #f7faf4;
 
-@if (TempData["ThongBao"] != null)
-{
-    <div class="alert alert-success">@TempData["ThongBao"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 8px 3px 35px;
+        font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+        color: var(--ht-ink);
+    }
 
-<!-- ================= FORM THÊM LỊCH ================= -->
-<div class="card p-4 mb-4 shadow-sm">
-    <h5 class="mb-3">➕ Thêm lịch khởi hành mới</h5>
+    .ht-lich *,
+    .ht-lich *::before,
+    .ht-lich *::after {
+        box-sizing: border-box;
+    }
 
-    <form asp-action="ThemLich" method="post">
-        <div class="row g-3">
+    .ht-lich a {
+        text-decoration: none;
+    }
 
-            <!-- CHỌN TOUR -->
-            <div class="col-md-4">
-                <label>🗺 Tour</label>
-                <select name="IdTour" class="form-select" required>
-                    <option value="">-- Chọn tour --</option>
-                    @foreach (var t in ViewBag.Tours)
-                    {
-                        <option value="@t.IdTour">@t.TenTour</option>
-                    }
-                </select>
-            </div>
+    .ht-lich button,
+    .ht-lich input,
+    .ht-lich select {
+        font: inherit;
+    }
 
-            <!-- NGÀY -->
-            <div class="col-md-4">
-                <label>📅 Ngày khởi hành</label>
-                <input id="ngayThem" type="text" name="NgayKhoiHanh"
-                       class="form-control" required />
-            </div>
+    /* HEADER */
 
-            <!-- GIỜ -->
-            <div class="col-md-4">
-                <label>🕒 Giờ khởi hành</label>
-                <input id="gioThem" type="text" name="GioKhoiHanh"
-                       class="form-control" required />
-            </div>
+    .ht-lich-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 19px;
+    }
 
-            <!-- SỐ CHỖ -->
-            <div class="col-md-4">
-                <label>👥 Số chỗ tối đa</label>
-                <input type="number" name="SoChoToiDa"
-                       class="form-control" min="1" required />
-            </div>
+    .ht-lich-eyebrow {
+        display: block;
+        margin-bottom: 6px;
+        color: #6ba47d;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
 
-        </div>
+    .ht-lich-head h1 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 6px;
+        color: var(--ht-dark);
+        font-size: clamp(23px, 2.3vw, 30px);
+        font-weight: 800;
+    }
 
-        <button class="btn btn-success mt-3">
-            <i class="fa fa-plus"></i> Thêm lịch
-        </button>
-    </form>
-</div>
+    .ht-lich-head h1 i {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #e5f3e7;
+        color: var(--ht-primary);
+        font-size: 17px;
+    }
 
-<div class="row g-3 mb-4">
-    <div class="col-md-3"><div class="card p-3 border-0 shadow-sm"><small class="text-muted">Tổng lịch</small><strong class="fs-4">@Model.Count</strong></div></div>
-    <div class="col-md-3"><div class="card p-3 border-0 shadow-sm"><small class="text-muted">Tổng sức chứa</small><strong class="fs-4">@tongSucChua</strong></div></div>
-    <div class="col-md-3"><div class="card p-3 border-0 shadow-sm"><small class="text-muted">Chỗ đang giữ/đã đặt</small><strong class="fs-4 text-primary">@tongDangGiu</strong></div></div>
-    <div class="col-md-3"><div class="card p-3 border-0 shadow-sm"><small class="text-muted">Sắp hết hoặc full</small><strong class="fs-4 text-danger">@sapHetHoacFull</strong></div></div>
-</div>
+    .ht-lich-head p {
+        margin: 0;
+        color: var(--ht-muted);
+        font-size: 12px;
+    }
 
-<!-- ================= BẢNG DANH SÁCH ================= -->
-<table class="table table-bordered align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>Tour</th>
-            <th>Ngày</th>
-            <th>Giờ</th>
-            <th>Chỗ tối đa</th>
-            <th>Đang giữ/đã đặt</th>
-            <th>Chỗ còn</th>
-            <th>Trạng thái</th>
-            <th>Chờ chỗ</th>
-            <th width="120">Hành động</th>
-        </tr>
-    </thead>
+    .ht-lich-main-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 43px;
+        padding: 10px 16px;
+        border: 1px solid #248b55;
+        border-radius: 10px;
+        background: #248b55;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+    }
 
-    <tbody>
-@foreach (var item in Model)
-{
-    var phanTram = item.SoChoToiDa > 0 ? (double)item.SoChoConLai / item.SoChoToiDa * 100 : 0;
-    var soDaGiu = Math.Max(0, item.SoChoToiDa - item.SoChoConLai);
-    var trangThaiCho = item.SoChoConLai <= 0 ? "Hết chỗ" : item.SoChoConLai <= 5 ? "Sắp hết chỗ" : "Còn chỗ";
-    var waitCount = waitlistCounts.TryGetValue(item.IdLich, out var count) ? count : 0;
+    .ht-lich-main-btn:hover {
+        background: #1a7445;
+    }
 
-    string mau = phanTram == 0 ? "bg-danger" :
-                 phanTram <= 50 ? "bg-warning text-dark" :
-                 "bg-success";
+    /* ALERTS */
 
-    <tr>
-        <td>@item.IdTourNavigation?.TenTour</td>
-        <td>@item.NgayKhoiHanh</td>
-        <td>@item.GioKhoiHanh</td>
-        <td>@item.SoChoToiDa</td>
-        <td><span class="badge bg-primary">@soDaGiu</span></td>
+    .ht-lich-alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 13px 15px;
+        border-radius: 11px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        line-height: 1.7;
+    }
 
-        <!-- CHỖ CÒN + MÀU THEO % -->
-        <td>
-            <span class="badge @mau">
-                @item.SoChoConLai / @item.SoChoToiDa
+    .ht-lich-alert.success {
+        background: #e9f7ec;
+        color: #23744b;
+        border: 1px solid #cdebd4;
+    }
+
+    .ht-lich-alert.error {
+        background: #fff0ed;
+        color: #b34a40;
+        border: 1px solid #f1cdc6;
+    }
+
+    /* STATISTICS */
+
+    .ht-lich-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 13px;
+        margin-bottom: 18px;
+    }
+
+    .ht-lich-stat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-width: 0;
+        padding: 17px;
+        border: 1px solid var(--ht-line);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 16px rgba(30, 75, 45, .04);
+    }
+
+    .ht-lich-stat span.stat-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #849688;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .ht-lich-stat strong {
+        display: block;
+        color: #235c3e;
+        font-size: 25px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .ht-lich-stat-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 41px;
+        width: 41px;
+        height: 41px;
+        border-radius: 11px;
+        background: #e9f6e9;
+        color: #278c54;
+        font-size: 16px;
+    }
+
+    .ht-lich-stat.gold .ht-lich-stat-icon {
+        background: #fff3dc;
+        color: #be902d;
+    }
+
+    .ht-lich-stat.blue .ht-lich-stat-icon {
+        background: #edf4fc;
+        color: #5c93b9;
+    }
+
+    .ht-lich-stat.red .ht-lich-stat-icon {
+        background: #fff0e9;
+        color: #cc7253;
+    }
+
+    /* MAIN TABLE PANEL */
+
+    .ht-lich-panel {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #dfe9dd;
+        border-radius: 17px;
+        box-shadow: 0 5px 20px rgba(30, 75, 45, .04);
+    }
+
+    .ht-lich-panel-head {
+        padding: 19px 20px 15px;
+    }
+
+    .ht-lich-panel-head h2 {
+        margin: 0 0 5px;
+        color: #23593d;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .ht-lich-panel-head p {
+        margin: 0;
+        color: #879a8b;
+        font-size: 11px;
+    }
+
+    /* FILTERS */
+
+    .ht-lich-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 0 20px 17px;
+    }
+
+    .ht-lich-tabs {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 10px;
+        background: #f1f6ef;
+    }
+
+    .ht-lich-tab {
+        min-height: 35px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: #77917d;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .ht-lich-tab.active {
+        color: #fff;
+        background: #248b55;
+        box-shadow: 0 3px 9px rgba(35, 139, 82, .13);
+    }
+
+    .ht-lich-search {
+        position: relative;
+        width: min(100%, 310px);
+    }
+
+    .ht-lich-search i {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        transform: translateY(-50%);
+        color: #8aa18e;
+        font-size: 12px;
+    }
+
+    .ht-lich-search input {
+        display: block;
+        width: 100%;
+        height: 41px;
+        padding: 10px 12px 10px 35px;
+        outline: none;
+        border: 1px solid #dfe9dc;
+        border-radius: 10px;
+        background: #fbfdfa;
+        color: #315e44;
+        font-size: 11px;
+    }
+
+    .ht-lich-search input:focus {
+        border-color: #65b781;
+        box-shadow: 0 0 0 3px rgba(43, 150, 87, .08);
+    }
+
+    /* TABLE */
+
+    .ht-lich-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .ht-lich-table {
+        width: 100%;
+        min-width: 930px;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .ht-lich-table thead {
+        background: #f5faf3;
+    }
+
+    .ht-lich-table th {
+        padding: 13px 12px;
+        border-top: 1px solid #e8eee5;
+        border-bottom: 1px solid #e4ece0;
+        color: #688374;
+        font-size: 10px;
+        font-weight: 800;
+        text-align: left;
+        letter-spacing: .35px;
+    }
+
+    .ht-lich-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ecf1e9;
+        vertical-align: middle;
+        font-size: 11px;
+    }
+
+    .ht-lich-table tbody tr:hover {
+        background: #fbfdfa;
+    }
+
+    .ht-lich-tour {
+        min-width: 0;
+    }
+
+    .ht-lich-tour strong {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #275740;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.55;
+    }
+
+    .ht-lich-tour small {
+        display: block;
+        margin-top: 4px;
+        color: #93a296;
+        font-size: 10px;
+    }
+
+    .ht-lich-date {
+        font-weight: 800;
+        color: #3a624a;
+        white-space: nowrap;
+    }
+
+    .ht-lich-time {
+        color: #607e6b;
+        font-weight: 700;
+    }
+
+    .ht-lich-seat {
+        min-width: 0;
+    }
+
+    .ht-lich-seat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 7px;
+        color: #396549;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-lich-progress {
+        height: 6px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #e9f0e5;
+    }
+
+    .ht-lich-progress > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: #36a26a;
+    }
+
+    .ht-lich-progress.low > span {
+        background: #dfa647;
+    }
+
+    .ht-lich-progress.empty > span {
+        background: #d9675b;
+    }
+
+    .ht-lich-used {
+        color: #6c8a76;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .ht-lich-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        max-width: 100%;
+        padding: 6px 9px;
+        border-radius: 7px;
+        white-space: nowrap;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-lich-status.available {
+        color: #26864f;
+        background: #e7f6e8;
+    }
+
+    .ht-lich-status.low {
+        color: #ab7921;
+        background: #fff3d9;
+    }
+
+    .ht-lich-status.full {
+        color: #be5b4e;
+        background: #fff0ec;
+    }
+
+    .ht-lich-status.past {
+        color: #839087;
+        background: #f0f3ef;
+    }
+
+    .ht-lich-wait {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        min-height: 28px;
+        padding: 5px 8px;
+        border-radius: 7px;
+        background: #f0f4ee;
+        color: #849486;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-lich-wait.has-wait {
+        color: #327ba1;
+        background: #e8f4fc;
+    }
+
+    .ht-lich-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .ht-lich-icon-btn {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .ht-lich-icon-btn.edit {
+        background: #e8f6e9;
+        color: #2a8c55;
+    }
+
+    .ht-lich-icon-btn.delete {
+        background: #fff0ed;
+        color: #c66053;
+    }
+
+    .ht-lich-icon-btn:disabled {
+        background: #f1f3f0;
+        color: #a1aea3;
+        cursor: not-allowed;
+    }
+
+    .ht-lich-empty {
+        display: none;
+        padding: 45px 15px;
+        text-align: center;
+        color: #8b9c8e;
+        font-size: 12px;
+    }
+
+    .ht-lich-empty i {
+        display: block;
+        margin-bottom: 11px;
+        color: #90bda0;
+        font-size: 25px;
+    }
+
+    /* FOOTER AND PAGINATION */
+
+    .ht-lich-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 14px 20px;
+        border-top: 1px solid #e8eee4;
+        background: #fbfdfa;
+    }
+
+    .ht-lich-bottom small {
+        color: #809686;
+        font-size: 11px;
+    }
+
+    .ht-lich-pager {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .ht-lich-page-btn {
+        display: grid;
+        place-items: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        border: 1px solid #dfe9db;
+        border-radius: 8px;
+        background: #fff;
+        color: #51755d;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ht-lich-page-btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    /* MODAL */
+
+    .ht-lich-modal[hidden] {
+        display: none !important;
+    }
+
+    .ht-lich-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(18, 42, 29, .52);
+        backdrop-filter: blur(3px);
+    }
+
+    .ht-lich-modal-card {
+        width: min(100%, 550px);
+        max-height: 92vh;
+        overflow-y: auto;
+        border: 1px solid #dce8da;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 24px 65px rgba(0, 0, 0, .17);
+    }
+
+    .ht-lich-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 21px 22px;
+        border-bottom: 1px solid #edf1e8;
+        background: #f8fcf6;
+    }
+
+    .ht-lich-modal-head h3 {
+        margin: 0 0 5px;
+        color: #22583d;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .ht-lich-modal-head p {
+        margin: 0;
+        color: #829486;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .ht-lich-close {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 0;
+        border-radius: 9px;
+        background: #e9efe6;
+        color: #668071;
+        cursor: pointer;
+    }
+
+    .ht-lich-modal-body {
+        padding: 22px;
+    }
+
+    .ht-lich-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .ht-lich-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .ht-lich-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #375f46;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-lich-field input,
+    .ht-lich-field select {
+        display: block;
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        outline: none;
+        border: 1px solid #dbe7d8;
+        border-radius: 10px;
+        background: #fbfdfa;
+        color: #355d45;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .ht-lich-field input:focus,
+    .ht-lich-field select:focus {
+        border-color: #5bae77;
+        box-shadow: 0 0 0 3px rgba(35, 140, 82, .08);
+    }
+
+    .ht-lich-field small {
+        display: block;
+        margin-top: 6px;
+        color: #8b9b8e;
+        font-size: 10px;
+    }
+
+    .ht-lich-form-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        margin-top: 17px;
+        border-radius: 9px;
+        background: #f2f8ee;
+        color: #718873;
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .ht-lich-form-note i {
+        color: #34965d;
+        margin-top: 3px;
+    }
+
+    .ht-lich-form-error {
+        display: none;
+        margin-top: 12px;
+        color: #b94f43;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .ht-lich-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 9px;
+        padding: 16px 22px;
+        border-top: 1px solid #e8eee5;
+        background: #fcfefb;
+    }
+
+    .ht-lich-cancel {
+        min-height: 40px;
+        padding: 10px 15px;
+        border: 1px solid #dce7d9;
+        border-radius: 9px;
+        background: #fff;
+        color: #718776;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ht-lich-submit {
+        min-height: 40px;
+        padding: 10px 16px;
+        border: 1px solid #248b55;
+        border-radius: 9px;
+        background: #248b55;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ht-lich-submit:hover {
+        background: #197544;
+    }
+
+    @@media (max-width: 1100px) {
+        .ht-lich-stats {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .ht-lich-toolbar {
+            align-items: stretch;
+            padding: 0 14px 15px;
+        }
+
+        .ht-lich-tabs {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .ht-lich-tab {
+            flex: 1;
+        }
+
+        .ht-lich-search {
+            width: 100%;
+        }
+
+        .ht-lich-panel-head,
+        .ht-lich-bottom {
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+        .ht-lich-stat {
+            padding: 13px;
+        }
+
+        .ht-lich-stat strong {
+            font-size: 22px;
+        }
+
+        .ht-lich-stat-icon {
+            flex-basis: 34px;
+            width: 34px;
+            height: 34px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .ht-lich-head {
+            align-items: stretch;
+        }
+
+        .ht-lich-main-btn {
+            width: 100%;
+        }
+
+        .ht-lich-form-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .ht-lich-field.full {
+            grid-column: auto;
+        }
+
+        .ht-lich-modal-body {
+            padding: 16px;
+        }
+
+        .ht-lich-modal-head,
+        .ht-lich-modal-footer {
+            padding: 16px;
+        }
+    }
+</style>
+
+<div class="ht-lich">
+
+    <!-- ======================================
+         PAGE HEADER
+    ======================================= -->
+
+    <header class="ht-lich-head">
+        <div>
+            <span class="ht-lich-eyebrow">
+                HAPPYTRIP / DEPARTURE MANAGEMENT
             </span>
-        </td>
 
-        <td>
-            <span class="badge @(item.SoChoConLai <= 0 ? "bg-danger" : item.SoChoConLai <= 5 ? "bg-warning text-dark" : "bg-success")">@trangThaiCho</span>
-        </td>
+            <h1>
+                <i class="fa-solid fa-calendar-days"></i>
+                Quản lý lịch khởi hành
+            </h1>
 
-        <td>
-            @if (waitCount > 0)
-            {
-                <a asp-action="DanhSachCho" asp-route-idLich="@item.IdLich" class="badge bg-info text-dark text-decoration-none">@waitCount khách</a>
-            }
-            else
-            {
-                <span class="text-muted">0</span>
-            }
-        </td>
-
-        <td class="text-center">
-
-           @{
-             bool daCoDon = item.DonDatTours != null && item.DonDatTours.Any(d => d.TrangThai != "DaHuy");
-            }
-
-            @if (daCoDon)
-            {
-                <!-- ĐÃ CÓ ĐƠN => KHÓA SỬA -->
-                <button class="btn btn-secondary btn-sm" disabled
-                        title="Đã có người đặt - không thể sửa">
-                    <i class="fa fa-lock"></i>
-                </button>
-            }
-            else
-            {
-                <!-- CHƯA CÓ ĐƠN => CHO PHÉP SỬA -->
-                <button type="button"
-                        class="btn btn-warning btn-sm me-1"
-                        onclick="moModalSua(@item.IdLich,
-                        '@item.NgayKhoiHanh.ToString("yyyy-MM-dd")',
-                        '@(item.GioKhoiHanh.HasValue ? item.GioKhoiHanh.Value.ToString("HH:mm") : "")',
-                        @item.SoChoToiDa)">
-                    <i class="fa fa-pen"></i>
-                </button>
-            }
-
-            <!-- XÓA -->
-            <form asp-action="XoaLich" method="post" style="display:inline-block">
-                <input type="hidden" name="id" value="@item.IdLich" />
-                <button type="submit"
-                        class="btn btn-danger btn-sm"
-                        onclick="return confirm('Xóa lịch này?')">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </form>
-
-        </td>
-    </tr>
-}
-</tbody>
-
-</table>
-
-<!-- ================= MODAL SỬA ================= -->
-<div class="modal fade" id="modalSuaLich" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <form asp-action="SuaLich" asp-controller="QuanTri" method="post">
-
-                @Html.AntiForgeryToken()
-
-                <div class="modal-header">
-                    <h5 class="modal-title">✏️ Sửa lịch</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <!-- ID lịch cần sửa -->
-                    <input type="hidden" id="editId" name="IdLich" />
-
-                    <div class="mb-3">
-                        <label>📅 Ngày</label>
-                        <input id="ngaySua"
-                               name="NgayKhoiHanh"
-                               type="date"
-                               class="form-control"
-                               required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label>🕒 Giờ</label>
-                        <input id="gioSua"
-                               name="GioKhoiHanh"
-                               type="time"
-                               class="form-control"
-                               required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label>👥 Số chỗ tối đa</label>
-                        <input id="soChoSua"
-                               name="SoChoToiDa"
-                               type="number"
-                               min="1"
-                               class="form-control"
-                               required />
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fa fa-save"></i> Lưu
-                    </button>
-                </div>
-
-            </form>
+            <p>
+                Theo dõi ngày khởi hành, sức chứa
+                và tình trạng đặt chỗ của từng tour.
+            </p>
         </div>
+
+        <button type="button"
+                class="ht-lich-main-btn"
+                id="htOpenCreate">
+
+            <i class="fa-solid fa-plus"></i>
+            Thêm lịch mới
+
+        </button>
+    </header>
+
+    <!-- ======================================
+         NOTIFICATIONS
+    ======================================= -->
+
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="ht-lich-alert success">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@TempData["ThongBao"]</span>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="ht-lich-alert error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    <!-- ======================================
+         STATISTICS
+    ======================================= -->
+
+    <section class="ht-lich-stats">
+
+        <div class="ht-lich-stat">
+            <div>
+                <span class="stat-label">
+                    Tổng lịch khởi hành
+                </span>
+                <strong>@tongLich</strong>
+            </div>
+
+            <span class="ht-lich-stat-icon">
+                <i class="fa-solid fa-calendar-days"></i>
+            </span>
+        </div>
+
+        <div class="ht-lich-stat gold">
+            <div>
+                <span class="stat-label">
+                    Tổng sức chứa
+                </span>
+                <strong>@tongSucChua.ToString("N0")</strong>
+            </div>
+
+            <span class="ht-lich-stat-icon">
+                <i class="fa-solid fa-users"></i>
+            </span>
+        </div>
+
+        <div class="ht-lich-stat blue">
+            <div>
+                <span class="stat-label">
+                    Chỗ đã sử dụng
+                </span>
+                <strong>@tongDaSuDung.ToString("N0")</strong>
+            </div>
+
+            <span class="ht-lich-stat-icon">
+                <i class="fa-solid fa-ticket"></i>
+            </span>
+        </div>
+
+        <div class="ht-lich-stat red">
+            <div>
+                <span class="stat-label">
+                    Sắp hết hoặc hết chỗ
+                </span>
+                <strong>@lichSapHet</strong>
+            </div>
+
+            <span class="ht-lich-stat-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </span>
+        </div>
+
+    </section>
+
+    <!-- ======================================
+         MAIN LIST
+    ======================================= -->
+
+    <section class="ht-lich-panel">
+
+        <div class="ht-lich-panel-head">
+            <h2>Danh sách lịch khởi hành</h2>
+
+            <p>
+                Có @lichSapToi lịch chưa qua ngày khởi hành
+                trong danh sách hiện tại.
+            </p>
+        </div>
+
+        <div class="ht-lich-toolbar">
+
+            <div class="ht-lich-tabs"
+                 id="htLichTabs">
+
+                <button type="button"
+                        class="ht-lich-tab active"
+                        data-filter="upcoming">
+                    Sắp tới
+                </button>
+
+                <button type="button"
+                        class="ht-lich-tab"
+                        data-filter="available">
+                    Còn chỗ
+                </button>
+
+                <button type="button"
+                        class="ht-lich-tab"
+                        data-filter="past">
+                    Đã qua
+                </button>
+
+                <button type="button"
+                        class="ht-lich-tab"
+                        data-filter="all">
+                    Tất cả
+                </button>
+            </div>
+
+            <div class="ht-lich-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input type="search"
+                       id="htLichSearch"
+                       placeholder="Tìm tên tour, mã tour, ngày..."
+                       autocomplete="off"
+                       aria-label="Tìm kiếm lịch khởi hành" />
+            </div>
+
+        </div>
+
+        <div class="ht-lich-table-wrap">
+
+            <table class="ht-lich-table">
+                <thead>
+                    <tr>
+                        <th style="width:29%;">Tour du lịch</th>
+                        <th style="width:105px;">Ngày đi</th>
+                        <th style="width:66px;">Giờ</th>
+                        <th style="width:140px;">Sức chứa</th>
+                        <th style="width:78px;">Đã giữ</th>
+                        <th style="width:117px;">Trạng thái</th>
+                        <th style="width:68px;">Chờ chỗ</th>
+                        <th style="width:86px; text-align:right;">
+                            Thao tác
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody id="htLichTableBody">
+
+                    @foreach (var item in dsLich)
+                    {
+                        var daQuaNgay = item.NgayKhoiHanh < today;
+
+                        var daCoDon = item.DonDatTours != null
+                            && item.DonDatTours.Any();
+
+                        var soDaGiu = Math.Max(
+                            0,
+                            item.SoChoToiDa - item.SoChoConLai
+                        );
+
+                        var phanTramCon = item.SoChoToiDa > 0
+                            ? Math.Clamp(
+                                (double)item.SoChoConLai
+                                    / item.SoChoToiDa * 100,
+                                0,
+                                100
+                            )
+                            : 0;
+
+                        var soKhachCho = waitlistCounts.TryGetValue(
+                            item.IdLich,
+                            out var count
+                        )
+                            ? count
+                            : 0;
+
+                        var timeText = item.GioKhoiHanh.HasValue
+                            ? item.GioKhoiHanh.Value.ToString("HH:mm")
+                            : "--:--";
+
+                        var trangThaiText = daQuaNgay
+                            ? "Đã qua"
+                            : item.SoChoConLai <= 0
+                                ? "Hết chỗ"
+                                : item.SoChoConLai <= 5
+                                    ? "Sắp hết chỗ"
+                                    : "Còn chỗ";
+
+                        var trangThaiClass = daQuaNgay
+                            ? "past"
+                            : item.SoChoConLai <= 0
+                                ? "full"
+                                : item.SoChoConLai <= 5
+                                    ? "low"
+                                    : "available";
+
+                        var canEdit = !daCoDon && !daQuaNgay;
+
+                        var canDelete = !daCoDon;
+
+                        <tr class="ht-lich-row"
+                            data-id="@item.IdLich"
+                            data-tour-id="@item.IdTour"
+                            data-tour="@item.IdTourNavigation?.TenTour"
+                            data-code="@item.IdTourNavigation?.MaTour"
+                            data-date="@item.NgayKhoiHanh.ToString("yyyy-MM-dd")"
+                            data-time="@timeText"
+                            data-capacity="@item.SoChoToiDa"
+                            data-left="@item.SoChoConLai">
+
+                            <td>
+                                <div class="ht-lich-tour">
+                                    <strong title="@item.IdTourNavigation?.TenTour">
+                                        @item.IdTourNavigation?.TenTour
+                                    </strong>
+
+                                    <small>
+                                        @item.IdTourNavigation?.MaTour
+                                        · Lịch #@item.IdLich
+                                    </small>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="ht-lich-date">
+                                    @item.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="ht-lich-time">
+                                    @timeText
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="ht-lich-seat">
+                                    <div class="ht-lich-seat-top">
+                                        <span>Còn chỗ</span>
+                                        <span>
+                                            @item.SoChoConLai/@item.SoChoToiDa
+                                        </span>
+                                    </div>
+
+                                    <div class="ht-lich-progress @(item.SoChoConLai <= 0 ? "empty" : item.SoChoConLai <= 5 ? "low" : "")">
+                                        <span style="width:@(phanTramCon.ToString("0.##", CultureInfo.InvariantCulture))%"></span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="ht-lich-used">
+                                    @soDaGiu
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="ht-lich-status @trangThaiClass">
+                                    <i class="fa-solid fa-circle"
+                                       style="font-size:6px;"></i>
+                                    @trangThaiText
+                                </span>
+                            </td>
+
+                            <td>
+                                @if (soKhachCho > 0)
+                                {
+                                    <a asp-controller="QuanTri"
+                                       asp-action="DanhSachCho"
+                                       asp-route-idLich="@item.IdLich"
+                                       class="ht-lich-wait has-wait"
+                                       title="Xem danh sách khách chờ">
+                                        @soKhachCho
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="ht-lich-wait">
+                                        0
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="ht-lich-actions">
+
+                                    <button type="button"
+                                            class="ht-lich-icon-btn edit htLichEditBtn"
+                                            title="@(canEdit ? "Sửa lịch" : "Không thể sửa lịch đã qua hoặc đã có đơn")"
+                                            aria-label="Sửa lịch #@item.IdLich"
+                                            disabled="@(!canEdit)">
+
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+
+                                    <form asp-controller="QuanTri"
+                                          asp-action="XoaLich"
+                                          method="post"
+                                          class="htLichDeleteForm"
+                                          style="margin:0;">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@item.IdLich" />
+
+                                        <button type="submit"
+                                                class="ht-lich-icon-btn delete"
+                                                title="@(canDelete ? "Xóa lịch" : "Đã có lịch sử đơn hàng, không thể xóa")"
+                                                aria-label="Xóa lịch #@item.IdLich"
+                                                disabled="@(!canDelete)">
+
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="ht-lich-empty"
+             id="htLichEmpty">
+
+            <i class="fa-solid fa-calendar-xmark"></i>
+
+            Không tìm thấy lịch khởi hành phù hợp.
+        </div>
+
+        <div class="ht-lich-bottom">
+
+            <small id="htLichResultCount">
+                Đang hiển thị danh sách lịch
+            </small>
+
+            <div class="ht-lich-pager">
+
+                <button type="button"
+                        class="ht-lich-page-btn"
+                        id="htLichPrev"
+                        aria-label="Trang trước">
+
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <span id="htLichPageInfo"
+                      style="font-size:11px;color:#688572;">
+                    1 / 1
+                </span>
+
+                <button type="button"
+                        class="ht-lich-page-btn"
+                        id="htLichNext"
+                        aria-label="Trang sau">
+
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+    </section>
+
+    <div style="margin-top:13px;
+                color:#879a89;
+                font-size:11px;
+                line-height:1.7;">
+        <i class="fa-solid fa-circle-info"
+           style="color:#429467;"></i>
+
+        Lịch đã có đơn hàng được khóa thao tác sửa và xóa.
+        Các lịch quá khứ vẫn được lưu để tra cứu.
+        Số chỗ hiển thị dựa trên dữ liệu hiện tại của hệ thống.
+    </div>
+
+</div>
+
+<!-- ==========================================
+     MODAL: ADD NEW DEPARTURE
+========================================== -->
+
+<div class="ht-lich-modal"
+     id="htCreateModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="htCreateTitle"
+     hidden>
+
+    <div class="ht-lich-modal-card">
+
+        <form asp-controller="QuanTri"
+              asp-action="ThemLich"
+              method="post"
+              id="htCreateForm">
+
+            @Html.AntiForgeryToken()
+
+            <div class="ht-lich-modal-head">
+                <div>
+                    <h3 id="htCreateTitle">
+                        <i class="fa-solid fa-calendar-plus"
+                           style="color:#30975d;"></i>
+                        Thêm lịch khởi hành
+                    </h3>
+
+                    <p>
+                        Thiết lập ngày, giờ và sức chứa
+                        cho một tour du lịch.
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="ht-lich-close htLichClose"
+                        aria-label="Đóng">
+
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="ht-lich-modal-body">
+
+                <div class="ht-lich-form-grid">
+
+                    <div class="ht-lich-field full">
+
+                        <label for="htCreateTour">
+                            Tour du lịch
+                        </label>
+
+                        <select name="IdTour"
+                                id="htCreateTour"
+                                required>
+
+                            <option value="">
+                                -- Chọn tour cần thêm lịch --
+                            </option>
+
+                            @foreach (var tour in tours.OrderBy(x => x.TenTour))
+                            {
+                                <option value="@tour.IdTour"
+                                        selected="@(selectedTourId == tour.IdTour.ToString())">
+                                    @tour.TenTour
+                                </option>
+                            }
+
+                        </select>
+
+                        <small>
+                            Chọn đúng tour trước khi tạo lịch.
+                        </small>
+                    </div>
+
+                    <div class="ht-lich-field">
+
+                        <label for="htCreateDate">
+                            Ngày khởi hành
+                        </label>
+
+                        <input type="date"
+                               id="htCreateDate"
+                               name="NgayKhoiHanh"
+                               min="@today.ToString("yyyy-MM-dd")"
+                               required />
+                    </div>
+
+                    <div class="ht-lich-field">
+
+                        <label for="htCreateTime">
+                            Giờ khởi hành
+                        </label>
+
+                        <input type="time"
+                               id="htCreateTime"
+                               name="GioKhoiHanh"
+                               value="07:00"
+                               required />
+                    </div>
+
+                    <div class="ht-lich-field full">
+
+                        <label for="htCreateCapacity">
+                            Số chỗ tối đa
+                        </label>
+
+                        <input type="number"
+                               id="htCreateCapacity"
+                               name="SoChoToiDa"
+                               min="1"
+                               step="1"
+                               value="30"
+                               required />
+
+                        <small>
+                            Sức chứa cần phù hợp với phương tiện
+                            và khả năng phục vụ thực tế.
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="ht-lich-form-note">
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <span>
+                        Khi thêm thành công, số chỗ còn lại
+                        ban đầu bằng số chỗ tối đa.
+                        Hệ thống sẽ cập nhật sức chứa
+                        khi khách đặt tour.
+                    </span>
+                </div>
+
+                <div class="ht-lich-form-error"
+                     id="htCreateError"
+                     role="alert"></div>
+
+            </div>
+
+            <div class="ht-lich-modal-footer">
+
+                <button type="button"
+                        class="ht-lich-cancel htLichClose">
+                    Hủy bỏ
+                </button>
+
+                <button type="submit"
+                        class="ht-lich-submit">
+                    <i class="fa-solid fa-plus"></i>
+                    Thêm lịch
+                </button>
+            </div>
+
+        </form>
     </div>
 </div>
 
-<!-- ================= THƯ VIỆN ================= -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="~/js/lich-khoi-hanh.js"></script>
+<!-- ==========================================
+     MODAL: EDIT DEPARTURE
+========================================== -->
+
+<div class="ht-lich-modal"
+     id="htEditModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="htEditTitle"
+     hidden>
+
+    <div class="ht-lich-modal-card">
+
+        <form asp-controller="QuanTri"
+              asp-action="SuaLich"
+              method="post"
+              id="htEditForm">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   id="htEditId"
+                   name="IdLich" />
+
+            <div class="ht-lich-modal-head">
+
+                <div>
+                    <h3 id="htEditTitle">
+                        <i class="fa-solid fa-pen-to-square"
+                           style="color:#30975d;"></i>
+                        Sửa lịch khởi hành
+                    </h3>
+
+                    <p id="htEditTourName">
+                        Thông tin lịch đang chỉnh sửa
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="ht-lich-close htLichClose"
+                        aria-label="Đóng">
+
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="ht-lich-modal-body">
+
+                <div class="ht-lich-form-grid">
+
+                    <div class="ht-lich-field">
+
+                        <label for="htEditDate">
+                            Ngày khởi hành
+                        </label>
+
+                        <input type="date"
+                               id="htEditDate"
+                               name="NgayKhoiHanh"
+                               min="@today.ToString("yyyy-MM-dd")"
+                               required />
+                    </div>
+
+                    <div class="ht-lich-field">
+
+                        <label for="htEditTime">
+                            Giờ khởi hành
+                        </label>
+
+                        <input type="time"
+                               id="htEditTime"
+                               name="GioKhoiHanh"
+                               required />
+                    </div>
+
+                    <div class="ht-lich-field full">
+
+                        <label for="htEditCapacity">
+                            Số chỗ tối đa
+                        </label>
+
+                        <input type="number"
+                               id="htEditCapacity"
+                               name="SoChoToiDa"
+                               min="1"
+                               step="1"
+                               required />
+                    </div>
+
+                </div>
+
+                <div class="ht-lich-form-note">
+
+                    <i class="fa-solid fa-shield-halved"></i>
+
+                    <span>
+                        Chỉ cho phép sửa lịch chưa có đơn hàng.
+                        Không thay đổi các lịch đã phát sinh giao dịch.
+                    </span>
+                </div>
+
+                <div class="ht-lich-form-error"
+                     id="htEditError"
+                     role="alert"></div>
+
+            </div>
+
+            <div class="ht-lich-modal-footer">
+
+                <button type="button"
+                        class="ht-lich-cancel htLichClose">
+                    Hủy bỏ
+                </button>
+
+                <button type="submit"
+                        class="ht-lich-submit">
+
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Lưu thay đổi
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* ==========================================
+       1. TABLE FILTER AND PAGINATION
+       ========================================== */
+
+    const today = "@today.ToString("yyyy-MM-dd")";
+    const pageSize = 10;
+
+    const tbody = document.getElementById("htLichTableBody");
+
+    const allRows = Array.from(
+        document.querySelectorAll(".ht-lich-row")
+    );
+
+    const searchInput = document.getElementById("htLichSearch");
+    const tabs = Array.from(
+        document.querySelectorAll(".ht-lich-tab")
+    );
+
+    const resultCount = document.getElementById(
+        "htLichResultCount"
+    );
+
+    const pageInfo = document.getElementById(
+        "htLichPageInfo"
+    );
+
+    const prevBtn = document.getElementById("htLichPrev");
+    const nextBtn = document.getElementById("htLichNext");
+    const emptyState = document.getElementById("htLichEmpty");
+
+    let currentFilter = "upcoming";
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function normalizeText(value) {
+        return String(value || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .trim();
+    }
+
+    function getFilteredRows() {
+
+        const keyword = normalizeText(searchInput?.value);
+
+        const filtered = allRows.filter(function (row) {
+
+            const date = row.dataset.date || "";
+            const left = Number(row.dataset.left || 0);
+
+            const isUpcoming = date >= today;
+            const isPast = date < today;
+
+            let matchesStatus = true;
+
+            if (currentFilter === "upcoming") {
+                matchesStatus = isUpcoming;
+            }
+
+            if (currentFilter === "available") {
+                matchesStatus = isUpcoming && left > 0;
+            }
+
+            if (currentFilter === "past") {
+                matchesStatus = isPast;
+            }
+
+            const searchableText = normalizeText(
+                (row.dataset.tour || "") + " " +
+                (row.dataset.code || "") + " " +
+                date + " " +
+                date.split("-").reverse().join("/")
+            );
+
+            return matchesStatus &&
+                (!keyword || searchableText.includes(keyword));
+        });
+
+        filtered.sort(function (a, b) {
+
+            const dateA = a.dataset.date || "";
+            const dateB = b.dataset.date || "";
+
+            if (currentFilter === "past") {
+                return dateB.localeCompare(dateA);
+            }
+
+            return dateA.localeCompare(dateB);
+        });
+
+        return filtered;
+    }
+
+    function renderTable() {
+
+        const filtered = getFilteredRows();
+
+        totalPages = Math.max(
+            1,
+            Math.ceil(filtered.length / pageSize)
+        );
+
+        currentPage = Math.min(
+            Math.max(currentPage, 1),
+            totalPages
+        );
+
+        allRows.forEach(function (row) {
+            row.hidden = true;
+            row.style.display = "none";
+        });
+
+        // Thay đổi thứ tự hiển thị ở phía trình duyệt.
+        filtered.forEach(function (row) {
+            tbody?.appendChild(row);
+        });
+
+        const start = (currentPage - 1) * pageSize;
+
+        filtered.slice(start, start + pageSize)
+            .forEach(function (row) {
+                row.hidden = false;
+                row.style.display = "";
+            });
+
+        if (resultCount) {
+            resultCount.textContent =
+                "Hiển thị " +
+                (filtered.length === 0 ? 0 : start + 1) +
+                "–" +
+                Math.min(start + pageSize, filtered.length) +
+                " trong " +
+                filtered.length +
+                " lịch";
+        }
+
+        if (pageInfo) {
+            pageInfo.textContent =
+                currentPage + " / " + totalPages;
+        }
+
+        if (prevBtn) {
+            prevBtn.disabled = currentPage <= 1;
+        }
+
+        if (nextBtn) {
+            nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        if (emptyState) {
+            emptyState.style.display =
+                filtered.length === 0 ? "block" : "none";
+        }
+    }
+
+    tabs.forEach(function (tab) {
+
+        tab.addEventListener("click", function () {
+
+            currentFilter = tab.dataset.filter || "upcoming";
+            currentPage = 1;
+
+            tabs.forEach(function (item) {
+                item.classList.toggle(
+                    "active",
+                    item === tab
+                );
+            });
+
+            renderTable();
+        });
+    });
+
+    searchInput?.addEventListener("input", function () {
+        currentPage = 1;
+        renderTable();
+    });
+
+    prevBtn?.addEventListener("click", function () {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    nextBtn?.addEventListener("click", function () {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
+
+    renderTable();
+
+    /* ==========================================
+       2. MODAL CONTROLS
+       ========================================== */
+
+    const createModal = document.getElementById("htCreateModal");
+    const editModal = document.getElementById("htEditModal");
+
+    const createForm = document.getElementById("htCreateForm");
+    const editForm = document.getElementById("htEditForm");
+
+    let lastTrigger = null;
+
+    function openModal(modal, trigger) {
+
+        lastTrigger = trigger || document.activeElement;
+
+        modal.hidden = false;
+
+        document.body.style.overflow = "hidden";
+
+        const focusTarget = modal.querySelector(
+            "select, input:not([type='hidden']), button"
+        );
+
+        focusTarget?.focus();
+    }
+
+    function closeModals() {
+
+        createModal.hidden = true;
+        editModal.hidden = true;
+
+        document.body.style.overflow = "";
+
+        lastTrigger?.focus();
+    }
+
+    document.getElementById("htOpenCreate")
+        ?.addEventListener("click", function () {
+
+            const error = document.getElementById(
+                "htCreateError"
+            );
+
+            if (error) {
+                error.style.display = "none";
+                error.textContent = "";
+            }
+
+            openModal(createModal, this);
+        });
+
+    document.querySelectorAll(".htLichClose")
+        .forEach(function (button) {
+            button.addEventListener("click", closeModals);
+        });
+
+    [createModal, editModal].forEach(function (modal) {
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                closeModals();
+            }
+        });
+    });
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape" &&
+            (!createModal.hidden || !editModal.hidden)) {
+
+            closeModals();
+        }
+    });
+
+    /* ==========================================
+       3. CREATE DEPARTURE
+       ========================================== */
+
+    const createTour = document.getElementById("htCreateTour");
+    const createDate = document.getElementById("htCreateDate");
+    const createTime = document.getElementById("htCreateTime");
+    const createCapacity = document.getElementById(
+        "htCreateCapacity"
+    );
+
+    function showFormError(id, message) {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent = message;
+            element.style.display = "block";
+        }
+    }
+
+    createForm?.addEventListener("submit", function (event) {
+
+        const idTour = createTour?.value;
+        const date = createDate?.value;
+        const time = createTime?.value;
+        const capacity = Number(createCapacity?.value);
+
+        if (!idTour || !date || !time ||
+            !Number.isInteger(capacity) || capacity < 1) {
+
+            event.preventDefault();
+
+            showFormError(
+                "htCreateError",
+                "Vui lòng nhập đầy đủ tour, ngày, giờ và số chỗ hợp lệ."
+            );
+
+            return;
+        }
+
+        if (date < today) {
+            event.preventDefault();
+
+            showFormError(
+                "htCreateError",
+                "Không thể tạo lịch cho ngày đã qua."
+            );
+
+            return;
+        }
+
+        // Chống chọn trùng cùng tour, cùng ngày
+        // đối với các lịch đang hiển thị trong trang.
+        // Controller vẫn cần kiểm tra lại trên SQL.
+        const duplicate = allRows.some(function (row) {
+            return row.dataset.tourId === idTour &&
+                row.dataset.date === date;
+        });
+        if (duplicate) {
+            event.preventDefault();
+
+            showFormError(
+                "htCreateError",
+                "Tour này đã có lịch khởi hành trong ngày đã chọn."
+            );
+        }
+    });
+
+    /* ==========================================
+       4. EDIT DEPARTURE
+       ========================================== */
+
+    const editId = document.getElementById("htEditId");
+    const editDate = document.getElementById("htEditDate");
+    const editTime = document.getElementById("htEditTime");
+    const editCapacity = document.getElementById("htEditCapacity");
+    const editTourName = document.getElementById(
+        "htEditTourName"
+    );
+
+    document.querySelectorAll(".htLichEditBtn")
+        .forEach(function (button) {
+
+            button.addEventListener("click", function () {
+
+                const row = button.closest(".ht-lich-row");
+
+                if (!row) {
+                    return;
+                }
+
+                editId.value = row.dataset.id || "";
+                editDate.value = row.dataset.date || "";
+                editTime.value = row.dataset.time || "";
+                editCapacity.value = row.dataset.capacity || "";
+
+                editTourName.textContent =
+                    row.dataset.tour || "Tour du lịch";
+
+                const error = document.getElementById(
+                    "htEditError"
+                );
+
+                if (error) {
+                    error.style.display = "none";
+                    error.textContent = "";
+                }
+
+                openModal(editModal, button);
+            });
+        });
+
+    editForm?.addEventListener("submit", function (event) {
+
+        const capacity = Number(editCapacity?.value);
+
+        if (
+            !editId.value ||
+            !editDate.value ||
+            !editTime.value ||
+            !Number.isInteger(capacity) ||
+            capacity < 1
+        ) {
+            event.preventDefault();
+
+            showFormError(
+                "htEditError",
+                "Vui lòng nhập ngày, giờ và số chỗ hợp lệ."
+            );
+
+            return;
+        }
+
+        if (editDate.value < today) {
+            event.preventDefault();
+
+            showFormError(
+                "htEditError",
+                "Ngày khởi hành không được nằm trong quá khứ."
+            );
+        }
+    });
+
+    /* ==========================================
+       5. CONFIRM DELETE
+       ========================================== */
+
+    document.querySelectorAll(".htLichDeleteForm")
+        .forEach(function (form) {
+
+            form.addEventListener("submit", function (event) {
+
+                const row = form.closest(".ht-lich-row");
+
+                const tourName = row?.dataset.tour
+                    || "lịch khởi hành này";
+
+                const date = row?.dataset.date
+                    || "";
+
+                const confirmed = window.confirm(
+                    "Xác nhận xóa lịch?\n\n" +
+                    "Tour: " + tourName + "\n" +
+                    "Ngày: " + date + "\n\n" +
+                    "Thao tác này không thể hoàn tác."
+                );
+
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            });
+        });
+
+});
+</script>

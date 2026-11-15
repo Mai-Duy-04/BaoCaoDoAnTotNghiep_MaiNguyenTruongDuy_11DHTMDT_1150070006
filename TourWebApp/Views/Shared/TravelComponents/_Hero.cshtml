@@ -1,48 +1,322 @@
+
 @model HeroModel
 
-<link rel="stylesheet" href="~/css/home-hero.css" asp-append-version="true" />
+<link rel="stylesheet"
+      href="~/css/home-hero.css"
+      asp-append-version="true" />
 
-<section class="hero-section ht-video-hero" aria-label="Khám phá cùng HappyTrip">
-    <div class="ht-video-media">
-        <video id="happytripHeroVideo"
-               class="ht-hero-video"
-               autoplay
-               muted
-               loop
-               playsinline
-               preload="metadata"
-               poster="/img/happytrip-hero/hero-background.png"
-               aria-hidden="true">
-            <source src="/videos/happytrip-cruise.mp4" type="video/mp4" />
-        </video>
+<section class="hero-section ht-video-hero ht-saigon-hero"
+         aria-label="Khám phá miền Nam cùng HappyTrip">
+
+    <!-- ANH NEN SAI GON -->
+    <div class="ht-saigon-background"
+         aria-hidden="true"></div>
+
+    <div class="ht-video-overlay"
+         aria-hidden="true"></div>
+
+    <!-- LA DUA GOC TREN BEN TRAI -->
+    <div class="ht-hero-palm ht-hero-palm-top"
+         aria-hidden="true">
+
+        <svg viewBox="0 0 300 310"
+             fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+
+            <defs>
+                <linearGradient id="htPalmGreenTop"
+                                x1="0" y1="0"
+                                x2="280" y2="280">
+                    <stop stop-color="#C2DD75" />
+                    <stop offset=".48" stop-color="#719D49" />
+                    <stop offset="1" stop-color="#315F3B" />
+                </linearGradient>
+            </defs>
+
+            <g fill="url(#htPalmGreenTop)">
+
+                <path d="M-8 8 Q111 51 226 222
+                         Q109 108 18 137
+                         Q80 98 180 199
+                         Q83 124 -8 8Z" />
+
+                <path d="M31 38 Q140 43 274 121
+                         Q161 76 94 116
+                         Q132 70 243 120
+                         Q132 92 31 38Z" />
+
+                <path d="M12 60 Q110 120 173 270
+                         Q102 163 33 187
+                         Q71 149 146 238
+                         Q76 153 12 60Z" />
+
+                <path d="M19 23 Q126 57 293 67
+                         Q180 63 126 109
+                         Q151 70 270 75
+                         Q141 83 19 23Z" />
+
+                <path d="M7 84 Q63 166 83 307
+                         Q58 214 6 231
+                         Q36 180 64 277
+                         Q34 174 7 84Z" />
+
+                <path d="M47 21 Q162 80 292 166
+                         Q195 119 140 148
+                         Q170 103 266 162
+                         Q168 119 47 21Z" />
+
+            </g>
+
+            <g stroke="#B8C96D"
+               stroke-width="3"
+               stroke-linecap="round"
+               opacity=".72">
+                <path d="M-15 0 Q117 75 248 251" />
+                <path d="M-5 25 Q139 44 291 101" />
+                <path d="M-10 50 Q91 158 113 309" />
+            </g>
+
+        </svg>
+
     </div>
 
-    <div class="ht-video-overlay"></div>
+    <!-- LA DUA GOC DUOI BEN TRAI -->
+    <div class="ht-hero-palm ht-hero-palm-bottom"
+         aria-hidden="true">
+
+        <svg viewBox="0 0 260 230"
+             fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+
+            <defs>
+                <linearGradient id="htPalmGreenBottom"
+                                x1="0" y1="0"
+                                x2="245" y2="215">
+                    <stop stop-color="#A9CC70" />
+                    <stop offset="1" stop-color="#376A43" />
+                </linearGradient>
+            </defs>
+
+            <g fill="url(#htPalmGreenBottom)">
+                <path d="M-13 231 Q68 117 226 24
+                         Q113 96 127 164
+                         Q97 115 205 34
+                         Q85 111 -13 231Z" />
+
+                <path d="M-14 229 Q42 102 111 7
+                         Q73 105 104 151
+                         Q62 114 99 17
+                         Q26 119 -14 229Z" />
+
+                <path d="M-12 227 Q114 156 257 145
+                         Q156 149 163 199
+                         Q127 156 245 153
+                         Q113 178 -12 227Z" />
+
+                <path d="M-16 231 Q28 144 36 43
+                         Q41 126 85 146
+                         Q36 148 30 59
+                         Q20 158 -16 231Z" />
+
+                <path d="M-15 225 Q92 128 200 80
+                         Q130 105 138 155
+                         Q116 114 188 90
+                         Q84 147 -15 225Z" />
+            </g>
+
+            <g stroke="#BBD38A"
+               stroke-width="2.8"
+               stroke-linecap="round"
+               opacity=".75">
+                <path d="M-16 230 Q79 109 234 20" />
+                <path d="M-15 230 Q38 91 118 5" />
+                <path d="M-16 230 Q114 150 259 144" />
+            </g>
+
+        </svg>
+
+    </div>
+
+    <!-- DUONG VE TAY MAU TRANG -->
+    <div class="ht-hero-flight-line"
+         aria-hidden="true">
+
+        <svg viewBox="0 0 230 60"
+             fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+
+            <path d="M3 34
+                     C25 4 42 56 66 31
+                     C80 15 91 20 100 34
+                     C111 50 122 40 118 28
+                     C112 10 91 17 107 36
+                     C130 63 150 4 179 27
+                     C195 39 204 34 225 9"
+                  stroke="white"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+
+            <path d="M218 10 L226 7 L223 17"
+                  stroke="white"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+
+        </svg>
+
+    </div>
 
     <div class="container travel-container ht-video-content">
-        <div class="ht-video-copy">
-            <span class="ht-video-eyebrow">
-                <span class="ht-video-line"></span>
-                HAPPYTRIP · KHÁM PHÁ THẾ GIỚI
-            </span>
 
-            <h1>@Model.Title</h1>
-            <p>@Model.Subtitle</p>
+        <!-- NOI DUNG BEN TRAI -->
+        <div class="ht-video-copy">
+
+            <div class="ht-hero-ribbon">
+                <i class="fa-solid fa-plane"
+                   aria-hidden="true"></i>
+
+                Du lịch miền Nam cùng HappyTrip
+            </div>
+
+            <div class="ht-hero-heading-wrap">
+
+                <h1 class="ht-saigon-title">
+                    <span>Khám phá nét đẹp</span>
+                    <em>phương Nam</em>
+                    <span>đầy cảm hứng</span>
+                </h1>
+
+                <!-- TIA SANG VANG VE TAY -->
+                <svg class="ht-hero-title-rays"
+                     viewBox="0 0 76 82"
+                     fill="none"
+                     aria-hidden="true"
+                     xmlns="http://www.w3.org/2000/svg">
+
+                    <path d="M12 39 L37 18"
+                          stroke="#FFD65B"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+
+                    <path d="M26 53 L63 47"
+                          stroke="#FFD65B"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+
+                    <path d="M5 20 L13 5"
+                          stroke="#FFD65B"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+
+                </svg>
+
+            </div>
+
+            <p class="ht-hero-description">
+                Từ sông nước miền Tây, biển đảo Phú Quốc
+                đến nhịp sống sôi động Sài Gòn —
+                những hành trình đáng nhớ đang chờ bạn.
+            </p>
 
             <div class="ht-video-actions">
+
                 <a href="@Model.PrimaryButtonUrl"
-                   class="btn travel-btn ht-video-btn-primary">
-                    @Model.PrimaryButtonText
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                   class="ht-video-btn-primary">
+
+                    Khám phá tour
+
+                    <i class="fa-solid fa-arrow-right"
+                       aria-hidden="true"></i>
+
                 </a>
 
                 <a href="@Model.SecondaryButtonUrl"
-                   class="btn travel-btn ht-video-btn-outline">
-                    @Model.SecondaryButtonText
+                   class="ht-video-btn-outline">
+
+                    <i class="fa-solid fa-wand-magic-sparkles"
+                       aria-hidden="true"></i>
+
+                    Gợi ý tour cho tôi
+
                 </a>
+
             </div>
+
         </div>
+
+        <!-- POSTCARD BEN PHAI -->
+        <div class="ht-hero-postcards"
+             aria-label="Hình ảnh du lịch Sài Gòn">
+
+            <div class="ht-postcard ht-postcard-back">
+
+                <img src="/img/happytrip-hero/nguyen-hue.jpg"
+                     alt="Khung cảnh Sài Gòn với tòa nhà Bitexco"
+                     loading="eager" />
+
+            </div>
+
+            <div class="ht-postcard ht-postcard-front">
+
+                <span class="ht-postcard-pin"
+                      aria-hidden="true">
+
+                    <i class="fa-solid fa-thumbtack"></i>
+
+                </span>
+
+                <img src="/img/happytrip-hero/cho-ben-thanh.jpg"
+                     alt="Chợ Bến Thành tại Thành phố Hồ Chí Minh"
+                     loading="eager" />
+
+                <span class="ht-postcard-caption">
+
+                    Sài Gòn
+
+                    <i class="fa-solid fa-heart"
+                       aria-hidden="true"></i>
+
+                </span>
+
+            </div>
+
+            <!-- NET VE SANG BEN CANH POSTCARD -->
+            <svg class="ht-postcard-rays"
+                 viewBox="0 0 70 85"
+                 fill="none"
+                 aria-hidden="true"
+                 xmlns="http://www.w3.org/2000/svg">
+
+                <path d="M17 49 L6 28"
+                      stroke="white"
+                      stroke-width="4"
+                      stroke-linecap="round" />
+
+                <path d="M32 38 L39 9"
+                      stroke="white"
+                      stroke-width="4"
+                      stroke-linecap="round" />
+
+                <path d="M46 51 L64 34"
+                      stroke="white"
+                      stroke-width="4"
+                      stroke-linecap="round" />
+
+            </svg>
+
+            <span class="ht-postcard-doodle"
+                  aria-hidden="true">✦</span>
+
+        </div>
+
     </div>
+
+    <div class="ht-hero-bottom-wave"
+         aria-hidden="true"></div>
+
 </section>
 
-<script src="~/js/home-hero.js" asp-append-version="true" defer></script>
+<script src="~/js/home-hero.js"
+        asp-append-version="true"
+        defer></script>

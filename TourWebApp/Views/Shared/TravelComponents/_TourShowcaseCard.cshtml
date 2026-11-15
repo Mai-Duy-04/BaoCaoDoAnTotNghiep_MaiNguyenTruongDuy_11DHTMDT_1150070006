@@ -1,53 +1,79 @@
+
 @model TourPackageItem
 
-<article class="ht-showcase-card">
+<article class="ht-showcase-card ht-ticket-card">
+
     <div class="ht-showcase-media">
+
         <img src="@Model.ImageUrl"
              alt="Hình ảnh tour @Model.Name"
              loading="lazy" />
 
-        <div class="ht-showcase-image-overlay"></div>
-
-        <span class="ht-showcase-category">
-            <i class="fa-solid fa-location-dot"></i>
-            @Model.Category
+        <span class="ht-showcase-duration-badge">
+            <i class="fa-regular fa-clock"></i>
+            @Model.Duration
         </span>
 
-        <div class="ht-showcase-image-caption">
-            <span>HAPPYTRIP · HÀNH TRÌNH NỔI BẬT</span>
-            <h3>@Model.Name</h3>
-        </div>
+        <span class="ht-tour-sticker"
+              aria-hidden="true">
+            <i class="fa-solid fa-camera"></i>
+        </span>
+
+        <span class="ht-tour-sparkle ht-tour-sparkle-one"
+              aria-hidden="true">✦</span>
+
+        <span class="ht-tour-sparkle ht-tour-sparkle-two"
+              aria-hidden="true">✧</span>
+
     </div>
 
     <div class="ht-showcase-content">
-        <div class="ht-showcase-meta">
-            <span>
-                <i class="fa-regular fa-clock"></i>
-                @Model.Duration
+
+        <div class="ht-tour-topline">
+
+            <span class="ht-showcase-category-text">
+                <i class="fa-solid fa-location-dot"></i>
+                @Model.Category
             </span>
 
-            <span>
+            <span class="ht-showcase-tour-rating">
                 <i class="fa-solid fa-star"></i>
                 @Model.Rating.ToString("0.0")/5
             </span>
+
         </div>
+
+        <h3 class="ht-showcase-tour-name">
+            @Model.Name
+        </h3>
 
         <p class="ht-showcase-description">
             @Model.Description
         </p>
 
+        <div class="ht-tour-divider"
+             aria-hidden="true">
+            <span>✦</span>
+        </div>
+
         <div class="ht-showcase-footer">
+
             <div class="ht-showcase-price">
-                <span>GIÁ TOUR</span>
+                <span>Giá tour</span>
                 <strong>@Model.Price.ToString("N0")đ</strong>
             </div>
 
             <a href="/tours/@Model.Slug"
                class="ht-showcase-detail"
-               aria-label="Xem chi tiết tour @Model.Name">
-                Xem chi tiết
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+               aria-label="Xem chi tiết tour @Model.Name"
+               title="Xem chi tiết tour">
+
+                <i class="fa-solid fa-arrow-right"></i>
+
             </a>
+
         </div>
+
     </div>
+
 </article>

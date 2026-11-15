@@ -1,100 +1,378 @@
 ﻿
 @model TravelAboutViewModel
+
 @{
     ViewData["Title"] = "Giới thiệu";
+
+    var teamMembers = Model.TeamMembers.ToList();
+    var stats = Model.Stats.ToList();
+
+    var statIcons = new[]
+    {
+        "fa-solid fa-users",
+        "fa-solid fa-location-dot",
+        "fa-regular fa-calendar-days",
+        "fa-regular fa-star"
+    };
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/about-refresh.css" asp-append-version="true" />
+    <link rel="stylesheet"
+          href="~/css/about-refresh.css"
+          asp-append-version="true" />
 }
 
-<main class="ht-about-page">
-    <section class="page-hero page-hero-about">
-        <div class="page-hero-overlay"></div>
-        <div class="container travel-container">
-            <span class="section-kicker">Về HappyTrip</span>
-            <h1>Thiết kế hành trình thực tế và đáng nhớ</h1>
-            <p>HappyTrip tập trung vào tour chất lượng, lịch trình rõ ràng và trải nghiệm địa phương phù hợp khách Việt.</p>
-        </div>
-    </section>
+<main class="htmag-about">
 
-    <section class="travel-section ht-about-mission">
-        <div class="container travel-container">
-            <div class="row g-5 align-items-center">
-                <div class="col-lg-6">
-                    <div class="ht-about-mission-content">
-                        <span class="section-kicker">Sứ mệnh của chúng tôi</span>
-                        <h2 class="about-title">Mỗi chuyến đi phải rõ ràng, an tâm và đáng tiền.</h2>
-                        <p class="about-copy">
-                            HappyTrip được xây dựng để mang lại trải nghiệm du lịch chỉn chu:
-                            tư vấn đúng nhu cầu, lịch trình dễ theo, dịch vụ minh bạch và hỗ trợ
-                            xuyên suốt chuyến đi. Chúng tôi ưu tiên sự thoải mái thực tế thay vì
-                            tour dày điểm đến nhưng thiếu trải nghiệm.
-                        </p>
+    <!-- =========================================
+         1. HERO - TRAVEL MAGAZINE
+         ========================================= -->
+    <section class="htmag-hero"
+             aria-labelledby="htmag-hero-title">
 
-                        <div class="ht-about-values">
-                            <span><i class="fa-solid fa-circle-check"></i> Lịch trình rõ ràng</span>
-                            <span><i class="fa-solid fa-circle-check"></i> Tư vấn phù hợp</span>
-                            <span><i class="fa-solid fa-circle-check"></i> Trải nghiệm thực tế</span>
-                        </div>
-                    </div>
-                </div>
+        <img class="htmag-hero-image"
+             src="/img/about/happytrip-about-hero-bright.jpg"
+     alt="Toàn cảnh thành phố Hồ Chí Minh bên sông"
+             fetchpriority="high" />
 
-                <div class="col-lg-6">
-                    <div class="ht-about-mission-media reveal">
-                        <img src="/img/about/mission.jpg"
-                             alt="Trải nghiệm khám phá thiên nhiên cùng HappyTrip"
-                             loading="lazy" />
-                    </div>
-                </div>
+        <div class="htmag-hero-shade"></div>
+
+        <div class="htmag-shell htmag-hero-inner">
+
+            <div class="htmag-hero-copy">
+
+                <span class="htmag-hero-eyebrow">
+                    VỀ HAPPYTRIP
+                </span>
+
+                <h1 id="htmag-hero-title">
+                    Không chỉ là chuyến đi,
+                    <br />
+                    mà là những câu chuyện
+                    <br />
+                    <span>đáng nhớ.</span>
+                </h1>
+
+                <span class="htmag-yellow-line"
+                      aria-hidden="true"></span>
+
+                <p>
+                    HappyTrip đồng hành cùng bạn khám phá
+                    vẻ đẹp miền Nam Việt Nam qua những
+                    hành trình trọn vẹn, chân thực
+                    và giàu trải nghiệm.
+                </p>
+
             </div>
+
+            <!-- CHỈ SỐ HIỂN THỊ NGAY TRONG HERO -->
+            @if (stats.Count > 0)
+            {
+                <div class="htmag-hero-facts">
+
+                    @for (var i = 0; i < Math.Min(3, stats.Count); i++)
+                    {
+                        var stat = stats[i];
+                        var iconClass = i < statIcons.Length
+                            ? statIcons[i]
+                            : "fa-solid fa-chart-simple";
+
+                        <div class="htmag-hero-fact">
+
+                            <i class="@iconClass"
+                               aria-hidden="true"></i>
+
+                            <div>
+                                <strong>@stat.Value</strong>
+                                <span>@stat.Label</span>
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+
         </div>
     </section>
 
-    <section class="travel-section section-cream ht-about-team">
-        <div class="container travel-container">
 
-            <partial name="~/Views/Shared/TravelComponents/_SectionHeading.cshtml"
-                     model='new SectionHeadingModel {
-                         Kicker = "Đội ngũ đồng hành",
-                         Title = "Những người đứng sau mỗi hành trình",
-                         Description = "Đội ngũ vận hành và hướng dẫn viên của HappyTrip luôn ưu tiên trải nghiệm thực tế của khách.",
-                         AlignClass = "text-center"
-                     }' />
+    <!-- =========================================
+         2. SU MENH - COLLAGE ANH
+         ========================================= -->
+    <section class="htmag-mission"
+             aria-labelledby="htmag-mission-title">
 
-            <div class="team-grid ht-about-team-grid mt-4">
-                @foreach (var member in Model.TeamMembers)
+        <div class="htmag-shell htmag-mission-grid">
+
+            <!-- 2 ẢNH XẾP CHỒNG -->
+            <div class="htmag-mission-images">
+
+                <div class="htmag-mission-orange"
+                     aria-hidden="true"></div>
+
+                <div class="htmag-mission-photo-primary">
+                    <img src="/img/tours/saigon-city.jpg"
+                         alt="Thành phố Hồ Chí Minh"
+                         loading="lazy" />
+                </div>
+
+                <div class="htmag-mission-photo-secondary">
+                    <img src="/img/about/mission.jpg"
+                         alt="Trải nghiệm khám phá thiên nhiên"
+                         loading="lazy" />
+                </div>
+
+            </div>
+
+            <!-- NỘI DUNG -->
+            <div class="htmag-mission-copy">
+
+                <span class="htmag-eyebrow">
+                    <span class="htmag-small-line"></span>
+                    SỨ MỆNH CỦA CHÚNG TÔI
+                </span>
+
+                <h2 id="htmag-mission-title">
+                    Đồng hành trên
+                    <br />
+                    mọi cung đường
+                </h2>
+
+                <p>
+                    HappyTrip được xây dựng để mang lại
+                    trải nghiệm du lịch chỉn chu:
+                    tư vấn đúng nhu cầu, lịch trình dễ theo,
+                    dịch vụ minh bạch và hỗ trợ xuyên suốt
+                    chuyến đi. Chúng tôi ưu tiên sự thoải mái
+                    thực tế thay vì tour dày điểm đến
+                    nhưng thiếu trải nghiệm.
+                </p>
+
+                <div class="htmag-benefits">
+
+                    <div class="htmag-benefit">
+                        <i class="fa-regular fa-compass"
+                           aria-hidden="true"></i>
+                        <strong>Lịch trình rõ ràng</strong>
+                    </div>
+
+                    <div class="htmag-benefit">
+                        <i class="fa-solid fa-shield-halved"
+                           aria-hidden="true"></i>
+                        <strong>Tư vấn phù hợp</strong>
+                    </div>
+
+                    <div class="htmag-benefit">
+                        <i class="fa-solid fa-mountain-sun"
+                           aria-hidden="true"></i>
+                        <strong>Trải nghiệm thực tế</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- =========================================
+         3. HANH TRINH PHAT TRIEN
+         ========================================= -->
+    <section class="htmag-journey"
+             aria-labelledby="htmag-journey-title">
+
+        <div class="htmag-shell htmag-journey-grid">
+
+            <div class="htmag-journey-heading">
+
+                <span class="htmag-eyebrow">
+                    HÀNH TRÌNH HAPPYTRIP
+                </span>
+
+                <h2 id="htmag-journey-title">
+                    Từ một ý tưởng
+                    <br />
+                    đến người bạn đồng hành
+                    <br />
+                    của du khách
+                </h2>
+
+                <span class="htmag-orange-line"
+                      aria-hidden="true"></span>
+
+            </div>
+
+            <!-- CÁC GIAI ĐOẠN, KHÔNG TỰ GẮN NĂM -->
+            <div class="htmag-timeline">
+
+                <div class="htmag-timeline-item">
+
+                    <span class="htmag-timeline-marker"></span>
+
+                    <div class="htmag-timeline-number">
+                        01
+                    </div>
+
+                    <div class="htmag-timeline-text">
+                        <h3>Khởi nguồn ý tưởng</h3>
+                        <p>
+                            Xây dựng nền tảng đặt tour
+                            tập trung vào trải nghiệm
+                            và nhu cầu thực tế.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="htmag-timeline-item">
+
+                    <span class="htmag-timeline-marker"></span>
+
+                    <div class="htmag-timeline-number">
+                        02
+                    </div>
+
+                    <div class="htmag-timeline-text">
+                        <h3>Phát triển và hoàn thiện</h3>
+                        <p>
+                            Hoàn thiện thông tin tour,
+                            điểm đến và công cụ
+                            tư vấn hành trình.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="htmag-timeline-item">
+
+                    <span class="htmag-timeline-marker"></span>
+
+                    <div class="htmag-timeline-number">
+                        03
+                    </div>
+
+                    <div class="htmag-timeline-text">
+                        <h3>Định hướng đồng hành lâu dài</h3>
+                        <p>
+                            Tiếp tục nâng cao trải nghiệm
+                            và khả năng gợi ý hành trình
+                            phù hợp với từng khách hàng.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="htmag-journey-image">
+
+                <img src="/img/tours/cantho.jpg"
+                     alt="Phong cảnh sông nước miền Tây"
+                     loading="lazy" />
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         4. DOI NGU - EDITORIAL PORTRAITS
+         ========================================= -->
+    <section class="htmag-team"
+             aria-labelledby="htmag-team-title">
+
+        <div class="htmag-shell htmag-team-layout">
+
+            <div class="htmag-team-intro">
+
+                <span class="htmag-eyebrow">
+                    ĐỘI NGŨ HAPPYTRIP
+                </span>
+
+                <h2 id="htmag-team-title">
+                    Những con người
+                    <br />
+                    tạo nên
+                    <span>HappyTrip</span>
+                </h2>
+
+                <p>
+                    Đội ngũ vận hành và hướng dẫn viên
+                    của HappyTrip luôn ưu tiên
+                    trải nghiệm thực tế của khách,
+                    đồng hành trên mỗi hành trình.
+                </p>
+
+                <span class="htmag-orange-line"
+                      aria-hidden="true"></span>
+
+            </div>
+
+            <div class="htmag-team-grid">
+
+                @foreach (var member in teamMembers)
                 {
-                    <article class="team-card ht-about-team-card reveal">
-                        <div class="ht-about-avatar">
+                    <article class="htmag-team-member">
+
+                        <div class="htmag-member-photo">
+
                             <img src="@member.ImageUrl"
                                  alt="@member.Name"
                                  loading="lazy" />
+
                         </div>
 
-                        <div class="team-body">
+                        <div class="htmag-member-info">
+
                             <h3>@member.Name</h3>
+
                             <span>@member.Role</span>
-                            <p>@member.Bio</p>
+
                         </div>
+
                     </article>
                 }
+
             </div>
+
         </div>
     </section>
 
-    <section class="travel-section ht-about-stats">
-        <div class="container travel-container">
-            <div class="stats-grid">
-                @foreach (var stat in Model.Stats)
+
+    <!-- =========================================
+         5. THONG KE - MOUNTAIN STRIP
+         ========================================= -->
+    @if (stats.Count > 0)
+    {
+        <section class="htmag-stats"
+                 aria-label="HappyTrip qua những con số">
+
+            <div class="htmag-stats-background"></div>
+
+            <div class="htmag-shell htmag-stats-grid">
+
+                @for (var i = 0; i < stats.Count; i++)
                 {
-                    <div class="stat-card reveal">
+                    var stat = stats[i];
+
+                    <div class="htmag-stat">
+
                         <strong>@stat.Value</strong>
+
                         <span>@stat.Label</span>
+
+                        <span class="htmag-stat-rule"
+                              aria-hidden="true"></span>
+
                     </div>
                 }
+
             </div>
-        </div>
-    </section>
+        </section>
+    }
 
 </main>

@@ -1,142 +1,1517 @@
-﻿@model TourWebApp.Models.ViewModels.NhapThongTinVM
+﻿
+@model TourWebApp.Models.ViewModels.NhapThongTinVM
+@using System.Globalization
+
 @{
-    var user = Context.Session.GetInt32("IdTaiKhoan") != null
-        ? (TourWebApp.Data.Models.TaiKhoan)ViewBag.User
-        : null;
-    var dsMaPhieuDaLuu = ViewBag.DanhSachMaPhieuDaLuu as List<string> ?? new List<string>();
+    ViewData["Title"] = "Thông tin đặt tour | HappyTrip";
+
+    var user = ViewBag.User as TourWebApp.Data.Models.TaiKhoan;
+
+    var danhSachVoucher =
+        ViewBag.DanhSachMaPhieuDaLuu as List<string>
+        ?? new List<string>();
+
+    var tenTour = Model.TenTour ?? "Tour du lịch";
+
+    var anhTour = ViewBag.AnhTour as string;
+
+    var anhTourSrc = string.IsNullOrWhiteSpace(anhTour)
+        ? ""
+        : TourImagePathHelper.ToTourImageSrc(anhTour);
+
+    var hoTen = !string.IsNullOrWhiteSpace(Model.HoTen)
+        ? Model.HoTen
+        : user?.HoTen ?? "";
+
+    var sdt = !string.IsNullOrWhiteSpace(Model.SDT)
+        ? Model.SDT
+        : user?.SoDienThoai ?? "";
+
+    var email = !string.IsNullOrWhiteSpace(Model.Email)
+        ? Model.Email
+        : user?.Email ?? "";
+
+    var tongKhach =
+        Model.NguoiLon + Model.TreEm + Model.EmBe;
+
+    var inv = CultureInfo.InvariantCulture;
 }
 
-<div class="container mt-4 mb-5">
-    <h3 class="mb-4 fw-bold">Đặt tour: @Model.TenTour</h3>
+<div class="ht-booking-v2">
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-warning">@TempData["Error"]</div>
+    <!-- HERO + TIEN TRINH DAT TOUR -->
+    <section class="htb-hero">
+        <div class="container">
+
+            <div class="htb-heading">
+                <div>
+                    <span class="htb-eyebrow">
+                        HAPPYTRIP · BƯỚC 2/3
+                    </span>
+
+                    <h1>Thông tin đặt tour</h1>
+
+                    <p>
+                        Điền thông tin liên hệ và kiểm tra
+                        số lượng khách trước khi thanh toán.
+                    </p>
+                </div>
+            </div>
+
+            <div class="htb-steps" aria-label="Tiến trình đặt tour">
+
+                <div class="htb-step completed">
+                    <span class="htb-step-number">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+
+                    <span>1. Chọn tour</span>
+                </div>
+
+                <span class="htb-step-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </span>
+
+                <div class="htb-step active"
+                     aria-current="step">
+                    <span class="htb-step-number">2</span>
+                    <span>2. Thông tin đặt tour</span>
+                </div>
+
+                <span class="htb-step-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </span>
+
+                <div class="htb-step upcoming">
+                    <span class="htb-step-number">3</span>
+                    <span>3. Thanh toán</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div class="container htb-container">
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="htb-alert error" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <form asp-controller="DatTour"
+              asp-action="TaoDonVaChuyenSangThanhToan"
+              method="post"
+              id="htBookingForm">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="IdTour" />
+            <input type="hidden" asp-for="IdLich" />
+
+            <input type="hidden" asp-for="GiaNguoiLon" />
+            <input type="hidden" asp-for="GiaTreEm" />
+            <input type="hidden" asp-for="GiaEmBe" />
+            <input type="hidden" asp-for="TongTien" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="htb-validation text-danger"></div>
+
+            <div class="htb-layout">
+
+                <!-- COT TRAI -->
+                <main class="htb-main">
+
+                    <!-- THONG TIN TOUR -->
+                    <section class="htb-card htb-tour-section">
+
+                        <div class="htb-card-heading">
+                            <span class="htb-heading-icon">
+                                <i class="fa-solid fa-suitcase-rolling"></i>
+                            </span>
+
+                            <div>
+                                <h2>Tour đã chọn</h2>
+                            </div>
+                        </div>
+
+                        <div class="htb-tour-box">
+
+                            <div class="htb-tour-image">
+                                @if (!string.IsNullOrWhiteSpace(anhTourSrc))
+                                {
+                                    <img src="@anhTourSrc"
+                                         alt="@tenTour"
+                                         loading="lazy"
+                                         onerror="this.style.display='none';this.parentElement.classList.add('htb-image-empty');" />
+                                }
+                                else
+                                {
+                                    <div class="htb-fallback">
+                                        <i class="fa-solid fa-umbrella-beach"></i>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="htb-tour-info">
+                                <span class="htb-overline">
+                                    HÀNH TRÌNH ĐÃ CHỌN
+                                </span>
+
+                                <h3>@tenTour</h3>
+
+                                <div class="htb-tour-meta">
+
+                                    <span>
+                                        <i class="fa-regular fa-calendar-days"></i>
+                                        @Model.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-solid fa-users"></i>
+                                        <strong id="htTourGuestCount">
+                                            @tongKhach
+                                        </strong>
+                                        khách
+                                    </span>
+
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- THONG TIN LIEN HE -->
+                    <section class="htb-card">
+
+                        <div class="htb-card-heading">
+                            <span class="htb-heading-icon">
+                                <i class="fa-regular fa-address-card"></i>
+                            </span>
+
+                            <div>
+                                <h2>Thông tin liên hệ</h2>
+                                <p>Thông tin người đại diện đặt tour</p>
+                            </div>
+                        </div>
+
+                        <div class="htb-fields">
+
+                            <div class="htb-field">
+                                <label for="HoTen">
+                                    Họ và tên <em>*</em>
+                                </label>
+
+                                <div class="htb-input-wrap">
+                                    <i class="fa-regular fa-user"></i>
+
+                                    <input asp-for="HoTen"
+                                           value="@hoTen"
+                                           placeholder="Nhập họ và tên"
+                                           autocomplete="name"
+                                           required />
+                                </div>
+
+                                <span asp-validation-for="HoTen"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="htb-field">
+                                <label for="SDT">
+                                    Số điện thoại <em>*</em>
+                                </label>
+
+                                <div class="htb-input-wrap">
+                                    <i class="fa-solid fa-phone"></i>
+
+                                    <input asp-for="SDT"
+                                           type="tel"
+                                           value="@sdt"
+                                           placeholder="Nhập số điện thoại"
+                                           autocomplete="tel"
+                                           required />
+                                </div>
+
+                                <span asp-validation-for="SDT"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="htb-field">
+                                <label for="Email">
+                                    Email <em>*</em>
+                                </label>
+
+                                <div class="htb-input-wrap">
+                                    <i class="fa-regular fa-envelope"></i>
+
+                                    <input asp-for="Email"
+                                           type="email"
+                                           value="@email"
+                                           placeholder="Nhập email nhận thông báo"
+                                           autocomplete="email"
+                                           required />
+                                </div>
+
+                                <span asp-validation-for="Email"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="htb-field">
+                                <label for="DiaChiLienHe">
+                                    Địa chỉ liên hệ
+                                    <small>(không bắt buộc)</small>
+                                </label>
+
+                                <div class="htb-input-wrap">
+                                    <i class="fa-solid fa-location-dot"></i>
+
+                                    <input asp-for="DiaChiLienHe"
+                                           maxlength="255"
+                                           placeholder="Số nhà, đường, phường/xã..."
+                                           autocomplete="street-address" />
+                                </div>
+
+                                <span asp-validation-for="DiaChiLienHe"
+                                      class="text-danger small"></span>
+                            </div>
+
+                            <div class="htb-field full">
+                                <label for="GhiChu">
+                                    Ghi chú
+                                    <small>(không bắt buộc)</small>
+                                </label>
+
+                                <textarea asp-for="GhiChu"
+                                          rows="2"
+                                          placeholder="Ăn chay, hỗ trợ trẻ nhỏ hoặc yêu cầu đặc biệt..."></textarea>
+
+                                <span asp-validation-for="GhiChu"
+                                      class="text-danger small"></span>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- SO LUONG KHACH -->
+                    <section class="htb-card">
+
+                        <div class="htb-card-heading">
+                            <span class="htb-heading-icon">
+                                <i class="fa-solid fa-users"></i>
+                            </span>
+
+                            <div>
+                                <h2>Số lượng hành khách</h2>
+                                <p>Điều chỉnh số khách trước khi xác nhận đặt tour</p>
+                            </div>
+                        </div>
+
+                        <div class="htb-counter-grid">
+
+                            <div class="htb-counter-card">
+                                <div class="htb-counter-label">
+                                    <strong>Người lớn</strong>
+
+                                    <small>
+                                        @Model.GiaNguoiLon.ToString("N0") đ/người
+                                    </small>
+                                </div>
+
+                                <div class="htb-counter-control">
+                                    <button type="button"
+                                            data-count="NguoiLon"
+                                            data-delta="-1"
+                                            aria-label="Giảm người lớn">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <input asp-for="NguoiLon"
+                                           type="number"
+                                           min="1"
+                                           inputmode="numeric"
+                                           aria-label="Số người lớn" />
+
+                                    <button type="button"
+                                            data-count="NguoiLon"
+                                            data-delta="1"
+                                            aria-label="Tăng người lớn">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="htb-counter-card">
+                                <div class="htb-counter-label">
+                                    <strong>Trẻ em</strong>
+
+                                    <small>
+                                        @Model.GiaTreEm.ToString("N0") đ/người
+                                    </small>
+                                </div>
+
+                                <div class="htb-counter-control">
+                                    <button type="button"
+                                            data-count="TreEm"
+                                            data-delta="-1"
+                                            aria-label="Giảm trẻ em">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <input asp-for="TreEm"
+                                           type="number"
+                                           min="0"
+                                           inputmode="numeric"
+                                           aria-label="Số trẻ em" />
+
+                                    <button type="button"
+                                            data-count="TreEm"
+                                            data-delta="1"
+                                            aria-label="Tăng trẻ em">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="htb-counter-card">
+                                <div class="htb-counter-label">
+                                    <strong>Em bé</strong>
+
+                                    <small>
+                                        @Model.GiaEmBe.ToString("N0") đ/người
+                                    </small>
+                                </div>
+
+                                <div class="htb-counter-control">
+                                    <button type="button"
+                                            data-count="EmBe"
+                                            data-delta="-1"
+                                            aria-label="Giảm em bé">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+
+                                    <input asp-for="EmBe"
+                                           type="number"
+                                           min="0"
+                                           inputmode="numeric"
+                                           aria-label="Số em bé" />
+
+                                    <button type="button"
+                                            data-count="EmBe"
+                                            data-delta="1"
+                                            aria-label="Tăng em bé">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="htb-hint">
+                            <i class="fa-solid fa-circle-info"></i>
+
+                            Giá thay đổi theo số khách.
+                            Số chỗ còn lại sẽ được kiểm tra
+                            trước khi tạo đơn.
+                        </div>
+                    </section>
+
+                    <!-- UU DAI VA THANH TOAN -->
+                    <section class="htb-card">
+
+                        <div class="htb-card-heading">
+                            <span class="htb-heading-icon">
+                                <i class="fa-solid fa-tags"></i>
+                            </span>
+
+                            <div>
+                                <h2>Ưu đãi & thanh toán</h2>
+                                <p>Chọn mã ưu đãi và phương thức thanh toán</p>
+                            </div>
+                        </div>
+
+                        <div class="htb-fields">
+
+                            <div class="htb-field">
+                                <label for="MaPhieuGiamGia">
+                                    Mã giảm giá
+                                </label>
+
+                                <div class="htb-input-wrap">
+                                    <i class="fa-solid fa-ticket"></i>
+
+                                    <input asp-for="MaPhieuGiamGia"
+                                           list="htSavedVoucherList"
+                                           placeholder="Nhập mã, VD: HAPPY20"
+                                           autocomplete="off"
+                                           style="text-transform:uppercase" />
+                                </div>
+
+                                <datalist id="htSavedVoucherList">
+                                    @foreach (var ma in danhSachVoucher)
+                                    {
+                                        <option value="@ma"></option>
+                                    }
+                                </datalist>
+
+                                <span asp-validation-for="MaPhieuGiamGia"
+                                      class="text-danger small"></span>
+
+                                <a class="htb-voucher-link"
+                                   href="/TaiKhoan/KhoPhieuGiamGia"
+                                   target="_blank"
+                                   rel="noopener">
+                                    <i class="fa-solid fa-gift"></i>
+                                    Mở kho voucher của tôi
+                                </a>
+                            </div>
+
+                            <div class="htb-field">
+                                <label for="PhuongThucThanhToan">
+                                    Phương thức thanh toán <em>*</em>
+                                </label>
+
+                                <div class="htb-input-wrap">
+                                    <i class="fa-regular fa-credit-card"></i>
+
+                                    <select asp-for="PhuongThucThanhToan"
+                                            required>
+                                        <option value="VNPAY">
+                                            VNPay (thanh toán online)
+                                        </option>
+
+                                        <option value="TienMat">
+                                            Tiền mặt (chờ xác nhận)
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="htb-hint">
+                            <i class="fa-solid fa-shield-halved"></i>
+
+                            VNPay hỗ trợ thanh toán trực tuyến.
+                            Với tiền mặt, đơn sẽ chờ xác nhận thu tiền.
+                        </div>
+
+                    </section>
+                </main>
+
+                <!-- COT PHAI: TOM TAT -->
+                <aside class="htb-sidebar">
+                    <section class="htb-summary">
+
+                        <div class="htb-summary-header">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <h2>Tóm tắt đơn đặt tour</h2>
+                        </div>
+
+                        <div class="htb-summary-body">
+
+                            <div class="htb-summary-tour">
+                                <div class="htb-summary-photo">
+                                    @if (!string.IsNullOrWhiteSpace(anhTourSrc))
+                                    {
+                                        <img src="@anhTourSrc"
+                                             alt="@tenTour"
+                                             loading="lazy"
+                                             onerror="this.style.display='none'" />
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-umbrella-beach"></i>
+                                    }
+                                </div>
+
+                                <div>
+                                    <strong>@tenTour</strong>
+
+                                    <small>
+                                        <i class="fa-regular fa-calendar"></i>
+                                        @Model.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="htb-summary-row">
+                                <span>Ngày khởi hành</span>
+                                <strong>
+                                    @Model.NgayKhoiHanh.ToString("dd/MM/yyyy")
+                                </strong>
+                            </div>
+
+                            <div class="htb-summary-row">
+                                <span>Số lượng khách</span>
+                                <strong id="htSummaryGuests">
+                                    @tongKhach khách
+                                </strong>
+                            </div>
+
+                            <div class="htb-summary-guests"
+                                 id="htGuestDescription">
+                                @Model.NguoiLon người lớn,
+                                @Model.TreEm trẻ em,
+                                @Model.EmBe em bé
+                            </div>
+
+                            <div class="htb-summary-divider"></div>
+
+                            <div class="htb-summary-row">
+                                <span>Tạm tính</span>
+                                <strong id="htSubtotal">
+                                    @Model.TongTien.ToString("N0") đ
+                                </strong>
+                            </div>
+
+                            <div class="htb-summary-row">
+                                <span>Giảm giá</span>
+                                <strong id="htDiscount">0 đ</strong>
+                            </div>
+
+                            <div class="htb-total">
+                                <span>Tổng thanh toán dự kiến</span>
+
+                                <strong id="htGrandTotal">
+                                    @Model.TongTien.ToString("N0") đ
+                                </strong>
+                            </div>
+
+                            <p class="htb-summary-note"
+                               id="htPriceNote">
+                                Voucher sẽ được kiểm tra và
+                                tính lại khi tạo đơn.
+                            </p>
+
+                            <button type="submit"
+                                    class="htb-submit"
+                                    id="htSubmitBooking">
+                                <i class="fa-solid fa-lock"></i>
+                                Tiếp tục thanh toán
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+
+                            <div class="htb-trust-row">
+                                <span>
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    Bảo mật
+                                </span>
+
+                                <span>
+                                    <i class="fa-solid fa-headset"></i>
+                                    Hỗ trợ
+                                </span>
+
+                                <span>
+                                    <i class="fa-solid fa-receipt"></i>
+                                    Minh bạch
+                                </span>
+                            </div>
+
+                        </div>
+                    </section>
+                </aside>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .ht-booking-v2 {
+        --ht-green: #176b43;
+        --ht-deep: #1e4834;
+        --ht-cream: #f7f5ee;
+        --ht-border: #e5e9df;
+        --ht-muted: #819184;
+        background: var(--ht-cream);
+        color: #2b4737;
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+        padding-bottom: 34px;
     }
 
-    <div class="card mb-4 p-3 shadow-sm border-0">
-        <div class="row g-3 align-items-center">
-            <div class="col-md-6">
-                <p class="mb-1"><strong>Ngày khởi hành:</strong> @Model.NgayKhoiHanh.ToString("dd/MM/yyyy")</p>
-                <p class="mb-0"><strong>Tổng khách:</strong> @Model.TongKhach</p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <div><strong>Tổng tiền tạm tính:</strong> @Model.TongTien.ToString("N0") đ</div>
-                @if (Model.SoTienGiam > 0)
-                {
-                    <div><strong>Giảm giá:</strong> -@Model.SoTienGiam.ToString("N0") đ</div>
-                    <div class="text-danger fs-5 fw-bold">Cần thanh toán: @Model.TongTienSauGiam.ToString("N0") đ</div>
-                }
-            </div>
-        </div>
-    </div>
+    .ht-booking-v2 *,
+    .ht-booking-v2 *::before,
+    .ht-booking-v2 *::after {
+        box-sizing: border-box;
+    }
 
-    <form asp-action="TaoDonVaChuyenSangThanhToan" method="post">
-        @Html.AntiForgeryToken()
+    .htb-hero {
+        padding: 27px 0 48px;
+        background:
+            radial-gradient(
+                ellipse at 90% 0%,
+                rgba(139, 200, 164, .22),
+                transparent 50%
+            ),
+            linear-gradient(120deg, #fbf8f1, #eef4eb);
+    }
 
-        <input type="hidden" asp-for="IdTour" />
-        <input type="hidden" asp-for="IdLich" />
-        <input type="hidden" asp-for="GiaNguoiLon" />
-        <input type="hidden" asp-for="GiaTreEm" />
-        <input type="hidden" asp-for="GiaEmBe" />
-        <input type="hidden" asp-for="TongTien" />
+    .htb-eyebrow {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #26804e;
+    }
 
-        <div class="card p-4 shadow-sm border-0">
-            <h5 class="fw-bold mb-3">Thông tin khách hàng</h5>
+    .htb-heading h1 {
+        margin: 9px 0 6px;
+        font-size: clamp(25px, 2.8vw, 36px);
+        font-weight: 800;
+        color: var(--ht-deep);
+    }
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+    .htb-heading p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #667f6e;
+    }
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Họ tên *</label>
-                    <input type="text" name="HoTen" class="form-control" value="@user?.HoTen" required />
-                </div>
+    .htb-steps {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+        max-width: 1120px;
+    }
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Số điện thoại *</label>
-                    <input type="tel" name="SDT" class="form-control" value="@user?.SoDienThoai" required />
-                </div>
+    .htb-step {
+        flex: 1;
+        min-width: 0;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 10px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="Email" class="form-control" value="@user?.Email" />
-                </div>
+    .htb-step-number {
+        width: 23px;
+        height: 23px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        border: 1px solid currentColor;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
 
-                <div class="col-md-6 mb-3">
-                    <label asp-for="MaPhieuGiamGia" class="form-label">Mã phiếu giảm giá</label>
-                    <input asp-for="MaPhieuGiamGia" class="form-control" placeholder="Nhập mã, VD: HAPPY20" style="text-transform:uppercase" list="savedVoucherList" />
-                    <datalist id="savedVoucherList">
-                        @foreach (var ma in dsMaPhieuDaLuu)
-                        {
-                            <option value="@ma"></option>
-                        }
-                    </datalist>
-                    <span asp-validation-for="MaPhieuGiamGia" class="text-danger small"></span>
-                    <div class="small mt-1">
-                        <a href="/TaiKhoan/KhoPhieuGiamGia" target="_blank">Mở kho voucher của tôi</a>
-                    </div>
-                    @if (dsMaPhieuDaLuu.Any())
-                    {
-                        <div class="small text-muted mt-1">Đã lưu @dsMaPhieuDaLuu.Count mã voucher. Bấm để gợi ý nhanh.</div>
-                    }
-                </div>
+    .htb-step.completed {
+        background: #e1f1e5;
+        color: #15713e;
+    }
 
-                <hr class="my-3" />
+    .htb-step.completed .htb-step-number {
+        background: #168149;
+        border-color: #168149;
+        color: white;
+    }
 
-                <h6 class="fw-bold mt-2">Số lượng khách</h6>
+    .htb-step.active {
+        background: #177348;
+        color: white;
+        box-shadow: 0 6px 15px rgba(23, 115, 72, .15);
+    }
 
-                <div class="col-md-4 mb-3">
-                    <label asp-for="NguoiLon" class="form-label">Người lớn</label>
-                    <input asp-for="NguoiLon" type="number" class="form-control" min="1" required />
-                </div>
+    .htb-step.active .htb-step-number {
+        background: white;
+        color: #177348;
+        border-color: white;
+    }
 
-                <div class="col-md-4 mb-3">
-                    <label asp-for="TreEm" class="form-label">Trẻ em</label>
-                    <input asp-for="TreEm" type="number" class="form-control" min="0" />
-                </div>
+    .htb-step.upcoming {
+        background: #e8eee9;
+        color: #687c6e;
+    }
 
-                <div class="col-md-4 mb-3">
-                    <label asp-for="EmBe" class="form-label">Em bé</label>
-                    <input asp-for="EmBe" type="number" class="form-control" min="0" />
-                </div>
+    .htb-step-arrow {
+        color: #698271;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
 
-                <div class="col-12 mb-3">
-                    <label asp-for="GhiChu" class="form-label">Ghi chú</label>
-                    <textarea asp-for="GhiChu" class="form-control" rows="3"></textarea>
-                </div>
+    .htb-container {
+        margin-top: 0;
+        padding-top: 20px;
+    }
 
-                <div class="col-12 mb-3">
-                    <label asp-for="PhuongThucThanhToan" class="form-label">Hình thức thanh toán</label>
-                    <select asp-for="PhuongThucThanhToan" class="form-select">
-                        <option value="VNPAY">VNPAY (online)</option>
-                        <option value="TienMat">Tiền mặt (xác nhận sau)</option>
-                    </select>
-                    <div class="form-text">Tiền mặt sẽ được tạo đơn chờ xác nhận thu tiền, không chuyển đến cổng thanh toán.</div>
-                </div>
+    .htb-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.58fr) minmax(300px, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
 
-                <div class="col-12">
-                    <div class="alert alert-light border d-flex justify-content-between align-items-center mb-0">
-                        <div>
-                            <div><strong>Tạm tính:</strong> @Model.TongTien.ToString("N0") đ</div>
-                            <div><strong>Giảm giá:</strong> @Model.SoTienGiam.ToString("N0") đ</div>
-                        </div>
-                        <div class="text-end">
-                            <div class="small text-muted">Tổng thanh toán dự kiến</div>
-                            <div class="text-danger fs-5 fw-bold">@Model.TongTienSauGiam.ToString("N0") đ</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    .htb-main {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-width: 0;
+    }
 
-            <div class="text-end mt-4">
-                <button class="btn btn-primary px-4 py-2" type="submit">
-                    Tiếp tục thanh toán ->
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
+    .htb-card,
+    .htb-summary {
+        background: #fff;
+        border: 1px solid var(--ht-border);
+        border-radius: 17px;
+        box-shadow: 0 7px 23px rgba(42, 73, 45, .045);
+    }
+
+    .htb-card {
+        padding: 19px;
+    }
+
+    .htb-card-heading {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 17px;
+    }
+
+    .htb-card-heading h2 {
+        margin: 0;
+        color: #214b36;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .htb-card-heading p {
+        margin: 4px 0 0;
+        font-size: 10px;
+        color: #91a095;
+    }
+
+    .htb-heading-icon {
+        width: 37px;
+        height: 37px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        color: #267f4d;
+        background: #eaf4eb;
+        font-size: 15px;
+    }
+
+    .htb-tour-section {
+        padding: 15px;
+    }
+
+    .htb-tour-section .htb-card-heading {
+        margin-bottom: 12px;
+    }
+
+    .htb-tour-box {
+        display: flex;
+        gap: 17px;
+        align-items: center;
+        border: 1px solid #edf0e8;
+        border-radius: 12px;
+        padding: 9px;
+    }
+
+    .htb-tour-image {
+        width: 215px;
+        height: 120px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #e8f1e8;
+    }
+
+    .htb-tour-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .htb-image-empty::after {
+        content: "Ảnh tour";
+        display: grid;
+        place-items: center;
+        height: 100%;
+        font-size: 12px;
+        color: #6b957b;
+    }
+
+    .htb-fallback {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        font-size: 36px;
+        color: #79ae8a;
+    }
+
+    .htb-tour-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .htb-overline {
+        font-size: 9px;
+        color: #4c9165;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .htb-tour-info h3 {
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.6;
+        color: #214b36;
+        margin: 9px 0 12px;
+    }
+
+    .htb-tour-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .htb-tour-meta span {
+        font-size: 11px;
+        color: #637e6b;
+    }
+
+    .htb-tour-meta i {
+        color: #218651;
+        margin-right: 5px;
+    }
+
+    .htb-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px 17px;
+    }
+
+    .htb-field {
+        min-width: 0;
+    }
+
+    .htb-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .htb-field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 7px;
+        color: #345b42;
+    }
+
+    .htb-field label em {
+        color: #e35b50;
+        font-style: normal;
+    }
+
+    .htb-field label small {
+        font-weight: 400;
+        color: #8b998e;
+    }
+
+    .htb-input-wrap {
+        position: relative;
+    }
+
+    .htb-input-wrap > i {
+        position: absolute;
+        top: 14px;
+        left: 12px;
+        color: #3a8758;
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .htb-input-wrap input,
+    .htb-input-wrap select {
+        display: block;
+        width: 100%;
+        min-height: 42px;
+        background: #fff;
+        color: #294735;
+        border: 1px solid #dfe7dd;
+        border-radius: 9px;
+        padding: 10px 11px 10px 36px;
+        font-family: inherit;
+        font-size: 12px;
+        outline: none;
+    }
+
+    .htb-field textarea {
+        width: 100%;
+        min-height: 65px;
+        border: 1px solid #dfe7dd;
+        border-radius: 9px;
+        padding: 11px 12px;
+        font-family: inherit;
+        font-size: 12px;
+        color: #294735;
+        outline: none;
+        resize: vertical;
+    }
+
+    .htb-input-wrap input:focus,
+    .htb-input-wrap select:focus,
+    .htb-field textarea:focus {
+        border-color: #3a9b62;
+        box-shadow: 0 0 0 3px rgba(46, 137, 76, .08);
+    }
+
+    .htb-counter-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    .htb-counter-card {
+        min-width: 0;
+        border: 1px solid #e7ede5;
+        border-radius: 10px;
+        padding: 11px;
+    }
+
+    .htb-counter-label {
+        min-height: 47px;
+    }
+
+    .htb-counter-label strong {
+        display: block;
+        font-size: 11px;
+        color: #2f523c;
+        margin-bottom: 5px;
+    }
+
+    .htb-counter-label small {
+        font-size: 10px;
+        color: #8b9b8e;
+    }
+
+    .htb-counter-control {
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+        height: 36px;
+        border: 1px solid #e2e9dd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .htb-counter-control button {
+        width: 34px;
+        flex-shrink: 0;
+        border: none;
+        background: #eef5eb;
+        color: #217547;
+        cursor: pointer;
+    }
+
+    .htb-counter-control button:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
+    .htb-counter-control input {
+        min-width: 0;
+        width: 100%;
+        border: 0;
+        outline: none;
+        background: #fff;
+        color: #214936;
+        text-align: center;
+        font-family: inherit;
+        font-weight: 800;
+        font-size: 12px;
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+    .htb-counter-control input::-webkit-inner-spin-button,
+    .htb-counter-control input::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .htb-hint {
+        margin-top: 13px;
+        color: #829486;
+        font-size: 10px;
+        line-height: 1.8;
+    }
+
+    .htb-hint i {
+        color: #288451;
+        margin-right: 6px;
+    }
+
+    .htb-voucher-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 9px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #21814b;
+        text-decoration: none;
+    }
+
+    .htb-sidebar {
+        position: sticky;
+        top: 18px;
+        min-width: 0;
+    }
+
+    .htb-summary {
+        overflow: hidden;
+    }
+
+    .htb-summary-header {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: #1c7246;
+        color: #fff;
+        padding: 17px;
+    }
+
+    .htb-summary-header h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .htb-summary-body {
+        padding: 18px;
+    }
+
+    .htb-summary-tour {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #edf0eb;
+    }
+
+    .htb-summary-photo {
+        display: grid;
+        place-items: center;
+        width: 90px;
+        height: 81px;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 10px;
+        color: #74ac82;
+        background: #e8f1e8;
+        font-size: 28px;
+    }
+
+    .htb-summary-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .htb-summary-tour strong {
+        display: block;
+        color: #244936;
+        font-size: 12px;
+        line-height: 1.6;
+        margin-bottom: 8px;
+    }
+
+    .htb-summary-tour small {
+        font-size: 10px;
+        color: #849786;
+    }
+
+    .htb-summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 13px;
+        margin-bottom: 13px;
+        font-size: 11px;
+    }
+
+    .htb-summary-row span {
+        color: #7a8e7e;
+    }
+
+    .htb-summary-row strong {
+        color: #344f3c;
+        text-align: right;
+    }
+
+    .htb-summary-guests {
+        margin-top: -5px;
+        color: #92a096;
+        text-align: right;
+        font-size: 10px;
+    }
+
+    .htb-summary-divider {
+        border-top: 1px solid #edf0eb;
+        margin: 17px 0;
+    }
+
+    .htb-total {
+        margin-top: 16px;
+        border-radius: 12px;
+        background: #f0f3e7;
+        padding: 17px 14px;
+    }
+
+    .htb-total span {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 11px;
+        color: #52765d;
+        font-weight: 700;
+    }
+
+    .htb-total strong {
+        display: block;
+        color: #167244;
+        font-size: clamp(22px, 2.4vw, 28px);
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .htb-summary-note {
+        margin: 12px 0 17px;
+        color: #8d9c90;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    .htb-submit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 47px;
+        border: 0;
+        border-radius: 10px;
+        background: #197847;
+        color: white;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+    }
+
+    .htb-submit:hover {
+        background: #105d36;
+        transform: translateY(-1px);
+    }
+
+    .htb-trust-row {
+        display: flex;
+        justify-content: space-around;
+        border-top: 1px solid #edf0eb;
+        margin-top: 17px;
+        padding-top: 16px;
+    }
+
+    .htb-trust-row span {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        font-size: 10px;
+        color: #849488;
+    }
+
+    .htb-trust-row i {
+        color: #348756;
+        font-size: 17px;
+    }
+
+    .htb-alert {
+        padding: 13px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .htb-alert.error {
+        background: #fff0e9;
+        color: #b34f45;
+    }
+
+    .htb-validation {
+        font-size: 12px;
+    }
+
+    @@media (max-width: 991px) {
+        .htb-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .htb-sidebar {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 680px) {
+        .htb-hero {
+            padding-top: 24px;
+            padding-bottom: 28px;
+        }
+
+        .htb-steps {
+            gap: 5px;
+        }
+
+        .htb-step {
+            font-size: 9px;
+            gap: 4px;
+            padding: 8px 5px;
+            white-space: normal;
+            text-align: center;
+        }
+
+        .htb-step-arrow {
+            font-size: 8px;
+        }
+
+        .htb-step-number {
+            width: 19px;
+            height: 19px;
+        }
+
+        .htb-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .htb-field.full {
+            grid-column: auto;
+        }
+
+        .htb-tour-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .htb-tour-image {
+            width: 100%;
+            height: 175px;
+        }
+
+        .htb-counter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .htb-counter-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .htb-counter-label {
+            min-height: 0;
+        }
+
+        .htb-counter-control {
+            width: 130px;
+            flex-shrink: 0;
+        }
+
+        .htb-card {
+            padding: 15px;
+        }
+
+        .htb-tour-section {
+            padding: 12px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .htb-submit {
+            transition: none;
+        }
+    }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            "use strict";
+
+            const prices = {
+                NguoiLon: Number(
+                    "@Model.GiaNguoiLon.ToString(inv)"
+                ),
+                TreEm: Number(
+                    "@Model.GiaTreEm.ToString(inv)"
+                ),
+                EmBe: Number(
+                    "@Model.GiaEmBe.ToString(inv)"
+                )
+            };
+
+            const ids = ["NguoiLon", "TreEm", "EmBe"];
+
+            const formatter = new Intl.NumberFormat("vi-VN", {
+                maximumFractionDigits: 0
+            });
+
+            function money(amount) {
+                return formatter.format(amount) + " đ";
+            }
+
+            function count(id) {
+                const input = document.getElementById(id);
+                const min = id === "NguoiLon" ? 1 : 0;
+
+                if (!input) return min;
+
+                const raw = Number(input.value);
+
+                if (!Number.isFinite(raw)) return min;
+
+                return Math.max(min, Math.trunc(raw));
+            }
+
+            function updateSummary() {
+                const adult = count("NguoiLon");
+                const child = count("TreEm");
+                const baby = count("EmBe");
+
+                const guests = adult + child + baby;
+
+                const amount =
+                    adult * prices.NguoiLon +
+                    child * prices.TreEm +
+                    baby * prices.EmBe;
+
+                document.getElementById(
+                    "htTourGuestCount"
+                ).textContent = guests;
+
+                document.getElementById(
+                    "htSummaryGuests"
+                ).textContent = guests + " khách";
+
+                document.getElementById(
+                    "htGuestDescription"
+                ).textContent =
+                    adult + " người lớn, " +
+                    child + " trẻ em, " +
+                    baby + " em bé";
+
+                document.getElementById(
+                    "htSubtotal"
+                ).textContent = money(amount);
+
+                document.getElementById(
+                    "htGrandTotal"
+                ).textContent = money(amount);
+
+                document.getElementById(
+                    "htDiscount"
+                ).textContent = "0 đ";
+
+                const totalInput = document.getElementById("TongTien");
+
+                if (totalInput) {
+                    totalInput.value = String(amount);
+                }
+
+                const voucher = document.getElementById(
+                    "MaPhieuGiamGia"
+                );
+
+                const hasVoucher =
+                    voucher && voucher.value.trim().length > 0;
+
+                document.getElementById(
+                    "htPriceNote"
+                ).textContent = hasVoucher
+                    ? "Tạm tính chưa trừ voucher. Hệ thống sẽ kiểm tra mã và tính lại tổng tiền khi tạo đơn."
+                    : "Giá được tính theo số khách và xác nhận lại khi tạo đơn.";
+
+                document.querySelectorAll(
+                    "[data-count]"
+                ).forEach(button => {
+                    const id = button.dataset.count;
+                    const min = id === "NguoiLon" ? 1 : 0;
+
+                    button.disabled =
+                        Number(button.dataset.delta) < 0 &&
+                        count(id) <= min;
+                });
+            }
+
+            document.querySelectorAll(
+                "[data-count]"
+            ).forEach(button => {
+                button.addEventListener("click", function () {
+                    const id = this.dataset.count;
+                    const input = document.getElementById(id);
+                    const delta = Number(this.dataset.delta);
+
+                    if (!input) return;
+
+                    const min = id === "NguoiLon" ? 1 : 0;
+
+                    input.value = Math.max(
+                        min,
+                        count(id) + delta
+                    );
+
+                    updateSummary();
+                });
+            });
+
+            ids.forEach(id => {
+                const input = document.getElementById(id);
+                if (!input) return;
+
+                input.addEventListener("input", updateSummary);
+
+                input.addEventListener("change", function () {
+                    this.value = count(id);
+                    updateSummary();
+                });
+            });
+
+            document.getElementById(
+                "MaPhieuGiamGia"
+            )?.addEventListener("input", updateSummary);
+
+            document.getElementById(
+                "htBookingForm"
+            )?.addEventListener("submit", function () {
+                ids.forEach(id => {
+                    const input = document.getElementById(id);
+
+                    if (input) {
+                        input.value = count(id);
+                    }
+                });
+
+                updateSummary();
+            });
+
+            updateSummary();
+        })();
+    </script>
 }

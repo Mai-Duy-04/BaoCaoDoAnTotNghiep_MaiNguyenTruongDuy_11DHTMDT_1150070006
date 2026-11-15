@@ -38,210 +38,501 @@ namespace TourWebApp.Controllers
             
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
-
-        // ========== DASHBOARD ==========
-        public IActionResult Dashboard(string period = "month", DateTime? selectedDate = null)
+    
+        public IActionResult Dashboard(
+            string period = "month",
+            DateTime? selectedDate = null)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
-            var now = DateTime.Now;
-            period = (period ?? "month").ToLower();
+            var today = DateTime.Today;
+            var baseDate = selectedDate?.Date ?? today;
 
-            DateTime currentStart;
-            DateTime currentEnd;
-            DateTime previousStart;
-            DateTime previousEnd;
+            period = (period ?? "month").Trim().ToLowerInvariant();
 
-            var baseDate = selectedDate?.Date ?? now.Date;
-
-            if (period == "day")
-            {
-                currentStart = baseDate;
-                currentEnd = baseDate.AddDays(1);
-
-                previousStart = currentStart.AddDays(-1);
-                previousEnd = currentStart;
-
-                ViewBag.FilterTitle = "Ngày " + baseDate.ToString("dd/MM/yyyy");
-                ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
-                ViewBag.SelectedDateText = baseDate.ToString("dd/MM/yyyy");
-            }
-            else if (period == "week")
-            {
-                currentEnd = now.Date.AddDays(1);
-                currentStart = currentEnd.AddDays(-7);
-
-                previousEnd = currentStart;
-                previousStart = previousEnd.AddDays(-7);
-
-                ViewBag.FilterTitle = "7 ngày gần nhất";
-                ViewBag.SelectedDate = now.ToString("yyyy-MM-dd");
-                ViewBag.SelectedDateText = now.ToString("dd/MM/yyyy");
-            }
-            else if (period == "quarter")
-            {
-                int currentQuarter = (now.Month - 1) / 3 + 1;
-                int firstMonthOfQuarter = (currentQuarter - 1) * 3 + 1;
-
-                currentStart = new DateTime(now.Year, firstMonthOfQuarter, 1);
-                currentEnd = currentStart.AddMonths(3);
-
-                previousEnd = currentStart;
-                previousStart = previousEnd.AddMonths(-3);
-
-                ViewBag.FilterTitle = $"Quý {currentQuarter} - {now.Year}";
-                ViewBag.SelectedDate = now.ToString("yyyy-MM-dd");
-                ViewBag.SelectedDateText = now.ToString("dd/MM/yyyy");
-            }
-            else if (period == "year")
-            {
-                currentStart = new DateTime(now.Year, 1, 1);
-                currentEnd = new DateTime(now.Year + 1, 1, 1);
-
-                previousStart = new DateTime(now.Year - 1, 1, 1);
-                previousEnd = currentStart;
-
-                ViewBag.FilterTitle = "Năm " + now.Year;
-                ViewBag.SelectedDate = now.ToString("yyyy-MM-dd");
-                ViewBag.SelectedDateText = now.ToString("dd/MM/yyyy");
-            }
-            else
+            if (!new[] { "day", "week", "month", "quarter", "year" }
+                .Contains(period))
             {
                 period = "month";
+            }
 
-                currentStart = new DateTime(now.Year, now.Month, 1);
-                currentEnd = currentStart.AddMonths(1);
+            DateTime start;
+            DateTime end;
+            DateTime previousStart;
+            DateTime previousEnd;
+            string filterTitle;
 
-                previousEnd = currentStart;
-                previousStart = previousEnd.AddMonths(-1);
+            // ==================================================
+            // 1. BO LOC THOI GIAN
+            // ==================================================
 
-                ViewBag.FilterTitle = "Tháng " + now.ToString("MM/yyyy");
-                ViewBag.SelectedDate = now.ToString("yyyy-MM-dd");
-                ViewBag.SelectedDateText = now.ToString("dd/MM/yyyy");
+            switch (period)
+            {
+                case "day":
+                {
+                    start = baseDate;
+                    end = start.AddDays(1);
+
+                    previousStart = start.AddDays(-1);
+                    previousEnd = start;
+
+                    filterTitle = $"Ngày {baseDate:dd/MM/yyyy}";
+                    break;
+                }
+
+                case "week":
+                {
+                    int offset = ((int)baseDate.DayOfWeek + 6) % 7;
+
+                    start = baseDate.AddDays(-offset);
+                    end = start.AddDays(7);
+
+                    previousStart = start.AddDays(-7);
+                    previousEnd = start;
+
+                    filterTitle =
+                        $"Tuần {start:dd/MM} - {end.AddDays(-1):dd/MM/yyyy}";
+                    break;
+                }
+
+                case "quarter":
+                {
+                    int quarter = (baseDate.Month - 1) / 3 + 1;
+                    int firstMonth = (quarter - 1) * 3 + 1;
+
+                    start = new DateTime(baseDate.Year, firstMonth, 1);
+                    end = start.AddMonths(3);
+
+                    previousStart = start.AddMonths(-3);
+                    previousEnd = start;
+
+                    filterTitle = $"Quý {quarter}/{baseDate.Year}";
+                    break;
+                }
+
+                case "year":
+                {
+                    start = new DateTime(baseDate.Year, 1, 1);
+                    end = start.AddYears(1);
+
+                    previousStart = start.AddYears(-1);
+                    previousEnd = start;
+
+                    filterTitle = $"Năm {baseDate.Year}";
+                    break;
+                }
+
+                default:
+                {
+                    period = "month";
+
+                    start = new DateTime(
+                        baseDate.Year,
+                        baseDate.Month,
+                        1);
+
+                    end = start.AddMonths(1);
+
+                    previousStart = start.AddMonths(-1);
+                    previousEnd = start;
+
+                    filterTitle = $"Tháng {baseDate:MM/yyyy}";
+                    break;
+                }
             }
 
             ViewBag.Period = period;
+            ViewBag.FilterTitle = filterTitle;
+            ViewBag.SelectedDate = baseDate.ToString("yyyy-MM-dd");
+            ViewBag.SelectedDateText = baseDate.ToString("dd/MM/yyyy");
 
-            var validOrders = _context.DonDatTours
+            // ==================================================
+            // 2. LAY DON DAT TOUR
+            // ==================================================
+
+            // Doanh thu duoc nhom theo NGAY DAT.
+            // Chi tinh don da thanh toan va chua bi huy.
+            // Chua phai doanh thu thuan sau hoan tien.
+
+            var orders = _context.DonDatTours
                 .AsNoTracking()
-                .Where(d => d.TrangThai != "DaHuy" && d.TrangThai != "Đã hủy");
+                .Where(d =>
+                    d.TrangThai != "DaHuy" &&
+                    d.TrangThai != "Đã hủy" &&
+                    d.NgayDat >= previousStart &&
+                    d.NgayDat < end)
+                .Select(d => new
+                {
+                    d.IdDon,
+                    d.IdTour,
+                    d.IdLich,
+                    d.NgayDat,
+                    d.DaThanhToan,
+                    d.TrangThai,
+                    d.NguoiLon,
+                    d.TreEm,
+                    d.TreNho,
+                    DoanhThu = d.TongTienSauGiam ?? d.TongTien
+                })
+                .ToList();
 
-            var currentOrders = validOrders
-                .Where(d => d.NgayDat >= currentStart && d.NgayDat < currentEnd);
+            var currentOrders = orders
+                .Where(d =>
+                    d.NgayDat >= start &&
+                    d.NgayDat < end)
+                .ToList();
 
-            var previousOrders = validOrders
-                .Where(d => d.NgayDat >= previousStart && d.NgayDat < previousEnd);
+            var previousOrders = orders
+                .Where(d =>
+                    d.NgayDat >= previousStart &&
+                    d.NgayDat < previousEnd)
+                .ToList();
 
-            var currentPaidOrders = currentOrders.Where(d => d.DaThanhToan);
-            var previousPaidOrders = previousOrders.Where(d => d.DaThanhToan);
+            // ==================================================
+            // 3. KPI THUC TE
+            // ==================================================
 
-            decimal currentRevenue = currentPaidOrders
-                .Sum(d => (decimal?)((d.TongTienSauGiam ?? d.TongTien))) ?? 0m;
+            decimal revenue = currentOrders
+                .Where(d => d.DaThanhToan)
+                .Sum(d => d.DoanhThu);
 
-            decimal previousRevenue = previousPaidOrders
-                .Sum(d => (decimal?)((d.TongTienSauGiam ?? d.TongTien))) ?? 0m;
+            decimal previousRevenue = previousOrders
+                .Where(d => d.DaThanhToan)
+                .Sum(d => d.DoanhThu);
 
-            int currentOrderCount = currentOrders.Count();
-            int previousOrderCount = previousOrders.Count();
+            int orderCount = currentOrders.Count;
+            int previousOrderCount = previousOrders.Count;
 
-            int currentCustomerCount = currentOrders
-                .Sum(d => (int?)(d.NguoiLon + d.TreEm + d.TreNho)) ?? 0;
+            int guestCount = currentOrders.Sum(d =>
+                d.NguoiLon + d.TreEm + d.TreNho);
 
-            int previousCustomerCount = previousOrders
-                .Sum(d => (int?)(d.NguoiLon + d.TreEm + d.TreNho)) ?? 0;
+            int previousGuestCount = previousOrders.Sum(d =>
+                d.NguoiLon + d.TreEm + d.TreNho);
 
-            ViewBag.TongDoanhThu = currentRevenue;
-            ViewBag.TongDon = currentOrderCount;
-            ViewBag.TongKhach = currentCustomerCount;
-            ViewBag.TourDangBan = _context.Tours.Count(t => t.TrangThai);
+            int activeTourCount = _context.Tours
+                .AsNoTracking()
+                .Count(t => t.TrangThai);
 
-            ViewBag.PhanTramDoanhThu = TinhPhanTram(currentRevenue, previousRevenue);
-            ViewBag.PhanTramDon = TinhPhanTram(currentOrderCount, previousOrderCount);
-            ViewBag.PhanTramKhach = TinhPhanTram(currentCustomerCount, previousCustomerCount);
-            ViewBag.PhanTramTour = 5.2m;
+            ViewBag.TongDoanhThu = revenue;
+            ViewBag.TongDon = orderCount;
+            ViewBag.TongKhach = guestCount;
+            ViewBag.TourDangBan = activeTourCount;
 
-            var labelDoanhThu = new List<string>();
-            var dataDoanhThu = new List<decimal>();
-            var labelKhach = new List<string>();
-            var dataKhach = new List<int>();
+            ViewBag.PhanTramDoanhThu =
+                TinhPhanTram(revenue, previousRevenue);
+
+            ViewBag.PhanTramDon =
+                TinhPhanTram(orderCount, previousOrderCount);
+
+            ViewBag.PhanTramKhach =
+                TinhPhanTram(guestCount, previousGuestCount);
+
+            // Khong su dung ty le 5.2% gan co dinh.
+            ViewBag.PhanTramTour = null;
+
+            // ==================================================
+            // 4. BIEU DO DOANH THU + SO DON
+            // ==================================================
+
+            var revenueLabels = new List<string>();
+            var revenueValues = new List<decimal>();
+
+            var guestLabels = new List<string>();
+            var guestValues = new List<int>();
+
+            var orderLabels = new List<string>();
+            var orderValues = new List<int>();
+
+            void AddBucket(
+                DateTime bucketStart,
+                DateTime bucketEnd,
+                string label)
+            {
+                var bucket = currentOrders
+                    .Where(d =>
+                        d.NgayDat >= bucketStart &&
+                        d.NgayDat < bucketEnd)
+                    .ToList();
+
+                decimal bucketRevenue = bucket
+                    .Where(d => d.DaThanhToan)
+                    .Sum(d => d.DoanhThu);
+
+                int bucketGuests = bucket.Sum(d =>
+                    d.NguoiLon + d.TreEm + d.TreNho);
+
+                int bucketOrders = bucket.Count;
+
+                revenueLabels.Add(label);
+                revenueValues.Add(bucketRevenue);
+
+                guestLabels.Add(label);
+                guestValues.Add(bucketGuests);
+
+                orderLabels.Add(label);
+                orderValues.Add(bucketOrders);
+            }
 
             if (period == "day")
             {
-                for (int h = 0; h < 24; h++)
+                for (int hour = 0; hour < 24; hour++)
                 {
-                    var hourStart = currentStart.AddHours(h);
-                    var hourEnd = hourStart.AddHours(1);
+                    var bucketStart = start.AddHours(hour);
 
-                    var ordersInHour = currentOrders
-                        .Where(d => d.NgayDat >= hourStart && d.NgayDat < hourEnd);
-
-                    var paidInHour = ordersInHour.Where(d => d.DaThanhToan);
-
-                    labelDoanhThu.Add($"{h:00}:00");
-                    dataDoanhThu.Add(paidInHour.Sum(d => (decimal?)((d.TongTienSauGiam ?? d.TongTien))) ?? 0m);
-
-                    labelKhach.Add($"{h:00}:00");
-                    dataKhach.Add(ordersInHour.Sum(d => (int?)(d.NguoiLon + d.TreEm + d.TreNho)) ?? 0);
+                    AddBucket(
+                        bucketStart,
+                        bucketStart.AddHours(1),
+                        $"{hour:00}:00");
                 }
             }
             else if (period == "quarter" || period == "year")
             {
-                var monthStart = new DateTime(currentStart.Year, currentStart.Month, 1);
+                var bucketStart = start;
 
-                while (monthStart < currentEnd)
+                while (bucketStart < end)
                 {
-                    var monthEnd = monthStart.AddMonths(1);
+                    AddBucket(
+                        bucketStart,
+                        bucketStart.AddMonths(1),
+                        bucketStart.ToString("MM/yyyy"));
 
-                    var ordersInMonth = currentOrders
-                        .Where(d => d.NgayDat >= monthStart && d.NgayDat < monthEnd);
-
-                    var paidInMonth = ordersInMonth.Where(d => d.DaThanhToan);
-
-                    labelDoanhThu.Add(monthStart.ToString("MM/yyyy"));
-                    dataDoanhThu.Add(paidInMonth.Sum(d => (decimal?)((d.TongTienSauGiam ?? d.TongTien))) ?? 0m);
-
-                    labelKhach.Add(monthStart.ToString("MM/yyyy"));
-                    dataKhach.Add(ordersInMonth.Sum(d => (int?)(d.NguoiLon + d.TreEm + d.TreNho)) ?? 0);
-
-                    monthStart = monthEnd;
+                    bucketStart = bucketStart.AddMonths(1);
                 }
             }
             else
             {
-                var dayStart = currentStart.Date;
+                var bucketStart = start;
 
-                while (dayStart < currentEnd)
+                while (bucketStart < end)
                 {
-                    var dayEnd = dayStart.AddDays(1);
+                    AddBucket(
+                        bucketStart,
+                        bucketStart.AddDays(1),
+                        bucketStart.ToString("dd/MM"));
 
-                    var ordersInDay = currentOrders
-                        .Where(d => d.NgayDat >= dayStart && d.NgayDat < dayEnd);
-
-                    var paidInDay = ordersInDay.Where(d => d.DaThanhToan);
-
-                    labelDoanhThu.Add(dayStart.ToString("dd/MM"));
-                    dataDoanhThu.Add(paidInDay.Sum(d => (decimal?)((d.TongTienSauGiam ?? d.TongTien))) ?? 0m);
-
-                    labelKhach.Add(dayStart.ToString("dd/MM"));
-                    dataKhach.Add(ordersInDay.Sum(d => (int?)(d.NguoiLon + d.TreEm + d.TreNho)) ?? 0);
-
-                    dayStart = dayEnd;
+                    bucketStart = bucketStart.AddDays(1);
                 }
             }
 
-            ViewBag.LabelDoanhThu = labelDoanhThu;
-            ViewBag.DataDoanhThu = dataDoanhThu;
-            ViewBag.LabelKhach = labelKhach;
-            ViewBag.DataKhach = dataKhach;
+            ViewBag.LabelDoanhThu = revenueLabels;
+            ViewBag.DataDoanhThu = revenueValues;
 
-            ViewBag.TopTour = _context.Tours
+            ViewBag.LabelKhach = guestLabels;
+            ViewBag.DataKhach = guestValues;
+
+            ViewBag.DashboardOrderLabelsJson =
+                System.Text.Json.JsonSerializer.Serialize(orderLabels);
+
+            ViewBag.DashboardOrderValuesJson =
+                System.Text.Json.JsonSerializer.Serialize(orderValues);
+
+            // ==================================================
+            // 5. THONG TIN TOUR VA LOAI TOUR
+            // ==================================================
+
+            var tours = _context.Tours
                 .AsNoTracking()
                 .Include(t => t.HinhTours)
+                .ToList();
+
+            var tourLookup = tours.ToDictionary(t => t.IdTour);
+
+            var typeLookup = _context.LoaiTours
+                .AsNoTracking()
+                .ToDictionary(t => t.IdLoaiTour, t => t.TenLoai);
+
+            var paidOrders = currentOrders
+                .Where(d => d.DaThanhToan)
+                .ToList();
+
+            // ==================================================
+            // 6. DONUT - DOANH THU THEO LOAI TOUR
+            // ==================================================
+
+            var categoryRevenue = paidOrders
+                .Where(d => tourLookup.ContainsKey(d.IdTour))
+                .GroupBy(d =>
+                {
+                    var tour = tourLookup[d.IdTour];
+
+                    return typeLookup.TryGetValue(
+                        tour.IdLoaiTour,
+                        out var typeName)
+                            ? typeName
+                            : "Chưa phân loại";
+                })
+                .Select(g => new
+                {
+                    name = g.Key,
+                    revenue = g.Sum(x => x.DoanhThu)
+                })
+                .Where(x => x.revenue > 0)
+                .OrderByDescending(x => x.revenue)
+                .ToList();
+
+            ViewBag.DashboardCategoryRevenueJson =
+                System.Text.Json.JsonSerializer.Serialize(
+                    categoryRevenue);
+
+            // ==================================================
+            // 7. HIEU QUA THEO DIEM DEN
+            // ==================================================
+
+            string DestinationName(string? raw)
+            {
+                if (string.IsNullOrWhiteSpace(raw))
+                    return "Chưa xác định";
+
+                var value = raw.Trim();
+
+                // Co duong di dang: TP.HCM -> Da Lat
+                // Hoac TP.HCM → Da Lat.
+                // Uu tien lay diem den cuoi cung.
+
+                var parts = value.Split(
+                    new[] { "→", "->", "➜" },
+                    StringSplitOptions.RemoveEmptyEntries);
+
+                return parts.Length > 0
+                    ? parts[^1].Trim()
+                    : value;
+            }
+
+            string TourImage(Tour tour)
+            {
+                var firstImage = tour.HinhTours
+                    .Where(h => !string.IsNullOrWhiteSpace(h.UrlHinh))
+                    .OrderBy(h => h.ThuTu ?? 999)
+                    .FirstOrDefault();
+
+                return TourImagePathHelper.ToTourImageSrc(
+                    firstImage?.UrlHinh ?? tour.HinhAnh);
+            }
+
+            var destinations = paidOrders
+                .Where(d => tourLookup.ContainsKey(d.IdTour))
+                .GroupBy(d =>
+                    DestinationName(
+                        tourLookup[d.IdTour].DiaDiem))
+                .Select(g =>
+                {
+                    var representativeOrder = g
+                        .OrderByDescending(x => x.DoanhThu)
+                        .First();
+
+                    var representativeTour =
+                        tourLookup[representativeOrder.IdTour];
+
+                    return new
+                    {
+                        name = g.Key,
+                        revenue = g.Sum(x => x.DoanhThu),
+                        guests = g.Sum(x =>
+                            x.NguoiLon + x.TreEm + x.TreNho),
+                        imageUrl = TourImage(representativeTour)
+                    };
+                })
+                .Where(x => x.revenue > 0)
+                .OrderByDescending(x => x.revenue)
+                .Take(5)
+                .ToList();
+
+            ViewBag.DashboardDestinationsJson =
+                System.Text.Json.JsonSerializer.Serialize(
+                    destinations);
+
+            // ==================================================
+            // 8. LICH KHOI HANH SAP TOI
+            // ==================================================
+
+            var todayDate = DateOnly.FromDateTime(today);
+
+            var upcomingSchedules = _context.LichKhoiHanhs
+                .AsNoTracking()
+                .Include(l => l.IdTourNavigation)
+                .ThenInclude(t => t.HinhTours)
+                .Where(l =>
+                    l.NgayKhoiHanh >= todayDate &&
+                    l.IdTourNavigation.TrangThai &&
+                    l.TrangThai != "DaHuy" &&
+                    l.TrangThai != "Đã hủy")
+                .OrderBy(l => l.NgayKhoiHanh)
+                .ThenBy(l => l.GioKhoiHanh)
+                .Take(3)
+                .ToList();
+
+            var upcomingIds = upcomingSchedules
+                .Select(l => l.IdLich)
+                .ToList();
+
+            var guestsBySchedule = _context.DonDatTours
+                .AsNoTracking()
+                .Where(d =>
+                    upcomingIds.Contains(d.IdLich) &&
+                    d.TrangThai != "DaHuy" &&
+                    d.TrangThai != "Đã hủy")
+                .GroupBy(d => d.IdLich)
+                .Select(g => new
+                {
+                    IdLich = g.Key,
+                    Guests = g.Sum(x =>
+                        x.NguoiLon + x.TreEm + x.TreNho)
+                })
+                .ToDictionary(x => x.IdLich, x => x.Guests);
+
+            var upcoming = upcomingSchedules
+                .Select(l =>
+                {
+                    var tour = l.IdTourNavigation;
+
+                    var guestTotal = guestsBySchedule.TryGetValue(
+                        l.IdLich,
+                        out var count)
+                            ? count
+                            : 0;
+
+                    return new
+                    {
+                        idLich = l.IdLich,
+                        tourName = tour.TenTour,
+                        destination = DestinationName(tour.DiaDiem),
+                        imageUrl = TourImage(tour),
+                        departureDate =
+                            l.NgayKhoiHanh.ToString("dd/MM/yyyy"),
+                        day = l.NgayKhoiHanh.Day,
+                        month = l.NgayKhoiHanh.Month,
+                        guests = guestTotal,
+                        daysRemaining =
+                            l.NgayKhoiHanh.DayNumber -
+                            todayDate.DayNumber,
+                        remainingSeats = l.SoChoConLai
+                    };
+                })
+                .ToList();
+
+            ViewBag.DashboardUpcomingJson =
+                System.Text.Json.JsonSerializer.Serialize(
+                    upcoming);
+
+            // ==================================================
+            // 9. TOP 3 TOUR
+            // ==================================================
+
+            // Giu dung logic hien tai:
+            // xep theo so nguoi da dat, sau do luot xem.
+
+            ViewBag.TopTour = tours
                 .Where(t => t.TrangThai)
                 .OrderByDescending(t => t.SoNguoiDaDat)
                 .ThenByDescending(t => t.LuotXem)
+                .ThenBy(t => t.IdTour)
                 .Take(3)
                 .ToList();
+
+            // ==================================================
+            // 10. TRA VE VIEW
+            // ==================================================
 
             return View();
         }
@@ -318,159 +609,467 @@ namespace TourWebApp.Controllers
             return View(new Tour());
         }
 
-        // POST
+        // =====================================================
+        // POST: THEM TOUR + GAN CHU DE SO THICH
+        // =====================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("ThemTour")]
-        public IActionResult ThemTour(Tour model, IFormFile? HinhAnhFile, List<IFormFile>? HinhAnhFiles)
+        public IActionResult ThemTour(
+            Tour model,
+            IFormFile? HinhAnhFile,
+            List<IFormFile>? HinhAnhFiles,
+            List<string>? MaSoThichs)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
-         
+            // ================================================
+            // 1. CHUAN HOA DANH SACH SO THICH
+            // ================================================
+
+            var maSoThichDaChon = (MaSoThichs ?? new List<string>())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim().ToUpperInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            // ================================================
+            // 2. KIEM TRA THONG TIN TOUR
+            // ================================================
+
             if (model.IdLoaiTour == 0)
-                ModelState.AddModelError("IdLoaiTour", "Vui lòng chọn loại tour");
+            {
+                ModelState.AddModelError(
+                    "IdLoaiTour",
+                    "Vui lòng chọn loại tour."
+                );
+            }
 
-            
             if (string.IsNullOrWhiteSpace(model.PhuongTien))
-                ModelState.AddModelError("PhuongTien", "Vui lòng chọn phương tiện");
+            {
+                ModelState.AddModelError(
+                    "PhuongTien",
+                    "Vui lòng chọn phương tiện."
+                );
+            }
 
-            
-            bool maTrung = _context.Tours.Any(t => t.MaTour == model.MaTour);
-            if (maTrung)
-                ModelState.AddModelError("MaTour", "Mã tour đã tồn tại");
+            if (string.IsNullOrWhiteSpace(model.MaTour))
+            {
+                ModelState.AddModelError(
+                    "MaTour",
+                    "Vui lòng nhập mã tour."
+                );
+            }
+            else
+            {
+                model.MaTour = model.MaTour.Trim();
+
+                bool maTrung = _context.Tours.Any(
+                    t => t.MaTour == model.MaTour
+                );
+
+                if (maTrung)
+                {
+                    ModelState.AddModelError(
+                        "MaTour",
+                        "Mã tour đã tồn tại."
+                    );
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(model.TenTour))
+            {
+                ModelState.AddModelError(
+                    "TenTour",
+                    "Vui lòng nhập tên tour."
+                );
+            }
+
+            if (model.GiaGoc.HasValue &&
+                model.GiaGoc.Value < 0)
+            {
+                ModelState.AddModelError(
+                    "GiaGoc",
+                    "Giá tour không được âm."
+                );
+            }
+
+            if (model.PhanTramGiam.HasValue &&
+                (model.PhanTramGiam.Value < 0 ||
+                 model.PhanTramGiam.Value > 100))
+            {
+                ModelState.AddModelError(
+                    "PhanTramGiam",
+                    "Phần trăm giảm phải từ 0 đến 100."
+                );
+            }
+
+            // ================================================
+            // 3. KIEM TRA CHU DE
+            // ================================================
+
+            if (maSoThichDaChon.Count == 0)
+            {
+                ModelState.AddModelError(
+                    "MaSoThichs",
+                    "Vui lòng chọn ít nhất một chủ đề du lịch."
+                );
+            }
+
+            var idSoThichHopLe = new List<int>();
+
+            foreach (string ma in maSoThichDaChon)
+            {
+                // Truy van tham so hoa, khong noi chuoi SQL.
+                // Chi chap nhan so thich dang hoat dong.
+
+                var ids = _context.Database.SqlQuery<int>(
+                    $"""
+                    SELECT st.IdSoThich AS Value
+                    FROM dbo.AISoThich AS st
+                    WHERE st.MaSoThich = {ma}
+                      AND st.TrangThai = 1
+                    """
+                ).ToList();
+
+                if (ids.Count == 0)
+                {
+                    ModelState.AddModelError(
+                        "MaSoThichs",
+                        $"Chủ đề '{ma}' không tồn tại hoặc đã ngừng hoạt động."
+                    );
+
+                    continue;
+                }
+
+                idSoThichHopLe.AddRange(ids);
+            }
+
+            idSoThichHopLe = idSoThichHopLe
+                .Distinct()
+                .ToList();
 
             if (!ModelState.IsValid)
             {
-                ViewBag.LoaiTours = _context.LoaiTours.ToList();
+                ViewBag.LoaiTours = _context.LoaiTours
+                    .OrderBy(x => x.TenLoai)
+                    .ToList();
+
                 return View(model);
             }
+
+            // ================================================
+            // 4. KHOI TAO THONG TIN KINH DOANH
+            // ================================================
 
             model.LuotXem = 0;
             model.SoNguoiDaDat = 0;
             model.TrangThai = true;
 
-          
-            if (model.PhanTramGiam == null || model.PhanTramGiam == 0)
-                model.GiaKhuyenMai = model.GiaGoc;
-            else
-                model.GiaKhuyenMai = model.GiaGoc - (model.GiaGoc * model.PhanTramGiam / 100);
+            int phanTramGiam = model.PhanTramGiam ?? 0;
 
-           
+            decimal giaGoc = model.GiaGoc ?? 0;
+
+            decimal giaKhuyenMai =
+                giaGoc - (giaGoc * phanTramGiam / 100m);
+
+            // Lam tron ve VND.
+            giaKhuyenMai = Math.Round(
+                giaKhuyenMai,
+                0,
+                MidpointRounding.AwayFromZero
+            );
+
+            model.GiaKhuyenMai = giaKhuyenMai;
+
+            // ================================================
+            // 5. GIU NGUYEN QUY TAC GIA HIEN TAI
+            // ================================================
+
+            decimal giaNguoiLon = giaKhuyenMai;
+
+            decimal giaTreEm = Math.Round(
+                giaNguoiLon * 0.5m,
+                0,
+                MidpointRounding.AwayFromZero
+            );
+
+            decimal giaEmBe = 0m;
+
+            model.TourGiaChiTiets =
+                new List<TourGiaChiTiet>
+                {
+                    new TourGiaChiTiet
+                    {
+                        DoiTuong = TourPriceAudience.Adult,
+                        Gia = giaNguoiLon,
+                        GhiChu = "Giá người lớn theo giá bán tour."
+                    },
+
+                    new TourGiaChiTiet
+                    {
+                        DoiTuong = TourPriceAudience.Child,
+                        Gia = giaTreEm,
+                        GhiChu = "50% giá người lớn."
+                    },
+
+                    new TourGiaChiTiet
+                    {
+                        DoiTuong = TourPriceAudience.Infant,
+                        Gia = giaEmBe,
+                        GhiChu = "Miễn phí."
+                    }
+                };
+
+            // ================================================
+            // 6. CHUAN BI DANH SACH ANH
+            // ================================================
+
             var uploadedImagePaths = new List<string>();
+
             var uploadFiles = new List<IFormFile>();
 
-            if (HinhAnhFile != null && HinhAnhFile.Length > 0)
-                uploadFiles.Add(HinhAnhFile);
-
-            if (HinhAnhFiles != null && HinhAnhFiles.Count > 0)
-                uploadFiles.AddRange(HinhAnhFiles.Where(x => x.Length > 0));
-
-            var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "tours");
-            Directory.CreateDirectory(uploadDirectory);
-
-            var thuTu = 1;
-            foreach (var imageFile in uploadFiles)
+            if (HinhAnhFile != null &&
+                HinhAnhFile.Length > 0)
             {
-                string fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-                string path = Path.Combine(uploadDirectory, fileName);
-
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    imageFile.CopyTo(stream);
-                }
-
-                uploadedImagePaths.Add(path);
-
-                if (string.IsNullOrWhiteSpace(model.HinhAnh))
-                    model.HinhAnh = fileName;
-
-                model.HinhTours.Add(new HinhTour
-                {
-                    UrlHinh = fileName,
-                    ThuTu = thuTu++
-                });
+                uploadFiles.Add(HinhAnhFile);
             }
 
-            decimal giaNguoiLon = model.GiaKhuyenMai ?? 0;
-            decimal giaTreEm = giaNguoiLon * 0.5m; 
-            decimal giaEmBe = 0;
-
-            model.TourGiaChiTiets = new List<TourGiaChiTiet>
+            if (HinhAnhFiles != null)
             {
-                new TourGiaChiTiet {
-                    DoiTuong = TourPriceAudience.Adult,
-                    Gia = giaNguoiLon,
-                    GhiChu = "Tự động tạo"
-                },
-                new TourGiaChiTiet {
-                    DoiTuong = TourPriceAudience.Child,
-                    Gia = giaTreEm,
-                    GhiChu = "50% giá người lớn"
-                },
-                new TourGiaChiTiet {
-                    DoiTuong = TourPriceAudience.Infant,
-                    Gia = giaEmBe,
-                    GhiChu = "Miễn phí"
-                }
-            };
+                uploadFiles.AddRange(
+                    HinhAnhFiles.Where(x => x.Length > 0)
+                );
+            }
 
-            _context.Tours.Add(model);
+            string uploadDirectory = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "img",
+                "tours"
+            );
+
+            // ================================================
+            // 7. TRANSACTION: TOUR + GIA + CHU DE
+            // ================================================
+
+            using var transaction =
+                _context.Database.BeginTransaction();
+
             try
             {
-                _context.SaveChanges();
-            }
-            catch (DbUpdateException)
-            {
-                foreach (var uploadedImagePath in uploadedImagePaths.Where(System.IO.File.Exists))
+                Directory.CreateDirectory(uploadDirectory);
+
+                int thuTu = 1;
+
+                foreach (var imageFile in uploadFiles)
                 {
-                    System.IO.File.Delete(uploadedImagePath);
+                    if (string.IsNullOrWhiteSpace(
+                        imageFile.ContentType
+                    ) ||
+                        !imageFile.ContentType.StartsWith(
+                            "image/",
+                            StringComparison.OrdinalIgnoreCase
+                        ))
+                    {
+                        throw new InvalidOperationException(
+                            "Tệp tải lên không phải hình ảnh."
+                        );
+                    }
+
+                    string extension = Path.GetExtension(
+                        imageFile.FileName
+                    ).ToLowerInvariant();
+
+                    if (!new[]
+                    {
+                        ".jpg",
+                        ".jpeg",
+                        ".png",
+                        ".webp"
+                    }.Contains(extension))
+                    {
+                        throw new InvalidOperationException(
+                            "Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP."
+                        );
+                    }
+
+                    string fileName =
+                        Guid.NewGuid().ToString("N") +
+                        extension;
+
+                    string path = Path.Combine(
+                        uploadDirectory,
+                        fileName
+                    );
+
+                    using (var stream = new FileStream(
+                        path,
+                        FileMode.CreateNew
+                    ))
+                    {
+                        // Ghi nhan truoc de co the don dep neu loi.
+                        uploadedImagePaths.Add(path);
+
+                        imageFile.CopyTo(stream);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(model.HinhAnh))
+                    {
+                        model.HinhAnh = fileName;
+                    }
+
+                    model.HinhTours.Add(
+                        new HinhTour
+                        {
+                            UrlHinh = fileName,
+                            ThuTu = thuTu++
+                        }
+                    );
                 }
 
-                ModelState.AddModelError(string.Empty, "Không thể lưu tour và bảng giá. Vui lòng kiểm tra dữ liệu rồi thử lại.");
-                ViewBag.LoaiTours = _context.LoaiTours.OrderBy(x => x.TenLoai).ToList();
+                // --------------------------------------------
+                // 7.1. LUU TOUR, BANG GIA VA ANH
+                // --------------------------------------------
+
+                _context.Tours.Add(model);
+
+                _context.SaveChanges();
+
+                int idTourMoi = model.IdTour;
+
+                if (idTourMoi <= 0)
+                {
+                    throw new InvalidOperationException(
+                        "Không lấy được mã định danh tour mới."
+                    );
+                }
+
+                // --------------------------------------------
+                // 7.2. GAN SO THICH CHO TOUR
+                // --------------------------------------------
+
+                foreach (int idSoThich in idSoThichHopLe)
+                {
+                    _context.Database.ExecuteSqlInterpolated(
+                        $"""
+                        INSERT INTO dbo.AITourSoThich
+                            (IdTour, IdSoThich)
+                        VALUES
+                            ({idTourMoi}, {idSoThich})
+                        """
+                    );
+                }
+
+                // Chi commit khi ca hai phan da thanh cong.
+                transaction.Commit();
+
+                TempData["ThongBao"] =
+                    "Đã thêm tour và lưu các chủ đề du lịch thành công.";
+
+                return RedirectToAction("QuanLyTour");
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+
+                // SQL da rollback thi don dep anh tren dia.
+                foreach (string path in uploadedImagePaths)
+                {
+                    try
+                    {
+                        if (System.IO.File.Exists(path))
+                        {
+                            System.IO.File.Delete(path);
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // Khong che mat loi luu tour ban dau.
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        // Khong che mat loi luu tour ban dau.
+                    }
+                }
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Không thể lưu tour hoặc các chủ đề du lịch. " +
+                    "Vui lòng kiểm tra dữ liệu và thử lại."
+                );
+
+                ViewBag.LoaiTours = _context.LoaiTours
+                    .OrderBy(x => x.TenLoai)
+                    .ToList();
+
                 return View(model);
             }
-
-            TempData["ThongBao"] = "✅ Đã thêm tour mới thành công";
-            return RedirectToAction("QuanLyTour");
         }
 
         // ========== FORM SỬA TOUR ==========
         [HttpGet]
         public IActionResult SuaTour(int id)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
             var tour = _context.Tours
                 .Include(t => t.HinhTours)
                 .Include(t => t.TourGiaChiTiets)
                 .FirstOrDefault(t => t.IdTour == id);
 
-            if (tour == null) return NotFound();
+            if (tour == null)
+                return NotFound();
 
-            
+            // Danh sách loại tour.
             ViewBag.LoaiTours = _context.LoaiTours
-                                        .OrderBy(x => x.TenLoai)
-                                        .ToList();
+                .OrderBy(x => x.TenLoai)
+                .ToList();
 
-           
+            // Bảng giá hiện tại.
             ViewBag.GiaNguoiLon = tour.TourGiaChiTiets
-                .FirstOrDefault(g => TourPriceAudience.IsAdult(g.DoiTuong))?.Gia ?? 0;
+                .FirstOrDefault(g =>
+                    TourPriceAudience.IsAdult(g.DoiTuong))
+                ?.Gia ?? 0m;
 
-            
             ViewBag.GiaTreEm = tour.TourGiaChiTiets
-                .FirstOrDefault(g => TourPriceAudience.IsChild(g.DoiTuong))?.Gia ?? 0;
+                .FirstOrDefault(g =>
+                    TourPriceAudience.IsChild(g.DoiTuong))
+                ?.Gia ?? 0m;
 
-            
             ViewBag.GiaEmBe = tour.TourGiaChiTiets
-                .FirstOrDefault(g => TourPriceAudience.IsInfant(g.DoiTuong))?.Gia ?? 0;
+                .FirstOrDefault(g =>
+                    TourPriceAudience.IsInfant(g.DoiTuong))
+                ?.Gia ?? 0m;
+
+            // Lấy mã sở thích đã gắn cho tour.
+            // Không cần tạo Entity mới cho bảng AITourSoThich.
+            var selectedCodes = _context.Database
+                .SqlQuery<string>(
+                    $"""
+                    SELECT s.MaSoThich AS Value
+                    FROM dbo.AITourSoThich AS ts
+                    INNER JOIN dbo.AISoThich AS s
+                        ON s.IdSoThich = ts.IdSoThich
+                    WHERE ts.IdTour = {id}
+                    """
+                )
+                .ToList();
+
+            ViewBag.SelectedMaSoThichs = selectedCodes;
 
             return View(tour);
         }
 
+        // ========== CHI TIET TOUR ==========
+        [HttpGet]
         public IActionResult ChiTietTour(int id)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
             var tour = _context.Tours
                 .Include(t => t.IdLoaiTourNavigation)
@@ -478,210 +1077,627 @@ namespace TourWebApp.Controllers
                 .Include(t => t.LichKhoiHanhs)
                 .FirstOrDefault(t => t.IdTour == id);
 
-            if (tour == null) return NotFound();
+            if (tour == null)
+                return NotFound();
 
             return View(tour);
         }
-
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SuaTour(
             Tour model,
-            List<IFormFile> HinhAnhFiles,
+            List<IFormFile>? HinhAnhFiles,
             List<int>? XoaHinhIds,
             decimal? GiaNguoiLon,
             decimal? GiaTreEm,
-            decimal? GiaEmBe)
-
+            decimal? GiaEmBe,
+            List<string>? MaSoThichs,
+            string? CheDoGia)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
-            var tour = _context.Tours.Find(model.IdTour);
-            if (tour == null) return NotFound();
+            var tour = _context.Tours
+                .FirstOrDefault(t => t.IdTour == model.IdTour);
 
-            if (!GiaNguoiLon.HasValue || GiaNguoiLon.Value < 0)
-                ModelState.AddModelError("GiaNguoiLon", "Giá người lớn không hợp lệ");
+            if (tour == null)
+                return NotFound();
 
-            if (!GiaTreEm.HasValue || GiaTreEm.Value < 0)
-                ModelState.AddModelError("GiaTreEm", "Giá trẻ em không hợp lệ");
-
-            if (!GiaEmBe.HasValue || GiaEmBe.Value < 0)
-                ModelState.AddModelError("GiaEmBe", "Giá em bé không hợp lệ");
-
-            if (!ModelState.IsValid)
-            {
-                _context.Entry(tour).Collection(x => x.HinhTours).Load();
-                model.HinhTours = tour.HinhTours;
-                ViewBag.LoaiTours = _context.LoaiTours.OrderBy(x => x.TenLoai).ToList();
-                ViewBag.GiaNguoiLon = GiaNguoiLon ?? 0;
-                ViewBag.GiaTreEm = GiaTreEm ?? 0;
-                ViewBag.GiaEmBe = GiaEmBe ?? 0;
-                return View(model);
-            }
-
-            tour.TenTour = model.TenTour;
-            tour.DiaDiem = model.DiaDiem;
-            tour.ThoiGian = model.ThoiGian;
-            tour.PhuongTien = model.PhuongTien;
-            tour.GiaGoc = model.GiaGoc;
-            tour.PhanTramGiam = model.PhanTramGiam;
-            tour.IdLoaiTour = model.IdLoaiTour;
-            tour.MoTa = model.MoTa;
-            tour.TrangThai = model.TrangThai;
-
-          
-            if (model.PhanTramGiam == null || model.PhanTramGiam == 0)
-                tour.GiaKhuyenMai = model.GiaGoc;
-            else
-                tour.GiaKhuyenMai = model.GiaGoc - (model.GiaGoc * model.PhanTramGiam / 100);
-
-            
             var existingImages = _context.HinhTours
                 .Where(x => x.IdTour == tour.IdTour)
                 .OrderBy(x => x.ThuTu)
                 .ThenBy(x => x.IdHinh)
                 .ToList();
 
-            foreach (var image in existingImages)
+            // =====================================================
+            // 1. KIEM TRA CHE DO GIA
+            // =====================================================
+
+            var cheDoGia = (CheDoGia ?? "").Trim();
+
+            if (cheDoGia != "TuDong" &&
+                cheDoGia != "TuyChinh")
             {
-                image.UrlHinh = TourImagePathHelper.NormalizeTourImagePath(image.UrlHinh);
+                ModelState.AddModelError(
+                    "CheDoGia",
+                    "Vui lòng chọn chế độ tính giá hợp lệ."
+                );
             }
 
-            var xoaHinhIdSet = (XoaHinhIds ?? new List<int>()).ToHashSet();
-            var imagesToRemove = existingImages
-                .Where(x => xoaHinhIdSet.Contains(x.IdHinh))
+            // Giá gốc và phần trăm giảm.
+            if (!model.GiaGoc.HasValue ||
+                model.GiaGoc.Value < 0)
+            {
+                ModelState.AddModelError(
+                    "GiaGoc",
+                    "Giá gốc phải lớn hơn hoặc bằng 0."
+                );
+            }
+
+            var phanTramGiam = model.PhanTramGiam ?? 0m;
+
+            if (phanTramGiam < 0 || phanTramGiam > 100)
+            {
+                ModelState.AddModelError(
+                    "PhanTramGiam",
+                    "Phần trăm giảm phải từ 0 đến 100."
+                );
+            }
+
+            decimal giaSauGiam = 0m;
+
+            if (model.GiaGoc.HasValue &&
+                model.GiaGoc.Value >= 0 &&
+                phanTramGiam >= 0 &&
+                phanTramGiam <= 100)
+            {
+                giaSauGiam = Math.Round(
+                    model.GiaGoc.Value *
+                    (100m - phanTramGiam) / 100m,
+                    0,
+                    MidpointRounding.AwayFromZero
+                );
+            }
+
+            // =====================================================
+            // 2. TINH GIA THEO CHE DO
+            // =====================================================
+
+            decimal giaNguoiLon = 0m;
+            decimal giaTreEm = 0m;
+            decimal giaEmBe = 0m;
+
+            if (cheDoGia == "TuDong")
+            {
+                // Không tin giá tự tính từ JavaScript.
+                // Máy chủ tính lại để lưu thống nhất.
+                giaNguoiLon = giaSauGiam;
+
+                giaTreEm = Math.Round(
+                    giaNguoiLon * 0.5m,
+                    0,
+                    MidpointRounding.AwayFromZero
+                );
+
+                giaEmBe = 0m;
+
+                // Giá tính lại được dùng để hiển thị
+                // nếu Controller phải trả về form.
+                ModelState.Remove("GiaNguoiLon");
+                ModelState.Remove("GiaTreEm");
+                ModelState.Remove("GiaEmBe");
+            }
+            else if (cheDoGia == "TuyChinh")
+            {
+                if (!GiaNguoiLon.HasValue ||
+                    GiaNguoiLon.Value < 0)
+                {
+                    ModelState.AddModelError(
+                        "GiaNguoiLon",
+                        "Giá người lớn không hợp lệ."
+                    );
+                }
+
+                if (!GiaTreEm.HasValue ||
+                    GiaTreEm.Value < 0)
+                {
+                    ModelState.AddModelError(
+                        "GiaTreEm",
+                        "Giá trẻ em không hợp lệ."
+                    );
+                }
+
+                if (!GiaEmBe.HasValue ||
+                    GiaEmBe.Value < 0)
+                {
+                    ModelState.AddModelError(
+                        "GiaEmBe",
+                        "Giá em bé không hợp lệ."
+                    );
+                }
+
+                giaNguoiLon = GiaNguoiLon ?? 0m;
+                giaTreEm = GiaTreEm ?? 0m;
+                giaEmBe = GiaEmBe ?? 0m;
+            }
+
+            // =====================================================
+            // 3. KIEM TRA THONG TIN TOUR
+            // =====================================================
+
+            if (string.IsNullOrWhiteSpace(model.TenTour))
+            {
+                ModelState.AddModelError(
+                    "TenTour",
+                    "Vui lòng nhập tên tour."
+                );
+            }
+
+            if (!_context.LoaiTours.Any(
+                x => x.IdLoaiTour == model.IdLoaiTour))
+            {
+                ModelState.AddModelError(
+                    "IdLoaiTour",
+                    "Loại tour không hợp lệ."
+                );
+            }
+
+            if (string.IsNullOrWhiteSpace(model.PhuongTien))
+            {
+                ModelState.AddModelError(
+                    "PhuongTien",
+                    "Vui lòng chọn phương tiện."
+                );
+            }
+
+            // =====================================================
+            // 4. CHUAN HOA CHU DE DU LICH
+            // =====================================================
+
+            var selectedCodes = (MaSoThichs ?? new List<string>())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim().ToUpperInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            if (imagesToRemove.Any())
+            var selectedTopicIds = new HashSet<int>();
+
+            if (selectedCodes.Count == 0)
             {
-                _context.HinhTours.RemoveRange(imagesToRemove);
+                ModelState.AddModelError(
+                    "MaSoThichs",
+                    "Vui lòng chọn ít nhất một chủ đề du lịch."
+                );
             }
 
-            var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "tours");
-            Directory.CreateDirectory(uploadDirectory);
+            foreach (var code in selectedCodes)
+            {
+                var ids = _context.Database
+                    .SqlQuery<int>(
+                        $"""
+                        SELECT IdSoThich AS Value
+                        FROM dbo.AISoThich
+                        WHERE MaSoThich = {code}
+                        AND TrangThai = 1
+                        """
+                    )
+                    .ToList();
+
+                if (ids.Count == 0)
+                {
+                    ModelState.AddModelError(
+                        "MaSoThichs",
+                        $"Chủ đề {code} không hợp lệ."
+                    );
+
+                    continue;
+                }
+
+                foreach (var id in ids)
+                {
+                    selectedTopicIds.Add(id);
+                }
+            }
+
+            // =====================================================
+            // 5. KIEM TRA HINH ANH
+            // =====================================================
+
+            var uploadFiles = (HinhAnhFiles ?? new List<IFormFile>())
+                .Where(x => x.Length > 0)
+                .ToList();
+
+            const long maxFileSize = 8 * 1024 * 1024;
+
+            var allowedExtensions = new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase)
+            {
+                ".jpg", ".jpeg", ".png", ".webp"
+            };
+
+            var allowedMimeTypes = new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase)
+            {
+                "image/jpeg", "image/png", "image/webp"
+            };
+
+            foreach (var file in uploadFiles)
+            {
+                var extension = Path.GetExtension(file.FileName);
+
+                if (!allowedExtensions.Contains(extension) ||
+                    !allowedMimeTypes.Contains(file.ContentType))
+                {
+                    ModelState.AddModelError(
+                        "HinhAnhFiles",
+                        "Chỉ hỗ trợ ảnh JPG, PNG và WEBP."
+                    );
+                }
+
+                if (file.Length > maxFileSize)
+                {
+                    ModelState.AddModelError(
+                        "HinhAnhFiles",
+                        "Mỗi ảnh không được vượt quá 8 MB."
+                    );
+                }
+            }
+
+            // =====================================================
+            // 6. TRA VE FORM KHI DU LIEU KHONG HOP LE
+            // =====================================================
+
+            IActionResult ReturnEditView(Tour viewModel)
+            {
+                ViewBag.LoaiTours = _context.LoaiTours
+                    .OrderBy(x => x.TenLoai)
+                    .ToList();
+
+                ViewBag.GiaNguoiLon = giaNguoiLon;
+                ViewBag.GiaTreEm = giaTreEm;
+                ViewBag.GiaEmBe = giaEmBe;
+
+                ViewBag.SelectedMaSoThichs = selectedCodes;
+
+                viewModel.HinhTours = existingImages;
+                viewModel.MaTour = tour.MaTour;
+                viewModel.HinhAnh = tour.HinhAnh;
+                viewModel.TrangThai = tour.TrangThai;
+
+                return View(viewModel);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return ReturnEditView(model);
+            }
+
+            // =====================================================
+            // 7. CHUAN BI ANH CAN THEM, XOA
+            // =====================================================
+
+            var deleteIdSet = (XoaHinhIds ?? new List<int>())
+                .ToHashSet();
+
+            var imagesToRemove = existingImages
+                .Where(x => deleteIdSet.Contains(x.IdHinh))
+                .ToList();
+
+            var imagesToKeep = existingImages
+                .Where(x => !deleteIdSet.Contains(x.IdHinh))
+                .ToList();
 
             var uploadedImagePaths = new List<string>();
             var newImageNames = new List<string>();
-            var nextOrder = existingImages
-                .Where(x => !xoaHinhIdSet.Contains(x.IdHinh))
+
+            var uploadDirectory = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "img",
+                "tours"
+            );
+
+            var nextOrder = imagesToKeep
                 .Select(x => x.ThuTu ?? 0)
                 .DefaultIfEmpty(0)
                 .Max() + 1;
 
-            if (HinhAnhFiles != null && HinhAnhFiles.Count > 0)
-            {
-                foreach (var file in HinhAnhFiles.Where(x => x.Length > 0))
-                {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    var path = Path.Combine(uploadDirectory, fileName);
+            // =====================================================
+            // 8. TRANSACTION LUU TOUR
+            // =====================================================
 
-                    using (var stream = new FileStream(path, FileMode.Create))
+            using var transaction =
+                _context.Database.BeginTransaction();
+
+            try
+            {
+                // ---------------------------------------------
+                // 8.1. THONG TIN TOUR
+                // ---------------------------------------------
+
+                tour.TenTour = model.TenTour.Trim();
+                tour.IdLoaiTour = model.IdLoaiTour;
+                tour.DiaDiem = model.DiaDiem;
+                tour.ThoiGian = model.ThoiGian;
+                tour.PhuongTien = model.PhuongTien;
+                tour.MoTa = model.MoTa;
+
+                // Không đổi mã tour và trạng thái bán
+                // trong form chỉnh sửa thông tin.
+                tour.GiaGoc = model.GiaGoc;
+                tour.PhanTramGiam = model.PhanTramGiam;
+                tour.GiaKhuyenMai = giaSauGiam;
+
+                // ---------------------------------------------
+                // 8.2. XOA CAC BAN GHI ANH DUOC CHON
+                // ---------------------------------------------
+
+                if (imagesToRemove.Count > 0)
+                {
+                    _context.HinhTours.RemoveRange(
+                        imagesToRemove
+                    );
+                }
+
+                // ---------------------------------------------
+                // 8.3. UPLOAD ANH MOI
+                // ---------------------------------------------
+
+                Directory.CreateDirectory(uploadDirectory);
+
+                foreach (var file in uploadFiles)
+                {
+                    var extension = Path.GetExtension(
+                        file.FileName
+                    ).ToLowerInvariant();
+
+                    var fileName =
+                        Guid.NewGuid().ToString("N") + extension;
+
+                    var physicalPath = Path.Combine(
+                        uploadDirectory,
+                        fileName
+                    );
+
+                    // Ghi nhận để dọn file nếu rollback.
+                    uploadedImagePaths.Add(physicalPath);
+
+                    using (var stream = new FileStream(
+                        physicalPath,
+                        FileMode.CreateNew))
                     {
                         file.CopyTo(stream);
                     }
 
-                    uploadedImagePaths.Add(path);
                     newImageNames.Add(fileName);
 
-                    _context.HinhTours.Add(new HinhTour
-                    {
-                        IdTour = tour.IdTour,
-                        UrlHinh = fileName,
-                        ThuTu = nextOrder++
-                    });
+                    _context.HinhTours.Add(
+                        new HinhTour
+                        {
+                            IdTour = tour.IdTour,
+                            UrlHinh = fileName,
+                            ThuTu = nextOrder++
+                        }
+                    );
                 }
-            }
 
-            var remainingImages = existingImages
-                .Where(x => !xoaHinhIdSet.Contains(x.IdHinh))
-                .Select(x => TourImagePathHelper.NormalizeTourImagePath(x.UrlHinh))
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Concat(newImageNames)
-                .ToList();
+                // ---------------------------------------------
+                // 8.4. ANH DAI DIEN
+                // ---------------------------------------------
 
-            var thumbnail = TourImagePathHelper.NormalizeTourImagePath(Request.Form["Thumbnail"].ToString());
-            var currentThumbnail = TourImagePathHelper.NormalizeTourImagePath(tour.HinhAnh);
+                var remainingImages = imagesToKeep
+                    .Select(x =>
+                        TourImagePathHelper
+                            .NormalizeTourImagePath(x.UrlHinh)
+                    )
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Concat(newImageNames)
+                    .ToList();
 
-            if (!string.IsNullOrWhiteSpace(thumbnail) && remainingImages.Contains(thumbnail))
-                tour.HinhAnh = thumbnail;
-            else if (!string.IsNullOrWhiteSpace(currentThumbnail) && remainingImages.Contains(currentThumbnail))
-                tour.HinhAnh = currentThumbnail;
-            else
-                tour.HinhAnh = remainingImages.FirstOrDefault();
-          
-            var giaNguoiLon = GiaNguoiLon.GetValueOrDefault();
-            var giaTreEm = GiaTreEm.GetValueOrDefault();
-            var giaEmBe = GiaEmBe.GetValueOrDefault();
+                var selectedThumbnail =
+                    TourImagePathHelper.NormalizeTourImagePath(
+                        Request.Form["Thumbnail"].ToString()
+                    );
 
-            
-            using var transaction = _context.Database.BeginTransaction();
-            try
-            {
+                var oldThumbnail =
+                    TourImagePathHelper.NormalizeTourImagePath(
+                        tour.HinhAnh
+                    );
+
+                if (!string.IsNullOrWhiteSpace(selectedThumbnail) &&
+                    remainingImages.Contains(
+                        selectedThumbnail,
+                        StringComparer.OrdinalIgnoreCase))
+                {
+                    tour.HinhAnh = selectedThumbnail;
+                }
+                else if (
+                    !string.IsNullOrWhiteSpace(oldThumbnail) &&
+                    remainingImages.Contains(
+                        oldThumbnail,
+                        StringComparer.OrdinalIgnoreCase))
+                {
+                    tour.HinhAnh = oldThumbnail;
+                }
+                else
+                {
+                    tour.HinhAnh = remainingImages.FirstOrDefault();
+                }
+
+                // ---------------------------------------------
+                // 8.5. XOA BANG GIA CU
+                // ---------------------------------------------
+
                 var oldPrices = _context.TourGiaChiTiets
                     .Where(x => x.IdTour == tour.IdTour)
                     .ToList();
 
-                _context.TourGiaChiTiets.RemoveRange(oldPrices);
+                _context.TourGiaChiTiets.RemoveRange(
+                    oldPrices
+                );
+
+                // Xóa giá cũ trước khi thêm lại,
+                // tránh xung đột khóa duy nhất.
                 _context.SaveChanges();
 
-                var newPriceList = new List<TourGiaChiTiet>
-                {
-                    new()
+                // ---------------------------------------------
+                // 8.6. LUU GIA THEO DOI TUONG
+                // ---------------------------------------------
+
+                _context.TourGiaChiTiets.AddRange(
+                    new TourGiaChiTiet
                     {
                         IdTour = tour.IdTour,
                         DoiTuong = TourPriceAudience.Adult,
                         Gia = giaNguoiLon,
-                        GhiChu = "Giá cố định"
+                        GhiChu = cheDoGia == "TuDong"
+                            ? "Giá tự động"
+                            : "Giá tùy chỉnh"
                     },
-                    new()
+                    new TourGiaChiTiet
                     {
                         IdTour = tour.IdTour,
                         DoiTuong = TourPriceAudience.Child,
                         Gia = giaTreEm,
-                        GhiChu = "Giá cố định"
+                        GhiChu = cheDoGia == "TuDong"
+                            ? "Giá tự động - 50% người lớn"
+                            : "Giá tùy chỉnh"
                     },
-                    new()
+                    new TourGiaChiTiet
                     {
                         IdTour = tour.IdTour,
                         DoiTuong = TourPriceAudience.Infant,
                         Gia = giaEmBe,
-                        GhiChu = "Giá cố định"
+                        GhiChu = cheDoGia == "TuDong"
+                            ? "Giá tự động - miễn phí"
+                            : "Giá tùy chỉnh"
                     }
-                };
+                );
 
-                _context.TourGiaChiTiets.AddRange(newPriceList);
                 _context.SaveChanges();
+
+                // ---------------------------------------------
+                // 8.7. DONG BO CHU DE TOUR
+                // ---------------------------------------------
+
+                var oldTopicIds = _context.Database
+                    .SqlQuery<int>(
+                        $"""
+                        SELECT IdSoThich AS Value
+                        FROM dbo.AITourSoThich
+                        WHERE IdTour = {tour.IdTour}
+                        """
+                    )
+                    .ToList()
+                    .ToHashSet();
+
+                foreach (var oldId in oldTopicIds)
+                {
+                    if (!selectedTopicIds.Contains(oldId))
+                    {
+                        _context.Database.ExecuteSqlInterpolated(
+                            $"""
+                            DELETE FROM dbo.AITourSoThich
+                            WHERE IdTour = {tour.IdTour}
+                            AND IdSoThich = {oldId}
+                            """
+                        );
+                    }
+                }
+
+                foreach (var newId in selectedTopicIds)
+                {
+                    if (!oldTopicIds.Contains(newId))
+                    {
+                        _context.Database.ExecuteSqlInterpolated(
+                            $"""
+                            INSERT INTO dbo.AITourSoThich
+                                (IdTour, IdSoThich)
+                            VALUES ({tour.IdTour}, {newId})
+                            """
+                        );
+                    }
+                }
+
+                // ---------------------------------------------
+                // 8.8. COMMIT
+                // ---------------------------------------------
+
                 transaction.Commit();
 
-                DeleteUnsharedTourImages(imagesToRemove.Select(x => x.UrlHinh));
-            }
-            catch (DbUpdateException)
-            {
-                transaction.Rollback();
-                foreach (var path in uploadedImagePaths.Where(System.IO.File.Exists))
+                // Chỉ dọn file ảnh cũ sau khi SQL commit.
+                try
                 {
-                    System.IO.File.Delete(path);
+                    DeleteUnsharedTourImages(
+                        imagesToRemove.Select(x => x.UrlHinh)
+                    );
+                }
+                catch (IOException)
+                {
+                    // SQL đã lưu thành công.
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // SQL đã lưu thành công.
+                }
+
+                TempData["ThongBao"] =
+                    "Đã cập nhật tour, giá bán, chủ đề " +
+                    "và hình ảnh thành công.";
+
+                return RedirectToAction("QuanLyTour");
+            }
+            catch (Exception)
+            {
+                // =================================================
+                // 9. ROLLBACK
+                // =================================================
+
+                transaction.Rollback();
+
+                foreach (var path in uploadedImagePaths)
+                {
+                    try
+                    {
+                        if (System.IO.File.Exists(path))
+                        {
+                            System.IO.File.Delete(path);
+                        }
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                    }
                 }
 
                 _context.ChangeTracker.Clear();
+
                 var currentTour = _context.Tours
                     .Include(x => x.HinhTours)
-                    .Include(x => x.TourGiaChiTiets)
                     .FirstOrDefault(x => x.IdTour == model.IdTour);
 
-                ModelState.AddModelError(string.Empty, "Không thể cập nhật tour và bảng giá. Vui lòng kiểm tra dữ liệu rồi thử lại.");
-                ViewBag.LoaiTours = _context.LoaiTours.OrderBy(x => x.TenLoai).ToList();
-                ViewBag.GiaNguoiLon = currentTour?.TourGiaChiTiets.FirstOrDefault(x => TourPriceAudience.IsAdult(x.DoiTuong))?.Gia ?? giaNguoiLon;
-                ViewBag.GiaTreEm = currentTour?.TourGiaChiTiets.FirstOrDefault(x => TourPriceAudience.IsChild(x.DoiTuong))?.Gia ?? giaTreEm;
-                ViewBag.GiaEmBe = currentTour?.TourGiaChiTiets.FirstOrDefault(x => TourPriceAudience.IsInfant(x.DoiTuong))?.Gia ?? giaEmBe;
+                ViewBag.LoaiTours = _context.LoaiTours
+                    .OrderBy(x => x.TenLoai)
+                    .ToList();
+
+                ViewBag.GiaNguoiLon = giaNguoiLon;
+                ViewBag.GiaTreEm = giaTreEm;
+                ViewBag.GiaEmBe = giaEmBe;
+
+                ViewBag.SelectedMaSoThichs = selectedCodes;
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Không thể cập nhật tour. " +
+                    "Vui lòng kiểm tra thông tin và thử lại."
+                );
+
                 return View(currentTour ?? model);
             }
-
-            TempData["ThongBao"] = "✅ Đã cập nhật tour";
-            return RedirectToAction("QuanLyTour");
         }
-
-
         private void DeleteUnsharedTourImages(IEnumerable<string> imagePaths)
         {
             foreach (var imagePath in imagePaths)
@@ -784,99 +1800,335 @@ namespace TourWebApp.Controllers
             ViewBag.IdTour = idTour;
             return View();
         }
-
-       [HttpPost]
+      
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ThemLich(LichKhoiHanh model)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
-            
-            if (model.IdTour == 0)
+            IActionResult BaoLoi(string message)
             {
-                TempData["Error"] = "Vui lòng chọn tour trước khi thêm lịch!";
+                TempData["Error"] = message;
                 return RedirectToAction("DanhSachLich");
             }
 
-            model.SoChoConLai = model.SoChoToiDa;
-            model.TrangThai = model.SoChoConLai > 0 ? "Còn chỗ" : "Hết chỗ";
+            // Kiểm tra tour.
+            if (model.IdTour <= 0)
+                return BaoLoi("Vui lòng chọn tour cần thêm lịch.");
 
-            _context.LichKhoiHanhs.Add(model);
-            _context.SaveChanges();
+            bool tourTonTai = _context.Tours
+                .Any(t => t.IdTour == model.IdTour);
 
-            return RedirectToAction("DanhSachLich");
+            if (!tourTonTai)
+                return BaoLoi("Tour được chọn không tồn tại.");
+
+            // Kiểm tra sức chứa.
+            if (model.SoChoToiDa <= 0)
+                return BaoLoi("Số chỗ tối đa phải lớn hơn 0.");
+
+            // Kiểm tra ngày và giờ.
+            var homNay = DateOnly.FromDateTime(DateTime.Now);
+            var gioHienTai = TimeOnly.FromDateTime(DateTime.Now);
+
+            if (model.NgayKhoiHanh < homNay)
+                return BaoLoi(
+                    "Không thể tạo lịch khởi hành trong quá khứ."
+                );
+
+            if (!model.GioKhoiHanh.HasValue)
+                return BaoLoi("Vui lòng nhập giờ khởi hành.");
+
+            if (model.NgayKhoiHanh == homNay &&
+                model.GioKhoiHanh.Value <= gioHienTai)
+            {
+                return BaoLoi(
+                    "Giờ khởi hành phải lớn hơn thời gian hiện tại."
+                );
+            }
+
+            // Một tour không được có hai lịch cùng ngày.
+            bool daCoLich = _context.LichKhoiHanhs
+                .Any(l =>
+                    l.IdTour == model.IdTour &&
+                    l.NgayKhoiHanh == model.NgayKhoiHanh);
+
+            if (daCoLich)
+                return BaoLoi(
+                    "Tour này đã có lịch khởi hành vào ngày đã chọn."
+                );
+
+            // Không lấy số chỗ còn lại do trình duyệt gửi lên.
+            var lichMoi = new LichKhoiHanh
+            {
+                IdTour = model.IdTour,
+                NgayKhoiHanh = model.NgayKhoiHanh,
+                GioKhoiHanh = model.GioKhoiHanh,
+                SoChoToiDa = model.SoChoToiDa,
+                SoChoConLai = model.SoChoToiDa,
+                TrangThai = "Còn chỗ"
+            };
+
+            try
+            {
+                _context.LichKhoiHanhs.Add(lichMoi);
+                _context.SaveChanges();
+
+                TempData["ThongBao"] =
+                    "Đã thêm lịch khởi hành thành công.";    
+                return RedirectToAction("DanhSachLich");
+            }
+            catch (DbUpdateException)
+            {
+                TempData["Error"] =
+                    "Không thể thêm lịch. Vui lòng kiểm tra " +
+                    "lịch trùng hoặc ràng buộc dữ liệu.";
+
+                return RedirectToAction("DanhSachLich");
+            }
         }
-
         // ================= SỬA LỊCH KHỞI HÀNH =================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SuaLich(LichKhoiHanh model)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
-            
             var lich = _context.LichKhoiHanhs
                 .FirstOrDefault(l => l.IdLich == model.IdLich);
 
             if (lich == null)
             {
-                TempData["Error"] = "Không tìm thấy lịch khởi hành!";
+                TempData["Error"] =
+                    "Không tìm thấy lịch khởi hành.";
+
                 return RedirectToAction("DanhSachLich");
             }
 
-            
-            bool coDon = _context.DonDatTours
-                .Any(d => d.IdLich == lich.IdLich && d.TrangThai != "DaHuy");
-
-            if (coDon)
+            IActionResult BaoLoi(string message)
             {
-                TempData["Error"] = "Lịch đã có người đặt, không thể sửa!";
-                return RedirectToAction("DanhSachLich", new { idTour = lich.IdTour });
+                TempData["Error"] = message;
+
+                return RedirectToAction(
+                    "DanhSachLich",
+                    new { idTour = lich.IdTour }
+                );
             }
 
-           
+            var homNay = DateOnly.FromDateTime(DateTime.Now);
+            var gioHienTai = TimeOnly.FromDateTime(DateTime.Now);
+
+            // Không sửa lịch đã qua.
+            if (lich.NgayKhoiHanh < homNay)
+                return BaoLoi(
+                    "Không thể chỉnh sửa lịch đã qua ngày khởi hành."
+                );
+
+            // Giữ mọi lịch đã từng phát sinh đơn hàng,
+            // kể cả đơn đã hủy.
+            bool daTungCoDon = _context.DonDatTours
+                .Any(d => d.IdLich == lich.IdLich);
+
+            if (daTungCoDon)
+                return BaoLoi(
+                    "Lịch đã có lịch sử đặt tour, không thể sửa trực tiếp."
+                );
+
+            // Tính số chỗ đang bị chiếm từ dữ liệu cũ
+            // TRƯỚC KHI cập nhật sức chứa.
+            int soChoDaGiu = Math.Max(
+                0,
+                lich.SoChoToiDa - lich.SoChoConLai
+            );
+
+            // Phòng trường hợp dữ liệu giữ chỗ tồn tại
+            // nhưng chưa có bản ghi đơn tương ứng.
+            if (soChoDaGiu > 0)
+                return BaoLoi(
+                    "Lịch đang có chỗ được giữ. " +
+                    "Không thể thay đổi lịch khi chưa xử lý số chỗ này."
+                );
+
+            if (model.SoChoToiDa <= 0)
+                return BaoLoi(
+                    "Số chỗ tối đa phải lớn hơn 0."
+                );
+
+            if (!model.GioKhoiHanh.HasValue)
+                return BaoLoi(
+                    "Vui lòng nhập giờ khởi hành."
+                );
+
+            if (model.NgayKhoiHanh < homNay)
+                return BaoLoi(
+                    "Ngày khởi hành mới không được nằm trong quá khứ."
+                );
+
+            if (model.NgayKhoiHanh == homNay &&
+                model.GioKhoiHanh.Value <= gioHienTai)
+            {
+                return BaoLoi(
+                    "Giờ khởi hành phải lớn hơn thời gian hiện tại."
+                );
+            }
+
+            bool trungLich = _context.LichKhoiHanhs
+                .Any(l =>
+                    l.IdTour == lich.IdTour &&
+                    l.IdLich != lich.IdLich &&
+                    l.NgayKhoiHanh == model.NgayKhoiHanh);
+
+            if (trungLich)
+                return BaoLoi(
+                    "Tour đã có lịch khác vào ngày được chọn."
+                );
+
+            // Cập nhật sau khi kiểm tra toàn bộ điều kiện.
             lich.NgayKhoiHanh = model.NgayKhoiHanh;
-            lich.GioKhoiHanh  = model.GioKhoiHanh;
-            lich.SoChoToiDa   = model.SoChoToiDa;
+            lich.GioKhoiHanh = model.GioKhoiHanh;
+            lich.SoChoToiDa = model.SoChoToiDa;
 
-            
-            int soDaDat = lich.SoChoToiDa - lich.SoChoConLai;   // số đã đặt cũ
-            if (soDaDat < 0) soDaDat = 0;
+            // Dùng số chỗ đã giữ từ trạng thái cũ.
+            lich.SoChoConLai =
+                model.SoChoToiDa - soChoDaGiu;
 
-            lich.SoChoConLai = Math.Max(0, model.SoChoToiDa - soDaDat);
-            lich.TrangThai   = lich.SoChoConLai > 0 ? "Còn chỗ" : "Hết chỗ";
+            lich.TrangThai = lich.SoChoConLai <= 0
+                ? "Hết chỗ"
+                : lich.SoChoConLai <= 5
+                    ? "Sắp hết chỗ"
+                    : "Còn chỗ";
 
-            _context.SaveChanges();
+            try
+            {
+                _context.SaveChanges();
 
-            TempData["ThongBao"] = "✅ Đã cập nhật lịch khởi hành!";
-            return RedirectToAction("DanhSachLich", new { idTour = lich.IdTour });
+                TempData["ThongBao"] =
+                    "Đã cập nhật lịch khởi hành thành công.";
+
+                return RedirectToAction(
+                    "DanhSachLich",
+                    new { idTour = lich.IdTour }
+                );
+            }
+            catch (DbUpdateException)
+            {
+                return BaoLoi(
+                    "Không thể cập nhật lịch do ràng buộc dữ liệu."
+                );
+            }
         }
-
-
-        // XÓA LỊCH (chỉ khi chưa có đơn)
+      
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult XoaLich(int id)
         {
-            if (!LaAdmin()) return NeuKhongPhaiAdmin();
+            if (!LaAdmin())
+                return NeuKhongPhaiAdmin();
 
-            var lich = _context.LichKhoiHanhs.FirstOrDefault(l => l.IdLich == id);
-            if (lich == null) return NotFound();
+            var lich = _context.LichKhoiHanhs
+                .FirstOrDefault(l => l.IdLich == id);
 
-            bool coDon = _context.DonDatTours.Any(d => d.IdLich == id && d.TrangThai != "DaHuy");
-
-            if (coDon)
+            if (lich == null)
             {
-                TempData["Error"] = "❌ Không thể xóa lịch đã có người đặt!";
-                return RedirectToAction("DanhSachLich", new { idTour = lich.IdTour });
+                TempData["Error"] =
+                    "Lịch khởi hành không tồn tại.";
+
+                return RedirectToAction("DanhSachLich");
             }
 
-            _context.LichKhoiHanhs.Remove(lich);
-            _context.SaveChanges();
+            IActionResult BaoLoi(string message)
+            {
+                TempData["Error"] = message;
 
-            TempData["ThongBao"] = "✅ Đã xóa lịch thành công";
+                return RedirectToAction(
+                    "DanhSachLich",
+                    new { idTour = lich.IdTour }
+                );
+            }
 
-            
-            return RedirectToAction("DanhSachLich", new { idTour = lich.IdTour });
+            // Kiểm tra tất cả đơn hàng,
+            // không phân biệt trạng thái.
+            bool daTungCoDon = _context.DonDatTours
+                .Any(d => d.IdLich == id);
+
+            if (daTungCoDon)
+            {
+                return BaoLoi(
+                    "Không thể xóa lịch đã có lịch sử đặt tour, " +
+                    "kể cả đơn hàng đã hủy."
+                );
+            }
+
+            // Không xóa lịch còn chỗ đang bị giữ.
+            int soChoDaGiu = Math.Max(
+                0,
+                lich.SoChoToiDa - lich.SoChoConLai
+            );
+
+            if (soChoDaGiu > 0)
+            {
+                return BaoLoi(
+                    "Lịch đang có số chỗ được giữ, " +
+                    "cần kiểm tra dữ liệu trước khi xóa."
+                );
+            }
+
+            // Kiểm tra DanhSachCho nếu bảng tồn tại.
+            // Câu SQL chỉ đọc, không thay đổi dữ liệu.
+            int soKhachCho;
+
+            try
+            {
+                soKhachCho = _context.Database
+                    .SqlQuery<int>(
+                        $"""
+                        IF OBJECT_ID(N'dbo.DanhSachCho', N'U') IS NULL
+                            SELECT CAST(0 AS int) AS Value;
+                        ELSE
+                            SELECT COUNT(*) AS Value
+                            FROM dbo.DanhSachCho
+                            WHERE IdLich = {id};
+                        """
+                    )
+                    .ToList()
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                return BaoLoi(
+                    "Không thể xác minh danh sách chờ. " +
+                    "Hệ thống chưa thực hiện xóa lịch."
+                );
+            }
+
+            if (soKhachCho > 0)
+            {
+                return BaoLoi(
+                    "Lịch có dữ liệu danh sách chờ, " +
+                    "không thể xóa trực tiếp."
+                );
+            }
+
+            try
+            {
+                _context.LichKhoiHanhs.Remove(lich);
+                _context.SaveChanges();
+
+                TempData["ThongBao"] =
+                    "Đã xóa lịch khởi hành thành công.";
+
+                return RedirectToAction("DanhSachLich");
+            }
+            catch (DbUpdateException)
+            {
+                return BaoLoi(
+                    "Lịch đang được liên kết với dữ liệu khác. " +
+                    "Không thể xóa để bảo vệ lịch sử hệ thống."
+                );
+            }
         }
-
         // ================= DANH SÁCH TẤT CẢ LỊCH (sidebar) =================
         public IActionResult DanhSachLich(int? idTour)
         {

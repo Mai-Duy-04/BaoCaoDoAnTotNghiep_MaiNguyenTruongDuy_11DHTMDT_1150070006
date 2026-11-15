@@ -1,0 +1,504 @@
+
+/* =====================================================
+   HAPPYTRIP - COMPACT TOUR BOOKING
+   wwwroot/css/tour-detail-compact.css
+   Load after tour-detail-booking.css
+   ===================================================== */
+
+.tour-detail-page #lichkhoihanh {
+    --ht-acc-green: #176b43;
+    --ht-acc-ink: #244b35;
+    --ht-acc-border: #e2e9e2;
+    --ht-acc-muted: #809184;
+}
+
+/* Khung tổng gọn, không kéo dài hai cột */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-card {
+    padding: 21px !important;
+    border-radius: 17px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-head {
+    margin-bottom: 16px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-head h2 {
+    font-size: 21px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-card > .row {
+    align-items: flex-start !important;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-schedule-card,
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card {
+    height: auto !important;
+    padding: 17px !important;
+    border-radius: 13px;
+    background: #fff;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-schedule-card > h3,
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card > h3 {
+    font-size: 15px;
+    margin-bottom: 13px;
+}
+
+/* Tab tháng ngắn gọn */
+
+.tour-detail-page #lichkhoihanh
+.ht-month-toolbar {
+    margin-bottom: 12px;
+    padding-bottom: 11px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-toolbar-title {
+    margin-bottom: 8px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tabs {
+    gap: 7px;
+    padding-bottom: 5px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab {
+    min-width: 79px;
+    min-height: 50px;
+    gap: 3px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab-year {
+    font-size: 10px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab-count {
+    display: none;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-summary {
+    font-size: 10px;
+    margin-top: 6px;
+}
+
+/* ============================================
+   DANH SÁCH LỊCH - MỖI LỊCH MỘT DÒNG
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid,
+.tour-detail-page #lichkhoihanh
+.ht-month-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid[hidden] {
+    display: none !important;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row.ht-acc-row {
+    display: grid !important;
+    grid-template-columns:
+        42px
+        36px
+        65px
+        minmax(90px, 1fr)
+        auto;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    min-height: 54px !important;
+    height: auto !important;
+    padding: 7px 10px !important;
+    margin: 0 !important;
+    border: 1px solid #e1e8e1;
+    border-radius: 999px;
+    background: #fff;
+    text-align: left;
+    box-shadow: none;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row.ht-acc-row:hover {
+    border-color: #8fc5a0;
+    background: #f8fcf7;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row.ht-acc-row.lich-selected,
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row.ht-acc-row.ht-acc-open {
+    border-color: #20844f !important;
+    background: #f0f8ef !important;
+    box-shadow: 0 0 0 1px rgba(32,132,79,.07);
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .ht-acc-row > .tour-calendar-day {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: #e8f5e9;
+    color: #207b4b;
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-row > span:nth-child(2) {
+    color: #476b50;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-row > span:nth-child(3) {
+    color: #748a79;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Ẩn trạng thái cũ, dùng badge mới ngắn gọn */
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-original-status {
+    display: none !important;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-seat-badge {
+    color: #287c4e;
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-seat-badge.is-low {
+    color: #b7832a;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-seat-badge.is-full {
+    color: #c16d62;
+}
+
+/* Nút Chọn + mũi tên */
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 77px;
+    min-height: 33px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #f0f3ef;
+    color: #617b66;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-open .ht-acc-action {
+    background: #176b43;
+    color: #fff;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-action i {
+    font-size: 10px;
+    transition: transform .2s ease;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-open .ht-acc-action i {
+    transform: rotate(180deg);
+}
+
+/* ============================================
+   PHẦN MỞ RỘNG - CHỈ HIỆN KHI CLICK
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-detail[hidden] {
+    display: none !important;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-detail {
+    display: block;
+    padding: 15px 17px;
+    margin: -3px 2px 8px;
+    border: 1px solid #c8dfce;
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+    background: #fcfefb;
+    animation: htAccReveal .18s ease-out;
+}
+
+@keyframes htAccReveal {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-detail-title {
+    margin: 0 0 10px;
+    color: #245b3e;
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px 18px;
+    padding: 0 0 13px;
+    border-bottom: 1px solid #e7eee5;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    min-width: 0;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-info-label {
+    color: #7b907f;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-info-value {
+    color: #285b3d;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-price-title {
+    margin-top: 13px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-prices {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-prices .ht-acc-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-prices .ht-acc-info-value {
+    color: #c84e3b;
+    font-size: 12px;
+    text-align: left;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-acc-note {
+    margin: 12px 0 0;
+    padding: 9px 11px;
+    border-radius: 9px;
+    background: #f2f7ed;
+    color: #738575;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+/* ============================================
+   KHUNG ĐẶT TOUR BÊN PHẢI GỌN HƠN
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card {
+    padding: 16px !important;
+    background: #fff;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info p {
+    padding: 5px 0;
+    font-size: 11px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list {
+    margin-bottom: 11px;
+    padding-bottom: 10px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list p {
+    padding: 5px 0;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-qty-list {
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-qty-row {
+    min-height: 35px;
+    margin-bottom: 5px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-total-box {
+    padding: 11px 13px;
+}
+
+.tour-detail-page #lichkhoihanh
+#bookingButton {
+    min-height: 43px;
+    margin-top: 10px !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1199px) {
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-section-card > .row {
+        align-items: flex-start !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-section-card {
+        padding: 13px !important;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-calendar-grid .lich-row.ht-acc-row {
+        grid-template-columns:
+            30px 26px 48px minmax(0,1fr) auto;
+        gap: 5px;
+        padding: 6px !important;
+        min-height: 47px !important;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-row > .tour-calendar-day {
+        width: 29px;
+        height: 29px;
+        font-size: 12px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-row > span:nth-child(2),
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-row > span:nth-child(3) {
+        font-size: 10px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-seat-badge {
+        font-size: 9px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-action {
+        min-width: 51px;
+        min-height: 29px;
+        padding: 5px 7px;
+        font-size: 10px;
+        gap: 4px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-detail {
+        padding: 12px 10px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-detail-grid {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-prices {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-prices .ht-acc-info {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-detail {
+        animation: none;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-acc-action i {
+        transition: none;
+    }
+}

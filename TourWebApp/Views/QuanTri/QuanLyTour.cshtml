@@ -1,208 +1,955 @@
+
 @model TourWebApp.ViewModels.QuanLyTourViewModel
+
 @{
-  Layout = "_LayoutAdmin";   // tên layout admin mà mình vừa làm
+    Layout = "_LayoutAdmin";
     ViewData["Title"] = "Quản lý tour";
-}
-<link rel="stylesheet" href="~/css/quanly-tour.css" />
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="mb-1">Quản lý tour</h3>
-        <div class="text-muted small">Xem, lọc và chỉnh sửa thông tin tour</div>
-    </div>
+    var tours = Model.Tours.ToList();
+    var totalTours = tours.Count;
+    var activeTours = tours.Count(t => t.TrangThai);
+    var inactiveTours = totalTours - activeTours;
 
-    <a asp-action="ThemTour" class="btn btn-primary">
-        <i class="fa-solid fa-plus me-1"></i> Thêm tour mới
-    </a>
-</div>
-
-@if (TempData["ThongBao"] != null)
-{
-    <div class="alert alert-success py-2">
-        @TempData["ThongBao"]
-    </div>
+    var vi = System.Globalization.CultureInfo
+        .GetCultureInfo("vi-VN");
 }
 
-<!-- BỘ LỌC -->
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <form class="row g-3" method="get" asp-action="QuanLyTour">
-            <div class="col-md-4">
-                <label class="form-label">Từ khóa</label>
-                <input type="text" name="tuKhoa" value="@Model.TuKhoa"
-                       class="form-control" placeholder="Tên tour, địa điểm..." />
+<link rel="stylesheet"
+      href="~/css/quanly-tour.css"
+      asp-append-version="true" />
+
+<style>
+    /* ===============================================
+       HAPPYTRIP - TOUR CARD ENHANCEMENTS
+       Chỉ ảnh hưởng trang quản lý tour
+       =============================================== */
+
+    .ht-tour-manager {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .ht-tour-list-section {
+        overflow: hidden;
+    }
+
+    .ht-tour-management-toolbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 13px;
+        margin: 0 0 18px;
+        padding: 13px 15px;
+        border: 1px solid #e3ebde;
+        border-radius: 13px;
+        background: #f8fbf6;
+    }
+
+    .ht-tour-toolbar-description {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .ht-tour-toolbar-description strong {
+        color: #236344;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .ht-tour-toolbar-description span {
+        color: #849889;
+        font-size: 11px;
+    }
+
+    .ht-tour-toolbar-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .ht-tour-toolbar-control {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .ht-tour-toolbar-control label {
+        color: #537861;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-tour-toolbar-control select {
+        min-height: 37px;
+        padding: 7px 29px 7px 11px;
+        border: 1px solid #d5e5d4;
+        border-radius: 9px;
+        background: white;
+        color: #2b6245;
+        outline: none;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .ht-tour-toolbar-control select:focus-visible {
+        outline: 3px solid #b3ddbd;
+        outline-offset: 2px;
+    }
+
+    /* ===============================================
+       TOUR IMAGE
+       =============================================== */
+
+    .ht-tour-card {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .ht-tour-card-media {
+        position: relative;
+        height: 166px;
+        overflow: hidden;
+        background: linear-gradient(
+            135deg,
+            #e2f3e2,
+            #f8f2d8
+        );
+    }
+
+    .ht-tour-card-media img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .3s ease;
+    }
+
+    .ht-tour-card:hover .ht-tour-card-media img {
+        transform: scale(1.035);
+    }
+
+    .ht-tour-image-empty {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 7px;
+        position: absolute;
+        inset: 0;
+        color: #58906a;
+        background: linear-gradient(
+            130deg,
+            #eaf7e7,
+            #fdf4da
+        );
+        text-align: center;
+    }
+
+    .ht-tour-image-empty i {
+        font-size: 26px;
+    }
+
+    .ht-tour-image-empty span {
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .ht-tour-media-overlay {
+        position: absolute;
+        inset: auto 0 0;
+        height: 56px;
+        background: linear-gradient(
+            to top,
+            rgba(12, 45, 29, .3),
+            transparent
+        );
+        pointer-events: none;
+    }
+
+    .ht-tour-photo-badge {
+        position: absolute;
+        top: 11px;
+        left: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 9px;
+        border-radius: 999px;
+        color: #2b6243;
+        background: rgba(255,255,255,.94);
+        box-shadow: 0 3px 10px rgba(0,0,0,.06);
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-tour-card-body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+        padding: 15px 17px 0;
+    }
+
+    .ht-tour-card-top {
+        margin-bottom: 2px;
+    }
+
+    .ht-tour-card-main h3 {
+        min-height: 0;
+        margin-bottom: 9px;
+    }
+
+    .ht-tour-route {
+        margin: 11px 0;
+    }
+
+    .ht-tour-card-footer {
+        margin: 0 -17px;
+    }
+
+    .ht-tour-manager .ht-tour-card[hidden] {
+        display: none !important;
+    }
+
+    /* ===============================================
+       PAGINATION
+       =============================================== */
+
+    .ht-tour-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 19px;
+        padding-top: 17px;
+        border-top: 1px solid #e6eee2;
+    }
+
+    .ht-tour-page-info {
+        color: #728b7b;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .ht-tour-page-info strong {
+        color: #227d4d;
+        font-weight: 800;
+    }
+
+    .ht-tour-pagination-buttons {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .ht-tour-manager .ht-tour-page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-width: 35px;
+        min-height: 35px;
+        padding: 8px 11px;
+        border: 1px solid #dbe8d9;
+        border-radius: 9px;
+        background: #fff;
+        color: #4f7b5d;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background .15s;
+    }
+
+    .ht-tour-manager .ht-tour-page-btn:hover:not(:disabled) {
+        background: #e9f5e8;
+    }
+
+    .ht-tour-manager .ht-tour-page-btn.active {
+        border-color: #258c53;
+        background: #268e55;
+        color: #fff;
+    }
+
+    .ht-tour-manager .ht-tour-page-btn:disabled {
+        opacity: .38;
+        cursor: not-allowed;
+    }
+
+    .ht-tour-pagination-ellipsis {
+        display: inline-flex;
+        min-width: 20px;
+        justify-content: center;
+        color: #8da092;
+        font-size: 12px;
+    }
+
+    @("@media") (max-width: 900px) {
+        .ht-tour-card-media {
+            height: 155px;
+        }
+    }
+
+    @("@media") (max-width: 600px) {
+        .ht-tour-toolbar-controls {
+            width: 100%;
+        }
+
+        .ht-tour-toolbar-control {
+            flex: 1;
+            min-width: 130px;
+        }
+
+        .ht-tour-toolbar-control select {
+            width: 100%;
+        }
+
+        .ht-tour-card-media {
+            height: 180px;
+        }
+
+        .ht-tour-pagination {
+            justify-content: center;
+        }
+    }
+
+    @("@media") (prefers-reduced-motion: reduce) {
+        .ht-tour-card-media img {
+            transition: none;
+        }
+    }
+</style>
+
+<div class="ht-tour-manager" id="htTourManager">
+
+    <!-- HEADER -->
+    <header class="ht-tour-manager-header">
+        <div class="ht-tour-manager-title">
+
+            <span class="ht-tour-manager-eyebrow">
+                <i class="fa-solid fa-route"></i>
+                HAPPYTRIP TOUR MANAGEMENT
+            </span>
+
+            <h1>Quản lý tour</h1>
+
+            <p>
+                Theo dõi, tìm kiếm và quản lý các
+                hành trình du lịch HappyTrip.
+            </p>
+
+        </div>
+
+        <a asp-controller="QuanTri"
+           asp-action="ThemTour"
+           class="ht-tour-add">
+
+            <i class="fa-solid fa-plus"></i>
+            Thêm tour mới
+
+        </a>
+    </header>
+
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="ht-tour-alert" role="status">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@TempData["ThongBao"]</span>
+        </div>
+    }
+
+    <!-- SUMMARY -->
+    <section class="ht-tour-summary"
+             aria-label="Thống kê danh sách tour">
+
+        <div class="ht-tour-summary-item">
+            <span class="ht-tour-summary-icon all">
+                <i class="fa-solid fa-suitcase-rolling"></i>
+            </span>
+
+            <div>
+                <small>Tour trong danh sách</small>
+                <strong>@totalTours.ToString("N0", vi)</strong>
+            </div>
+        </div>
+
+        <div class="ht-tour-summary-item">
+            <span class="ht-tour-summary-icon active">
+                <i class="fa-solid fa-circle-check"></i>
+            </span>
+
+            <div>
+                <small>Đang bán</small>
+                <strong>@activeTours.ToString("N0", vi)</strong>
+            </div>
+        </div>
+
+        <div class="ht-tour-summary-item">
+            <span class="ht-tour-summary-icon paused">
+                <i class="fa-solid fa-pause"></i>
+            </span>
+
+            <div>
+                <small>Ngưng bán</small>
+                <strong>@inactiveTours.ToString("N0", vi)</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- FILTER -->
+    <section class="ht-tour-filter-section">
+
+        <div class="ht-tour-section-header">
+            <div>
+                <h2>
+                    <i class="fa-solid fa-sliders"></i>
+                    Bộ lọc tìm kiếm
+                </h2>
+
+                <p>
+                    Tìm tour theo tên, địa điểm hoặc loại tour.
+                </p>
+            </div>
+        </div>
+
+        <form asp-controller="QuanTri"
+              asp-action="QuanLyTour"
+              method="get"
+              class="ht-tour-filter-form">
+
+            <div class="ht-tour-field">
+                <label for="htTourKeyword">
+                    Từ khóa
+                </label>
+
+                <div class="ht-tour-input-wrap">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input id="htTourKeyword"
+                           type="search"
+                           name="tuKhoa"
+                           value="@Model.TuKhoa"
+                           placeholder="Tên tour, địa điểm..."
+                           autocomplete="off" />
+                </div>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">Loại tour</label>
-                <select name="idLoaiTour" class="form-select">
-                    <option value="">-- Tất cả --</option>
+            <div class="ht-tour-field">
+                <label for="htTourType">
+                    Loại tour
+                </label>
+
+                <select id="htTourType"
+                        name="idLoaiTour">
+
+                    <option value="">-- Tất cả loại tour --</option>
+
                     @foreach (var lt in Model.LoaiTours)
                     {
-                        <option value="@lt.IdLoaiTour"
-                                selected="@(Model.IdLoaiTour == lt.IdLoaiTour ? "selected" : null)">
-                            @lt.TenLoai
-                        </option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-md-3 align-self-end">
-                <button class="btn btn-outline-primary me-2">
-                    <i class="fa-solid fa-filter me-1"></i> Lọc tour
-                </button>
-                <a asp-action="QuanLyTour" class="btn btn-link text-decoration-none">Xóa lọc</a>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- BẢNG TOUR -->
-<div class="card shadow-sm">
-    <div class="card-body">
-       <table class="table table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>#</th>
-            <th>Mã tour</th>
-            <th>Tên tour</th>
-            <th>Loại</th>
-            <th>Địa điểm</th>
-            <th>Thời gian</th>
-            <th>Phương tiện</th>
-            <th>Giá gốc</th>
-            <th>Giá KM</th>
-            <th>% Giảm</th>
-            <th>Đã đặt</th>
-            <th>Lượt xem</th>
-            <th>Trạng thái</th>
-            <th class="text-center">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            int stt = 1;
-        }
-        @foreach (var t in Model.Tours)
-        {
-            <tr>
-                <td>@stt</td>
-                <td>@t.MaTour</td>
-               <td class="text-ellipsis" title="@t.TenTour">
-                    @t.TenTour
-                </td>
-                <td>
-                    @(t.IdLoaiTourNavigation != null 
-                        ? t.IdLoaiTourNavigation.TenLoai 
-                        : "Chưa có loại")
-                </td>
-                <td>@t.DiaDiem</td>
-                <td>@t.ThoiGian</td>
-                <td class="text-ellipsis">@t.PhuongTien</td>
-                <td>
-                @if (t.PhanTramGiam != null && t.PhanTramGiam > 0)
-                {
-                    <span class="text-muted text-decoration-line-through">
-                        @String.Format("{0:N0} đ", t.GiaGoc)
-                    </span>
-                }
-                else
-                {
-                    <span class="fw-semibold">
-                        @String.Format("{0:N0} đ", t.GiaGoc)
-                    </span>
-                }
-                </td>
-
-                <td class="text-danger fw-semibold">
-                    @String.Format("{0:N0} đ", t.GiaKhuyenMai)
-                </td>
-
-                <td>@t.PhanTramGiam %</td>
-                <td>@t.SoNguoiDaDat</td>
-                <td>@t.LuotXem</td>
-
-                <td>
-                @if (t.TrangThai)
-                {
-                    <span class="badge bg-success">Đang bán</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">Ngưng bán</span>
-                }
-                </td>
-
-
-                <td class="text-center">
-                    <div class="action-group">
-
-                        <!-- 👁 Xem -->
-                        <a asp-action="ChiTietTour"
-                        asp-route-id="@t.IdTour"
-                        class="btn-action view"
-                        title="Xem chi tiết">
-                            <i class="fa fa-eye"></i>
-                        </a>
-
-                        <!-- ✏️ Sửa -->
-                        <a asp-action="SuaTour"
-                        asp-route-id="@t.IdTour"
-                        class="btn-action edit"
-                        title="Chỉnh sửa tour">
-                            <i class="fa fa-pen"></i>
-                        </a>
-
-                        @if (t.TrangThai)
+                        if (Model.IdLoaiTour == lt.IdLoaiTour)
                         {
-                            <!-- 🚫 Ngưng bán -->
-                            <form asp-action="NgungBanTour" method="post">
-                                <input type="hidden" name="id" value="@t.IdTour" />
-                                <button type="submit"
-                                        class="btn-action lock"
-                                        title="Ngưng bán"
-                                        onclick="return confirm('Ngưng bán tour này?')">
-                                    <i class="fa fa-ban"></i>
-                                </button>
-                            </form>
+                            <option value="@lt.IdLoaiTour" selected>
+                                @lt.TenLoai
+                            </option>
                         }
                         else
                         {
-                            <!-- ✅ Mở lại -->
-                            <form asp-action="MoLaiTour" method="post">
-                                <input type="hidden" name="id" value="@t.IdTour" />
-                                <button type="submit"
-                                        class="btn-action unlock"
-                                        title="Mở bán lại">
-                                    <i class="fa fa-refresh"></i>
-                                </button>
-                            </form>
+                            <option value="@lt.IdLoaiTour">
+                                @lt.TenLoai
+                            </option>
                         }
+                    }
 
-                      <!-- 🗑 Xóa -->
-                        <form asp-action="XoaTour"
-                            asp-controller="QuanTri"
-                            method="post"
-                            style="display:inline;">
-                            @Html.AntiForgeryToken()
+                </select>
+            </div>
 
-                            <input type="hidden" name="id" value="@t.IdTour" />
+            <div class="ht-tour-filter-actions">
 
-                            <button type="submit"
-                                    class="btn-action delete"
-                                    title="Xóa vĩnh viễn"
-                                    onclick="return confirm('XÓA VĨNH VIỄN tour này?')">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </form>
+                <button type="submit"
+                        class="ht-tour-filter-button">
+                    <i class="fa-solid fa-filter"></i>
+                    Lọc tour
+                </button>
+
+                <a asp-controller="QuanTri"
+                   asp-action="QuanLyTour"
+                   class="ht-tour-clear-button">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Xóa lọc
+                </a>
+
+            </div>
+        </form>
+
+    </section>
+
+    <!-- LIST -->
+    <section class="ht-tour-list-section">
+
+        <div class="ht-tour-section-header ht-tour-list-heading">
+            <div>
+                <h2>
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    Danh sách tour du lịch
+                </h2>
+
+                <p>
+                    Có <strong>@totalTours</strong>
+                    tour phù hợp với bộ lọc hiện tại.
+                </p>
+            </div>
+
+            <span class="ht-tour-view-label">
+                <i class="fa-solid fa-grip"></i>
+                Dạng thẻ quản lý
+            </span>
+        </div>
+
+        <!-- SORT + PAGE SIZE -->
+        @if (tours.Any())
+        {
+            <div class="ht-tour-management-toolbar">
+
+                <div class="ht-tour-toolbar-description">
+                    <strong>
+                        <i class="fa-solid fa-list-check"></i>
+                        Sắp xếp danh sách
+                    </strong>
+
+                    <span>
+                        Chọn thứ tự và số tour muốn hiển thị.
+                    </span>
+                </div>
+
+                <div class="ht-tour-toolbar-controls">
+
+                    <div class="ht-tour-toolbar-control">
+                        <label for="htTourSort">
+                            Sắp xếp theo
+                        </label>
+
+                        <select id="htTourSort">
+                            <option value="newest">
+                                Mới thêm nhất
+                            </option>
+
+                            <option value="oldest">
+                                Cũ nhất
+                            </option>
+
+                            <option value="az">
+                                Tên A–Z
+                            </option>
+
+                            <option value="za">
+                                Tên Z–A
+                            </option>
+
+                            <option value="priceAsc">
+                                Giá thấp đến cao
+                            </option>
+
+                            <option value="priceDesc">
+                                Giá cao đến thấp
+                            </option>
+                        </select>
                     </div>
-                </td>
 
-            </tr>
-            stt++;
+                    <div class="ht-tour-toolbar-control">
+                        <label for="htTourPageSize">
+                            Hiển thị
+                        </label>
+
+                        <select id="htTourPageSize">
+                            <option value="8" selected>
+                                8 tour / trang
+                            </option>
+
+                            <option value="12">
+                                12 tour / trang
+                            </option>
+
+                            <option value="20">
+                                20 tour / trang
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
         }
-    </tbody>
-</table>
-<script src="~/js/quanly-tour.js"></script>
-    </div>
+
+        @if (!tours.Any())
+        {
+            <div class="ht-tour-empty">
+
+                <div class="ht-tour-empty-icon">
+                    <i class="fa-solid fa-map"></i>
+                </div>
+
+                <h3>Không tìm thấy tour phù hợp</h3>
+
+                <p>
+                    Thử đổi từ khóa hoặc loại tour
+                    để xem kết quả khác.
+                </p>
+
+                <a asp-controller="QuanTri"
+                   asp-action="QuanLyTour">
+                    Xem tất cả tour
+                </a>
+
+            </div>
+        }
+        else
+        {
+            <div class="ht-tour-cards"
+                 id="htTourCards">
+
+                @{
+                    int stt = 1;
+                }
+
+                @foreach (var t in tours)
+                {
+                    var typeName =
+                        t.IdLoaiTourNavigation?.TenLoai
+                        ?? "Chưa phân loại";
+
+                    var sellingPrice =
+                        t.GiaKhuyenMai ?? t.GiaGoc ?? 0m;
+
+                    var originalPrice = t.GiaGoc ?? 0m;
+
+                    var hasDiscount =
+                        t.PhanTramGiam.HasValue &&
+                        t.PhanTramGiam.Value > 0;
+
+                    var rawImage = t.HinhAnh?.Trim() ?? "";
+
+                    string imageUrl = "";
+
+                    if (!string.IsNullOrEmpty(rawImage))
+                    {
+                        if (rawImage.StartsWith("https://",
+                            StringComparison.OrdinalIgnoreCase)
+                            || rawImage.StartsWith("http://",
+                            StringComparison.OrdinalIgnoreCase)
+                            || rawImage.StartsWith("/"))
+                        {
+                            imageUrl = rawImage;
+                        }
+                        else
+                        {
+                            imageUrl =
+                                "/img/tours/" +
+                                System.IO.Path.GetFileName(rawImage);
+                        }
+                    }
+
+                    <article class="ht-tour-card"
+                             data-tour-id="@t.IdTour"
+                             data-tour-name="@t.TenTour"
+                             data-tour-price="@sellingPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+
+                        <!-- PHOTO -->
+                        <div class="ht-tour-card-media">
+
+                            @if (!string.IsNullOrEmpty(imageUrl))
+                            {
+                                <img src="@imageUrl"
+                                     alt="Hình ảnh @t.TenTour"
+                                     loading="lazy"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+
+                                <div class="ht-tour-image-empty">
+                                    <i class="fa-solid fa-image"></i>
+                                    <span>Chưa có ảnh tour</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="ht-tour-image-empty"
+                                     style="display:flex;">
+                                    <i class="fa-solid fa-image"></i>
+                                    <span>Chưa có ảnh tour</span>
+                                </div>
+                            }
+
+                            <div class="ht-tour-media-overlay"></div>
+
+                            <span class="ht-tour-photo-badge">
+                                <i class="fa-solid fa-map-pin"></i>
+                                Hành trình #@stt
+                            </span>
+
+                        </div>
+
+                        <!-- BODY -->
+                        <div class="ht-tour-card-body">
+
+                            <div class="ht-tour-card-top">
+
+                                <div class="ht-tour-card-main">
+
+                                    <div class="ht-tour-card-kicker">
+
+                                        <span class="ht-tour-code"
+                                              title="@t.MaTour">
+                                            @t.MaTour
+                                        </span>
+
+                                    </div>
+
+                                    <h3 title="@t.TenTour">
+                                        @t.TenTour
+                                    </h3>
+
+                                    <span class="ht-tour-category">
+                                        <i class="fa-solid fa-tags"></i>
+                                        @typeName
+                                    </span>
+
+                                </div>
+
+                                @if (t.TrangThai)
+                                {
+                                    <span class="ht-tour-status selling">
+                                        <i class="fa-solid fa-circle"></i>
+                                        Đang bán
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="ht-tour-status stopped">
+                                        <i class="fa-solid fa-circle"></i>
+                                        Ngưng bán
+                                    </span>
+                                }
+
+                            </div>
+
+                            <!-- ROUTE -->
+                            <div class="ht-tour-route"
+                                 title="@t.DiaDiem">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>@t.DiaDiem</span>
+                            </div>
+
+                            <!-- DETAILS -->
+                            <div class="ht-tour-details">
+
+                                <div class="ht-tour-detail">
+                                    <span class="ht-tour-detail-icon">
+                                        <i class="fa-regular fa-clock"></i>
+                                    </span>
+                                    <div>
+                                        <small>Thời gian</small>
+                                        <strong>@t.ThoiGian</strong>
+                                    </div>
+                                </div>
+
+                                <div class="ht-tour-detail">
+                                    <span class="ht-tour-detail-icon">
+                                        <i class="fa-solid fa-bus"></i>
+                                    </span>
+                                    <div>
+                                        <small>Phương tiện</small>
+                                        <strong>@t.PhuongTien</strong>
+                                    </div>
+                                </div>
+
+                                <div class="ht-tour-detail">
+                                    <span class="ht-tour-detail-icon">
+                                        <i class="fa-solid fa-users"></i>
+                                    </span>
+                                    <div>
+                                        <small>Đã đặt</small>
+                                        <strong>
+                                            @t.SoNguoiDaDat.ToString("N0", vi)
+                                            khách
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div class="ht-tour-detail">
+                                    <span class="ht-tour-detail-icon">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </span>
+                                    <div>
+                                        <small>Lượt xem</small>
+                                        <strong>
+                                            @t.LuotXem.ToString("N0", vi)
+                                        </strong>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- PRICE -->
+                            <div class="ht-tour-price-row">
+
+                                <div class="ht-tour-price">
+                                    <small>Giá bán hiện tại</small>
+
+                                    <strong>
+                                        @sellingPrice.ToString("N0", vi) đ
+                                    </strong>
+
+                                    @if (hasDiscount)
+                                    {
+                                        <span class="ht-tour-old-price">
+                                            @originalPrice.ToString("N0", vi) đ
+                                        </span>
+                                    }
+                                </div>
+
+                                @if (hasDiscount)
+                                {
+                                    <span class="ht-tour-discount">
+                                        <i class="fa-solid fa-tag"></i>
+                                        Giảm @t.PhanTramGiam%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="ht-tour-no-discount">
+                                        Không giảm giá
+                                    </span>
+                                }
+
+                            </div>
+
+                            <!-- ACTIONS -->
+                            <div class="ht-tour-card-footer">
+
+                                <span class="ht-tour-actions-label">
+                                    Thao tác quản lý
+                                </span>
+
+                                <div class="ht-tour-actions">
+
+                                    <a asp-controller="QuanTri"
+                                       asp-action="ChiTietTour"
+                                       asp-route-id="@t.IdTour"
+                                       class="ht-tour-action view"
+                                       title="Xem chi tiết"
+                                       aria-label="Xem chi tiết @t.TenTour">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+
+                                    <a asp-controller="QuanTri"
+                                       asp-action="SuaTour"
+                                       asp-route-id="@t.IdTour"
+                                       class="ht-tour-action edit"
+                                       title="Chỉnh sửa tour"
+                                       aria-label="Sửa @t.TenTour">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+
+                                    @if (t.TrangThai)
+                                    {
+                                        <form asp-controller="QuanTri"
+                                              asp-action="NgungBanTour"
+                                              method="post"
+                                              class="ht-tour-action-form"
+                                              onsubmit="return confirm('Ngưng bán tour này?')">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@t.IdTour" />
+
+                                            <button type="submit"
+                                                    class="ht-tour-action lock"
+                                                    title="Ngưng bán"
+                                                    aria-label="Ngưng bán @t.TenTour">
+                                                <i class="fa-solid fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-controller="QuanTri"
+                                              asp-action="MoLaiTour"
+                                              method="post"
+                                              class="ht-tour-action-form"
+                                              onsubmit="return confirm('Mở bán lại tour này?')">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@t.IdTour" />
+
+                                            <button type="submit"
+                                                    class="ht-tour-action unlock"
+                                                    title="Mở bán lại"
+                                                    aria-label="Mở bán @t.TenTour">
+                                                <i class="fa-solid fa-rotate"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <form asp-controller="QuanTri"
+                                          asp-action="XoaTour"
+                                          method="post"
+                                          class="ht-tour-action-form"
+                                          onsubmit="return confirm('XÓA VĨNH VIỄN tour này? Hành động không thể hoàn tác.')">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@t.IdTour" />
+
+                                        <button type="submit"
+                                                class="ht-tour-action delete"
+                                                title="Xóa tour"
+                                                aria-label="Xóa @t.TenTour">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </article>
+
+                    stt++;
+                }
+
+            </div>
+
+            <!-- PAGINATION -->
+            <nav class="ht-tour-pagination"
+                 aria-label="Phân trang danh sách tour">
+
+                <span class="ht-tour-page-info"
+                      id="htTourPageInfo"
+                      aria-live="polite">
+                    Đang hiển thị danh sách tour
+                </span>
+
+                <div class="ht-tour-pagination-buttons"
+                     id="htTourPaginationButtons">
+                </div>
+
+            </nav>
+        }
+
+    </section>
+
 </div>
+
+<script src="~/js/quanly-tour.js"
+        asp-append-version="true"></script>

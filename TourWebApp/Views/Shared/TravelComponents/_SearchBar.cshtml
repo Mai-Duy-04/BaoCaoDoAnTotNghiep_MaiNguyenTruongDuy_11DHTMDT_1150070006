@@ -1,62 +1,176 @@
-﻿<section class="planner-wrap">
+﻿
+<link rel="stylesheet"
+      href="~/css/home-search.css"
+      asp-append-version="true" />
+
+<section class="planner-wrap ht-search-planner"
+         aria-label="Tìm kiếm tour du lịch">
+
     <div class="container travel-container">
-        <form class="planner-card" method="get" action="/tours" id="plannerFilterForm">
-            <div class="planner-field">
-                <label for="planner-destination">Điểm đến</label>
-                <input id="planner-destination" name="diadiem" type="text" placeholder="Bạn muốn đi đâu?" />
-            </div>
-            <div class="planner-field">
-                <label for="planner-date">Ngày đi</label>
-                <input id="planner-date" name="ngaydi" type="date" />
-            </div>
-            <div class="planner-field">
-                <label for="planner-travelers">Số người</label>
-                <select id="planner-travelers" name="travelers">
-                    <option value="2">2 người</option>
-                    <option value="3">3 người</option>
-                    <option value="4">4 người</option>
-                    <option value="5">5+ người</option>
-                </select>
-            </div>
-            <div class="planner-field">
-                <label for="planner-budget">Ngân sách</label>
-                <select id="planner-budget" name="budget">
-                    <option value="">Tất cả</option>
-                    <option value="1000000-3000000">1 - 3 triệu</option>
-                    <option value="3000000-6000000">3 - 6 triệu</option>
-                    <option value="6000000-10000000">6 - 10 triệu</option>
-                    <option value="10000000-">10 triệu+</option>
-                </select>
+
+        <form class="planner-card ht-search-card"
+              method="get"
+              action="/tours"
+              id="plannerFilterForm">
+
+            <!-- DIEM DEN -->
+            <div class="planner-field ht-search-field">
+
+                <div class="ht-search-icon" aria-hidden="true">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div class="ht-search-field-content">
+                    <label for="planner-destination">
+                        Điểm đến
+                    </label>
+
+                    <input id="planner-destination"
+                           name="diadiem"
+                           type="text"
+                           placeholder="Bạn muốn đi đâu?"
+                           autocomplete="off" />
+                </div>
+
             </div>
 
-            <input type="hidden" name="giamin" id="planner-giamin" />
-            <input type="hidden" name="giamax" id="planner-giamax" />
+            <!-- NGAY KHOI HANH -->
+            <div class="planner-field ht-search-field">
 
-            <button type="submit" class="btn travel-btn travel-btn-primary planner-submit">Tìm tour ngay</button>
+                <div class="ht-search-icon" aria-hidden="true">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+
+                <div class="ht-search-field-content">
+                    <label for="planner-date">
+                        Ngày khởi hành
+                    </label>
+
+                    <input id="planner-date"
+                           name="ngaydi"
+                           type="date" />
+                </div>
+
+            </div>
+
+            <!-- SO NGUOI -->
+            <div class="planner-field ht-search-field">
+
+                <div class="ht-search-icon" aria-hidden="true">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <div class="ht-search-field-content">
+                    <label for="planner-travelers">
+                        Số người
+                    </label>
+
+                    <select id="planner-travelers"
+                            name="travelers">
+
+                        <option value="2">2 người</option>
+                        <option value="3">3 người</option>
+                        <option value="4">4 người</option>
+                        <option value="5">5+ người</option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- NGAN SACH -->
+            <div class="planner-field ht-search-field">
+
+                <div class="ht-search-icon" aria-hidden="true">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+
+                <div class="ht-search-field-content">
+                    <label for="planner-budget">
+                        Ngân sách
+                    </label>
+
+                    <select id="planner-budget"
+                            name="budget">
+
+                        <option value="">Tất cả</option>
+                        <option value="1000000-3000000">
+                            1 - 3 triệu
+                        </option>
+                        <option value="3000000-6000000">
+                            3 - 6 triệu
+                        </option>
+                        <option value="6000000-10000000">
+                            6 - 10 triệu
+                        </option>
+                        <option value="10000000-">
+                            10 triệu+
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- GIU NGUYEN THAM SO LOC GIA -->
+            <input type="hidden"
+                   name="giamin"
+                   id="planner-giamin" />
+
+            <input type="hidden"
+                   name="giamax"
+                   id="planner-giamax" />
+
+            <!-- TIM TOUR -->
+            <button type="submit"
+                    class="btn planner-submit ht-search-submit">
+
+                <i class="fa-solid fa-magnifying-glass"
+                   aria-hidden="true"></i>
+
+                <span>Tìm tour</span>
+
+            </button>
+
         </form>
+
     </div>
+
 </section>
 
 <script>
     (function () {
+        "use strict";
+
         var form = document.getElementById("plannerFilterForm");
-        if (!form) return;
+
+        if (!form) {
+            return;
+        }
 
         var budget = document.getElementById("planner-budget");
         var giaMin = document.getElementById("planner-giamin");
         var giaMax = document.getElementById("planner-giamax");
 
-        if (!budget || !giaMin || !giaMax) return;
+        if (!budget || !giaMin || !giaMax) {
+            return;
+        }
 
         form.addEventListener("submit", function () {
             giaMin.value = "";
             giaMax.value = "";
 
             var selected = budget.value || "";
-            if (!selected) return;
+
+            if (!selected) {
+                return;
+            }
 
             var parts = selected.split("-");
-            if (parts.length !== 2) return;
+
+            if (parts.length !== 2) {
+                return;
+            }
 
             giaMin.value = parts[0] || "";
             giaMax.value = parts[1] || "";

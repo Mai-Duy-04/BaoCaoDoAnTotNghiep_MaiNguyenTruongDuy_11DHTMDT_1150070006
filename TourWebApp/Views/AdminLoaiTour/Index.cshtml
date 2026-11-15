@@ -1,56 +1,884 @@
-@model List<TourWebApp.Models.ViewModels.LoaiTourListVM>
+
+@model IEnumerable<TourWebApp.Models.ViewModels.LoaiTourListVM>
+
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "_LayoutAdmin";
     ViewData["Title"] = "Quản lý loại tour";
+
+    var dsLoaiTour = Model?.ToList()
+        ?? new List<TourWebApp.Models.ViewModels.LoaiTourListVM>();
+
+    var tongLoai = dsLoaiTour.Count;
+    var tongTour = dsLoaiTour.Sum(x => x.SoTour);
+    var loaiDangDung = dsLoaiTour.Count(x => x.SoTour > 0);
+    var loaiChuaDung = dsLoaiTour.Count(x => x.SoTour == 0);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="fw-bold mb-0">📌 Quản lý loại tour</h3>
-    <a class="btn btn-primary" asp-action="Create">+ Thêm loại tour</a>
+<style>
+    .ht-type-page {
+        --ht-dark: #184d35;
+        --ht-green: #238d55;
+        --ht-green-light: #eaf6eb;
+        --ht-text: #294d39;
+        --ht-muted: #849587;
+        --ht-line: #e3ecdf;
+        width: 100%;
+        max-width: 1450px;
+        margin: 0 auto;
+        padding: 8px 3px 35px;
+        font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+        color: var(--ht-text);
+    }
+
+    .ht-type-page *,
+    .ht-type-page *::before,
+    .ht-type-page *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-type-page a {
+        text-decoration: none;
+    }
+
+    .ht-type-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 21px;
+    }
+
+    .ht-type-eyebrow {
+        color: #68a47b;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.3px;
+        text-transform: uppercase;
+    }
+
+    .ht-type-header h1 {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin: 7px 0 6px;
+        font-size: clamp(24px, 2.5vw, 31px);
+        font-weight: 800;
+        color: var(--ht-dark);
+    }
+
+    .ht-type-header h1 i {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        background: #e8f5e9;
+        border-radius: 13px;
+        color: #258d55;
+        font-size: 19px;
+    }
+
+    .ht-type-header p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--ht-muted);
+    }
+
+    .ht-type-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 44px;
+        padding: 11px 17px;
+        background: #238c54;
+        color: #fff !important;
+        border-radius: 11px;
+        font-size: 12px;
+        font-weight: 800;
+        box-shadow: 0 6px 14px rgba(35,140,84,.15);
+        transition: background .2s, transform .2s;
+    }
+
+    .ht-type-add:hover {
+        background: #196f41;
+        transform: translateY(-1px);
+    }
+
+    /* STATS */
+
+    .ht-type-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 13px;
+        margin-bottom: 19px;
+    }
+
+    .ht-type-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-width: 0;
+        padding: 17px 18px;
+        background: #fff;
+        border: 1px solid var(--ht-line);
+        border-radius: 15px;
+        box-shadow: 0 4px 17px rgba(29,75,43,.035);
+    }
+
+    .ht-type-stat-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #829687;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .ht-type-stat strong {
+        display: block;
+        font-size: 27px;
+        font-weight: 800;
+        line-height: 1;
+        color: #1e6040;
+    }
+
+    .ht-type-stat-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 43px;
+        width: 43px;
+        height: 43px;
+        border-radius: 13px;
+        background: #e9f6e8;
+        color: #32945c;
+        font-size: 18px;
+    }
+
+    .ht-type-stat.gold .ht-type-stat-icon {
+        background: #fff4dd;
+        color: #c99634;
+    }
+
+    .ht-type-stat.blue .ht-type-stat-icon {
+        background: #edf5fc;
+        color: #5e94b9;
+    }
+
+    .ht-type-stat.grey .ht-type-stat-icon {
+        background: #f0f3ee;
+        color: #829486;
+    }
+
+    /* TABLE PANEL */
+
+    .ht-type-panel {
+        background: #fff;
+        border: 1px solid #dfeadd;
+        border-radius: 17px;
+        overflow: hidden;
+        box-shadow: 0 6px 23px rgba(27,76,42,.045);
+    }
+
+    .ht-type-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding: 19px 20px;
+        border-bottom: 1px solid #e8efe4;
+    }
+
+    .ht-type-toolbar h2 {
+        margin: 0 0 5px;
+        font-size: 15px;
+        font-weight: 800;
+        color: #1f5539;
+    }
+
+    .ht-type-toolbar p {
+        margin: 0;
+        font-size: 11px;
+        color: #8b9c8d;
+    }
+
+    .ht-type-toolbar-right {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .ht-type-search {
+        position: relative;
+        width: min(100%, 270px);
+    }
+
+    .ht-type-search i {
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        transform: translateY(-50%);
+        color: #91a495;
+        font-size: 13px;
+    }
+
+    .ht-type-search input {
+        width: 100%;
+        height: 40px;
+        padding: 10px 12px 10px 37px;
+        background: #f8fbf6;
+        border: 1px solid #e0eade;
+        border-radius: 10px;
+        outline: none;
+        color: #365e45;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .ht-type-search input:focus {
+        border-color: #60b47d;
+        box-shadow: 0 0 0 3px rgba(43,147,83,.08);
+    }
+
+    .ht-type-filter {
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #e0eade;
+        border-radius: 10px;
+        background: #f8fbf6;
+        color: #496d54;
+        outline: none;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .ht-type-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .ht-type-table {
+        width: 100%;
+        min-width: 740px;
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: fixed;
+    }
+
+    .ht-type-table thead {
+        background: #f6faf4;
+    }
+
+    .ht-type-table thead th {
+        padding: 14px 16px;
+        color: #6d8975;
+        font-size: 10px;
+        font-weight: 800;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        border-bottom: 1px solid #e5eee0;
+    }
+
+    .ht-type-table tbody tr {
+        border-bottom: 1px solid #edf2e9;
+        transition: background .2s;
+    }
+
+    .ht-type-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .ht-type-table tbody tr:hover {
+        background: #fbfdf9;
+    }
+
+    .ht-type-table tbody td {
+        padding: 13px 16px;
+        vertical-align: middle;
+        font-size: 12px;
+        line-height: 1.55;
+    }
+
+    .ht-type-id {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 33px;
+        height: 29px;
+        padding: 0 7px;
+        color: #6c9475;
+        background: #f0f6ee;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-type-name {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+    }
+
+    .ht-type-name-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 35px;
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        color: #338956;
+        background: #e9f5e9;
+        font-size: 13px;
+    }
+
+    .ht-type-name strong {
+        display: block;
+        min-width: 0;
+        color: #27593d;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-type-description {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        color: #829385;
+        font-size: 11px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-type-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-width: 58px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        background: #e8f6e8;
+        color: #258650;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-type-count.empty {
+        background: #f1f4ef;
+        color: #8b9b8c;
+    }
+
+    .ht-type-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .ht-type-action {
+        display: grid;
+        place-items: center;
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        border-radius: 9px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+    }
+
+    .ht-type-action:hover {
+        transform: translateY(-1px);
+    }
+
+    .ht-type-action.edit {
+        color: #288451;
+        background: #e7f5e8;
+    }
+
+    .ht-type-action.edit:hover {
+        background: #d7eedb;
+    }
+
+    .ht-type-action.delete {
+        color: #c46557;
+        background: #fff0ed;
+    }
+
+    .ht-type-action.delete:hover {
+        background: #ffe0da;
+    }
+
+    .ht-type-action.delete:disabled {
+        color: #b0b7ae;
+        background: #f1f2ef;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .ht-type-empty {
+        padding: 45px 20px;
+        text-align: center;
+        color: #8a9b8c;
+        font-size: 12px;
+    }
+
+    .ht-type-empty i {
+        display: block;
+        margin-bottom: 12px;
+        color: #89b99a;
+        font-size: 28px;
+    }
+
+    .ht-type-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 13px 20px;
+        background: #fbfdfa;
+        border-top: 1px solid #e8eee5;
+        color: #87998b;
+        font-size: 11px;
+    }
+
+    .ht-type-footer strong {
+        color: #3d8056;
+    }
+
+    @@media (max-width: 1100px) {
+        .ht-type-stats {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 680px) {
+        .ht-type-header {
+            align-items: stretch;
+        }
+
+        .ht-type-add {
+            width: 100%;
+        }
+
+        .ht-type-stats {
+            gap: 9px;
+        }
+
+        .ht-type-stat {
+            padding: 13px;
+        }
+
+        .ht-type-stat strong {
+            font-size: 23px;
+        }
+
+        .ht-type-stat-icon {
+            flex-basis: 35px;
+            width: 35px;
+            height: 35px;
+            font-size: 14px;
+        }
+
+        .ht-type-toolbar {
+            padding: 15px;
+        }
+
+        .ht-type-toolbar-right,
+        .ht-type-search {
+            width: 100%;
+        }
+
+        .ht-type-filter {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="ht-type-page">
+
+    <!-- HEADER -->
+    <header class="ht-type-header">
+
+        <div>
+            <span class="ht-type-eyebrow">
+                HAPPYTRIP / TOUR CATEGORIES
+            </span>
+
+            <h1>
+                <i class="fa-solid fa-layer-group"></i>
+                Quản lý loại tour
+            </h1>
+
+            <p>
+                Quản lý và phân loại các hành trình du lịch.
+            </p>
+        </div>
+
+        <a asp-controller="AdminLoaiTour"
+           asp-action="Create"
+           class="ht-type-add">
+
+            <i class="fa-solid fa-plus"></i>
+            Thêm loại tour
+        </a>
+    </header>
+
+    <!-- STATISTICS -->
+    <section class="ht-type-stats">
+
+        <div class="ht-type-stat">
+            <div>
+                <span class="ht-type-stat-label">
+                    Tổng loại tour
+                </span>
+                <strong>@tongLoai</strong>
+            </div>
+            <span class="ht-type-stat-icon">
+                <i class="fa-solid fa-layer-group"></i>
+            </span>
+        </div>
+
+        <div class="ht-type-stat gold">
+            <div>
+                <span class="ht-type-stat-label">
+                    Tổng tour phân loại
+                </span>
+                <strong>@tongTour</strong>
+            </div>
+            <span class="ht-type-stat-icon">
+                <i class="fa-solid fa-suitcase-rolling"></i>
+            </span>
+        </div>
+
+        <div class="ht-type-stat blue">
+            <div>
+                <span class="ht-type-stat-label">
+                    Loại đang sử dụng
+                </span>
+                <strong>@loaiDangDung</strong>
+            </div>
+            <span class="ht-type-stat-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </span>
+        </div>
+
+        <div class="ht-type-stat grey">
+            <div>
+                <span class="ht-type-stat-label">
+                    Loại chưa có tour
+                </span>
+                <strong>@loaiChuaDung</strong>
+            </div>
+            <span class="ht-type-stat-icon">
+                <i class="fa-solid fa-box-open"></i>
+            </span>
+        </div>
+
+    </section>
+
+    <!-- MAIN LIST -->
+    <section class="ht-type-panel">
+
+        <div class="ht-type-toolbar">
+
+            <div>
+                <h2>Danh sách loại tour</h2>
+
+                <p>
+                    Tìm kiếm, chỉnh sửa và quản lý
+                    các nhóm hành trình.
+                </p>
+            </div>
+
+            <div class="ht-type-toolbar-right">
+
+                <div class="ht-type-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input type="search"
+                           id="htTypeSearch"
+                           placeholder="Tìm tên hoặc mô tả..."
+                           autocomplete="off"
+                           aria-label="Tìm kiếm loại tour" />
+                </div>
+
+                <select id="htTypeFilter"
+                        class="ht-type-filter"
+                        aria-label="Lọc loại tour">
+
+                    <option value="all">Tất cả loại</option>
+                    <option value="used">Đang có tour</option>
+                    <option value="empty">Chưa có tour</option>
+
+                </select>
+            </div>
+        </div>
+
+        <div class="ht-type-table-wrap">
+
+            <table class="ht-type-table">
+
+                <thead>
+                    <tr>
+                        <th style="width:75px;">ID</th>
+                        <th style="width:27%;">Tên loại tour</th>
+                        <th>Mô tả</th>
+                        <th style="width:115px;">Số tour</th>
+                        <th style="width:118px;text-align:right;">
+                            Thao tác
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody id="htTypeTableBody">
+
+                    @foreach (var item in dsLoaiTour)
+                    {
+                        <tr class="ht-type-row"
+                            data-name="@item.TenLoai"
+                            data-description="@item.MoTa"
+                            data-count="@item.SoTour">
+
+                            <td>
+                                <span class="ht-type-id">
+                                    @item.IdLoaiTour
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="ht-type-name">
+
+                                    <span class="ht-type-name-icon">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    </span>
+
+                                    <strong>@item.TenLoai</strong>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="ht-type-description"
+                                      title="@item.MoTa">
+                                    @(string.IsNullOrWhiteSpace(item.MoTa)
+                                        ? "Chưa có mô tả"
+                                        : item.MoTa)
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="ht-type-count @(item.SoTour == 0 ? "empty" : "")">
+
+                                    <i class="fa-solid fa-suitcase"></i>
+                                    @item.SoTour
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="ht-type-actions">
+
+                                    <a asp-controller="AdminLoaiTour"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.IdLoaiTour"
+                                       class="ht-type-action edit"
+                                       title="Sửa loại tour"
+                                       aria-label="Sửa loại tour @item.TenLoai">
+
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+
+                                    @if (item.SoTour == 0)
+                                    {
+                                        <form asp-controller="AdminLoaiTour"
+                                              asp-action="Delete"
+                                              asp-route-id="@item.IdLoaiTour"
+                                              method="post"
+                                              class="ht-type-delete-form"
+                                              style="margin:0;">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="ht-type-action delete"
+                                                    title="Xóa loại tour"
+                                                    aria-label="Xóa loại tour @item.TenLoai"
+                                                    data-category-name="@item.TenLoai">
+
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="ht-type-action delete"
+                                                title="Loại này đang có tour, không thể xóa trực tiếp"
+                                                aria-label="Không thể xóa loại tour đang được sử dụng"
+                                                disabled>
+
+                                            <i class="fa-solid fa-lock"></i>
+                                        </button>
+                                    }
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+
+            <div class="ht-type-empty"
+                 id="htTypeSearchEmpty"
+                 style="display:none;">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                Không tìm thấy loại tour phù hợp.
+            </div>
+
+            @if (!dsLoaiTour.Any())
+            {
+                <div class="ht-type-empty">
+                    <i class="fa-solid fa-folder-open"></i>
+                    Chưa có loại tour nào trong hệ thống.
+                </div>
+            }
+
+        </div>
+
+        <div class="ht-type-footer">
+
+            <span>
+                Hiển thị
+                <strong id="htTypeVisibleCount">
+                    @tongLoai
+                </strong>
+                / @tongLoai loại tour
+            </span>
+
+            <span>
+                <i class="fa-solid fa-circle-info"></i>
+                Loại đang có tour không thể xóa trực tiếp.
+            </span>
+        </div>
+
+    </section>
 </div>
 
-<table class="table table-bordered align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th width="80">ID</th>
-            <th width="280">Tên loại</th>
-            <th>Mô tả</th>
-            <th width="120" class="text-center">Số tour</th>
-            <th width="220">Thao tác</th>
-        </tr>
-    </thead>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-    <tbody>
-        @if (Model == null || Model.Count == 0)
-        {
-            <tr>
-                <td colspan="5" class="text-center text-muted fst-italic">Chưa có loại tour nào.</td>
-            </tr>
-        }
-        else
-        {
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.IdLoaiTour</td>
-                    <td class="fw-semibold">@item.TenLoai</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.MoTa) ? "-" : item.MoTa)</td>
-                    <td class="text-center">
-                        <span class="badge bg-info">@item.SoTour</span>
-                    </td>
-                    <td>
-                        <a class="btn btn-warning btn-sm"
-                           asp-action="Edit"
-                           asp-route-id="@item.IdLoaiTour">Sửa</a>
+    const searchInput = document.getElementById("htTypeSearch");
+    const filterSelect = document.getElementById("htTypeFilter");
 
-                        <form asp-action="Delete" method="post" class="d-inline"
-                              onsubmit="return confirm('Xóa loại tour này nha?');">
-                            <input type="hidden" name="id" value="@item.IdLoaiTour" />
-                            <button class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
+    const rows = Array.from(
+        document.querySelectorAll(".ht-type-row")
+    );
+
+    const visibleCount = document.getElementById(
+        "htTypeVisibleCount"
+    );
+
+    const emptyMessage = document.getElementById(
+        "htTypeSearchEmpty"
+    );
+
+    function normalizeText(value) {
+        return (value || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .trim();
+    }
+
+    function applyFilters() {
+
+        const keyword = normalizeText(searchInput?.value);
+        const filter = filterSelect?.value || "all";
+
+        let count = 0;
+
+        rows.forEach(function (row) {
+
+            const name = normalizeText(row.dataset.name);
+            const description = normalizeText(
+                row.dataset.description
+            );
+
+            const tourCount = Number(
+                row.dataset.count || 0
+            );
+
+            const matchesSearch =
+                !keyword ||
+                name.includes(keyword) ||
+                description.includes(keyword);
+
+            const matchesFilter =
+                filter === "all" ||
+                (filter === "used" && tourCount > 0) ||
+                (filter === "empty" && tourCount === 0);
+
+            const show = matchesSearch && matchesFilter;
+
+            row.hidden = !show;
+            row.style.display = show ? "" : "none";
+
+            if (show) {
+                count++;
             }
+        });
+
+        if (visibleCount) {
+            visibleCount.textContent = count;
         }
-    </tbody>
-</table>
+
+        if (emptyMessage) {
+            emptyMessage.style.display =
+                rows.length > 0 && count === 0
+                    ? "block"
+                    : "none";
+        }
+    }
+
+    searchInput?.addEventListener("input", applyFilters);
+    filterSelect?.addEventListener("change", applyFilters);
+
+    document.querySelectorAll(".ht-type-delete-form")
+        .forEach(function (form) {
+
+            form.addEventListener("submit", function (event) {
+
+                const button = form.querySelector(
+                    "[data-category-name]"
+                );
+
+                const name = button?.dataset.categoryName
+                    || "loại tour này";
+
+                const confirmed = window.confirm(
+                    "Bạn có chắc muốn xóa \"" +
+                    name +
+                    "\"?\n\nThao tác này không thể hoàn tác."
+                );
+
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            });
+        });
+
+    applyFilters();
+});
+</script>

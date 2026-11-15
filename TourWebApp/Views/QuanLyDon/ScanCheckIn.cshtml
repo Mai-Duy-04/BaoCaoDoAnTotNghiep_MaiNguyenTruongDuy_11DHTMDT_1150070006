@@ -1,30 +1,952 @@
+
 @model TourWebApp.Data.Models.DonDatTour
+@using System
+
 @{
-    ViewData["Title"] = "Scan check-in";
-    Layout = "_Layout";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Check-in vé du lịch";
+
+    bool daCheckIn = ViewBag.DaCheckIn is bool value && value;
+    string token = ViewBag.CheckInToken as string ?? "";
+
+    bool daHuy = Model.TrangThai == "DaHuy";
+    bool daThanhToan = Model.DaThanhToan;
+    bool trangThaiCu = Model.TrangThai == "HoanTat";
+
+    bool coTheCheckIn =
+        daThanhToan &&
+        !daHuy &&
+        !daCheckIn &&
+        !trangThaiCu &&
+        !string.IsNullOrWhiteSpace(token);
+
+    int soKhach = Model.NguoiLon + Model.TreEm + Model.TreNho;
+
+    decimal thanhTien = Math.Max(
+        0m,
+        Model.TongTienSauGiam ??
+        (Model.TongTien - (Model.SoTienGiam ?? 0m)));
+
+    string tenTour = Model.IdTourNavigation?.TenTour ?? "Tour du lịch";
+    string diaDiem = Model.IdTourNavigation?.DiaDiem ?? "Đang cập nhật";
+    string tenKhach = Model.IdTaiKhoanNavigation?.HoTen ?? "Chưa cập nhật";
+
+    string ngayKhoiHanh =
+        Model.IdLichNavigation?.NgayKhoiHanh.ToString("dd/MM/yyyy")
+        ?? "Chưa cập nhật";
+
+    string trangThai = daCheckIn ? "Đã check-in"
+        : daHuy ? "Đã hủy"
+        : !daThanhToan ? "Chưa thanh toán"
+        : trangThaiCu ? "Cần đối chiếu"
+        : "Chưa check-in";
+
+    string mauTrangThai = daCheckIn ? "done"
+        : coTheCheckIn ? "ready" : "blocked";
 }
 
-<div class="container py-4" style="max-width:900px;">
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4">
-            <h3 class="mb-3">Xác nhận check-in</h3>
-            <p class="text-muted mb-4">Thông tin đơn được quét từ QR.</p>
+<div class="ht-mini-checkin">
 
-            <div class="row g-3 mb-4">
-                <div class="col-md-6"><strong>Mã đơn:</strong> @Model.MaBooking</div>
-                <div class="col-md-6"><strong>Khách hàng:</strong> @Model.IdTaiKhoanNavigation?.HoTen</div>
-                <div class="col-md-6"><strong>Tour:</strong> @Model.IdTourNavigation?.TenTour</div>
-                <div class="col-md-6"><strong>Ngày đặt:</strong> @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</div>
-                <div class="col-md-6"><strong>Trạng thái:</strong> @Model.TrangThai</div>
-                <div class="col-md-6"><strong>Đã thanh toán:</strong> @(Model.DaThanhToan ? "Có" : "Chưa")</div>
+    <header class="mc-heading">
+        <div>
+            <div class="mc-breadcrumb">
+                <a asp-controller="QuanLyDon" asp-action="Index">
+                    Quản lý đặt tour
+                </a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Check-in</span>
             </div>
 
-            <form asp-action="XacNhanCheckIn" asp-controller="QuanLyDon" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="idDon" value="@Model.IdDon" />
-                <button type="submit" class="btn btn-success">Xác nhận check-in</button>
-                <a asp-action="ChiTiet" asp-controller="QuanLyDon" asp-route-id="@Model.IdDon" class="btn btn-outline-secondary ms-2">Xem chi tiết đơn</a>
-            </form>
+            <h1>Kiểm tra vé điện tử</h1>
+            <p>Đối chiếu thông tin và xác nhận khách tham gia tour.</p>
         </div>
+
+        <a asp-controller="QuanLyDon"
+           asp-action="Index"
+           class="mc-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            Quay lại
+        </a>
+    </header>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="mc-alert success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Info"] != null)
+    {
+        <div class="mc-alert info">@TempData["Info"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="mc-alert error">@TempData["Error"]</div>
+    }
+
+    <div class="mc-layout">
+
+        <!-- THẺ VÉ ĐIỆN TỬ -->
+        <article class="mc-ticket">
+
+            <div class="mc-ticket-head">
+
+                <div class="mc-brand-line">
+                    <div class="mc-brand">
+                        <span class="mc-brand-icon">
+                            <i class="fa-solid fa-plane"></i>
+                        </span>
+
+                        <div>
+                            <strong>HappyTrip</strong>
+                            <small>ELECTRONIC TOUR TICKET</small>
+                        </div>
+                    </div>
+
+                    <span class="mc-ticket-label">
+                        <i class="fa-solid fa-ticket"></i>
+                        E-TICKET
+                    </span>
+                </div>
+
+                <div class="mc-tour-section">
+                    <span class="mc-overline">THÔNG TIN HÀNH TRÌNH</span>
+
+                    <h2>@tenTour</h2>
+
+                    <div class="mc-destination">
+                        <i class="fa-solid fa-location-dot"></i>
+                        @diaDiem
+                    </div>
+                </div>
+
+                <div class="mc-tour-pills">
+                    <span>
+                        <i class="fa-regular fa-calendar"></i>
+                        @ngayKhoiHanh
+                    </span>
+
+                    <span>
+                        <i class="fa-solid fa-users"></i>
+                        @soKhach khách
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="mc-ticket-perforation">
+                <span class="mc-hole left"></span>
+                <span class="mc-dashes"></span>
+                <span class="mc-hole right"></span>
+            </div>
+
+            <div class="mc-ticket-content">
+
+                <div class="mc-booking-row">
+                    <div>
+                        <span class="mc-overline">MÃ ĐẶT TOUR</span>
+                        <strong class="mc-booking">@Model.MaBooking</strong>
+                    </div>
+
+                    <span class="mc-status @mauTrangThai">
+                        <i class="fa-solid fa-circle"></i>
+                        @trangThai
+                    </span>
+                </div>
+
+                <div class="mc-information">
+
+                    <div class="mc-info-item">
+                        <span>Người đặt</span>
+                        <strong>@tenKhach</strong>
+                    </div>
+
+                    <div class="mc-info-item">
+                        <span>Ngày đặt</span>
+                        <strong>@Model.NgayDat.ToString("dd/MM/yyyy")</strong>
+                    </div>
+
+                    <div class="mc-info-item">
+                        <span>Ngày khởi hành</span>
+                        <strong>@ngayKhoiHanh</strong>
+                    </div>
+
+                    <div class="mc-info-item">
+                        <span>Hành khách</span>
+                        <strong>
+                            @Model.NguoiLon NL · @Model.TreEm TE · @Model.TreNho EB
+                        </strong>
+                    </div>
+
+                </div>
+
+                <div class="mc-payment">
+                    <div>
+                        <span>Thanh toán</span>
+                        <strong class="@(daThanhToan ? "mc-paid" : "mc-unpaid")">
+                            @(daThanhToan ? "Đã thanh toán" : "Chưa thanh toán")
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Phương thức</span>
+                        <strong>@(Model.PhuongThucTT ?? "Chưa chọn")</strong>
+                    </div>
+
+                    <div class="mc-total">
+                        <span>Giá trị đơn</span>
+                        <strong>@thanhTien.ToString("N0") đ</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <footer class="mc-ticket-footer">
+                <i class="fa-solid fa-shield-halved"></i>
+                Thông tin vé được xác thực bởi HappyTrip
+            </footer>
+
+        </article>
+
+        <!-- PANEL XÁC NHẬN -->
+        <aside class="mc-sidebar">
+
+            <section class="mc-panel">
+
+                <div class="mc-panel-heading">
+                    <span class="mc-panel-icon">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </span>
+
+                    <div>
+                        <h3>Xác nhận Check-in</h3>
+                        <p>Kiểm tra trạng thái đơn đặt tour</p>
+                    </div>
+                </div>
+
+                @if (daCheckIn)
+                {
+                    <div class="mc-state done">
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        <div>
+                            <strong>Đã check-in thành công</strong>
+                            <p>Đơn này đã được xác nhận. Không cần thực hiện lại.</p>
+                        </div>
+                    </div>
+                }
+                else if (coTheCheckIn)
+                {
+                    <div class="mc-state ready">
+                        <i class="fa-solid fa-shield-halved"></i>
+
+                        <div>
+                            <strong>Vé hợp lệ</strong>
+                            <p>Đã thanh toán. Vui lòng đối chiếu thông tin và ngày đi trước khi xác nhận.</p>
+                        </div>
+                    </div>
+
+                    <form asp-controller="QuanLyDon"
+                          asp-action="XacNhanCheckIn"
+                          method="post"
+                          onsubmit="return confirm('Xác nhận check-in toàn bộ @soKhach khách của đơn @Model.MaBooking?');">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="idDon"
+                               value="@Model.IdDon" />
+
+                        <input type="hidden"
+                               name="token"
+                               value="@token" />
+
+                        <button type="submit" class="mc-confirm">
+                            <i class="fa-solid fa-check"></i>
+                            Xác nhận Check-in
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="mc-state blocked">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+
+                        <div>
+                            <strong>Chưa thể check-in</strong>
+
+                            <p>
+                                @if (daHuy)
+                                {
+                                    <text>Đơn đặt tour đã bị hủy.</text>
+                                }
+                                else if (!daThanhToan)
+                                {
+                                    <text>Đơn chưa thanh toán thành công.</text>
+                                }
+                                else if (trangThaiCu)
+                                {
+                                    <text>Đơn có trạng thái hoàn tất từ hệ thống cũ, cần đối chiếu.</text>
+                                }
+                                else
+                                {
+                                    <text>Không có token xác nhận hợp lệ.</text>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <a asp-controller="QuanLyDon"
+                   asp-action="ChiTiet"
+                   asp-route-id="@Model.IdDon"
+                   class="mc-outline-btn">
+                    <i class="fa-regular fa-eye"></i>
+                    Xem chi tiết đơn
+                </a>
+
+            </section>
+
+            <section class="mc-panel mc-guest-panel">
+
+                <div class="mc-panel-heading">
+                    <span class="mc-panel-icon muted">
+                        <i class="fa-solid fa-users"></i>
+                    </span>
+
+                    <div>
+                        <h3>Hành khách</h3>
+                        <p>Áp dụng cho toàn bộ đơn</p>
+                    </div>
+                </div>
+
+                <div class="mc-guest-grid">
+                    <div>
+                        <span>Người lớn</span>
+                        <strong>@Model.NguoiLon</strong>
+                    </div>
+
+                    <div>
+                        <span>Trẻ em</span>
+                        <strong>@Model.TreEm</strong>
+                    </div>
+
+                    <div>
+                        <span>Em bé</span>
+                        <strong>@Model.TreNho</strong>
+                    </div>
+                </div>
+
+                <div class="mc-guest-total">
+                    <span>Tổng cộng</span>
+                    <strong>@soKhach người</strong>
+                </div>
+
+                <p class="mc-footnote">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Một mã QR xác nhận cho cả đơn đặt tour.
+                </p>
+
+            </section>
+
+        </aside>
+
     </div>
 </div>
+
+<style>
+    .ht-mini-checkin {
+        --mc-green: #236f49;
+        --mc-dark: #244834;
+        --mc-border: #e5eae4;
+        --mc-muted: #879489;
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+        color: #304537;
+        padding: 6px 4px 30px;
+        font-size: 13px;
+    }
+
+    .ht-mini-checkin *,
+    .ht-mini-checkin *::before,
+    .ht-mini-checkin *::after {
+        box-sizing: border-box;
+    }
+
+    .mc-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .mc-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 9px;
+        color: #92a096;
+        font-size: 11px;
+    }
+
+    .mc-breadcrumb a {
+        color: #39825a;
+        text-decoration: none;
+    }
+
+    .mc-breadcrumb i {
+        font-size: 9px;
+    }
+
+    .mc-heading h1 {
+        margin: 0 0 5px;
+        color: #254c37;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .mc-heading p {
+        margin: 0;
+        color: #91a096;
+        font-size: 11px;
+    }
+
+    .mc-back {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 13px;
+        border: 1px solid #dbe7dc;
+        border-radius: 9px;
+        background: #fff;
+        color: #41734f;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .mc-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.28fr) minmax(275px, .72fr);
+        gap: 17px;
+        align-items: start;
+        max-width: 1140px;
+        margin: 0 auto;
+    }
+
+    .mc-ticket,
+    .mc-panel {
+        background: #fff;
+        border: 1px solid var(--mc-border);
+        border-radius: 15px;
+        box-shadow: 0 4px 16px rgba(30, 65, 41, .035);
+        overflow: hidden;
+        min-width: 0;
+    }
+
+    .mc-ticket-head {
+        background: linear-gradient(115deg, #f1f7ef, #f9f9f1);
+        padding: 21px 24px 19px;
+    }
+
+    .mc-brand-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .mc-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mc-brand-icon {
+        display: grid;
+        place-items: center;
+        width: 37px;
+        height: 37px;
+        border-radius: 11px;
+        background: #277a50;
+        color: white;
+        font-size: 15px;
+    }
+
+    .mc-brand strong {
+        display: block;
+        color: #236442;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .mc-brand small {
+        display: block;
+        margin-top: 3px;
+        color: #84a08b;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: .6px;
+    }
+
+    .mc-ticket-label {
+        padding: 6px 9px;
+        border: 1px solid #e1eadc;
+        background: #fff;
+        border-radius: 7px;
+        color: #3d8055;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .mc-tour-section {
+        margin-top: 24px;
+    }
+
+    .mc-overline {
+        display: block;
+        color: #8a9a8e;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .8px;
+    }
+
+    .mc-tour-section h2 {
+        margin: 8px 0 9px;
+        color: #28583d;
+        font-size: clamp(17px, 1.6vw, 21px);
+        font-weight: 800;
+        line-height: 1.55;
+    }
+
+    .mc-destination {
+        font-size: 11px;
+        line-height: 1.7;
+        color: #77927d;
+    }
+
+    .mc-destination i {
+        color: #4a8b5a;
+        margin-right: 5px;
+    }
+
+    .mc-tour-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 17px;
+    }
+
+    .mc-tour-pills span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border-radius: 7px;
+        background: #fff;
+        color: #477255;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .mc-ticket-perforation {
+        display: flex;
+        align-items: center;
+        height: 13px;
+        position: relative;
+    }
+
+    .mc-hole {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        top: -1px;
+        background: #f4f7f2;
+    }
+
+    .mc-hole.left {
+        left: -8px;
+    }
+
+    .mc-hole.right {
+        right: -8px;
+    }
+
+    .mc-dashes {
+        width: calc(100% - 22px);
+        margin: 0 11px;
+        border-top: 1.5px dashed #dce5d9;
+    }
+
+    .mc-ticket-content {
+        padding: 17px 24px 20px;
+    }
+
+    .mc-booking-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .mc-booking {
+        display: block;
+        margin-top: 6px;
+        font-size: 16px;
+        color: #256944;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .mc-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 9px;
+        border-radius: 7px;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .mc-status i {
+        font-size: 6px;
+    }
+
+    .mc-status.ready {
+        background: #fdf3d9;
+        color: #a67b24;
+    }
+
+    .mc-status.done {
+        background: #e6f5e9;
+        color: #267e49;
+    }
+
+    .mc-status.blocked {
+        background: #fff0ed;
+        color: #c65b54;
+    }
+
+    .mc-information {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 15px;
+    }
+
+    .mc-info-item span {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 10px;
+        color: #95a097;
+    }
+
+    .mc-info-item strong {
+        display: block;
+        color: #364b3d;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .mc-payment {
+        margin-top: 21px;
+        padding-top: 15px;
+        border-top: 1px solid #ecf0ea;
+    }
+
+    .mc-payment > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 7px 0;
+        font-size: 11px;
+    }
+
+    .mc-payment span {
+        color: #8b998e;
+    }
+
+    .mc-payment strong {
+        color: #405847;
+        text-align: right;
+    }
+
+    .mc-payment .mc-paid {
+        color: #2e8853;
+    }
+
+    .mc-payment .mc-unpaid {
+        color: #c17b32;
+    }
+
+    .mc-payment .mc-total {
+        border-top: 1px dashed #e1e8df;
+        margin-top: 8px;
+        padding-top: 13px;
+    }
+
+    .mc-total strong {
+        color: #227448;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .mc-ticket-footer {
+        padding: 12px;
+        background: #f3f8f2;
+        color: #8aa18f;
+        text-align: center;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .mc-ticket-footer i {
+        margin-right: 5px;
+    }
+
+    .mc-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .mc-panel {
+        padding: 19px;
+    }
+
+    .mc-panel-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 14px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #eef1ec;
+    }
+
+    .mc-panel-icon {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #eaf4eb;
+        color: #347d50;
+        flex-shrink: 0;
+    }
+
+    .mc-panel-icon.muted {
+        background: #f0f2ed;
+        color: #748a79;
+    }
+
+    .mc-panel-heading h3 {
+        margin: 0 0 4px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #31533e;
+    }
+
+    .mc-panel-heading p {
+        margin: 0;
+        color: #a0aaa1;
+        font-size: 10px;
+    }
+
+    .mc-state {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 13px;
+    }
+
+    .mc-state > i {
+        margin-top: 2px;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .mc-state strong {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .mc-state p {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.8;
+    }
+
+    .mc-state.ready,
+    .mc-state.done {
+        background: #eef7ef;
+        border-color: #e1f0e3;
+        color: #34764b;
+    }
+
+    .mc-state.blocked {
+        color: #a76550;
+        background: #fff4ed;
+        border-color: #f8e6de;
+    }
+
+    .mc-confirm {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        margin-top: 13px;
+        padding: 12px;
+        background: #28764c;
+        border: 0;
+        border-radius: 9px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .mc-confirm:hover {
+        background: #1c613b;
+    }
+
+    .mc-outline-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        margin-top: 11px;
+        padding: 11px;
+        background: #fff;
+        border: 1px solid #dce9de;
+        border-radius: 9px;
+        color: #427652;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .mc-outline-btn:hover {
+        background: #f5faf5;
+        color: #28653e;
+    }
+
+    .mc-guest-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .mc-guest-grid > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        padding: 13px 7px;
+        border: 1px solid #ebefea;
+        border-radius: 9px;
+        background: #fafbf9;
+    }
+
+    .mc-guest-grid span {
+        color: #8b998d;
+        font-size: 10px;
+    }
+
+    .mc-guest-grid strong {
+        color: #386c48;
+        font-size: 17px;
+    }
+
+    .mc-guest-total {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 13px 2px 5px;
+        font-size: 12px;
+    }
+
+    .mc-guest-total strong {
+        color: #287648;
+    }
+
+    .mc-footnote {
+        color: #98a49a;
+        font-size: 10px;
+        line-height: 1.7;
+        margin: 12px 0 0;
+    }
+
+    .mc-footnote i {
+        margin-right: 4px;
+    }
+
+    .mc-alert {
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        border-radius: 9px;
+        font-size: 12px;
+    }
+
+    .mc-alert.success {
+        color: #247447;
+        background: #e7f6eb;
+    }
+
+    .mc-alert.info {
+        color: #326c9c;
+        background: #edf5ff;
+    }
+
+    .mc-alert.error {
+        color: #b85446;
+        background: #fff0ec;
+    }
+
+    @@media (max-width: 950px) {
+        .mc-layout {
+            grid-template-columns: 1fr;
+            max-width: 670px;
+        }
+    }
+
+    @@media (max-width: 520px) {
+        .mc-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .mc-heading h1 {
+            font-size: 19px;
+        }
+
+        .mc-ticket-head,
+        .mc-ticket-content {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .mc-booking-row {
+            flex-wrap: wrap;
+        }
+
+        .mc-information {
+            gap: 16px 10px;
+        }
+
+        .mc-brand small {
+            font-size: 7px;
+        }
+    }
+</style>

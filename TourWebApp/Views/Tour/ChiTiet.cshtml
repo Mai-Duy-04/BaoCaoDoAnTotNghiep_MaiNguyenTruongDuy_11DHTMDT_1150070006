@@ -1,4 +1,3 @@
-
 @model TourWebApp.Data.Models.Tour
 @using TourWebApp.Data.Models
 @using System.Globalization
@@ -137,15 +136,29 @@
         return "Tiếp tục tham quan các điểm đến theo chương trình. Chi tiết hoạt động sẽ được cập nhật theo lịch trình chính thức.";
     }
 }
-
 <link rel="stylesheet"
       href="~/css/tour-detail.css"
       asp-append-version="true" />
 
 <link rel="stylesheet"
+      href="~/css/tour-detail-redesign.css"
+      asp-append-version="true" />
+
+<link rel="stylesheet"
       href="~/css/tour-comments-compact.css"
       asp-append-version="true" />
-      
+
+<link rel="stylesheet"
+      href="~/css/tour-detail-booking.css"
+      asp-append-version="true" />
+
+<link rel="stylesheet"
+      href="~/css/tour-detail-compact.css"
+      asp-append-version="true" />
+
+<link rel="stylesheet"
+      href="~/css/tour-detail-content-fix.css"
+      asp-append-version="true" />
 <main class="tour-detail-page">
 
     <!-- ================================================
@@ -1689,4 +1702,13 @@
 </main>
 
 <script src="~/js/tour-detail.js"
+        asp-append-version="true"></script>
+
+<script src="~/js/tour-detail-months.js"
+        asp-append-version="true"></script>
+
+<script src="~/js/tour-detail-accordion.js"
+        asp-append-version="true"></script>
+
+<script src="~/js/tour-detail-content-fix.js"
         asp-append-version="true"></script>

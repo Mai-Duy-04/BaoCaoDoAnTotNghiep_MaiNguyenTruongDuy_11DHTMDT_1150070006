@@ -1,0 +1,711 @@
+
+@{
+    ViewData["Title"] = "Đặt lại mật khẩu - HappyTrip";
+
+    string token = ViewBag.Token as string ?? "";
+    string thongBaoLoi = ViewBag.ThongBao as string ?? "";
+}
+
+<style>
+    /* ============================================
+       HAPPYTRIP - RESET PASSWORD
+       ============================================ */
+
+    .ht-reset-page,
+    .ht-reset-page *,
+    .ht-reset-page *::before,
+    .ht-reset-page *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-reset-page {
+        width: 100%;
+        min-height: calc(100vh - 80px);
+        min-height: calc(100dvh - 80px);
+        padding: 20px 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        background:
+            radial-gradient(
+                ellipse at 91% 5%,
+                rgba(208, 232, 192, .54),
+                transparent 38%
+            ),
+            linear-gradient(
+                120deg,
+                #fdfefa 0%,
+                #f9fbf5 52%,
+                #eff6e9 100%
+            );
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .ht-reset-shell {
+        width: min(1020px, 100%);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: clamp(28px, 6vw, 88px);
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* LEFT: TRAVEL INTRO */
+
+    .ht-reset-story {
+        min-width: 0;
+        position: relative;
+        padding: 20px 0 48px;
+    }
+
+    .ht-reset-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 48px;
+        color: #09683c;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -1.2px;
+        text-decoration: none;
+    }
+
+    .ht-reset-brand i {
+        color: #efb82c;
+        font-size: 24px;
+        transform: rotate(-12deg);
+    }
+
+    .ht-reset-story h1 {
+        margin: 0;
+        color: #263f30;
+        font-size: clamp(31px, 3.8vw, 49px);
+        line-height: 1.32;
+        font-weight: 500;
+        letter-spacing: -1.2px;
+    }
+
+    .ht-reset-story h1 strong {
+        display: block;
+        margin-top: 4px;
+        color: #097442;
+        font-size: clamp(43px, 5vw, 65px);
+        line-height: 1.14;
+        font-weight: 800;
+        letter-spacing: -2.5px;
+    }
+
+    .ht-reset-story h1 span {
+        display: block;
+        color: #164b35;
+        font-size: clamp(27px, 3vw, 39px);
+        font-weight: 650;
+    }
+
+    .ht-reset-story-line {
+        width: 148px;
+        height: 5px;
+        margin: 15px 0 23px 90px;
+        border-radius: 100%;
+        background: #f0bd33;
+        transform: rotate(-6deg);
+    }
+
+    .ht-reset-description {
+        color: #54705a;
+        font-size: 13px;
+        line-height: 1.9;
+        margin: 0 0 25px;
+    }
+
+    .ht-reset-benefits {
+        display: flex;
+        gap: 23px;
+    }
+
+    .ht-reset-benefit {
+        text-align: center;
+        color: #2e6144;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.7;
+    }
+
+    .ht-reset-benefit i {
+        display: block;
+        margin-bottom: 9px;
+        color: #13774a;
+        font-size: 22px;
+    }
+
+    .ht-reset-landscape {
+        position: absolute;
+        left: -5%;
+        bottom: -65px;
+        width: 108%;
+        opacity: .55;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    /* RIGHT: FORM */
+
+    .ht-reset-card {
+        width: 100%;
+        min-width: 0;
+        padding: 31px 36px 29px;
+        background: #fffefa;
+        border: 1px solid #e4ecdf;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(25, 78, 44, .09);
+    }
+
+    .ht-reset-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 13px;
+        border-radius: 18px;
+        background: #e8f3e6;
+        color: #16804b;
+        font-size: 24px;
+    }
+
+    .ht-reset-card h2 {
+        margin: 0 0 8px;
+        color: #155239;
+        font-size: 24px;
+        font-weight: 800;
+        text-align: center;
+    }
+
+    .ht-reset-subtitle {
+        margin: 0 0 23px;
+        color: #728575;
+        font-size: 12px;
+        line-height: 1.8;
+        text-align: center;
+    }
+
+    .ht-reset-field {
+        margin-bottom: 16px;
+    }
+
+    .ht-reset-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #355741;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .ht-reset-input-wrap {
+        position: relative;
+    }
+
+    .ht-reset-input-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 45px;
+        color: #18754a;
+        background: #eef5ea;
+        border: 1px solid #dce9d8;
+        border-radius: 10px 0 0 10px;
+        pointer-events: none;
+        font-size: 15px;
+    }
+
+    .ht-reset-input-wrap input {
+        width: 100%;
+        height: 46px;
+        display: block;
+        padding: 0 44px 0 56px;
+        border: 1px solid #d9e4d8;
+        border-radius: 10px;
+        background: #fff;
+        color: #254c37;
+        outline: none;
+        font: 12px "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .ht-reset-input-wrap input:focus {
+        border-color: #268653;
+        box-shadow: 0 0 0 3px rgba(38, 134, 83, .1);
+    }
+
+    .ht-reset-input-wrap input::placeholder {
+        color: #9ca99f;
+    }
+
+    .ht-reset-eye {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 34px;
+        height: 34px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: #8a9b8e;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .ht-reset-eye:hover {
+        color: #187546;
+        background: #f0f5ef;
+    }
+
+    .ht-reset-hint {
+        display: block;
+        margin-top: 6px;
+        color: #839485;
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    .ht-reset-error {
+        margin: 0 0 13px;
+        padding: 11px 13px;
+        border-radius: 9px;
+        background: #fff0ec;
+        color: #a53d38;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .ht-reset-error[hidden] {
+        display: none;
+    }
+
+    .ht-reset-submit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: 100%;
+        height: 45px;
+        margin-top: 19px;
+        border: 0;
+        border-radius: 24px;
+        background: linear-gradient(100deg, #1b854e, #096a3b);
+        color: #fff;
+        font: 800 12px "Be Vietnam Pro", Arial, sans-serif;
+        cursor: pointer;
+        box-shadow: 0 5px 13px rgba(21, 110, 65, .14);
+    }
+
+    .ht-reset-submit:hover {
+        background: #086137;
+    }
+
+    .ht-reset-submit:disabled {
+        opacity: .65;
+        cursor: wait;
+    }
+
+    .ht-reset-back {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        color: #18734a;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .ht-reset-back:hover {
+        text-decoration: underline;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (min-width: 901px) and (max-height: 720px) {
+        .ht-reset-page {
+            padding: 9px 20px;
+        }
+
+        .ht-reset-brand {
+            margin-bottom: 25px;
+        }
+
+        .ht-reset-story {
+            padding: 10px 0 28px;
+        }
+
+        .ht-reset-card {
+            padding: 22px 29px;
+        }
+
+        .ht-reset-icon {
+            width: 43px;
+            height: 43px;
+            margin-bottom: 9px;
+            font-size: 19px;
+        }
+
+        .ht-reset-subtitle {
+            margin-bottom: 14px;
+        }
+
+        .ht-reset-field {
+            margin-bottom: 10px;
+        }
+
+        .ht-reset-submit {
+            margin-top: 12px;
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .ht-reset-page {
+            min-height: calc(100dvh - 75px);
+            padding: 24px 15px;
+            align-items: flex-start;
+            overflow: visible;
+        }
+
+        .ht-reset-shell {
+            display: block;
+            max-width: 480px;
+        }
+
+        .ht-reset-story {
+            display: none;
+        }
+
+        .ht-reset-card {
+            padding: 27px 25px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .ht-reset-page {
+            padding: 13px 10px 28px;
+        }
+
+        .ht-reset-card {
+            padding: 24px 18px;
+            border-radius: 18px;
+        }
+
+        .ht-reset-card h2 {
+            font-size: 21px;
+        }
+    }
+</style>
+
+<div class="ht-reset-page">
+
+    <div class="ht-reset-shell">
+
+        <!-- LEFT: HAPPYTRIP INTRO -->
+
+        <section class="ht-reset-story">
+
+            <a href="/" class="ht-reset-brand">
+                <i class="fa-solid fa-paper-plane"></i>
+                HappyTrip
+            </a>
+
+            <h1>
+                Hành trình
+                <strong>Việt Nam</strong>
+                <span>luôn chờ bạn.</span>
+            </h1>
+
+            <div class="ht-reset-story-line"></div>
+
+            <p class="ht-reset-description">
+                Thiết lập mật khẩu mới để tiếp tục
+                khám phá, đặt tour và lưu giữ
+                những chuyến đi đáng nhớ.
+            </p>
+
+            <div class="ht-reset-benefits">
+
+                <div class="ht-reset-benefit">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Bảo mật tài khoản
+                </div>
+
+                <div class="ht-reset-benefit">
+                    <i class="fa-solid fa-key"></i>
+                    Mật khẩu mới
+                </div>
+
+                <div class="ht-reset-benefit">
+                    <i class="fa-solid fa-route"></i>
+                    Tiếp tục hành trình
+                </div>
+
+            </div>
+
+            <svg class="ht-reset-landscape"
+                 viewBox="0 0 550 160"
+                 xmlns="http://www.w3.org/2000/svg"
+                 aria-hidden="true">
+
+                <path d="M0 120 L75 48 L115 82 L175 26
+                         L248 105 L300 58 L353 102
+                         L425 32 L505 92 L550 66
+                         L550 160 L0 160 Z"
+                      fill="#b5d5bf"
+                      opacity=".45" />
+
+                <path d="M0 137 L88 85 L158 115
+                         L243 66 L308 123 L390 80
+                         L458 120 L550 92
+                         L550 160 L0 160 Z"
+                      fill="#7db395"
+                      opacity=".45" />
+
+                <path d="M0 150 Q80 108 150 140
+                         Q235 108 312 146
+                         Q410 108 550 142
+                         L550 160 L0 160 Z"
+                      fill="#4c966b"
+                      opacity=".37" />
+
+            </svg>
+
+        </section>
+
+        <!-- RIGHT: RESET PASSWORD FORM -->
+
+        <section class="ht-reset-card">
+
+            <div class="ht-reset-icon">
+                <i class="fa-solid fa-key"></i>
+            </div>
+
+            <h2>Tạo mật khẩu mới</h2>
+
+            <p class="ht-reset-subtitle">
+                Nhập mật khẩu mới để khôi phục
+                quyền truy cập tài khoản HappyTrip.
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(thongBaoLoi))
+            {
+                <div class="ht-reset-error"
+                     role="alert">
+                    @thongBaoLoi
+                </div>
+            }
+
+            <form id="htResetForm"
+                  asp-controller="TaiKhoan"
+                  asp-action="DatLaiMatKhau"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="token"
+                       value="@token" />
+
+                <!-- NEW PASSWORD -->
+                <div class="ht-reset-field">
+
+                    <label for="MatKhauMoi">
+                        Mật khẩu mới
+                    </label>
+
+                    <div class="ht-reset-input-wrap">
+
+                        <span class="ht-reset-input-icon">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+
+                        <input type="password"
+                               id="MatKhauMoi"
+                               name="MatKhauMoi"
+                               placeholder="Tối thiểu 8 ký tự"
+                               minlength="8"
+                               maxlength="100"
+                               autocomplete="new-password"
+                               required />
+
+                        <button type="button"
+                                class="ht-reset-eye"
+                                data-target="MatKhauMoi"
+                                aria-label="Hiện mật khẩu">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+
+                    </div>
+
+                    <small class="ht-reset-hint">
+                        Mật khẩu từ 8 đến 100 ký tự.
+                    </small>
+
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div class="ht-reset-field">
+
+                    <label for="NhapLaiMatKhauMoi">
+                        Xác nhận mật khẩu mới
+                    </label>
+
+                    <div class="ht-reset-input-wrap">
+
+                        <span class="ht-reset-input-icon">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+
+                        <input type="password"
+                               id="NhapLaiMatKhauMoi"
+                               name="NhapLaiMatKhauMoi"
+                               placeholder="Nhập lại mật khẩu mới"
+                               minlength="8"
+                               maxlength="100"
+                               autocomplete="new-password"
+                               required />
+
+                        <button type="button"
+                                class="ht-reset-eye"
+                                data-target="NhapLaiMatKhauMoi"
+                                aria-label="Hiện mật khẩu xác nhận">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- CLIENT VALIDATION MESSAGE -->
+                <div id="htResetError"
+                     class="ht-reset-error"
+                     role="alert"
+                     aria-live="polite"
+                     hidden>
+                </div>
+
+                <!-- SUBMIT -->
+                <button type="submit"
+                        id="htResetSubmit"
+                        class="ht-reset-submit">
+
+                    <i class="fa-solid fa-check"></i>
+                    CẬP NHẬT MẬT KHẨU
+
+                </button>
+
+                <!-- RETURN LOGIN -->
+                <a asp-controller="TaiKhoan"
+                   asp-action="DangNhap"
+                   class="ht-reset-back">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Quay lại đăng nhập
+
+                </a>
+
+            </form>
+
+        </section>
+
+    </div>
+
+</div>
+
+<script>
+    (function () {
+        "use strict";
+
+        const form = document.getElementById("htResetForm");
+        const password = document.getElementById("MatKhauMoi");
+        const confirmPassword = document.getElementById(
+            "NhapLaiMatKhauMoi"
+        );
+        const errorBox = document.getElementById("htResetError");
+        const submitButton = document.getElementById("htResetSubmit");
+
+        if (!form) return;
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.hidden = false;
+        }
+
+        function clearError() {
+            errorBox.textContent = "";
+            errorBox.hidden = true;
+        }
+
+        document.querySelectorAll(
+            "#htResetForm .ht-reset-eye"
+        ).forEach(function (button) {
+            button.addEventListener("click", function () {
+                const input = document.getElementById(
+                    this.dataset.target
+                );
+
+                if (!input) return;
+
+                const show = input.type === "password";
+
+                input.type = show ? "text" : "password";
+
+                const icon = this.querySelector("i");
+
+                if (icon) {
+                    icon.className = show
+                        ? "fa-regular fa-eye-slash"
+                        : "fa-regular fa-eye";
+                }
+
+                this.setAttribute(
+                    "aria-label",
+                    show ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                );
+            });
+        });
+
+        form.addEventListener("submit", function (event) {
+            clearError();
+
+            if (password.value.length < 8) {
+                event.preventDefault();
+                showError("Mật khẩu phải có ít nhất 8 ký tự.");
+                password.focus();
+                return;
+            }
+
+            if (password.value !== confirmPassword.value) {
+                event.preventDefault();
+                showError("Hai mật khẩu không khớp.");
+                confirmPassword.focus();
+                return;
+            }
+
+            if (!form.checkValidity()) {
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> ' +
+                'ĐANG CẬP NHẬT...';
+        });
+    })();
+</script>

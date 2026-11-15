@@ -1,34 +1,38 @@
-.ht-video-hero {
+
+/* ==========================================
+   HAPPYTRIP - SAIGON HERO
+   ========================================== */
+
+.ht-saigon-hero {
     position: relative;
     isolation: isolate;
     display: flex;
     align-items: center;
-    min-height: 740px;
-    height: min(860px, 92svh);
-    padding: 120px 0 115px;
+    width: 100%;
+    min-height: 565px;
+    height: clamp(565px, 40vw, 655px);
     margin: 0;
+    padding: 102px 0 100px;
     overflow: hidden;
-    background: #132c3b;
-    color: #fff;
+    background: #0d4c60;
+    color: #ffffff;
 }
 
-.ht-video-hero .ht-video-media {
+/* BACKGROUND */
+.ht-saigon-hero .ht-saigon-background {
     position: absolute;
     inset: 0;
     z-index: -3;
-    overflow: hidden;
-    background: #132c3b url("/img/happytrip-hero/hero-background.png") center / cover no-repeat;
+    background:
+        #0d4c60
+        url("/img/happytrip-hero/nguyen-hue.jpg")
+        center center / cover no-repeat;
+    transform: none;
+    animation: none;
 }
 
-.ht-video-hero .ht-hero-video {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-}
-
-.ht-video-hero .ht-video-overlay {
+/* OVERLAY */
+.ht-saigon-hero .ht-video-overlay {
     position: absolute;
     inset: 0;
     z-index: -2;
@@ -36,167 +40,431 @@
     background:
         linear-gradient(
             90deg,
-            rgba(6, 21, 31, .72) 0%,
-            rgba(6, 21, 31, .46) 36%,
-            rgba(6, 21, 31, .13) 75%,
-            rgba(6, 21, 31, .08) 100%
+            rgba(4, 37, 51, .83) 0%,
+            rgba(4, 43, 57, .70) 29%,
+            rgba(5, 54, 70, .30) 57%,
+            rgba(5, 54, 70, .04) 100%
         ),
         linear-gradient(
             0deg,
-            rgba(6, 21, 31, .35),
-            transparent 45%
+            rgba(5, 35, 43, .18),
+            transparent 46%
         );
 }
 
-.ht-video-hero .ht-video-content {
+/* ==========================================
+   MAIN LAYOUT
+   ========================================== */
+
+.ht-saigon-hero .ht-video-content {
     position: relative;
-    z-index: 2;
-    width: min(1200px, calc(100% - 40px));
-}
-
-.ht-video-hero .ht-video-copy {
-    max-width: 660px;
-    text-align: left;
-    animation: htVideoIntro .9s ease both;
-}
-
-.ht-video-hero .ht-video-eyebrow {
-    display: flex;
+    z-index: 3;
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.2fr)
+        minmax(0, .8fr);
     align-items: center;
-    gap: 14px;
-    margin-bottom: 25px;
-    color: #e9d5b5;
-    font-size: .78rem;
-    font-weight: 800;
-    letter-spacing: .16em;
+    gap: 35px;
+    width: min(1300px, calc(100% - 92px));
+    max-width: 1300px;
+    margin-inline: auto;
 }
 
-.ht-video-hero .ht-video-line {
-    flex-shrink: 0;
-    width: 38px;
-    height: 1px;
-    background: #e9d5b5;
+.ht-saigon-hero .ht-video-copy {
+    position: relative;
+    z-index: 4;
+    max-width: 700px;
+    min-width: 0;
+    text-align: left;
+    animation: htHeroAppear .8s ease both;
 }
 
-.ht-video-hero .ht-video-copy h1 {
-    max-width: 660px;
-    margin: 0 0 24px;
+/* ==========================================
+   YELLOW RIBBON
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-ribbon {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 23px;
+    padding: 9px 17px;
+    border-radius: 5px;
+    background: #ffdc80;
+    color: #16464c;
+    box-shadow: 0 6px 19px rgba(0,0,0,.12);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.3;
+    letter-spacing: .01em;
+    transform: rotate(-2deg);
+}
+
+.ht-saigon-hero .ht-hero-ribbon i {
+    font-size: 12px;
+    transform: rotate(-25deg);
+}
+
+/* ==========================================
+   HERO TITLE
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-heading-wrap {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.ht-saigon-hero .ht-saigon-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    max-width: 710px;
+    margin: 0 0 22px;
     color: #fff;
-    font-size: clamp(3rem, 5vw, 5.4rem);
-    line-height: 1.12;
-    font-weight: 800;
-    letter-spacing: -.025em;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 3.55vw, 58px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.035em;
+    word-spacing: normal;
+    text-align: left;
     text-wrap: balance;
-    text-shadow: 0 3px 25px rgba(0, 0, 0, .18);
+    text-shadow: 0 3px 15px rgba(0,0,0,.12);
 }
 
-.ht-video-hero .ht-video-copy p {
-    max-width: 490px;
+.ht-saigon-hero .ht-saigon-title > span {
+    display: block;
+    max-width: 100%;
+    letter-spacing: inherit;
+    word-spacing: normal;
+    text-align: left;
+}
+
+.ht-saigon-hero .ht-saigon-title em {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    color: #ffdb63;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 1.06em;
+    font-style: italic;
+    font-weight: 850;
+    line-height: 1.14;
+    letter-spacing: -0.035em;
+    word-spacing: 0;
+}
+
+.ht-saigon-hero .ht-saigon-title em::after {
+    content: "";
+    position: absolute;
+    left: 2%;
+    right: 9%;
+    bottom: -2px;
+    height: 3px;
+    border-radius: 100%;
+    background: #ffdb63;
+    transform: rotate(-1deg);
+}
+
+/* YELLOW HAND-DRAWN RAYS */
+.ht-saigon-hero .ht-hero-title-rays {
+    position: absolute;
+    top: 31%;
+    right: -53px;
+    z-index: 2;
+    width: 60px;
+    height: 65px;
+    overflow: visible;
+    pointer-events: none;
+    transform: rotate(6deg);
+}
+
+/* ==========================================
+   DESCRIPTION
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-description {
+    max-width: 505px;
     margin: 0;
-    color: rgba(255, 255, 255, .9);
-    font-size: clamp(1rem, 1.3vw, 1.18rem);
-    line-height: 1.85;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, .15);
+    color: rgba(255,255,255,.94);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: clamp(14px, 1.1vw, 16px);
+    font-weight: 400;
+    line-height: 1.78;
+    letter-spacing: 0;
+    word-spacing: normal;
+    text-align: left;
+    text-shadow: 0 2px 8px rgba(0,0,0,.1);
 }
 
-.ht-video-hero .ht-video-actions {
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+.ht-saigon-hero .ht-video-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 13px;
-    margin-top: 32px;
+    gap: 12px;
+    margin-top: 27px;
 }
 
-.ht-video-hero .ht-video-btn-primary,
-.ht-video-hero .ht-video-btn-outline {
+.ht-saigon-hero .ht-video-btn-primary,
+.ht-saigon-hero .ht-video-btn-outline {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    min-height: 52px;
-    padding: 12px 24px;
+    min-height: 47px;
+    padding: 11px 22px;
     border-radius: 999px;
-    font-size: .94rem;
-    font-weight: 800;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0;
+    text-decoration: none;
+    white-space: nowrap;
     transition:
+        transform .25s ease,
         background-color .25s ease,
-        color .25s ease,
-        transform .25s ease;
+        box-shadow .25s ease;
 }
 
-.ht-video-hero .ht-video-btn-primary {
-    background: #e9d5b5;
-    border: 1px solid #e9d5b5;
-    color: #24382f;
+.ht-saigon-hero .ht-video-btn-primary {
+    background: #ffdf85;
+    color: #113d43;
+    border: 1px solid #ffdf85;
+    box-shadow: 0 7px 20px rgba(0,0,0,.10);
 }
 
-.ht-video-hero .ht-video-btn-primary:hover {
-    background: #fff;
-    color: #24382f;
+.ht-saigon-hero .ht-video-btn-primary:hover {
+    background: #fff0b6;
+    color: #113d43;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0,0,0,.17);
+}
+
+.ht-saigon-hero .ht-video-btn-outline {
+    background: rgba(4,44,55,.24);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.78);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+}
+
+.ht-saigon-hero .ht-video-btn-outline:hover {
+    background: rgba(255,255,255,.17);
+    color: #fff;
     transform: translateY(-3px);
 }
 
-.ht-video-hero .ht-video-btn-outline {
-    background: rgba(255, 255, 255, .09);
-    border: 1px solid rgba(255, 255, 255, .7);
-    color: #fff;
-    backdrop-filter: blur(9px);
-}
-
-.ht-video-hero .ht-video-btn-outline:hover {
-    background: #fff;
-    color: #24382f;
-    transform: translateY(-3px);
-}
-
-.ht-video-hero .ht-video-footer {
-    position: absolute;
-    bottom: 32px;
-    left: max(24px, calc((100vw - 1200px) / 2));
-    right: max(24px, calc((100vw - 1200px) / 2));
-    z-index: 2;
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    color: rgba(255, 255, 255, .75);
-    font-size: .69rem;
-    font-weight: 800;
-    letter-spacing: .15em;
-}
-
-.ht-video-hero .ht-video-control {
-    position: absolute;
-    right: 30px;
-    bottom: 75px;
-    z-index: 4;
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    padding: 0;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, .7);
-    background: rgba(12, 27, 33, .35);
-    color: #fff;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    transition: background-color .2s ease, transform .2s ease;
-}
-
-.ht-video-hero .ht-video-control:hover {
-    background: rgba(255, 255, 255, .25);
-    transform: scale(1.06);
-}
-
-.ht-video-hero .ht-video-control:focus-visible {
-    outline: 3px solid #e9d5b5;
+.ht-saigon-hero .ht-video-btn-primary:focus-visible,
+.ht-saigon-hero .ht-video-btn-outline:focus-visible {
+    outline: 3px solid #ffdf85;
     outline-offset: 4px;
 }
 
-@keyframes htVideoIntro {
+/* ==========================================
+   POSTCARDS
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-postcards {
+    position: relative;
+    justify-self: end;
+    width: 315px;
+    max-width: 100%;
+    height: 285px;
+    margin-right: 15px;
+}
+
+.ht-saigon-hero .ht-postcard {
+    position: absolute;
+    width: 225px;
+    height: 263px;
+    padding: 9px 9px 12px;
+    background: #fffdf7;
+    border: 1px solid rgba(255,255,255,.85);
+    border-radius: 12px;
+    box-shadow: 0 17px 35px rgba(4,32,37,.22);
+    transform-origin: center;
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+}
+
+.ht-saigon-hero .ht-postcard img {
+    display: block;
+    width: 100%;
+    height: 204px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 6px;
+    background: #eeeae2;
+}
+
+.ht-saigon-hero .ht-postcard-back {
+    top: 25px;
+    left: 9px;
+    z-index: 1;
+    transform: rotate(-11deg);
+}
+
+.ht-saigon-hero .ht-postcard-front {
+    top: 0;
+    right: 0;
+    z-index: 2;
+    transform: rotate(7deg);
+}
+
+.ht-saigon-hero .ht-postcard-front:hover {
+    transform: translateY(-7px) rotate(4deg);
+    box-shadow: 0 22px 42px rgba(4,32,37,.28);
+}
+
+.ht-saigon-hero .ht-postcard-back:hover {
+    transform: translateY(-5px) rotate(-8deg);
+}
+
+.ht-saigon-hero .ht-postcard-caption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 8px;
+    color: #143e3b;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 23px;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.2;
+}
+
+.ht-saigon-hero .ht-postcard-caption i {
+    color: #ef9446;
+    font-size: 12px;
+}
+
+.ht-saigon-hero .ht-postcard-pin {
+    position: absolute;
+    top: -17px;
+    left: 46%;
+    z-index: 4;
+    color: #ee7e3d;
+    font-size: 29px;
+    transform: rotate(-27deg);
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.18));
+}
+
+.ht-saigon-hero .ht-postcard-doodle {
+    position: absolute;
+    z-index: 3;
+    top: 10px;
+    left: -23px;
+    color: #ffdb77;
+    font-size: 43px;
+    pointer-events: none;
+    animation: htDoodleFloat 4s ease-in-out infinite;
+}
+
+.ht-saigon-hero .ht-postcard-rays {
+    position: absolute;
+    top: -37px;
+    left: -48px;
+    z-index: 3;
+    width: 62px;
+    height: 77px;
+    pointer-events: none;
+    transform: rotate(-12deg);
+}
+
+/* ==========================================
+   PALM LEAVES
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-palm {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 8px 9px rgba(0,0,0,.12));
+}
+
+.ht-saigon-hero .ht-hero-palm svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.ht-saigon-hero .ht-hero-palm-top {
+    top: -30px;
+    left: -80px;
+    width: 300px;
+    height: 310px;
+    opacity: .94;
+    transform: rotate(-5deg);
+    transform-origin: top left;
+}
+
+.ht-saigon-hero .ht-hero-palm-bottom {
+    left: -48px;
+    bottom: 8px;
+    width: 175px;
+    height: 155px;
+    opacity: .94;
+    transform: rotate(4deg);
+    transform-origin: bottom left;
+}
+
+/* ==========================================
+   WHITE HAND-DRAWN FLIGHT LINE
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-flight-line {
+    position: absolute;
+    z-index: 2;
+    top: 45%;
+    left: 12px;
+    width: 175px;
+    height: 55px;
+    color: rgba(255,255,255,.9);
+    transform: rotate(-3deg);
+    pointer-events: none;
+}
+
+.ht-saigon-hero .ht-hero-flight-line svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* ==========================================
+   BOTTOM WAVE
+   ========================================== */
+
+.ht-saigon-hero .ht-hero-bottom-wave {
+    position: absolute;
+    z-index: 2;
+    left: -5%;
+    right: -5%;
+    bottom: -31px;
+    height: 64px;
+    border-radius: 50% 50% 0 0 / 80% 80% 0 0;
+    background: #faf5eb;
+    pointer-events: none;
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+@keyframes htHeroAppear {
     from {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(18px);
     }
 
     to {
@@ -205,78 +473,372 @@
     }
 }
 
-@media (max-width: 991px) {
-    .ht-video-hero {
-        min-height: 650px;
-        height: 85svh;
-        padding: 120px 0 100px;
+@keyframes htDoodleFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(14deg);
     }
 
-    .ht-video-hero .ht-video-copy h1 {
-        font-size: clamp(2.8rem, 6vw, 4.5rem);
+    50% {
+        transform: translateY(-7px) rotate(22deg);
     }
 }
 
-@media (max-width: 575px) {
-    .ht-video-hero {
-        min-height: 620px;
-        height: 85svh;
-        padding: 115px 0 105px;
+/* ==========================================
+   LAPTOP
+   ========================================== */
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .ht-saigon-hero {
+        min-height: 550px;
+        height: 570px;
     }
 
-    .ht-video-hero .ht-video-content {
+    .ht-saigon-hero .ht-video-content {
+        width: calc(100% - 70px);
+        gap: 20px;
+    }
+
+    .ht-saigon-hero .ht-saigon-title {
+        font-size: clamp(35px, 4vw, 48px);
+    }
+
+    .ht-saigon-hero .ht-hero-postcards {
+        width: 260px;
+        height: 250px;
+        margin-right: 0;
+    }
+
+    .ht-saigon-hero .ht-postcard {
+        width: 190px;
+        height: 226px;
+    }
+
+    .ht-saigon-hero .ht-postcard img {
+        height: 171px;
+    }
+
+    .ht-saigon-hero .ht-postcard-caption {
+        font-size: 19px;
+    }
+
+    .ht-saigon-hero .ht-hero-title-rays {
+        right: -39px;
+        width: 45px;
+    }
+
+    .ht-saigon-hero .ht-hero-palm-top {
+        width: 240px;
+        height: 248px;
+        left: -65px;
+    }
+
+    .ht-saigon-hero .ht-hero-flight-line {
+        width: 135px;
+        top: 47%;
+    }
+}
+
+/* ==========================================
+   TABLET
+   ========================================== */
+
+@media (min-width: 701px) and (max-width: 991px) {
+    .ht-saigon-hero {
+        min-height: 570px;
+        height: auto;
+        padding: 110px 0 95px;
+    }
+
+    .ht-saigon-hero .ht-video-content {
+        width: calc(100% - 44px);
+        grid-template-columns: minmax(0, 1fr) 210px;
+        gap: 12px;
+    }
+
+    .ht-saigon-hero .ht-saigon-title {
+        font-size: clamp(32px, 4.5vw, 45px);
+    }
+
+    .ht-saigon-hero .ht-hero-description {
+        font-size: 13px;
+    }
+
+    .ht-saigon-hero .ht-hero-postcards {
+        width: 205px;
+        height: 215px;
+        margin-right: 0;
+    }
+
+    .ht-saigon-hero .ht-postcard {
+        width: 150px;
+        height: 192px;
+        padding: 7px;
+    }
+
+    .ht-saigon-hero .ht-postcard img {
+        height: 143px;
+    }
+
+    .ht-saigon-hero .ht-postcard-caption {
+        font-size: 17px;
+    }
+
+    .ht-saigon-hero .ht-postcard-pin {
+        font-size: 22px;
+    }
+
+    .ht-saigon-hero .ht-hero-palm-top {
+        width: 190px;
+        height: 200px;
+        left: -65px;
+    }
+
+    .ht-saigon-hero .ht-hero-palm-bottom {
+        width: 125px;
+        height: 110px;
+    }
+
+    .ht-saigon-hero .ht-hero-flight-line {
+        width: 110px;
+        top: 50%;
+        left: 4px;
+    }
+
+    .ht-saigon-hero .ht-hero-title-rays {
+        width: 38px;
+        right: -25px;
+    }
+
+    .ht-saigon-hero .ht-postcard-rays {
+        width: 42px;
+        left: -29px;
+    }
+}
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 700px) {
+    .ht-saigon-hero {
+        min-height: 600px;
+        height: auto;
+        padding: 115px 0 95px;
+    }
+
+    .ht-saigon-hero .ht-saigon-background {
+        background-position: 57% center;
+    }
+
+    .ht-saigon-hero .ht-video-overlay {
+        background: linear-gradient(
+            90deg,
+            rgba(4,36,49,.92),
+            rgba(4,45,56,.60)
+        );
+    }
+
+    .ht-saigon-hero .ht-video-content {
+        display: block;
         width: calc(100% - 36px);
     }
 
-    .ht-video-hero .ht-video-eyebrow {
-        font-size: .64rem;
-        letter-spacing: .07em;
+    .ht-saigon-hero .ht-video-copy {
+        width: 100%;
     }
 
-    .ht-video-hero .ht-video-copy h1 {
-        font-size: clamp(2.4rem, 9vw, 3.5rem);
+    .ht-saigon-hero .ht-hero-ribbon {
+        margin-bottom: 21px;
+        padding: 8px 12px;
+        font-size: 10px;
+    }
+    
+    .ht-saigon-hero .ht-saigon-title {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        max-width: 710px;
+        margin: 0 0 22px;
+        color: #ffffff;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: clamp(38px, 3.4vw, 55px);
+        font-weight: 850;
+        line-height: 1.16;
+        letter-spacing: -0.035em;
+        word-spacing: 0;
+        text-align: left;
+        text-wrap: wrap;
+        text-shadow: 0 3px 15px rgba(0,0,0,.12);
+    }
+    
+    .ht-saigon-hero .ht-saigon-title > span {
+        display: block;
+        max-width: 100%;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
+        word-spacing: 0;
+        text-align: left;
+        white-space: normal;
     }
 
-    .ht-video-hero .ht-video-copy p {
-        font-size: .96rem;
+    .ht-saigon-hero .ht-hero-description {
+        max-width: 355px;
+        font-size: 13px;
         line-height: 1.7;
     }
 
-    .ht-video-hero .ht-video-actions {
-        gap: 10px;
+    .ht-saigon-hero .ht-video-actions {
+        gap: 9px;
+        margin-top: 22px;
     }
 
-    .ht-video-hero .ht-video-btn-primary,
-    .ht-video-hero .ht-video-btn-outline {
-        min-height: 46px;
-        padding: 10px 17px;
-        font-size: .84rem;
+    .ht-saigon-hero .ht-video-btn-primary,
+    .ht-saigon-hero .ht-video-btn-outline {
+        min-height: 43px;
+        padding: 10px 14px;
+        font-size: 11px;
     }
 
-    .ht-video-hero .ht-video-footer {
-        left: 18px;
-        right: 18px;
-        bottom: 22px;
-        font-size: .55rem;
-        letter-spacing: .04em;
+    .ht-saigon-hero .ht-hero-postcards {
+        position: relative;
+        width: 180px;
+        height: 157px;
+        margin: 24px 8px 0 auto;
     }
 
-    .ht-video-hero .ht-video-control {
-        right: 18px;
-        bottom: 65px;
-        width: 42px;
-        height: 42px;
+    .ht-saigon-hero .ht-postcard {
+        width: 124px;
+        height: 146px;
+        padding: 5px;
+        border-radius: 8px;
+    }
+
+    .ht-saigon-hero .ht-postcard img {
+        height: 104px;
+        border-radius: 5px;
+    }
+
+    .ht-saigon-hero .ht-postcard-caption {
+        font-size: 13px;
+        padding-top: 5px;
+    }
+
+    .ht-saigon-hero .ht-postcard-pin {
+        top: -10px;
+        font-size: 19px;
+    }
+
+    .ht-saigon-hero .ht-postcard-doodle {
+        font-size: 25px;
+    }
+
+    .ht-saigon-hero .ht-postcard-rays {
+        width: 35px;
+        height: 45px;
+        top: -17px;
+        left: -23px;
+    }
+
+    .ht-saigon-hero .ht-hero-title-rays {
+        top: 30%;
+        right: -10px;
+        width: 30px;
+        height: 40px;
+        opacity: .85;
+    }
+
+    .ht-saigon-hero .ht-hero-palm-top {
+        top: -16px;
+        left: -57px;
+        width: 150px;
+        height: 155px;
+        opacity: .78;
+    }
+
+    .ht-saigon-hero .ht-hero-palm-bottom {
+        left: -30px;
+        bottom: 10px;
+        width: 95px;
+        height: 90px;
+    }
+
+    .ht-saigon-hero .ht-hero-flight-line {
+        top: 55%;
+        left: -5px;
+        width: 90px;
+        opacity: .65;
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .ht-video-hero .ht-video-copy {
-        animation: none;
+@media (max-width: 380px) {
+    .ht-saigon-hero .ht-saigon-title {
+        font-size: 30px;
     }
 
-    .ht-video-hero .ht-video-btn-primary,
-    .ht-video-hero .ht-video-btn-outline,
-    .ht-video-hero .ht-video-control {
-        transition: none;
+    .ht-saigon-hero .ht-video-btn-primary,
+    .ht-saigon-hero .ht-video-btn-outline {
+        font-size: 10px;
+        padding-inline: 11px;
+    }
+
+    .ht-saigon-hero .ht-hero-title-rays {
+        display: none;
+    }
+}
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .ht-saigon-hero .ht-video-copy,
+    .ht-saigon-hero .ht-postcard-doodle {
+        animation: none !important;
+    }
+
+    .ht-saigon-hero .ht-postcard,
+    .ht-saigon-hero .ht-video-btn-primary,
+    .ht-saigon-hero .ht-video-btn-outline {
+        transition: none !important;
+    }
+}
+
+/* =========================================
+   FIX HERO DESKTOP - KHONG ANH HUONG MOBILE
+   ========================================= */
+
+@media (min-width: 701px) {
+
+    .ht-saigon-hero .ht-saigon-title {
+        font-family: "Segoe UI", Arial, sans-serif !important;
+        font-size: clamp(38px, 3.5vw, 58px);
+        font-weight: 800;
+        letter-spacing: -0.035em !important;
+        word-spacing: 0 !important;
+        text-align: left !important;
+        text-align-last: left !important;
+        text-wrap: wrap;
+        line-height: 1.15;
+    }
+
+    .ht-saigon-hero .ht-saigon-title > span {
+        font-family: inherit !important;
+        letter-spacing: inherit !important;
+        word-spacing: 0 !important;
+        text-align: left !important;
+        text-align-last: left !important;
+        white-space: normal;
+    }
+
+    .ht-saigon-hero .ht-saigon-title em {
+        font-family: "Segoe UI", Arial, sans-serif !important;
+        font-size: 1.08em;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: -0.035em !important;
+        word-spacing: 0 !important;
     }
 }

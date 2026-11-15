@@ -1,160 +1,1116 @@
-﻿@model List<TourWebApp.Data.Models.DonDatTour>
+﻿
+@model List<TourWebApp.Data.Models.DonDatTour>
+@using System.Linq
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Quản lý đặt tour";
+
+    var orders = Model ?? new List<TourWebApp.Data.Models.DonDatTour>();
+
+    var filterStatus = Convert.ToString(ViewBag.TrangThai) ?? "TatCa";
+    var filterMethod = Convert.ToString(ViewBag.PhuongThucTT) ?? "TatCa";
+    var filterKeyword = Convert.ToString(ViewBag.TuKhoa) ?? "";
+    var fromDate = Convert.ToString(ViewBag.NgayDatTu) ?? "";
+    var toDate = Convert.ToString(ViewBag.NgayDatDen) ?? "";
+
+    var pendingCashCount = Convert.ToInt32(ViewBag.PendingCashCount ?? 0);
+    var now = DateTime.Now;
+
+    var total = orders.Count;
+    var paid = orders.Count(x => x.DaThanhToan && x.TrangThai != "DaHuy");
+    var cancelled = orders.Count(x => x.TrangThai == "DaHuy");
+    var pending = orders.Count(x =>
+        !x.DaThanhToan &&
+        x.TrangThai != "DaHuy" &&
+        x.TrangThaiThanhToan != "HetHanThanhToan");
+
+    var totalRevenue = orders
+        .Where(x => x.DaThanhToan && x.TrangThai != "DaHuy")
+        .Sum(x => Math.Max(0m,
+            x.TongTienSauGiam ??
+            (x.TongTien - (x.SoTienGiam ?? 0m))));
 }
 
-<h3 class="fw-bold mb-4">Quản lý đơn đặt tour</h3>
+<div class="ht-orders" id="htOrdersPage">
 
-@{
-    var pendingCashCount = ViewBag.PendingCashCount as int? ?? 0;
-}
-
-@if (pendingCashCount > 0)
-{
-    <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert">
-        <div><strong>@pendingCashCount</strong> đơn đang chờ admin xác nhận thủ công.</div>
-        <a class="btn btn-sm btn-primary" href="@Url.Action("Index", "QuanLyDon", new { trangThai = "ChoXacNhanTienMat" })">Xem ngay</a>
-    </div>
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-warning">@TempData["Error"]</div>
-}
-
-<form method="get" class="mb-3 card card-body">
-    <div class="row g-2">
-        <div class="col-12 col-md-3">
-            <label class="form-label mb-1">Trạng thái</label>
-            <select name="trangThai" class="form-select">
-                <option value="TatCa">Tất cả</option>
-                <option value="ChoDuyet" selected="@(ViewBag.TrangThai=="ChoDuyet")">Chờ duyệt</option>
-                <option value="DaDuyet" selected="@(ViewBag.TrangThai=="DaDuyet")">Đã duyệt</option>
-                <option value="DaHuy" selected="@(ViewBag.TrangThai=="DaHuy")">Đã hủy</option>
-                <option value="DaThanhToan" selected="@(ViewBag.TrangThai=="DaThanhToan")">Đã thanh toán</option>
-                <option value="ChuaThanhToan" selected="@(ViewBag.TrangThai=="ChuaThanhToan")">Chưa thanh toán</option>
-                <option value="ChoXacNhanTienMat" selected="@(ViewBag.TrangThai=="ChoXacNhanTienMat")">Chờ xác nhận thủ công</option>
-            </select>
+    <div class="hto-hero">
+        <div>
+            <div class="hto-breadcrumb">
+                <i class="fa-solid fa-house"></i>
+                <span>Quản trị</span>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Quản lý đặt tour</span>
+            </div>
+            <h1>
+                <i class="fa-regular fa-calendar-check"></i>
+                Quản lý đặt tour
+            </h1>
+            <p>Theo dõi đơn đặt tour, thanh toán và tình trạng xử lý của khách hàng.</p>
         </div>
-
-        <div class="col-6 col-md-2">
-            <label class="form-label mb-1">Ngày đặt từ</label>
-            <input type="date" name="ngayDatTu" class="form-control" value="@ViewBag.NgayDatTu" />
-        </div>
-
-        <div class="col-6 col-md-2">
-            <label class="form-label mb-1">Đến ngày</label>
-            <input type="date" name="ngayDatDen" class="form-control" value="@ViewBag.NgayDatDen" />
-        </div>
-
-        <div class="col-12 col-md-2">
-            <label class="form-label mb-1">Phương thức TT</label>
-            <select name="phuongThucTT" class="form-select">
-                <option value="TatCa" selected="@(ViewBag.PhuongThucTT=="TatCa")">Tất cả</option>
-                <option value="VNPAY" selected="@(ViewBag.PhuongThucTT=="VNPAY")">VNPAY</option>
-                <option value="ChuyenKhoanQR" selected="@(ViewBag.PhuongThucTT=="ChuyenKhoanQR")">Chuyển khoản QR</option>
-                <option value="TienMat" selected="@(ViewBag.PhuongThucTT=="TienMat")">Tiền mặt</option>
-                <option value="MienPhi" selected="@(ViewBag.PhuongThucTT=="MienPhi")">Miễn phí</option>
-            </select>
-        </div>
-
-        <div class="col-12 col-md-3">
-            <label class="form-label mb-1">Mã đơn / Tên khách</label>
-            <input type="text"
-                   name="tuKhoa"
-                   class="form-control"
-                   value="@ViewBag.TuKhoa"
-                   placeholder="Nhập mã booking hoặc tên khách" />
+        <div class="hto-hero-decoration">
+            <i class="fa-solid fa-plane-departure"></i>
         </div>
     </div>
 
-    <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-primary" type="submit">Lọc</button>
-        <button class="btn btn-success"
-                type="submit"
-                formaction="@Url.Action("ExportExcel", "QuanLyDon")">
-            Xuất Excel
-        </button>
-        <a class="btn btn-outline-secondary" href="@Url.Action("Index", "QuanLyDon")">Đặt lại</a>
+    @if (TempData["Success"] != null)
+    {
+        <div class="hto-notice success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="hto-notice error">@TempData["Error"]</div>
+    }
+
+    @if (pendingCashCount > 0)
+    {
+        <div class="hto-notice info">
+            <div>
+                <i class="fa-solid fa-circle-info"></i>
+                Có <strong>@pendingCashCount</strong> đơn chờ xác nhận thanh toán tiền mặt.
+            </div>
+            <a href="@Url.Action("Index", "QuanLyDon", new { trangThai = "ChoXacNhanTienMat" })">
+                Xem đơn
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    }
+
+    <div class="hto-stats">
+        <div class="hto-stat">
+            <div class="hto-stat-icon green">
+                <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <div>
+                <span>Tổng đơn đặt tour</span>
+                <strong>@total.ToString("N0")</strong>
+                <small>Trong kết quả lọc</small>
+            </div>
+        </div>
+
+        <div class="hto-stat">
+            <div class="hto-stat-icon gold">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <span>Đã thanh toán</span>
+                <strong>@paid.ToString("N0")</strong>
+                <small>@totalRevenue.ToString("N0") đ</small>
+            </div>
+        </div>
+
+        <div class="hto-stat">
+            <div class="hto-stat-icon blue">
+                <i class="fa-regular fa-clock"></i>
+            </div>
+            <div>
+                <span>Chưa thanh toán</span>
+                <strong>@pending.ToString("N0")</strong>
+                <small>Chưa xác nhận thành công</small>
+            </div>
+        </div>
+
+        <div class="hto-stat">
+            <div class="hto-stat-icon red">
+                <i class="fa-regular fa-circle-xmark"></i>
+            </div>
+            <div>
+                <span>Đã hủy</span>
+                <strong>@cancelled.ToString("N0")</strong>
+                <small>Đơn đã hủy</small>
+            </div>
+        </div>
     </div>
-</form>
 
-<table class="table table-bordered align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th>Mã booking</th>
-            <th>Khách hàng</th>
-            <th>Tour</th>
-            <th>Ngày đặt</th>
-            <th>Tổng gốc</th>
-            <th>Tổng TT</th>
-            <th>Trạng thái</th>
-            <th width="160">Thao tác</th>
-        </tr>
-    </thead>
+    <section class="hto-panel hto-filter-panel">
+        <div class="hto-panel-title">
+            <h2>
+                <i class="fa-solid fa-filter"></i>
+                Bộ lọc đơn đặt tour
+            </h2>
+            <span>Tìm kiếm và quản lý</span>
+        </div>
 
-    <tbody>
-        @foreach (var d in Model)
-        {
-            var tongThanhToan = d.TongTienSauGiam ?? (d.TongTien - (d.SoTienGiam ?? 0));
-            if (tongThanhToan < 0) { tongThanhToan = 0; }
+        <form method="get"
+              action="@Url.Action("Index", "QuanLyDon")"
+              id="htoFilterForm">
 
-            <tr>
-                <td>@d.MaBooking</td>
-                <td>@d.IdTaiKhoanNavigation.HoTen</td>
-                <td>@d.IdTourNavigation.TenTour</td>
-                <td>@d.NgayDat.ToString("dd/MM/yyyy")</td>
-                <td>@String.Format("{0:#,0}đ", d.TongTien)</td>
-                <td>
-                    @String.Format("{0:#,0}đ", tongThanhToan)
-                    @if (!string.IsNullOrWhiteSpace(d.MaPhieuGiamGia))
-                    {
-                        <div class="small text-success">@d.MaPhieuGiamGia</div>
-                    }
-                </td>
-                <td>
-                    @if (d.DaThanhToan)
-                    {
-                        <span class="badge bg-success">Đã thanh toán</span>
-                    }
-                    else if (d.TrangThai == "DaHuy")
-                    {
-                        <span class="badge bg-danger">Đã hủy</span>
-                    }
-                    else if (d.TrangThai == "ChoXacNhanTienMat")
-                    {
-                        <span class="badge bg-info text-dark">Chờ xác nhận thủ công</span>
-                    }
-                    else if (d.HanThanhToan != null && d.HanThanhToan < DateTime.Now)
-                    {
-                        <span class="badge bg-secondary">Hết hạn thanh toán</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning text-dark">Chờ thanh toán</span>
-                    }
-                </td>
+            <div class="hto-filter-grid">
 
-                <td>
-                    <a asp-action="ChiTiet" asp-route-id="@d.IdDon" class="btn btn-primary btn-sm">Xem</a>
+                <div class="hto-field hto-search-field">
+                    <label for="htoKeyword">Mã booking / Tên khách</label>
+                    <div class="hto-input-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input id="htoKeyword"
+                               name="tuKhoa"
+                               type="search"
+                               value="@filterKeyword"
+                               placeholder="Nhập mã đơn hoặc tên khách..." />
+                    </div>
+                </div>
 
-                    @if (!d.DaThanhToan)
+                <div class="hto-field">
+                    <label for="htoFromDate">Ngày đặt từ</label>
+                    <input id="htoFromDate"
+                           type="date"
+                           name="ngayDatTu"
+                           value="@fromDate" />
+                </div>
+
+                <div class="hto-field">
+                    <label for="htoToDate">Đến ngày</label>
+                    <input id="htoToDate"
+                           type="date"
+                           name="ngayDatDen"
+                           value="@toDate" />
+                </div>
+
+                <div class="hto-field">
+                    <label for="htoStatus">Trạng thái đơn</label>
+                    <select id="htoStatus" name="trangThai">
+                        <option value="TatCa" selected="@(filterStatus == "TatCa")">Tất cả trạng thái</option>
+                        <option value="ChoDuyet" selected="@(filterStatus == "ChoDuyet")">Chờ duyệt</option>
+                        <option value="DaDuyet" selected="@(filterStatus == "DaDuyet")">Đã duyệt</option>
+                        <option value="DaThanhToan" selected="@(filterStatus == "DaThanhToan")">Đã thanh toán</option>
+                        <option value="ChuaThanhToan" selected="@(filterStatus == "ChuaThanhToan")">Chưa thanh toán</option>
+                        <option value="ChoXacNhanTienMat" selected="@(filterStatus == "ChoXacNhanTienMat")">Chờ xác nhận tiền mặt</option>
+                        <option value="DaHuy" selected="@(filterStatus == "DaHuy")">Đã hủy</option>
+                    </select>
+                </div>
+
+                <div class="hto-field">
+                    <label for="htoPayment">Phương thức thanh toán</label>
+                    <select id="htoPayment" name="phuongThucTT">
+                        <option value="TatCa" selected="@(filterMethod == "TatCa")">Tất cả phương thức</option>
+                        <option value="VNPAY" selected="@(filterMethod == "VNPAY")">VNPay</option>
+                        <option value="ChuyenKhoanQR" selected="@(filterMethod == "ChuyenKhoanQR")">Chuyển khoản QR</option>
+                        <option value="TienMat" selected="@(filterMethod == "TienMat")">Tiền mặt</option>
+                        <option value="MienPhi" selected="@(filterMethod == "MienPhi")">Miễn phí</option>
+                    </select>
+                </div>
+
+                <div class="hto-field hto-actions-field">
+                    <label>Thao tác lọc</label>
+                    <div class="hto-filter-actions">
+                        <button type="submit" class="hto-btn primary">
+                            <i class="fa-solid fa-filter"></i>
+                            Lọc
+                        </button>
+
+                        <a class="hto-btn outline"
+                           href="@Url.Action("Index", "QuanLyDon")">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            Làm mới
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hto-filter-footer">
+                <span>
+                    <i class="fa-solid fa-circle-info"></i>
+                    Bộ lọc sử dụng dữ liệu thực từ hệ thống.
+                </span>
+
+                <button type="submit"
+                        class="hto-btn export"
+                        formaction="@Url.Action("ExportExcel", "QuanLyDon")">
+                    <i class="fa-solid fa-file-excel"></i>
+                    Xuất Excel
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="hto-panel hto-table-panel">
+
+        <div class="hto-table-heading">
+            <div>
+                <h2>Danh sách đơn đặt tour</h2>
+                <p>Kiểm tra tình trạng đặt chỗ và xử lý từng đơn hàng.</p>
+            </div>
+            <span class="hto-total-label">@total đơn trong kết quả lọc</span>
+        </div>
+
+        <div class="hto-tabs" role="group" aria-label="Lọc nhanh theo thanh toán">
+            <button type="button" class="hto-tab active" data-tab="all">
+                Tất cả <span>@total</span>
+            </button>
+            <button type="button" class="hto-tab" data-tab="paid">
+                Đã thanh toán <span>@paid</span>
+            </button>
+            <button type="button" class="hto-tab" data-tab="pending">
+                Chưa thanh toán <span>@pending</span>
+            </button>
+            <button type="button" class="hto-tab" data-tab="cancelled">
+                Đã hủy <span>@cancelled</span>
+            </button>
+        </div>
+
+        <div class="hto-table-scroll">
+            <table class="hto-table" id="htoOrderTable">
+                <thead>
+                    <tr>
+                        <th>Mã booking</th>
+                        <th>Thông tin tour</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày khởi hành</th>
+                        <th>Số khách</th>
+                        <th>Tổng thanh toán</th>
+                        <th>Thanh toán</th>
+                        <th>Trạng thái đơn</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var d in orders.OrderByDescending(x => x.NgayDat))
                     {
-                        <form asp-action="Xoa"
-                              method="post"
-                              class="d-inline"
-                              onsubmit="return confirm('Xóa đơn chưa thanh toán này?')">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@d.IdDon" />
-                            <button class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
+                        var amount = Math.Max(0m,
+                            d.TongTienSauGiam ??
+                            (d.TongTien - (d.SoTienGiam ?? 0m)));
+
+                        var isCancelled = d.TrangThai == "DaHuy";
+                        var isPaid = d.DaThanhToan && !isCancelled;
+                        var isPending = !d.DaThanhToan
+                            && !isCancelled
+                            && d.TrangThaiThanhToan != "HetHanThanhToan";
+
+                        var category = isCancelled
+                            ? "cancelled"
+                            : isPaid ? "paid" : isPending ? "pending" : "other";
+
+                        var isExpired = !d.DaThanhToan
+                            && d.HanThanhToan.HasValue
+                            && d.HanThanhToan.Value < now;
+
+                        var guestCount = d.NguoiLon + d.TreEm + d.TreNho;
+                        var tourName = d.IdTourNavigation?.TenTour ?? "Tour không xác định";
+                        var customerName = d.IdTaiKhoanNavigation?.HoTen ?? "Khách hàng";
+                        var departure = d.IdLichNavigation?.NgayKhoiHanh;
+
+                        var paymentText = isPaid
+                            ? "Đã thanh toán"
+                            : isCancelled ? "Đã hủy"
+                            : isExpired ? "Hết hạn"
+                            : "Chưa thanh toán";
+
+                        var paymentClass = isPaid
+                            ? "success"
+                            : isCancelled || isExpired ? "danger" : "warning";
+
+                        var orderText = d.TrangThai switch
+                        {
+                            "ChoThanhToan" => "Chờ thanh toán",
+                            "ChoXacNhanTienMat" => "Chờ thu tiền mặt",
+                            "ThanhToanThanhCong" => "Đã thanh toán",
+                            "DaHuy" => "Đã hủy",
+                            "HoanTat" => "Hoàn tất",
+                            "ChoDuyet" => "Chờ duyệt",
+                            "DaDuyet" => "Đã duyệt",
+                            _ => d.TrangThai ?? "Chưa cập nhật"
+                        };
+
+                        var orderClass = isCancelled
+                            ? "danger"
+                            : d.TrangThai == "HoanTat" ? "success"
+                            : isPaid ? "success" : "warning";
+
+                        <tr class="hto-order-row" data-category="@category">
+                            <td>
+                                <strong class="hto-booking-code">@d.MaBooking</strong>
+                                <span class="hto-subline">
+                                    Đặt: @d.NgayDat.ToString("dd/MM/yyyy")
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="hto-tour-name" title="@tourName">
+                                    @tourName
+                                </div>
+                                <span class="hto-subline">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    @(d.IdTourNavigation?.DiaDiem ?? "Chưa cập nhật")
+                                </span>
+                            </td>
+
+                            <td>
+                                <strong class="hto-customer-name">@customerName</strong>
+                                <span class="hto-subline">
+                                    @(d.IdTaiKhoanNavigation?.SoDienThoai ?? "")
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="hto-date">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    @(departure?.ToString("dd/MM/yyyy") ?? "Chưa có")
+                                </span>
+                            </td>
+
+                            <td>
+                                <strong>@guestCount khách</strong>
+                                <span class="hto-subline">
+                                    @d.NguoiLon NL, @d.TreEm TE, @d.TreNho EB
+                                </span>
+                            </td>
+
+                            <td>
+                                <strong class="hto-money">
+                                    @amount.ToString("N0") đ
+                                </strong>
+                                @if (!string.IsNullOrWhiteSpace(d.MaPhieuGiamGia))
+                                {
+                                    <span class="hto-subline hto-voucher">
+                                        <i class="fa-solid fa-ticket"></i>
+                                        @d.MaPhieuGiamGia
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <span class="hto-status @paymentClass">
+                                    @paymentText
+                                </span>
+                                <span class="hto-subline">
+                                    @(d.PhuongThucTT ?? "Chưa chọn")
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="hto-status @orderClass">
+                                    @orderText
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="hto-row-actions">
+                                    <a asp-controller="QuanLyDon"
+                                       asp-action="ChiTiet"
+                                       asp-route-id="@d.IdDon"
+                                       class="hto-icon-btn"
+                                       title="Xem chi tiết"
+                                       aria-label="Xem chi tiết đơn @d.MaBooking">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </a>
+
+                                    @if (!d.DaThanhToan && !isCancelled)
+                                    {
+                                        <form asp-controller="QuanLyDon"
+                                              asp-action="Xoa"
+                                              method="post"
+                                              onsubmit="return confirm('Bạn có chắc muốn xóa đơn chưa thanh toán này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@d.IdDon" />
+                                            <button type="submit"
+                                                    class="hto-icon-btn danger"
+                                                    title="Xóa đơn chưa thanh toán"
+                                                    aria-label="Xóa đơn @d.MaBooking">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
                     }
-                </td>
-            </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="htoEmpty" class="hto-empty" hidden>
+            <i class="fa-regular fa-folder-open"></i>
+            <strong>Không tìm thấy đơn đặt tour</strong>
+            <p>Hãy thử chọn trạng thái khác hoặc làm mới bộ lọc.</p>
+        </div>
+
+        <div class="hto-pagination">
+            <span id="htoPageInfo">Đang tải danh sách...</span>
+            <div class="hto-page-buttons" id="htoPageButtons"></div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .ht-orders {
+        --hto-green: #16683d;
+        --hto-dark: #174b32;
+        --hto-text: #263b30;
+        --hto-muted: #7a887f;
+        --hto-border: #e4ebe4;
+        --hto-bg: #f6f9f5;
+        color: var(--hto-text);
+        padding: 10px 4px 30px;
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .ht-orders *,
+    .ht-orders *::before,
+    .ht-orders *::after {
+        box-sizing: border-box;
+    }
+
+    .hto-hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(105deg, #edf8ef, #f7faf6 60%, #e5f0e9);
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .hto-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: #68806f;
+        margin-bottom: 13px;
+    }
+
+    .hto-breadcrumb .fa-chevron-right {
+        font-size: 9px;
+    }
+
+    .hto-hero h1 {
+        margin: 0 0 8px;
+        font-size: clamp(22px, 2vw, 28px);
+        font-weight: 800;
+        color: #155336;
+        letter-spacing: -.5px;
+    }
+
+    .hto-hero h1 i {
+        margin-right: 9px;
+    }
+
+    .hto-hero p {
+        color: #718277;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .hto-hero-decoration {
+        font-size: 75px;
+        color: #a5c8b0;
+        transform: rotate(-17deg);
+        padding-right: 35px;
+        opacity: .65;
+    }
+
+    .hto-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .hto-stat {
+        background: #fff;
+        border: 1px solid var(--hto-border);
+        border-radius: 17px;
+        padding: 19px 17px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        box-shadow: 0 5px 18px rgba(30, 72, 44, .035);
+    }
+
+    .hto-stat-icon {
+        width: 51px;
+        height: 51px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        font-size: 21px;
+    }
+
+    .hto-stat-icon.green { background: #e4f5e9; color: #17814c; }
+    .hto-stat-icon.gold { background: #fff3d5; color: #c28a12; }
+    .hto-stat-icon.blue { background: #e5f2ff; color: #2878c3; }
+    .hto-stat-icon.red { background: #ffe9e9; color: #d85151; }
+
+    .hto-stat span {
+        display: block;
+        font-size: 12px;
+        color: #718077;
+        margin-bottom: 5px;
+    }
+
+    .hto-stat strong {
+        display: block;
+        color: #1e4833;
+        font-size: 23px;
+        line-height: 1.3;
+    }
+
+    .hto-stat small {
+        display: block;
+        font-size: 10px;
+        color: #97a299;
+        margin-top: 4px;
+        overflow-wrap: anywhere;
+    }
+
+    .hto-panel {
+        background: #fff;
+        border: 1px solid var(--hto-border);
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(30, 72, 44, .035);
+        margin-bottom: 19px;
+        overflow: hidden;
+    }
+
+    .hto-filter-panel {
+        padding: 23px;
+    }
+
+    .hto-panel-title,
+    .hto-table-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .hto-panel-title {
+        margin-bottom: 18px;
+    }
+
+    .hto-panel-title h2,
+    .hto-table-heading h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: #244934;
+    }
+
+    .hto-panel-title h2 i {
+        color: #1e8551;
+        margin-right: 6px;
+    }
+
+    .hto-panel-title > span,
+    .hto-table-heading p {
+        color: #93a096;
+        font-size: 12px;
+    }
+
+    .hto-filter-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr;
+        gap: 16px;
+    }
+
+    .hto-field {
+        min-width: 0;
+    }
+
+    .hto-field label {
+        display: block;
+        color: #52675a;
+        font-weight: 600;
+        font-size: 12px;
+        margin-bottom: 7px;
+    }
+
+    .hto-field input,
+    .hto-field select {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        height: 43px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid #dce6dc;
+        background: #fff;
+        color: #344b3c;
+        font-size: 12px;
+        outline: none;
+    }
+
+    .hto-field input:focus,
+    .hto-field select:focus {
+        border-color: #38845a;
+        box-shadow: 0 0 0 3px rgba(43, 139, 82, .08);
+    }
+
+    .hto-input-icon {
+        position: relative;
+    }
+
+    .hto-input-icon > i {
+        position: absolute;
+        left: 13px;
+        top: 14px;
+        color: #7e9986;
+        font-size: 13px;
+    }
+
+    .hto-input-icon input {
+        padding-left: 36px;
+    }
+
+    .hto-filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .hto-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 15px;
+        min-height: 43px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 12px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .hto-btn.primary {
+        color: #fff;
+        background: #177343;
+    }
+
+    .hto-btn.primary:hover { background: #115a33; color: #fff; }
+
+    .hto-btn.outline {
+        color: #246a43;
+        border-color: #b9d7c2;
+        background: #fff;
+    }
+
+    .hto-btn.outline:hover { background: #eaf5ed; }
+
+    .hto-btn.export {
+        color: #fff;
+        background: #278352;
+    }
+
+    .hto-filter-footer {
+        border-top: 1px solid #edf0eb;
+        padding-top: 15px;
+        margin-top: 17px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 11px;
+        color: #8b998d;
+    }
+
+    .hto-filter-footer i { margin-right: 4px; }
+
+    .hto-notice {
+        border-radius: 12px;
+        padding: 13px 16px;
+        margin-bottom: 14px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .hto-notice.info { background: #eaf4ff; color: #23609d; }
+    .hto-notice.success { background: #e9f7ee; color: #247447; }
+    .hto-notice.error { background: #fff0eb; color: #ae4032; }
+    .hto-notice a { color: inherit; font-weight: 700; }
+
+    .hto-table-heading {
+        padding: 22px 23px 15px;
+    }
+
+    .hto-table-heading p {
+        margin: 6px 0 0;
+    }
+
+    .hto-total-label {
+        display: inline-block;
+        border-radius: 30px;
+        background: #edf6ef;
+        padding: 8px 12px;
+        color: #34704b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .hto-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 23px 18px;
+    }
+
+    .hto-tab {
+        border: 1px solid #e5ece5;
+        background: #f8faf8;
+        color: #647568;
+        padding: 10px 15px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .hto-tab.active {
+        background: #187c46;
+        border-color: #187c46;
+        color: white;
+    }
+
+    .hto-tab span {
+        margin-left: 4px;
+        opacity: .8;
+    }
+
+    .hto-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .hto-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1100px;
+        font-size: 11px;
+    }
+
+    .hto-table thead {
+        background: #14633b;
+        color: #fff;
+    }
+
+    .hto-table th {
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .hto-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #eef1ed;
+        vertical-align: middle;
+        color: #344b3d;
+    }
+
+    .hto-table tbody tr:hover {
+        background: #f7fbf8;
+    }
+
+    .hto-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .hto-booking-code {
+        font-size: 10px;
+        color: #23563b;
+        overflow-wrap: anywhere;
+    }
+
+    .hto-tour-name {
+        font-size: 11px;
+        font-weight: 800;
+        max-width: 215px;
+        line-height: 1.6;
+    }
+
+    .hto-customer-name {
+        font-size: 11px;
+        color: #2e4235;
+    }
+
+    .hto-subline {
+        display: block;
+        margin-top: 5px;
+        color: #8b9a8f;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .hto-subline i { margin-right: 3px; }
+
+    .hto-voucher { color: #238651; }
+
+    .hto-date {
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    .hto-date i { color: #2a8853; margin-right: 5px; }
+
+    .hto-money {
+        white-space: nowrap;
+        font-size: 11px;
+        color: #243b2b;
+    }
+
+    .hto-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 9px;
+        border-radius: 30px;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .hto-status.success { color: #15723a; background: #def5e5; }
+    .hto-status.warning { color: #a47613; background: #fff1c9; }
+    .hto-status.danger { color: #c94444; background: #ffeded; }
+
+    .hto-row-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .hto-row-actions form { margin: 0; }
+
+    .hto-icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid #bcdcc4;
+        border-radius: 8px;
+        color: #22804b;
+        background: #fff;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .hto-icon-btn:hover { background: #e9f6ed; color: #156a39; }
+    .hto-icon-btn.danger { color: #c85050; border-color: #f1cdcd; }
+    .hto-icon-btn.danger:hover { background: #fff1f1; }
+
+    .hto-empty {
+        text-align: center;
+        padding: 45px 15px;
+        color: #819187;
+    }
+
+    .hto-empty i {
+        display: block;
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+
+    .hto-empty strong { display: block; color: #415d49; }
+    .hto-empty p { margin: 7px 0 0; font-size: 12px; }
+
+    .hto-pagination {
+        border-top: 1px solid #edf0ed;
+        padding: 17px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #839186;
+        font-size: 11px;
+    }
+
+    .hto-page-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .hto-page-btn {
+        min-width: 31px;
+        height: 31px;
+        padding: 0 9px;
+        border-radius: 8px;
+        border: 1px solid #e2e8e2;
+        background: #fff;
+        color: #516b59;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .hto-page-btn.active {
+        color: white;
+        background: #177344;
+        border-color: #177344;
+    }
+
+    .hto-page-btn:disabled {
+        cursor: default;
+        opacity: .4;
+    }
+
+    @@media (max-width: 1200px) {
+        .hto-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @@media (max-width: 800px) {
+        .hto-filter-grid { grid-template-columns: 1fr 1fr; }
+        .hto-search-field { grid-column: 1 / -1; }
+        .hto-hero-decoration { display: none; }
+    }
+
+    @@media (max-width: 550px) {
+        .hto-stats { grid-template-columns: 1fr; }
+        .hto-filter-grid { grid-template-columns: 1fr; }
+        .hto-filter-panel { padding: 15px; }
+        .hto-hero { padding: 20px; }
+        .hto-filter-footer,
+        .hto-pagination,
+        .hto-table-heading { flex-direction: column; align-items: flex-start; }
+        .hto-tabs { padding: 0 15px 15px; }
+        .hto-tab { padding: 9px 12px; }
+    }
+</style>
+
+<script>
+(function () {
+    "use strict";
+
+    function initOrdersPage() {
+        const table = document.getElementById("htoOrderTable");
+        const empty = document.getElementById("htoEmpty");
+        const info = document.getElementById("htoPageInfo");
+        const buttons = document.getElementById("htoPageButtons");
+        const tabs = Array.from(document.querySelectorAll(".hto-tab"));
+        const filterForm = document.getElementById("htoFilterForm");
+
+        if (!table || !empty || !info || !buttons) return;
+
+        const rows = Array.from(table.querySelectorAll("tbody .hto-order-row"));
+        const perPage = 10;
+
+        let currentTab = "all";
+        let currentPage = 1;
+
+        function getFilteredRows() {
+            if (currentTab === "all") return rows;
+
+            return rows.filter(row =>
+                row.dataset.category === currentTab
+            );
         }
-    </tbody>
-</table>
+
+        function createButton(label, page, disabled, active) {
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "hto-page-btn" + (active ? " active" : "");
+            button.textContent = label;
+            button.disabled = disabled;
+
+            if (active) button.setAttribute("aria-current", "page");
+
+            button.addEventListener("click", function () {
+                currentPage = page;
+                render();
+
+                document.querySelector(".hto-table-panel")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+
+            return button;
+        }
+
+        function render() {
+            const filtered = getFilteredRows();
+            const count = filtered.length;
+            const pages = Math.max(1, Math.ceil(count / perPage));
+
+            currentPage = Math.max(1, Math.min(currentPage, pages));
+
+            const start = (currentPage - 1) * perPage;
+            const visible = filtered.slice(start, start + perPage);
+            const visibleSet = new Set(visible);
+
+            rows.forEach(row => {
+                row.hidden = !visibleSet.has(row);
+                row.style.display = visibleSet.has(row) ? "" : "none";
+            });
+
+            empty.hidden = count !== 0;
+            table.style.display = count === 0 ? "none" : "";
+
+            info.textContent = count === 0
+                ? "Không có đơn phù hợp"
+                : "Hiển thị " + (start + 1) + " – " +
+                  Math.min(start + perPage, count) +
+                  " trong " + count + " đơn";
+
+            buttons.replaceChildren();
+
+            if (count === 0 || pages <= 1) return;
+
+            buttons.appendChild(
+                createButton("‹", currentPage - 1, currentPage === 1, false)
+            );
+
+            const firstPage = Math.max(1, currentPage - 2);
+            const lastPage = Math.min(pages, firstPage + 4);
+
+            for (let page = Math.max(1, lastPage - 4); page <= lastPage; page++) {
+                buttons.appendChild(
+                    createButton(String(page), page, false, page === currentPage)
+                );
+            }
+
+            buttons.appendChild(
+                createButton("›", currentPage + 1, currentPage === pages, false)
+            );
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", function () {
+                currentTab = tab.dataset.tab || "all";
+                currentPage = 1;
+
+                tabs.forEach(item => {
+                    const selected = item === tab;
+                    item.classList.toggle("active", selected);
+                    item.setAttribute("aria-pressed", String(selected));
+                });
+
+                render();
+            });
+        });
+
+        tabs.forEach(tab => {
+            tab.setAttribute("aria-pressed",
+                String(tab.classList.contains("active")));
+        });
+
+        if (filterForm) {
+            filterForm.addEventListener("submit", function (event) {
+                const from = document.getElementById("htoFromDate")?.value;
+                const to = document.getElementById("htoToDate")?.value;
+
+                if (from && to && from > to) {
+                    event.preventDefault();
+                    alert("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+                }
+            });
+        }
+
+        render();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initOrdersPage);
+    } else {
+        initOrdersPage();
+    }
+})();
+</script>
