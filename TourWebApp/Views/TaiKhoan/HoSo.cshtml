@@ -1,214 +1,1286 @@
+
 @model TourWebApp.Data.Models.TaiKhoan
-@using TourWebApp.Data.Models
 
 @{
-    ViewData["Title"] = "Hồ sơ cá nhân";
-    var ds = ViewBag.DonCuaToi as List<DonDatTour>;
-    var totalOrders = ds?.Count ?? 0;
-    var pendingOrders = ds?.Count(x => x.TrangThai == "ChoThanhToan") ?? 0;
-    var paidOrders = ds?.Count(x => x.TrangThai == "ThanhToanThanhCong") ?? 0;
+    ViewData["Title"] = "Tài khoản của tôi";
+
+    string profileMessage = ViewBag.ThongBao as string ?? "";
+    string passwordSuccess = ViewBag.ThongBaoMatKhau as string ?? "";
+    string passwordError = ViewBag.LoiMatKhau as string ?? "";
+
+    bool openPasswordPanel =
+        !string.IsNullOrWhiteSpace(passwordError);
+
+    string firstLetter = string.IsNullOrWhiteSpace(Model.HoTen)
+        ? "H"
+        : Model.HoTen.Trim().Substring(0, 1).ToUpperInvariant();
 }
 
-<link rel="stylesheet" href="~/css/account-dashboard.css" asp-append-version="true" />
+<style>
+    /* ============================================
+       HAPPYTRIP - PREMIUM TRAVEL ACCOUNT
+       ============================================ */
 
-<div class="account-dashboard-page">
-    <div class="account-dashboard-shell">
-        <aside class="account-dashboard-sidebar">
-            <div class="account-user-chip">
-                <div class="account-user-avatar">@((Model.HoTen ?? "U").Trim().Substring(0, 1).ToUpper())</div>
-                <div>
-                    <p class="account-user-kicker">Tài khoản khách hàng</p>
-                    <h2>@Model.HoTen</h2>
-                    <p class="account-user-email">@Model.Email</p>
+    .ht-profile-page,
+    .ht-profile-page *,
+    .ht-profile-page *::before,
+    .ht-profile-page *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-profile-page {
+        --ht-forest: #183e30;
+        --ht-green: #176c47;
+        --ht-gold: #d7a951;
+        --ht-cream: #faf8f3;
+        --ht-ink: #263b32;
+        --ht-muted: #87918a;
+
+        min-height: 70vh;
+        padding: 28px 22px 76px;
+        background: #f7f6f1;
+        color: var(--ht-ink);
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .ht-profile-container {
+        width: min(1100px, 100%);
+        margin: 0 auto;
+    }
+
+    /* BREADCRUMB */
+
+    .ht-profile-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 19px;
+        font-size: 11px;
+        color: #879288;
+    }
+
+    .ht-profile-breadcrumb a {
+        color: #647769;
+        text-decoration: none;
+    }
+
+    .ht-profile-breadcrumb a:hover {
+        color: var(--ht-green);
+    }
+
+    .ht-profile-breadcrumb i {
+        font-size: 9px;
+    }
+
+    /* HERO */
+
+    .ht-profile-hero {
+        position: relative;
+        min-height: 210px;
+        padding: 34px 42px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        border-radius: 22px;
+        background: linear-gradient(
+            114deg,
+            #163a2e 0%,
+            #245943 64%,
+            #4e8060 100%
+        );
+        isolation: isolate;
+    }
+
+    .ht-profile-hero::after {
+        content: "";
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        top: -170px;
+        right: 110px;
+        border-radius: 50%;
+        background: rgba(251, 225, 146, .13);
+        filter: blur(28px);
+        pointer-events: none;
+    }
+
+    .ht-profile-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 590px;
+    }
+
+    .ht-profile-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 13px;
+        color: #e6cb91;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .ht-profile-eyebrow i {
+        color: #e6c271;
+    }
+
+    .ht-profile-hero h1 {
+        margin: 0 0 9px;
+        color: #fffef8;
+        font-size: clamp(27px, 3vw, 38px);
+        font-weight: 800;
+        line-height: 1.3;
+        letter-spacing: -.9px;
+    }
+
+    .ht-profile-hero p {
+        margin: 0;
+        color: #d6e4d8;
+        font-size: 12px;
+        line-height: 1.9;
+    }
+
+    .ht-profile-hero-decoration {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 44%;
+        height: 100%;
+        z-index: 1;
+        opacity: .85;
+        pointer-events: none;
+    }
+
+    .ht-profile-hero-decoration svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .ht-profile-hero-sun {
+        position: absolute;
+        top: 32px;
+        right: 104px;
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        background: #ebcd86;
+        opacity: .72;
+        box-shadow: 0 0 60px rgba(235, 205, 134, .18);
+    }
+
+    /* WELCOME STRIP */
+
+    .ht-profile-welcome {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin: -25px 25px 28px;
+        padding: 17px 22px;
+        border: 1px solid #e7e6dc;
+        border-radius: 16px;
+        background: #fffefa;
+        box-shadow: 0 10px 28px rgba(29, 57, 36, .07);
+    }
+
+    .ht-profile-welcome-user {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-width: 0;
+    }
+
+    .ht-profile-avatar {
+        width: 47px;
+        height: 47px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: #e6ecdd;
+        color: #235f43;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .ht-profile-user-details {
+        min-width: 0;
+    }
+
+    .ht-profile-user-details span {
+        display: block;
+        margin-bottom: 4px;
+        color: #849185;
+        font-size: 10px;
+    }
+
+    .ht-profile-user-details strong {
+        display: block;
+        overflow: hidden;
+        color: #244a36;
+        font-size: 15px;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ht-profile-member-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 13px;
+        border: 1px solid #e6eadc;
+        border-radius: 30px;
+        background: #f7f9f2;
+        color: #457557;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .ht-profile-member-status i {
+        font-size: 12px;
+    }
+
+    /* CONTENT */
+
+    .ht-profile-content {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, .72fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .ht-profile-card {
+        min-width: 0;
+        padding: 29px;
+        border: 1px solid #ebe9df;
+        border-radius: 19px;
+        background: #fffefa;
+        box-shadow: 0 7px 29px rgba(37, 60, 44, .035);
+    }
+
+    .ht-profile-card-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding-bottom: 20px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #eeeee6;
+    }
+
+    .ht-profile-card-icon {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #edf3e8;
+        color: #227249;
+        font-size: 17px;
+    }
+
+    .ht-profile-card-heading {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .ht-profile-card-heading h2 {
+        margin: 0 0 6px;
+        color: #234634;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .ht-profile-card-heading p {
+        margin: 0;
+        color: #8a958b;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    /* FORM */
+
+    .ht-profile-form {
+        margin: 0;
+    }
+
+    .ht-profile-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 17px;
+    }
+
+    .ht-profile-field {
+        min-width: 0;
+    }
+
+    .ht-profile-field-full {
+        grid-column: 1 / -1;
+    }
+
+    .ht-profile-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #435d4c;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .ht-profile-input {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        height: 45px;
+        padding: 0 13px;
+        border: 1px solid #e2e5db;
+        border-radius: 10px;
+        outline: none;
+        background: #fff;
+        color: #274735;
+        font: 12px "Be Vietnam Pro", Arial, sans-serif;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .ht-profile-input:focus {
+        border-color: #3b9063;
+        box-shadow: 0 0 0 3px rgba(59, 144, 99, .08);
+    }
+
+    .ht-profile-input::placeholder {
+        color: #a8b1a8;
+    }
+
+    .ht-profile-input[readonly] {
+        background: #f4f5f1;
+        color: #7f8d81;
+    }
+
+    textarea.ht-profile-input {
+        min-height: 103px;
+        height: auto;
+        padding: 12px 13px;
+        line-height: 1.75;
+        resize: vertical;
+    }
+
+    .ht-profile-hint {
+        display: block;
+        margin-top: 6px;
+        color: #929d93;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    /* BUTTONS */
+
+    .ht-profile-primary-btn,
+    .ht-profile-outline-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 44px;
+        padding: 0 21px;
+        border-radius: 10px;
+        font: 700 11px "Be Vietnam Pro", Arial, sans-serif;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+        text-decoration: none;
+    }
+
+    .ht-profile-primary-btn {
+        border: 1px solid #1e5940;
+        background: #1f563e;
+        color: #fff;
+    }
+
+    .ht-profile-primary-btn:hover {
+        background: #14653f;
+        transform: translateY(-1px);
+    }
+
+    .ht-profile-outline-btn {
+        border: 1px solid #c8d9cb;
+        background: #fffefa;
+        color: #216946;
+    }
+
+    .ht-profile-outline-btn:hover {
+        background: #edf5ec;
+    }
+
+    .ht-profile-form-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 22px;
+    }
+
+    /* SECURITY */
+
+    .ht-profile-security-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        border: 1px solid #e5ecdf;
+        border-radius: 12px;
+        background: #f5f8f1;
+        margin-bottom: 22px;
+    }
+
+    .ht-profile-security-status-icon {
+        width: 39px;
+        height: 39px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #e2eee1;
+        color: #27784e;
+        font-size: 17px;
+    }
+
+    .ht-profile-security-status strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #2e6144;
+        font-size: 12px;
+    }
+
+    .ht-profile-security-status p {
+        margin: 0;
+        color: #849184;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    .ht-profile-security-intro {
+        margin: 0 0 20px;
+        color: #718272;
+        font-size: 12px;
+        line-height: 1.9;
+    }
+
+    .ht-profile-security-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .ht-profile-security-form {
+        margin-top: 23px;
+        padding-top: 21px;
+        border-top: 1px solid #e9ece4;
+    }
+
+    .ht-profile-security-form[hidden] {
+        display: none !important;
+    }
+
+    .ht-profile-security-form .ht-profile-field {
+        margin-bottom: 16px;
+    }
+
+    .ht-profile-password-wrap {
+        position: relative;
+    }
+
+    .ht-profile-password-wrap .ht-profile-input {
+        padding-right: 45px;
+    }
+
+    .ht-profile-eye {
+        position: absolute;
+        right: 7px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 33px;
+        height: 33px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: #88988c;
+        cursor: pointer;
+    }
+
+    .ht-profile-eye:hover {
+        background: #edf3ed;
+        color: #1c7048;
+    }
+
+    /* ALERTS */
+
+    .ht-profile-alert {
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    .ht-profile-alert-success {
+        border: 1px solid #d3e8d2;
+        background: #eff8eb;
+        color: #276441;
+    }
+
+    .ht-profile-alert-error {
+        border: 1px solid #f0d4cf;
+        background: #fff0ed;
+        color: #a3473e;
+    }
+
+    .ht-profile-alert[hidden] {
+        display: none !important;
+    }
+
+    /* FOOTER NOTE */
+
+    .ht-profile-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        margin-top: 27px;
+        color: #89968b;
+        font-size: 10px;
+        line-height: 1.8;
+        text-align: center;
+    }
+
+    .ht-profile-note i {
+        color: #9cad99;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 930px) {
+        .ht-profile-content {
+            grid-template-columns: 1fr;
+        }
+
+        .ht-profile-container {
+            max-width: 720px;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .ht-profile-page {
+            padding: 15px 12px 45px;
+        }
+
+        .ht-profile-hero {
+            min-height: 185px;
+            padding: 27px 23px;
+            border-radius: 17px;
+        }
+
+        .ht-profile-hero-decoration {
+            width: 65%;
+            opacity: .45;
+        }
+
+        .ht-profile-welcome {
+            margin: -20px 12px 22px;
+            padding: 13px;
+            flex-wrap: wrap;
+        }
+
+        .ht-profile-member-status {
+            display: none;
+        }
+
+        .ht-profile-card {
+            padding: 22px 18px;
+            border-radius: 15px;
+        }
+
+        .ht-profile-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .ht-profile-field-full {
+            grid-column: auto;
+        }
+
+        .ht-profile-form-footer .ht-profile-primary-btn {
+            width: 100%;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .ht-profile-primary-btn {
+            transition: none;
+        }
+    }
+</style>
+
+<div class="ht-profile-page">
+
+    <div class="ht-profile-container">
+
+        <!-- BREADCRUMB -->
+        <nav class="ht-profile-breadcrumb"
+             aria-label="Đường dẫn trang">
+
+            <a href="/">Trang chủ</a>
+
+            <i class="fa-solid fa-chevron-right"></i>
+
+            <span>Tài khoản của tôi</span>
+
+        </nav>
+
+        <!-- ======================================
+             HERO
+             ====================================== -->
+        <section class="ht-profile-hero">
+
+            <div class="ht-profile-hero-content">
+
+                <div class="ht-profile-eyebrow">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    HAPPYTRIP · MY ACCOUNT
                 </div>
+
+                <h1>Hành trình của bạn,<br />chúng mình đồng hành.</h1>
+
+                <p>
+                    Quản lý thông tin cá nhân thật dễ dàng<br />
+                    để mỗi chuyến đi đều trọn vẹn hơn.
+                </p>
+
             </div>
 
-            <nav class="account-dashboard-nav" aria-label="Điều hướng tài khoản">
-                <a href="#profileSection" class="is-active">Hồ sơ cá nhân</a>
-                <a href="#passwordSection">Đổi mật khẩu</a>
-                <a href="#orderSection">Đơn của tôi</a>
-            </nav>
+            <div class="ht-profile-hero-decoration"
+                 aria-hidden="true">
 
-            <div class="account-quick-stats">
-                <article>
-                    <span>Tổng đơn</span>
-                    <strong>@totalOrders</strong>
-                </article>
-                <article>
-                    <span>Chờ thanh toán</span>
-                    <strong>@pendingOrders</strong>
-                </article>
-                <article>
-                    <span>Đã thanh toán</span>
-                    <strong>@paidOrders</strong>
-                </article>
-            </div>
-        </aside>
+                <div class="ht-profile-hero-sun"></div>
 
-        <section class="account-dashboard-main">
-            <div id="profileSection" class="account-panel">
-                <div class="account-panel-head">
-                    <h3>Hồ sơ cá nhân</h3>
-                    <p>Cập nhật thông tin tài khoản của bạn.</p>
-                </div>
+                <svg viewBox="0 0 520 250"
+                     preserveAspectRatio="xMidYMax slice"
+                     xmlns="http://www.w3.org/2000/svg">
 
-                @if (ViewBag.ThongBao != null)
-                {
-                    <div class="account-alert-success">@ViewBag.ThongBao</div>
-                }
+                    <path d="M0 185
+                             L80 105 L115 138 L197 55
+                             L258 142 L305 91 L385 157
+                             L442 86 L520 149 L520 250 L0 250 Z"
+                          fill="#79a38b"
+                          opacity=".38" />
 
-                <form method="post" class="account-profile-form">
-                    <input type="hidden" asp-for="IdTaiKhoan" />
+                    <path d="M0 213
+                             L89 155 L160 204 L240 120
+                             L325 205 L410 142 L520 190
+                             L520 250 L0 250 Z"
+                          fill="#afd0b4"
+                          opacity=".48" />
 
-                    <div class="account-form-grid">
-                        <div class="account-form-group">
-                            <label>Họ và tên</label>
-                            <input asp-for="HoTen" placeholder="Nhập họ tên" />
-                        </div>
+                    <path d="M0 239
+                             Q90 193 170 229
+                             Q270 178 350 229
+                             Q440 190 520 218
+                             L520 250 L0 250 Z"
+                          fill="#d5dfc4"
+                          opacity=".55" />
 
-                        <div class="account-form-group">
-                            <label>Email</label>
-                            <input value="@Model.Email" readonly class="account-readonly-input" />
-                        </div>
+                    <path d="M160 39 Q205 18 250 39"
+                          fill="none"
+                          stroke="#e9d8a9"
+                          stroke-width="1.5"
+                          stroke-dasharray="5 7"
+                          opacity=".65" />
 
-                        <div class="account-form-group">
-                            <label>Số điện thoại</label>
-                            <input asp-for="SoDienThoai" placeholder="Nhập số điện thoại" />
-                        </div>
-
-                        <div class="account-form-group account-form-group-full">
-                            <label>Địa chỉ</label>
-                            <textarea asp-for="DiaChi" placeholder="Nhập địa chỉ"></textarea>
-                        </div>
-                    </div>
-
-                    <button class="account-btn-save" type="submit">Lưu thay đổi</button>
-                </form>
-            </div>
-
-            <div id="passwordSection" class="account-panel">
-                <div class="account-panel-head">
-                    <h4>Đổi mật khẩu</h4>
-                    <p>Thiết lập mật khẩu mới để bảo mật tài khoản tốt hơn.</p>
-                </div>
-
-                <form method="post" action="/TaiKhoan/DoiMatKhau" class="account-profile-form">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="idTaiKhoan" value="@Model.IdTaiKhoan" />
-
-                    <div class="account-form-grid">
-                        <div class="account-form-group account-form-group-full">
-                            <label>Mật khẩu hiện tại</label>
-                            <input type="password" name="matKhauHienTai" placeholder="Nhập mật khẩu hiện tại" required />
-                        </div>
-
-                        <div class="account-form-group">
-                            <label>Mật khẩu mới</label>
-                            <input type="password" name="matKhauMoi" placeholder="Tối thiểu 6 ký tự" required minlength="6" />
-                        </div>
-
-                        <div class="account-form-group">
-                            <label>Xác nhận mật khẩu mới</label>
-                            <input type="password" name="xacNhanMatKhau" placeholder="Nhập lại mật khẩu mới" required minlength="6" />
-                        </div>
-                    </div>
-
-                    <button class="account-btn-save" type="submit">Cập nhật mật khẩu</button>
-                </form>
-            </div>
-
-            <div id="orderSection" class="account-panel account-orders-panel">
-                <div class="account-panel-head account-panel-head-inline">
-                    <h4>Đơn của tôi</h4>
-                    <a href="/TaiKhoan/DonCuaToi" class="account-outline-link">Xem dạng bảng</a>
-                </div>
-
-                @if (ds != null && ds.Any())
-                {
-                    <div class="account-order-grid">
-                        @foreach (var don in ds)
-                        {
-                            var guestCount = don.NguoiLon + don.TreEm + don.TreNho;
-                            <article class="account-order-card">
-                                <div class="account-order-top">
-                                    <div>
-                                        <p class="account-order-code">Mã đơn: <strong>@don.MaBooking</strong></p>
-                                        <h5>@(don.IdTourNavigation?.TenTour ?? "Tour đang cập nhật")</h5>
-                                    </div>
-                                    <span class="account-status @don.TrangThai">@don.TrangThai</span>
-                                </div>
-
-                                <div class="account-order-meta">
-                                    <span><i class="fa-regular fa-calendar"></i> @don.NgayDat.ToString("dd/MM/yyyy HH:mm")</span>
-                                    <span><i class="fa-solid fa-users"></i> @guestCount khách</span>
-                                    <span class="amount"><i class="fa-solid fa-wallet"></i> @don.TongTien.ToString("N0") đ</span>
-                                </div>
-
-                                <div class="account-order-progress">
-                                    <div class="account-progress-step done">Tạo đơn</div>
-                                    <div class="account-progress-step @(don.TrangThai == "ThanhToanThanhCong" ? "done" : "")">Thanh toán</div>
-                                    <div class="account-progress-step @(don.TrangThai == "DaHuy" ? "cancel" : "done")">@(don.TrangThai == "DaHuy" ? "Đã hủy" : "Xác nhận")</div>
-                                </div>
-
-                                <div class="account-order-actions">
-                                    <a class="account-btn-view" href="/TaiKhoan/ChiTietDon?idDon=@don.IdDon">Xem chi tiết</a>
-
-                                    @if (don.TrangThai == "ChoThanhToan")
-                                    {
-                                        <a class="account-btn-extend" href="/DatTour/GiaHanThanhToan?idDon=@don.IdDon">Gia hạn 5 phút</a>
-                                    }
-                                </div>
-                            </article>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="account-empty-order">Bạn chưa có đơn đặt tour nào.</div>
-                }
+                </svg>
             </div>
 
         </section>
+
+        <!-- ======================================
+             MEMBER STRIP
+             ====================================== -->
+        <div class="ht-profile-welcome">
+
+            <div class="ht-profile-welcome-user">
+
+                <div class="ht-profile-avatar">
+                    @firstLetter
+                </div>
+
+                <div class="ht-profile-user-details">
+                    <span>Xin chào, người đồng hành!</span>
+                    <strong>@Model.HoTen</strong>
+                </div>
+
+            </div>
+
+            <div class="ht-profile-member-status">
+                <i class="fa-solid fa-circle-check"></i>
+                Tài khoản HappyTrip
+            </div>
+
+        </div>
+
+        <!-- ======================================
+             CONTENT
+             ====================================== -->
+        <div class="ht-profile-content">
+
+            <!-- ==================================
+                 THONG TIN CA NHAN
+                 ================================== -->
+            <section class="ht-profile-card"
+                     id="profileSection">
+
+                <div class="ht-profile-card-header">
+
+                    <div class="ht-profile-card-icon">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+
+                    <div class="ht-profile-card-heading">
+
+                        <h2>Thông tin cá nhân</h2>
+
+                        <p>
+                            Thông tin liên hệ được sử dụng
+                            cho tài khoản và quá trình đặt tour.
+                        </p>
+
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(profileMessage))
+                {
+                    <div class="ht-profile-alert ht-profile-alert-success"
+                         role="status">
+                        @profileMessage
+                    </div>
+                }
+
+                <form asp-controller="TaiKhoan"
+                      asp-action="HoSo"
+                      method="post"
+                      class="ht-profile-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           asp-for="IdTaiKhoan" />
+
+                    <div class="ht-profile-fields">
+
+                        <!-- HO TEN -->
+                        <div class="ht-profile-field">
+
+                            <label asp-for="HoTen">
+                                Họ và tên
+                            </label>
+
+                            <input asp-for="HoTen"
+                                   class="ht-profile-input"
+                                   maxlength="100"
+                                   placeholder="Nhập họ và tên"
+                                   autocomplete="name"
+                                   required />
+
+                        </div>
+
+                        <!-- SO DIEN THOAI -->
+                        <div class="ht-profile-field">
+
+                            <label asp-for="SoDienThoai">
+                                Số điện thoại
+                            </label>
+
+                            <input asp-for="SoDienThoai"
+                                   id="htProfilePhone"
+                                   type="tel"
+                                   class="ht-profile-input"
+                                   maxlength="10"
+                                   inputmode="numeric"
+                                   autocomplete="tel-national"
+                                   pattern="0[35789][0-9]{8}"
+                                   placeholder="0912345678" />
+
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="ht-profile-field ht-profile-field-full">
+
+                            <label for="htProfileEmail">
+                                Địa chỉ email
+                            </label>
+
+                            <input id="htProfileEmail"
+                                   type="email"
+                                   class="ht-profile-input"
+                                   value="@Model.Email"
+                                   readonly />
+
+                            <small class="ht-profile-hint">
+                                Email liên kết với tài khoản,
+                                hiện không thể chỉnh sửa tại đây.
+                            </small>
+
+                        </div>
+
+                        <!-- DIA CHI -->
+                        <div class="ht-profile-field ht-profile-field-full">
+
+                            <label asp-for="DiaChi">
+                                Địa chỉ liên hệ
+                            </label>
+
+                            <textarea asp-for="DiaChi"
+                                      class="ht-profile-input"
+                                      maxlength="255"
+                                      rows="3"
+                                      placeholder="Nhập địa chỉ của bạn"></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="ht-profile-form-footer">
+
+                        <button type="submit"
+                                class="ht-profile-primary-btn">
+
+                            <i class="fa-solid fa-check"></i>
+
+                            Lưu thông tin
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+            <!-- ==================================
+                 BAO MAT TAI KHOAN
+                 ================================== -->
+            <section class="ht-profile-card"
+                     id="passwordSection">
+
+                <div class="ht-profile-card-header">
+
+                    <div class="ht-profile-card-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+
+                    <div class="ht-profile-card-heading">
+
+                        <h2>Bảo mật tài khoản</h2>
+
+                        <p>
+                            Quản lý mật khẩu và bảo vệ
+                            thông tin đăng nhập.
+                        </p>
+
+                    </div>
+                </div>
+
+                <div class="ht-profile-security-status">
+
+                    <div class="ht-profile-security-status-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+
+                    <div>
+                        <strong>Mật khẩu tài khoản</strong>
+
+                        <p>
+                            Bạn có thể thay đổi mật khẩu
+                            bất cứ khi nào cần.
+                        </p>
+                    </div>
+
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(passwordSuccess))
+                {
+                    <div class="ht-profile-alert ht-profile-alert-success"
+                         role="status">
+
+                        <i class="fa-solid fa-circle-check"></i>
+                        @passwordSuccess
+
+                    </div>
+                }
+
+                <p class="ht-profile-security-intro">
+                    Để bảo vệ tài khoản, bạn cần xác nhận
+                    mật khẩu hiện tại trước khi thiết lập
+                    mật khẩu mới.
+                </p>
+
+                <div class="ht-profile-security-actions">
+
+                    <button type="button"
+                            id="htOpenPassword"
+                            class="ht-profile-outline-btn"
+                            aria-expanded="@(openPasswordPanel ? "true" : "false")"
+                            aria-controls="htPasswordPanel"
+                            hidden="@openPasswordPanel">
+
+                        <i class="fa-solid fa-key"></i>
+
+                        Đổi mật khẩu
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+                </div>
+
+                <!-- FORM DOI MAT KHAU: AN MAC DINH -->
+                <div id="htPasswordPanel"
+                     class="ht-profile-security-form"
+                     hidden="@(!openPasswordPanel)">
+
+                    <form asp-controller="TaiKhoan"
+                          asp-action="DoiMatKhau"
+                          method="post"
+                          id="htPasswordForm">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="idTaiKhoan"
+                               value="@Model.IdTaiKhoan" />
+
+                        @if (!string.IsNullOrWhiteSpace(passwordError))
+                        {
+                            <div class="ht-profile-alert ht-profile-alert-error"
+                                 role="alert">
+                                @passwordError
+                            </div>
+                        }
+
+                        <!-- MAT KHAU HIEN TAI -->
+                        <div class="ht-profile-field">
+
+                            <label for="htCurrentPassword">
+                                Mật khẩu hiện tại
+                            </label>
+
+                            <div class="ht-profile-password-wrap">
+
+                                <input type="password"
+                                       name="matKhauHienTai"
+                                       id="htCurrentPassword"
+                                       class="ht-profile-input"
+                                       autocomplete="current-password"
+                                       placeholder="Nhập mật khẩu hiện tại"
+                                       required />
+
+                                <button type="button"
+                                        class="ht-profile-eye"
+                                        data-target="htCurrentPassword"
+                                        aria-label="Hiện mật khẩu">
+
+                                    <i class="fa-regular fa-eye"></i>
+
+                                </button>
+
+                            </div>
+                        </div>
+
+                        <!-- MAT KHAU MOI -->
+                        <div class="ht-profile-field">
+
+                            <label for="htNewPassword">
+                                Mật khẩu mới
+                            </label>
+
+                            <div class="ht-profile-password-wrap">
+
+                                <input type="password"
+                                       name="matKhauMoi"
+                                       id="htNewPassword"
+                                       class="ht-profile-input"
+                                       autocomplete="new-password"
+                                       minlength="8"
+                                       maxlength="100"
+                                       placeholder="Tối thiểu 8 ký tự"
+                                       required />
+
+                                <button type="button"
+                                        class="ht-profile-eye"
+                                        data-target="htNewPassword"
+                                        aria-label="Hiện mật khẩu">
+
+                                    <i class="fa-regular fa-eye"></i>
+
+                                </button>
+
+                            </div>
+                        </div>
+
+                        <!-- XAC NHAN MAT KHAU -->
+                        <div class="ht-profile-field">
+
+                            <label for="htConfirmPassword">
+                                Xác nhận mật khẩu mới
+                            </label>
+
+                            <div class="ht-profile-password-wrap">
+
+                                <input type="password"
+                                       name="xacNhanMatKhau"
+                                       id="htConfirmPassword"
+                                       class="ht-profile-input"
+                                       autocomplete="new-password"
+                                       minlength="8"
+                                       maxlength="100"
+                                       placeholder="Nhập lại mật khẩu mới"
+                                       required />
+
+                                <button type="button"
+                                        class="ht-profile-eye"
+                                        data-target="htConfirmPassword"
+                                        aria-label="Hiện mật khẩu">
+
+                                    <i class="fa-regular fa-eye"></i>
+
+                                </button>
+
+                            </div>
+                        </div>
+
+                        <div id="htPasswordError"
+                             class="ht-profile-alert ht-profile-alert-error"
+                             role="alert"
+                             hidden>
+                        </div>
+
+                        <div class="ht-profile-security-actions">
+
+                            <button type="submit"
+                                    class="ht-profile-primary-btn">
+
+                                <i class="fa-solid fa-check"></i>
+
+                                Cập nhật mật khẩu
+
+                            </button>
+
+                            <button type="button"
+                                    id="htCancelPassword"
+                                    class="ht-profile-outline-btn">
+
+                                Hủy
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <div class="ht-profile-note">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+            Thông tin tài khoản được sử dụng
+            để phục vụ và hỗ trợ các chuyến đi của bạn.
+
+        </div>
+
     </div>
+
 </div>
 
-@{
-    var passwordNotifyMessage = ViewBag.ThongBaoMatKhau as string;
-    var passwordErrorMessage = ViewBag.LoiMatKhau as string;
-    var passwordModalMessage = !string.IsNullOrWhiteSpace(passwordNotifyMessage) ? passwordNotifyMessage : passwordErrorMessage;
-    var passwordModalIsSuccess = !string.IsNullOrWhiteSpace(passwordNotifyMessage);
-}
+<script>
+    (function () {
+        "use strict";
 
-@if (!string.IsNullOrWhiteSpace(passwordModalMessage))
-{
-    <div id="accountNotifyModal" class="account-notify-modal is-open" role="dialog" aria-modal="true" aria-labelledby="accountNotifyTitle">
-        <div class="account-notify-backdrop" data-close-notify></div>
-        <div class="account-notify-card">
-            <button type="button" class="account-notify-close" aria-label="Đóng" data-close-notify>&times;</button>
-            <div class="account-notify-icon @(passwordModalIsSuccess ? "is-success" : "is-error")">@(passwordModalIsSuccess ? "✓" : "!")</div>
-            <h5 id="accountNotifyTitle">@(passwordModalIsSuccess ? "Thành công" : "Có lỗi xảy ra")</h5>
-            <p>@passwordModalMessage</p>
-            <button type="button" class="account-btn-save account-notify-btn" data-close-notify>Đã hiểu</button>
-        </div>
-    </div>
+        const phone = document.getElementById(
+            "htProfilePhone"
+        );
 
-    <script>
-        (function () {
-            var modal = document.getElementById('accountNotifyModal');
-            if (!modal) return;
+        const openButton = document.getElementById(
+            "htOpenPassword"
+        );
 
-            var closeButtons = modal.querySelectorAll('[data-close-notify]');
-            var closeModal = function () { modal.classList.remove('is-open'); };
+        const cancelButton = document.getElementById(
+            "htCancelPassword"
+        );
 
-            closeButtons.forEach(function (btn) {
-                btn.addEventListener('click', closeModal);
+        const passwordPanel = document.getElementById(
+            "htPasswordPanel"
+        );
+
+        const passwordForm = document.getElementById(
+            "htPasswordForm"
+        );
+
+        // ========================================
+        // PHONE: CHI NHAN TOI DA 10 CHU SO
+        // ========================================
+
+        if (phone) {
+            phone.addEventListener("input", function () {
+                this.value = this.value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
             });
+        }
 
-            document.addEventListener('keydown', function (evt) {
-                if (evt.key === 'Escape' && modal.classList.contains('is-open')) {
-                    closeModal();
+        // ========================================
+        // DOI MAT KHAU - MO / DONG
+        // ========================================
+
+        function setPasswordPanel(open) {
+            if (!passwordPanel || !openButton) return;
+
+            passwordPanel.hidden = !open;
+            openButton.hidden = open;
+
+            openButton.setAttribute(
+                "aria-expanded",
+                open ? "true" : "false"
+            );
+
+            if (open) {
+                const firstInput = document.getElementById(
+                    "htCurrentPassword"
+                );
+
+                if (firstInput) firstInput.focus();
+            } else if (passwordForm) {
+                passwordForm.reset();
+                openButton.focus();
+            }
+        }
+
+        if (openButton) {
+            openButton.addEventListener("click", function () {
+                setPasswordPanel(true);
+            });
+        }
+
+        if (cancelButton) {
+            cancelButton.addEventListener("click", function () {
+                setPasswordPanel(false);
+            });
+        }
+
+        // ========================================
+        // HIEN / AN MAT KHAU
+        // ========================================
+
+        document.querySelectorAll(
+            ".ht-profile-eye"
+        ).forEach(function (button) {
+
+            button.addEventListener("click", function () {
+                const input = document.getElementById(
+                    this.dataset.target
+                );
+
+                if (!input) return;
+
+                const show = input.type === "password";
+
+                input.type = show
+                    ? "text"
+                    : "password";
+
+                const icon = this.querySelector("i");
+
+                if (icon) {
+                    icon.className = show
+                        ? "fa-regular fa-eye-slash"
+                        : "fa-regular fa-eye";
                 }
+
+                this.setAttribute(
+                    "aria-label",
+                    show ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                );
             });
-        })();
-    </script>
-}
+
+        });
+
+        // ========================================
+        // KIEM TRA MAT KHAU TRUOC KHI GUI
+        // ========================================
+
+        if (passwordForm) {
+            passwordForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    const newPassword = document.getElementById(
+                        "htNewPassword"
+                    );
+
+                    const confirmPassword = document.getElementById(
+                        "htConfirmPassword"
+                    );
+
+                    const errorBox = document.getElementById(
+                        "htPasswordError"
+                    );
+
+                    if (!newPassword ||
+                        !confirmPassword ||
+                        !errorBox) {
+                        return;
+                    }
+
+                    errorBox.hidden = true;
+                    errorBox.textContent = "";
+
+                    if (newPassword.value.length < 8) {
+                        event.preventDefault();
+
+                        errorBox.textContent =
+                            "Mật khẩu mới phải có ít nhất 8 ký tự.";
+
+                        errorBox.hidden = false;
+                        newPassword.focus();
+                        return;
+                    }
+
+                    if (
+                        newPassword.value !==
+                        confirmPassword.value
+                    ) {
+                        event.preventDefault();
+
+                        errorBox.textContent =
+                            "Mật khẩu xác nhận không khớp.";
+
+                        errorBox.hidden = false;
+                        confirmPassword.focus();
+                    }
+                }
+            );
+        }
+
+    })();
+</script>

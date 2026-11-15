@@ -1,91 +1,1526 @@
-﻿@model TourWebApp.Data.Models.DonDatTour
+﻿
+@model TourWebApp.Data.Models.DonDatTour
+@using System
+
 @{
+    ViewData["Title"] = "Vé hành trình | HappyTrip";
+
+    var tenTour = Model.IdTourNavigation?.TenTour ?? "Tour du lịch";
+    var diaDiem = Model.IdTourNavigation?.DiaDiem ?? "Việt Nam";
+
+    var anhTour = TourImagePathHelper.ToTourImageSrc(
+        Model.IdTourNavigation?.HinhAnh
+    );
+
+    var ngayDi = Model.IdLichNavigation?
+        .NgayKhoiHanh.ToString("dd/MM/yyyy")
+        ?? "Đang cập nhật";
+
+    var tongKhach = Model.NguoiLon + Model.TreEm + Model.TreNho;
+
     var tongGoc = Model.TongTien;
-    var soTienGiam = Model.SoTienGiam ?? 0;
-    var tongThanhToan = Model.TongTienSauGiam ?? (tongGoc - soTienGiam);
-    if (tongThanhToan < 0) { tongThanhToan = 0; }
-    var checkInToken = ViewBag.CheckInToken as string;
-    var checkinUrl = !string.IsNullOrWhiteSpace(checkInToken)
-        ? Url.Action("ScanCheckIn", "QuanLyDon", new { token = checkInToken }, Context.Request.Scheme)
+    var giamGia = Model.SoTienGiam ?? 0m;
+    var thanhToan = Math.Max(
+        0m,
+        Model.TongTienSauGiam ?? (tongGoc - giamGia)
+    );
+
+    var daThanhToan = Model.DaThanhToan;
+    var token = ViewBag.CheckInToken as string;
+
+    var checkinUrl = daThanhToan && !string.IsNullOrWhiteSpace(token)
+        ? Url.Action(
+            "ScanCheckIn",
+            "QuanLyDon",
+            new { token },
+            Context.Request.Scheme)
         : null;
-    var checkinQrUrl = !string.IsNullOrWhiteSpace(checkinUrl)
-        ? $"https://api.qrserver.com/v1/create-qr-code/?size=240x240&data={Uri.EscapeDataString(checkinUrl)}"
+
+    var qrUrl = !string.IsNullOrWhiteSpace(checkinUrl)
+        ? "https://api.qrserver.com/v1/create-qr-code/" +
+          "?size=320x320&margin=10&data=" +
+          Uri.EscapeDataString(checkinUrl)
         : null;
 }
 
+<div class="scrap-v2">
+
+    <!-- TRANG TRÍ NỀN -->
+    <div class="scrap-decor leaves-left" aria-hidden="true">
+        <i class="fa-solid fa-leaf"></i>
+        <i class="fa-solid fa-leaf"></i>
+        <i class="fa-solid fa-leaf"></i>
+    </div>
+
+    <div class="scrap-decor leaves-right" aria-hidden="true">
+        <i class="fa-solid fa-leaf"></i>
+        <i class="fa-solid fa-leaf"></i>
+    </div>
+
+    <div class="scrap-stamp-v2" aria-hidden="true">
+        <i class="fa-solid fa-plane"></i>
+        <span>HAPPYTRIP</span>
+        <strong>CONFIRMED</strong>
+    </div>
+
+    <!-- HEADER -->
+    <header class="scrap-hero-v2">
+        <div class="scrap-logo-v2">
+            <i class="fa-solid fa-paper-plane"></i>
+            HappyTrip
+        </div>
+
+        <div class="scrap-eyebrow-v2">
+            BOOKING CONFIRMATION
+        </div>
+
+        <h1>
+            @(daThanhToan
+                ? "THANH TOÁN THÀNH CÔNG"
+                : "THÔNG TIN ĐẶT TOUR")
+        </h1>
+
+        <div class="scrap-brush-v2"></div>
+
+        <p>
+            <i class="fa-solid fa-circle-check"></i>
+            @(daThanhToan
+                ? "Hành trình của bạn đã được xác nhận!"
+                : "Đơn đang chờ xác nhận thanh toán.")
+        </p>
+    </header>
+
+    <!-- BỘ SƯU TẬP SCRAPBOOK -->
+    <div class="scrap-stage-v2">
+
+        <!-- POSTCARD BÊN TRÁI -->
+        <aside class="scrap-side-v2 left">
+
+            <div class="scrap-polaroid-v2">
+                <div class="scrap-tape-v2"></div>
+
+                <div class="scrap-polaroid-photo">
+                    @if (!string.IsNullOrWhiteSpace(anhTour))
+                    {
+                        <img src="@anhTour"
+                             alt="Ảnh postcard hành trình"
+                             loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="scrap-photo-placeholder">
+                            <i class="fa-solid fa-umbrella-beach"></i>
+                        </div>
+                    }
+                </div>
+
+                <strong>Travel memories ♡</strong>
+                <span>HAPPYTRIP POSTCARD</span>
+            </div>
+
+            <div class="scrap-sticker-v2 left-sticker">
+                <i class="fa-solid fa-camera-retro"></i>
+                <span>CAPTURE THE MOMENT</span>
+            </div>
+
+            <div class="scrap-sticker-v2 beach-sticker">
+                <span class="beach-emoji">🌴</span>
+                <strong>VACATION MODE</strong>
+            </div>
+
+        </aside>
+
+        <!-- VÉ CHÍNH -->
+        <main class="scrap-main-ticket-v2">
+
+            <div class="scrap-ticket-head-v2">
+                <div class="scrap-ticket-brand-v2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    HappyTrip
+                </div>
+
+                <div class="scrap-ticket-name-v2">
+                    BOARDING PASS
+                </div>
+            </div>
+
+            <div class="scrap-ticket-content-v2">
+
+                <!-- TÊN TOUR -->
+                <div class="scrap-tour-top-v2">
+                    <div class="scrap-tour-name-v2">
+                        <span>TOUR DU LỊCH</span>
+                        <h2>@tenTour</h2>
+                    </div>
+
+                    <div class="scrap-booking-v2">
+                        <span>BOOKING REF.</span>
+
+                        <strong id="scrapCodeV2">
+                            @Model.MaBooking
+                        </strong>
+
+                        <button type="button"
+                                id="scrapCopyV2"
+                                aria-label="Sao chép mã booking">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ẢNH HÀNH TRÌNH -->
+                <div class="scrap-tour-photo-v2">
+                    @if (!string.IsNullOrWhiteSpace(anhTour))
+                    {
+                        <img src="@anhTour"
+                             alt="@tenTour"
+                             loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="scrap-photo-placeholder">
+                            <i class="fa-solid fa-umbrella-beach"></i>
+                            <span>Khám phá Việt Nam cùng HappyTrip</span>
+                        </div>
+                    }
+
+                    <div class="scrap-photo-gradient"></div>
+
+                    <span class="scrap-photo-location">
+                        <i class="fa-solid fa-location-dot"></i>
+                        @diaDiem
+                    </span>
+
+                    <div class="scrap-photo-corner">
+                        <i class="fa-solid fa-plane"></i>
+                        LET'S GO!
+                    </div>
+                </div>
+
+                <!-- THÔNG TIN CHUYẾN ĐI -->
+                <div class="scrap-detail-grid-v2">
+
+                    <div>
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>
+                            <small>NGÀY KHỞI HÀNH</small>
+                            <strong>@ngayDi</strong>
+                        </span>
+                    </div>
+
+                    <div>
+                        <i class="fa-solid fa-users"></i>
+                        <span>
+                            <small>HÀNH KHÁCH</small>
+                            <strong>@tongKhach khách</strong>
+                            <em>
+                                @Model.NguoiLon NL,
+                                @Model.TreEm TE,
+                                @Model.TreNho EB
+                            </em>
+                        </span>
+                    </div>
+
+                    <div>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>
+                            <small>ĐIỂM ĐẾN</small>
+                            <strong>@diaDiem</strong>
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- GIÁ -->
+                <div class="scrap-price-grid-v2">
+
+                    <div>
+                        <small>TỔNG TIỀN GỐC</small>
+                        <strong>@tongGoc.ToString("N0") đ</strong>
+                    </div>
+
+                    <div>
+                        <small>GIẢM GIÁ</small>
+                        <strong>-@giamGia.ToString("N0") đ</strong>
+                    </div>
+
+                    <div class="scrap-price-final-v2">
+                        <small>TỔNG THANH TOÁN</small>
+                        <strong>@thanhToan.ToString("N0") đ</strong>
+                    </div>
+
+                </div>
+
+                <!-- THÔNG TIN THANH TOÁN -->
+                <div class="scrap-payment-grid-v2">
+
+                    <div>
+                        <i class="fa-regular fa-credit-card"></i>
+                        <span>
+                            <small>THANH TOÁN LÚC</small>
+                            <strong>
+                                @(Model.NgayThanhToan?.ToString(
+                                    "HH:mm dd/MM/yyyy"
+                                ) ?? "Chưa xác nhận")
+                            </strong>
+                        </span>
+                    </div>
+
+                    <div>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>
+                            <small>PHƯƠNG THỨC</small>
+                            <strong>
+                                @(Model.PhuongThucTT ?? "Chưa cập nhật")
+                            </strong>
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- ĐƯỜNG XÉ VÉ -->
+                <div class="scrap-cut-v2">
+                    <span></span>
+                    <i class="fa-solid fa-plane"></i>
+                    <span></span>
+                </div>
+
+                <!-- CHECK-IN -->
+                <div class="scrap-checkin-v2">
+
+                    <div class="scrap-checkin-info-v2">
+                        <span class="scrap-checkin-label">
+                            YOUR ELECTRONIC TRAVEL PASS
+                        </span>
+
+                        <h3>THE CHECK-IN</h3>
+
+                        <p>
+                            Xuất trình mã QR tại điểm tập trung
+                            để nhân viên xác nhận tham gia tour.
+                        </p>
+
+                        <div class="scrap-booking-bottom-v2">
+                            <small>BOOKING NUMBER</small>
+                            <strong>@Model.MaBooking</strong>
+                        </div>
+
+                        <div class="scrap-travel-stamps">
+                            <span>
+                                <i class="fa-solid fa-plane-departure"></i>
+                                READY TO GO
+                            </span>
+
+                            <span>
+                                <i class="fa-solid fa-suitcase-rolling"></i>
+                                HAPPY JOURNEY
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="scrap-qr-area-v2">
+                        <div class="scrap-qr-box-v2">
+                            @if (!string.IsNullOrWhiteSpace(qrUrl))
+                            {
+                                <img src="@qrUrl"
+                                     alt="QR Check-in @Model.MaBooking" />
+                            }
+                            else
+                            {
+                                <div class="scrap-qr-unavailable">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <span>QR chưa khả dụng</span>
+                                </div>
+                            }
+                        </div>
+
+                        <small>SCAN TO CHECK IN</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="scrap-ticket-foot-v2">
+                <span>
+                    <i class="fa-solid fa-paper-plane"></i>
+                    READY FOR YOUR NEXT JOURNEY
+                </span>
+
+                <span>HAPPYTRIP · VIETNAM</span>
+            </div>
+
+        </main>
+
+        <!-- POSTCARD BÊN PHẢI -->
+        <aside class="scrap-side-v2 right">
+
+            <div class="scrap-polaroid-v2 second">
+                <div class="scrap-tape-v2"></div>
+
+                <div class="scrap-passport-art">
+                    <div class="scrap-passport-circle">
+                        <i class="fa-solid fa-plane"></i>
+                        <span>HAPPYTRIP</span>
+                        <strong>EXPLORE</strong>
+                    </div>
+
+                    <div class="scrap-flight-path"></div>
+
+                    <i class="fa-solid fa-compass scrap-compass-art"></i>
+                </div>
+
+                <strong>Explore more ✈</strong>
+                <span>COLLECT MOMENTS</span>
+            </div>
+
+            <div class="scrap-luggage-tag">
+                <div class="scrap-tag-hole"></div>
+                <i class="fa-solid fa-suitcase-rolling"></i>
+                <strong>ADVENTURE</strong>
+                <span>IS CALLING!</span>
+            </div>
+
+            <div class="scrap-sticker-v2 right-sticker">
+                <span>☀️</span>
+                <strong>HELLO SUNSHINE</strong>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- NÚT -->
+    <div class="scrap-actions-v2">
+
+        <a href="/" class="scrap-action-v2 outline">
+            <i class="fa-solid fa-house"></i>
+            Về trang chủ
+        </a>
+
+        <a asp-controller="TaiKhoan"
+           asp-action="DonCuaToi"
+           class="scrap-action-v2 primary">
+            <i class="fa-solid fa-ticket"></i>
+            Xem đơn đặt tour của tôi
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+
+    </div>
+
+    <p class="scrap-ending-v2">
+        <i class="fa-solid fa-heart"></i>
+        Mỗi hành trình là một câu chuyện.
+        Cảm ơn bạn đã chọn HappyTrip!
+    </p>
+
+</div>
+
 <style>
-    .done-wrap { max-width: 1460px; margin: 20px auto; padding: 0 16px; }
-    .ticket-done {
-        display: grid;
-        grid-template-columns: 1.28fr 0.72fr;
-        background: #fff;
-        border-radius: 24px;
+    .scrap-v2 {
+        --sc-green: #07513e;
+        --sc-deep: #053c30;
+        --sc-gold: #e6b449;
+        --sc-paper: #fff7e8;
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+        color: #153e31;
+        position: relative;
+        isolation: isolate;
+        background:
+            radial-gradient(circle at 0 15%,
+                rgba(241,207,135,.28),transparent 30%),
+            radial-gradient(circle at 100% 75%,
+                rgba(26,156,138,.25),transparent 34%),
+            repeating-linear-gradient(
+                30deg,
+                rgba(42,81,52,.017) 0 1px,
+                transparent 1px 5px
+            ),
+            linear-gradient(140deg,#f7efe0,#d0ebe3);
+        padding: 30px 18px 45px;
         overflow: hidden;
-        box-shadow: 0 18px 40px rgba(17, 24, 39, .12);
-        min-height: 620px;
     }
-    .ticket-main { padding: 28px 32px; background: linear-gradient(180deg,#ffffff 0%,#f8fbff 100%); }
-    .ticket-side { padding: 28px 24px; background: #0f172a; color: #e2e8f0; position: relative; }
-    .ticket-side:before, .ticket-side:after { content: ""; position: absolute; left: -16px; width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; }
-    .ticket-side:before { top: 140px; }
-    .ticket-side:after { bottom: 140px; }
-    .ticket-dash { border-top: 2px dashed rgba(148,163,184,.45); margin: 14px 0 16px; }
-    .ticket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; }
-    .ticket-row { margin-bottom: 8px; }
-    .ticket-row .k { color: #64748b; font-size: .92rem; }
-    .ticket-row .v { font-weight: 700; color: #0f172a; }
-    .pay-total { font-size: 1.5rem; font-weight: 800; color: #dc2626; }
-    @@media (max-width: 992px) {
-        .ticket-done { grid-template-columns: 1fr; min-height: auto; }
-        .ticket-side:before, .ticket-side:after { display: none; }
+
+    .scrap-v2 * {
+        box-sizing: border-box;
+    }
+
+    /* HEADER */
+
+    .scrap-hero-v2 {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        margin: 0 auto 30px;
+        max-width: 1000px;
+    }
+
+    .scrap-logo-v2 {
+        color: #064333;
+        font-size: 29px;
+        font-weight: 900;
+        margin-bottom: 14px;
+    }
+
+    .scrap-logo-v2 i {
+        margin-right: 8px;
+        color: #167e53;
+    }
+
+    .scrap-eyebrow-v2 {
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: #4a7660;
+        margin-bottom: 13px;
+    }
+
+    .scrap-hero-v2 h1 {
+        color: #074633;
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+        font-size: clamp(30px,4vw,52px);
+        font-weight: 900;
+        letter-spacing: -1px;
+        line-height: 1.25;
+        margin: 0;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+
+    .scrap-brush-v2 {
+        width: 240px;
+        height: 7px;
+        background: #efb637;
+        border-radius: 70%;
+        transform: rotate(-2deg);
+        margin: 14px auto;
+    }
+
+    .scrap-hero-v2 p {
+        font-size: 15px;
+        color: #315f48;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .scrap-hero-v2 p i {
+        color: #16834b;
+        margin-right: 7px;
+    }
+
+    /* NỀN STICKER */
+
+    .scrap-decor {
+        position: absolute;
+        z-index: -1;
+        display: flex;
+        gap: 3px;
+        pointer-events: none;
+        color: #2a805a;
+        opacity: .35;
+    }
+
+    .scrap-decor i {
+        font-size: 105px;
+    }
+
+    .leaves-left {
+        top: 0;
+        left: -80px;
+        transform: rotate(145deg);
+    }
+
+    .leaves-right {
+        right: -80px;
+        bottom: 120px;
+        transform: rotate(-35deg);
+    }
+
+    .scrap-stamp-v2 {
+        position: absolute;
+        z-index: 0;
+        top: 80px;
+        right: 7%;
+        width: 112px;
+        height: 112px;
+        border: 4px double #1d6a51;
+        border-radius: 50%;
+        transform: rotate(17deg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        color: #1d6a51;
+        opacity: .45;
+    }
+
+    .scrap-stamp-v2 i {
+        font-size: 23px;
+    }
+
+    .scrap-stamp-v2 span,
+    .scrap-stamp-v2 strong {
+        font-size: 9px;
+    }
+
+    /* VÙNG VÉ */
+
+    .scrap-stage-v2 {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns:
+            minmax(0,1fr)
+            minmax(0,850px)
+            minmax(0,1fr);
+        align-items: center;
+        max-width: 1450px;
+        margin: 0 auto;
+    }
+
+    .scrap-main-ticket-v2 {
+        min-width: 0;
+        background:
+            repeating-linear-gradient(
+                0deg,
+                rgba(87,69,39,.015) 0 1px,
+                transparent 1px 4px
+            ),
+            linear-gradient(130deg,#fffaf0,#f6ecda);
+        box-shadow: 0 20px 45px rgba(41,57,42,.19);
+        border-radius: 3px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .scrap-main-ticket-v2::after {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -11px;
+        height: 12px;
+        background:
+            linear-gradient(-45deg,
+                transparent 8px,
+                #e4e8d9 0) 0 0/16px 16px,
+            linear-gradient(45deg,
+                transparent 8px,
+                #e4e8d9 0) 0 0/16px 16px;
+        pointer-events: none;
+    }
+
+    .scrap-ticket-head-v2 {
+        min-height: 76px;
+        background: linear-gradient(100deg,#054739,#0b6b53);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        color: white;
+        padding: 19px 29px;
+    }
+
+    .scrap-ticket-brand-v2 {
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .scrap-ticket-brand-v2 i {
+        color: #ffdb8d;
+        margin-right: 6px;
+    }
+
+    .scrap-ticket-name-v2 {
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: #ffe7b0;
+    }
+
+    .scrap-ticket-content-v2 {
+        padding: 26px 29px 20px;
+        min-width: 0;
+    }
+
+    /* SỬA TRIỆT ĐỂ LỖI TÊN TOUR */
+
+    .scrap-tour-top-v2 {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) 185px;
+        gap: 20px;
+        align-items: start;
+        margin-bottom: 21px;
+    }
+
+    .scrap-tour-name-v2 {
+        min-width: 0;
+    }
+
+    .scrap-tour-name-v2 > span {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        color: #5b8067;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+    }
+
+    .scrap-tour-name-v2 h2 {
+        display: block;
+        font-family: "Be Vietnam Pro", Arial, sans-serif !important;
+        font-size: clamp(20px,2.1vw,27px) !important;
+        font-weight: 800 !important;
+        line-height: 1.55 !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-align: left !important;
+        text-transform: none !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+        color: #073e30;
+        margin: 0 !important;
+        max-width: 100%;
+    }
+
+    .scrap-booking-v2 {
+        min-width: 0;
+        padding-left: 15px;
+        border-left: 2px dashed #b9bba8;
+    }
+
+    .scrap-booking-v2 > span {
+        display: block;
+        font-size: 10px;
+        font-weight: 800;
+        color: #64826c;
+        margin-bottom: 8px;
+    }
+
+    .scrap-booking-v2 strong {
+        display: block;
+        background: #f6dc9e;
+        color: #084b36;
+        font-size: 12px;
+        padding: 9px;
+        overflow-wrap: anywhere;
+    }
+
+    .scrap-booking-v2 button {
+        margin-top: 8px;
+        background: transparent;
+        border: 0;
+        color: #147c51;
+        cursor: pointer;
+    }
+
+    /* ẢNH TOUR */
+
+    .scrap-tour-photo-v2 {
+        height: 260px;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        position: relative;
+        border: 8px solid #fffdf7;
+        box-shadow: 0 6px 18px rgba(27,63,45,.15);
+        background: #dcefe7;
+    }
+
+    .scrap-tour-photo-v2 > img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+    }
+
+    .scrap-photo-placeholder {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        align-items: center;
+        justify-content: center;
+        background: #daeee5;
+        color: #3d8864;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .scrap-photo-placeholder i {
+        font-size: 45px;
+    }
+
+    .scrap-photo-gradient {
+        position: absolute;
+        inset: 45% 0 0;
+        background: linear-gradient(
+            transparent,rgba(2,45,35,.57)
+        );
+        pointer-events: none;
+    }
+
+    .scrap-photo-location {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 15px;
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        text-shadow: 0 2px 7px #063a2e;
+    }
+
+    .scrap-photo-corner {
+        position: absolute;
+        top: 13px;
+        right: 13px;
+        border-radius: 20px;
+        background: #ffda75;
+        color: #14563c;
+        font-size: 9px;
+        font-weight: 900;
+        padding: 8px 11px;
+        transform: rotate(7deg);
+    }
+
+    /* THÔNG TIN */
+
+    .scrap-detail-grid-v2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        padding: 24px 0;
+        border-bottom: 1px dashed #b0b8a6;
+    }
+
+    .scrap-detail-grid-v2 > div {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    .scrap-detail-grid-v2 > div + div {
+        border-left: 1px dashed #b0b8a6;
+        padding-left: 12px;
+    }
+
+    .scrap-detail-grid-v2 i {
+        color: #08674a;
+        font-size: 21px;
+        margin-top: 4px;
+        flex-shrink: 0;
+    }
+
+    .scrap-detail-grid-v2 span {
+        display: block;
+        min-width: 0;
+    }
+
+    .scrap-detail-grid-v2 small {
+        display: block;
+        font-size: 9px;
+        font-weight: 800;
+        color: #65816e;
+        margin-bottom: 6px;
+    }
+
+    .scrap-detail-grid-v2 strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #0b4735;
+        overflow-wrap: break-word;
+    }
+
+    .scrap-detail-grid-v2 em {
+        display: block;
+        font-size: 9px;
+        color: #879488;
+        margin-top: 4px;
+        font-style: normal;
+    }
+
+    /* GIÁ */
+
+    .scrap-price-grid-v2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.35fr;
+        margin: 21px 0 10px;
+        background: #f3f3e7;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .scrap-price-grid-v2 > div {
+        text-align: center;
+        padding: 17px 8px;
+        min-width: 0;
+    }
+
+    .scrap-price-grid-v2 > div + div {
+        border-left: 1px dashed #d3d7c5;
+    }
+
+    .scrap-price-grid-v2 small {
+        display: block;
+        color: #64806c;
+        font-size: 10px;
+        font-weight: 800;
+        margin-bottom: 9px;
+    }
+
+    .scrap-price-grid-v2 strong {
+        display: block;
+        color: #104935;
+        font-size: 16px;
+        overflow-wrap: anywhere;
+    }
+
+    .scrap-price-grid-v2 .scrap-price-final-v2 {
+        background: linear-gradient(100deg,#105c44,#087054);
+    }
+
+    .scrap-price-final-v2 small {
+        color: #e5d79e;
+    }
+
+    .scrap-price-final-v2 strong {
+        color: white;
+        font-size: clamp(18px,2vw,25px);
+    }
+
+    .scrap-payment-grid-v2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        padding: 17px 0;
+    }
+
+    .scrap-payment-grid-v2 > div {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .scrap-payment-grid-v2 i {
+        color: #0a7753;
+        font-size: 22px;
+    }
+
+    .scrap-payment-grid-v2 small {
+        display: block;
+        color: #799080;
+        font-size: 9px;
+        margin-bottom: 5px;
+    }
+
+    .scrap-payment-grid-v2 strong {
+        color: #184a37;
+        font-size: 12px;
+    }
+
+    /* ĐƯỜNG XÉ */
+
+    .scrap-cut-v2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 -10px 22px;
+        color: #16805a;
+    }
+
+    .scrap-cut-v2 span {
+        flex: 1;
+        border-top: 2px dashed #97b09f;
+    }
+
+    .scrap-cut-v2 i {
+        font-size: 20px;
+        transform: rotate(-15deg);
+    }
+
+    /* QR */
+
+    .scrap-checkin-v2 {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) 200px;
+        align-items: center;
+        gap: 25px;
+        padding-bottom: 15px;
+    }
+
+    .scrap-checkin-info-v2 {
+        min-width: 0;
+    }
+
+    .scrap-checkin-label {
+        color: #6a906f;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .scrap-checkin-info-v2 h3 {
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+        font-size: clamp(23px,2.5vw,32px);
+        font-weight: 900;
+        color: #07513b;
+        margin: 8px 0 12px;
+    }
+
+    .scrap-checkin-info-v2 p {
+        color: #51735e;
+        font-size: 12px;
+        line-height: 1.9;
+        max-width: 370px;
+        margin: 0 0 18px;
+    }
+
+    .scrap-booking-bottom-v2 {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 6px;
+        background: #e4ead5;
+        padding: 11px 15px;
+        border-radius: 7px;
+    }
+
+    .scrap-booking-bottom-v2 small {
+        color: #719079;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .scrap-booking-bottom-v2 strong {
+        color: #07503b;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    .scrap-travel-stamps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .scrap-travel-stamps span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #347652;
+        border: 1px dashed #65a17b;
+        padding: 7px 9px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 800;
+        transform: rotate(-2deg);
+    }
+
+    .scrap-qr-area-v2 {
+        text-align: center;
+        min-width: 0;
+    }
+
+    .scrap-qr-box-v2 {
+        display: grid;
+        place-items: center;
+        width: 200px;
+        height: 200px;
+        max-width: 100%;
+        margin: auto;
+        padding: 8px;
+        border: 3px solid #096a51;
+        border-radius: 12px;
+        background: white;
+    }
+
+    .scrap-qr-box-v2 img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .scrap-qr-area-v2 > small {
+        display: block;
+        color: #64846c;
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        font-weight: 800;
+        margin-top: 10px;
+    }
+
+    .scrap-qr-unavailable {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+        color: #819387;
+        font-size: 11px;
+    }
+
+    .scrap-qr-unavailable i {
+        font-size: 29px;
+    }
+
+    .scrap-ticket-foot-v2 {
+        background: #e3e8d9;
+        color: #49725b;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 16px 25px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    /* HAI POSTCARD CÓ HÌNH VÀ STICKER */
+
+    .scrap-side-v2 {
+        position: relative;
+        height: 570px;
+        min-width: 0;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .scrap-polaroid-v2 {
+        width: 205px;
+        max-width: 100%;
+        padding: 10px 10px 20px;
+        background: #fffdfa;
+        box-shadow: 0 15px 25px rgba(29,68,48,.21);
+        text-align: center;
+        position: absolute;
+        top: 75px;
+        left: -25px;
+        transform: rotate(-13deg);
+    }
+
+    .scrap-side-v2.right .scrap-polaroid-v2 {
+        left: auto;
+        right: -25px;
+        transform: rotate(12deg);
+        top: 90px;
+    }
+
+    .scrap-tape-v2 {
+        position: absolute;
+        top: -14px;
+        left: 25%;
+        width: 105px;
+        height: 27px;
+        transform: rotate(5deg);
+        background: rgba(238,206,144,.75);
+        box-shadow: 0 2px 5px rgba(38,41,27,.05);
+    }
+
+    .scrap-polaroid-photo {
+        height: 175px;
+        overflow: hidden;
+        background: #d4e8df;
+    }
+
+    .scrap-polaroid-photo img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+    }
+
+    .scrap-polaroid-v2 > strong {
+        display: block;
+        font-size: 15px;
+        font-weight: 800;
+        color: #126248;
+        margin-top: 13px;
+        line-height: 1.4;
+    }
+
+    .scrap-polaroid-v2 > span {
+        display: block;
+        color: #8a9b87;
+        font-size: 8px;
+        letter-spacing: 1px;
+        margin-top: 5px;
+    }
+
+    .scrap-passport-art {
+        height: 175px;
+        position: relative;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background:
+            linear-gradient(
+                120deg,#b0ded2,#e6f2e4
+            );
+    }
+
+    .scrap-passport-circle {
+        width: 130px;
+        height: 130px;
+        border: 3px double #247b60;
+        border-radius: 50%;
+        color: #156a51;
+        transform: rotate(-15deg);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .scrap-passport-circle i {
+        font-size: 31px;
+    }
+
+    .scrap-passport-circle span,
+    .scrap-passport-circle strong {
+        font-size: 10px;
+        letter-spacing: 1px;
+    }
+
+    .scrap-compass-art {
+        position: absolute;
+        bottom: -12px;
+        right: -10px;
+        font-size: 55px;
+        opacity: .17;
+        color: #0e5e4a;
+    }
+
+    .scrap-sticker-v2 {
+        position: absolute;
+        background: #fce9b2;
+        color: #0d6449;
+        border: 2px solid #e2b953;
+        border-radius: 13px;
+        padding: 13px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 7px 13px rgba(32,62,44,.11);
+        text-align: center;
+    }
+
+    .scrap-sticker-v2 i {
+        font-size: 27px;
+    }
+
+    .scrap-sticker-v2 span,
+    .scrap-sticker-v2 strong {
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: .4px;
+    }
+
+    .left-sticker {
+        top: 360px;
+        left: 5px;
+        transform: rotate(10deg);
+    }
+
+    .beach-sticker {
+        top: 470px;
+        left: 80px;
+        border-radius: 50%;
+        width: 115px;
+        height: 115px;
+        background: #d5f1dd;
+        transform: rotate(-8deg);
+        justify-content: center;
+    }
+
+    .beach-emoji {
+        font-size: 34px !important;
+    }
+
+    .right-sticker {
+        top: 485px;
+        right: 15px;
+        background: #fff0c3;
+        transform: rotate(11deg);
+    }
+
+    .right-sticker > span {
+        font-size: 30px;
+    }
+
+    .scrap-luggage-tag {
+        position: absolute;
+        top: 355px;
+        right: 60px;
+        width: 140px;
+        height: 115px;
+        background: #f6c34f;
+        color: #124b39;
+        border-radius: 17px;
+        transform: rotate(-12deg);
+        box-shadow: 0 9px 17px rgba(25,65,43,.16);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .scrap-luggage-tag i {
+        font-size: 30px;
+    }
+
+    .scrap-luggage-tag strong {
+        font-size: 11px;
+    }
+
+    .scrap-luggage-tag span {
+        font-size: 10px;
+    }
+
+    .scrap-tag-hole {
+        position: absolute;
+        top: 8px;
+        width: 10px;
+        height: 10px;
+        border: 2px solid #bd963e;
+        border-radius: 50%;
+        background: #f7f1dd;
+    }
+
+    /* NÚT VÀ FOOTER */
+
+    .scrap-actions-v2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin: 35px auto 13px;
+        position: relative;
+        z-index: 5;
+    }
+
+    .scrap-action-v2 {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 45px;
+        padding: 11px 23px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 800;
+        transition: transform .2s;
+    }
+
+    .scrap-action-v2:hover {
+        transform: translateY(-2px);
+    }
+
+    .scrap-action-v2.outline {
+        color: #09664a;
+        background: #fffdfa;
+        border: 1px solid #147854;
+    }
+
+    .scrap-action-v2.primary {
+        color: white;
+        background: linear-gradient(100deg,#16875b,#074c39);
+        border: 1px solid #e2ae39;
+        box-shadow: 0 6px 14px rgba(12,83,60,.17);
+    }
+
+    .scrap-ending-v2 {
+        text-align: center;
+        color: #416b54;
+        font-size: 12px;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .scrap-ending-v2 i {
+        color: #e45f74;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1280px) {
+        .scrap-stage-v2 {
+            max-width: 950px;
+            grid-template-columns: minmax(0,1fr);
+        }
+
+        .scrap-side-v2 {
+            position: absolute;
+            width: 150px;
+            height: 350px;
+            top: 48%;
+            opacity: .8;
+        }
+
+        .scrap-side-v2.left {
+            left: -115px;
+        }
+
+        .scrap-side-v2.right {
+            right: -115px;
+        }
+
+        .scrap-polaroid-v2 {
+            width: 150px;
+        }
+
+        .scrap-polaroid-photo,
+        .scrap-passport-art {
+            height: 125px;
+        }
+
+        .scrap-side-v2 .scrap-sticker-v2,
+        .scrap-side-v2 .scrap-luggage-tag {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 1100px) {
+        .scrap-side-v2,
+        .scrap-stamp-v2 {
+            display: none;
+        }
+
+        .scrap-stage-v2 {
+            max-width: 850px;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .scrap-v2 {
+            padding: 23px 11px 32px;
+        }
+
+        .scrap-hero-v2 h1 {
+            font-size: 30px;
+        }
+
+        .scrap-ticket-head-v2 {
+            padding: 15px;
+        }
+
+        .scrap-ticket-brand-v2 {
+            font-size: 17px;
+        }
+
+        .scrap-ticket-name-v2 {
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .scrap-ticket-content-v2 {
+            padding: 17px 14px;
+        }
+
+        .scrap-tour-top-v2 {
+            grid-template-columns: 1fr;
+            gap: 13px;
+        }
+
+        .scrap-tour-name-v2 h2 {
+            font-size: 21px !important;
+        }
+
+        .scrap-booking-v2 {
+            border-left: 0;
+            border-top: 1px dashed #bac3b2;
+            padding: 12px 0 0;
+        }
+
+        .scrap-tour-photo-v2 {
+            height: 190px;
+        }
+
+        .scrap-detail-grid-v2 {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .scrap-detail-grid-v2 > div + div {
+            border-left: 0;
+            padding-left: 0;
+        }
+
+        .scrap-price-grid-v2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .scrap-price-final-v2 {
+            grid-column: 1 / -1;
+        }
+
+        .scrap-payment-grid-v2 {
+            grid-template-columns: 1fr;
+        }
+
+        .scrap-checkin-v2 {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .scrap-qr-area-v2 {
+            order: -1;
+        }
+
+        .scrap-actions-v2 {
+            flex-direction: column;
+        }
+
+        .scrap-action-v2 {
+            width: 100%;
+        }
+
+        .scrap-ticket-foot-v2 {
+            flex-wrap: wrap;
+            padding: 14px;
+            font-size: 9px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .scrap-action-v2 {
+            transition: none;
+        }
     }
 </style>
 
-<div class="done-wrap">
-    <div class="ticket-done">
-        <section class="ticket-main">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h2 class="text-success fw-bold mb-1"><i class="fa-solid fa-circle-check"></i> THANH TOÁN THÀNH CÔNG</h2>
-                    <p class="text-muted mb-0">Cảm ơn bạn đã tin tưởng HappyTrip</p>
-                </div>
-                <div class="booking-box p-2 px-3 rounded-3" style="background:#F1F8FF; border:1px solid #B6D9FF;">
-                    <strong>Mã Booking:</strong> <span class="text-primary fw-bold">@Model.MaBooking</span>
-                </div>
-            </div>
+<script>
+    (function () {
+        "use strict";
 
-            <div class="ticket-dash"></div>
-            <h5 class="fw-bold mb-3 text-primary">Thông tin đơn hàng</h5>
-            <div class="ticket-grid">
-                <div class="ticket-row"><div class="k">Tên tour</div><div class="v">@Model.IdTourNavigation.TenTour</div></div>
-                <div class="ticket-row"><div class="k">Ngày khởi hành</div><div class="v">@Model.IdLichNavigation.NgayKhoiHanh.ToString("dd/MM/yyyy")</div></div>
-                <div class="ticket-row"><div class="k">Số lượng khách</div><div class="v">@Model.NguoiLon NL, @Model.TreEm TE, @Model.TreNho EB</div></div>
-                <div class="ticket-row"><div class="k">Thanh toán lúc</div><div class="v">@Model.NgayThanhToan?.ToString("HH:mm dd/MM/yyyy")</div></div>
-                <div class="ticket-row"><div class="k">Tổng tiền gốc</div><div class="v">@tongGoc.ToString("N0") đ</div></div>
-                <div class="ticket-row"><div class="k">Giảm giá</div><div class="v">-@soTienGiam.ToString("N0") đ</div></div>
-            </div>
-            @if (!string.IsNullOrWhiteSpace(Model.MaPhieuGiamGia))
-            {
-                <div class="mt-2"><span class="badge bg-success">Voucher: @Model.MaPhieuGiamGia</span></div>
-            }
-            <div class="mt-3">Tổng thanh toán: <span class="pay-total">@tongThanhToan.ToString("N0") đ</span></div>
-            <div class="text-center mt-4">
-            <p class="text-muted mb-1">Thông tin xác nhận đã được gửi qua Email/SĐT của bạn.</p>
-            <p class="mb-2">Cần hỗ trợ? Gọi ngay <strong>0938 179 170</strong></p>
-            <a href="/" class="btn btn-primary rounded-pill px-5 py-2 fw-bold mt-2">Về trang chủ</a>
-            </div>
-        </section>
+        const copyButton = document.getElementById("scrapCopyV2");
+        const codeElement = document.getElementById("scrapCodeV2");
 
-        <aside class="ticket-side d-flex flex-column align-items-center justify-content-center">
-            <h5 class="fw-bold mb-2 text-white">THE CHECK-IN</h5>
-            <p class="mb-3 text-center" style="color:#94a3b8;">Xuất trình mã này tại điểm tập trung</p>
-            @if (!string.IsNullOrWhiteSpace(checkinQrUrl))
-            {
-                <img src="@checkinQrUrl" alt="QR check-in @Model.MaBooking" style="width:220px;height:220px;border:8px solid #fff;border-radius:16px;background:#fff;" />
+        if (!copyButton || !codeElement) return;
+
+        copyButton.addEventListener("click", async function () {
+            const bookingCode = codeElement.textContent.trim();
+
+            try {
+                await navigator.clipboard.writeText(bookingCode);
+
+                copyButton.innerHTML =
+                    '<i class="fa-solid fa-check"></i>';
+
+                copyButton.title = "Đã sao chép";
+            } catch {
+                copyButton.title = "Không thể sao chép";
             }
-            <div class="mt-3 px-3 py-2 rounded-3" style="background:#111827; border:1px solid #334155;">
-                <span style="color:#cbd5e1;">Booking:</span> <strong class="text-white">@Model.MaBooking</strong>
-            </div>
-        </aside>
-    </div>
-</div>
+        });
+    })();
+</script>

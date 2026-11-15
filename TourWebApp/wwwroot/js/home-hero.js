@@ -1,6 +1,4 @@
-
 "use strict";
-
 (function () {
     function initHeroVideo() {
         const video = document.querySelector(

@@ -1,89 +1,1102 @@
-﻿@model List<TourWebApp.Data.Models.DonDatTour>
+﻿
+@model List<TourWebApp.Data.Models.DonDatTour>
+@using System
+@using System.Linq
+@using System.Collections.Generic
+@using TourWebApp.Helpers
+
 @{
-    ViewData["Title"] = "Đơn của tôi";
-    var totalOrders = Model?.Count ?? 0;
-    var pendingOrders = Model?.Count(x => x.TrangThai == "ChoThanhToan") ?? 0;
-    var paidOrders = Model?.Count(x => x.TrangThai == "ThanhToanThanhCong") ?? 0;
+    ViewData["Title"] = "Đơn đặt tour của tôi";
+
+    var orders = Model ??
+        new List<TourWebApp.Data.Models.DonDatTour>();
+
+    var total = orders.Count;
+
+    var pending = orders.Count(x =>
+        x.TrangThai == "ChoThanhToan");
+
+    var paid = orders.Count(x =>
+        x.TrangThai == "ThanhToanThanhCong" ||
+        x.TrangThai == "HoanTat");
+
+    var other = total - pending - paid;
+
+    string GetStatus(string? status)
+    {
+        return status switch
+        {
+            "ChoThanhToan" => "Chờ thanh toán",
+            "ThanhToanThanhCong" => "Đã thanh toán",
+            "HoanTat" => "Hoàn tất",
+            "DaHuy" => "Đã hủy",
+            "HetHanThanhToan" => "Hết hạn thanh toán",
+            "ThanhToanThatBai" => "Thanh toán thất bại",
+            "ChoXacNhan" => "Chờ xác nhận",
+            "DaXacNhan" => "Đã xác nhận",
+            "HoanThanh" => "Hoàn thành",
+            "DaHoanTien" => "Đã hoàn tiền",
+            _ => string.IsNullOrWhiteSpace(status)
+                ? "Đang cập nhật"
+                : status
+        };
+    }
+
+    string GetStatusColor(string? status)
+    {
+        return status switch
+        {
+            "ChoThanhToan" => "waiting",
+
+            "ThanhToanThanhCong" or
+            "HoanTat" or
+            "HoanThanh" => "success",
+
+            "DaHuy" or
+            "HetHanThanhToan" or
+            "ThanhToanThatBai" => "danger",
+
+            "DaHoanTien" => "refund",
+
+            _ => "neutral"
+        };
+    }
+
+    string GetFilter(string? status)
+    {
+        if (status == "ChoThanhToan")
+            return "pending";
+
+        if (status == "ThanhToanThanhCong" ||
+            status == "HoanTat")
+            return "paid";
+
+        return "other";
+    }
 }
 
-<link rel="stylesheet" href="~/css/account-dashboard.css" asp-append-version="true" />
+<style>
+    /* ========================================
+       HAPPYTRIP - MY BOOKING PREMIUM
+       COMPACT TRAVEL LIST
+       ======================================== */
 
-<div class="account-dashboard-page">
-    <div class="account-dashboard-shell">
-        <aside class="account-dashboard-sidebar">
-            <div class="account-user-chip">
-                <div class="account-user-avatar">@((Context.Session.GetString("HoTen") ?? "U").Trim().Substring(0, 1).ToUpper())</div>
-                <div>
-                    <p class="account-user-kicker">Quản lý đơn hàng</p>
-                    <h2>@(Context.Session.GetString("HoTen") ?? "Khách hàng")</h2>
-                    <p class="account-user-email">Theo dõi trạng thái booking</p>
+    .ht-bookings,
+    .ht-bookings *,
+    .ht-bookings *::before,
+    .ht-bookings *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-bookings {
+        --bk-green: #075b43;
+        --bk-deep: #143c30;
+        --bk-gold: #e2b569;
+        --bk-text: #243e32;
+        --bk-muted: #7c8b80;
+
+        min-height: 65vh;
+        padding: 28px 18px 55px;
+        background: #f8f6f0;
+        color: var(--bk-text);
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .ht-bookings-container {
+        width: min(1100px, 100%);
+        margin: 0 auto;
+    }
+
+    /* BREADCRUMB */
+
+    .bk-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 20px;
+        color: #819083;
+        font-size: 11px;
+    }
+
+    .bk-breadcrumb a {
+        color: #607967;
+        text-decoration: none;
+    }
+
+    .bk-breadcrumb i {
+        font-size: 9px;
+    }
+
+    /* HEADER */
+
+    .bk-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .bk-header-kicker {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #b78a42;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .bk-header h1 {
+        margin: 0 0 7px;
+        color: #113f2e;
+        font-size: clamp(25px, 3vw, 34px);
+        font-weight: 800;
+        letter-spacing: -.8px;
+    }
+
+    .bk-header p {
+        margin: 0;
+        color: #778b7b;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .bk-explore {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-shrink: 0;
+        min-height: 39px;
+        padding: 0 17px;
+        border-radius: 9px;
+        background: #075b43;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .bk-explore:hover {
+        background: #033e2e;
+        color: white;
+    }
+
+    /* SUMMARY BAR */
+
+    .bk-summary {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        padding: 15px 20px;
+        margin-bottom: 19px;
+        background: #fffdf9;
+        border: 1px solid #e8e3d9;
+        border-left: 4px solid #0b6a4d;
+        border-radius: 12px;
+    }
+
+    .bk-summary-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #718275;
+        font-size: 11px;
+    }
+
+    .bk-summary-item i {
+        color: #187b57;
+        font-size: 12px;
+    }
+
+    .bk-summary-item strong {
+        color: #154c36;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .bk-summary-item.is-pending i {
+        color: #bd862c;
+    }
+
+    /* TOOLBAR */
+
+    .bk-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .bk-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .bk-filter {
+        min-height: 35px;
+        padding: 0 13px;
+        border: 1px solid #e2e6db;
+        border-radius: 8px;
+        background: #fffefa;
+        color: #61766a;
+        font: 700 10px "Be Vietnam Pro", Arial, sans-serif;
+        cursor: pointer;
+    }
+
+    .bk-filter.is-active {
+        background: #075b43;
+        border-color: #075b43;
+        color: #fff;
+    }
+
+    .bk-search {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 36px;
+        width: 245px;
+        max-width: 100%;
+        padding: 0 11px;
+        border: 1px solid #e1e7de;
+        border-radius: 8px;
+        background: #fffefa;
+        color: #71907d;
+    }
+
+    .bk-search i {
+        font-size: 12px;
+    }
+
+    .bk-search input {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #244b36;
+        font: 11px "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .bk-count {
+        margin: 0 0 13px;
+        color: #849084;
+        font-size: 10px;
+    }
+
+    /* BOOKING LIST */
+
+    .bk-list {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+    }
+
+    .bk-card {
+        display: grid;
+        grid-template-columns: 192px minmax(0, 1fr) 175px;
+        align-items: stretch;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #e5e4da;
+        border-radius: 14px;
+        background: #fffefa;
+        box-shadow: 0 4px 15px rgba(24, 55, 34, .045);
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .bk-card:hover {
+        border-color: #abcbb6;
+        box-shadow: 0 8px 23px rgba(24, 55, 34, .085);
+    }
+
+    .bk-card[hidden] {
+        display: none !important;
+    }
+
+    /* IMAGE */
+
+    .bk-photo {
+        position: relative;
+        min-height: 157px;
+        overflow: hidden;
+        background: #dce9de;
+    }
+
+    .bk-photo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 157px;
+        object-fit: cover;
+        transition: transform .3s ease;
+    }
+
+    .bk-card:hover .bk-photo img {
+        transform: scale(1.035);
+    }
+
+    .bk-photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            0deg,
+            rgba(9, 49, 33, .2),
+            transparent 55%
+        );
+        pointer-events: none;
+    }
+    
+    /* Chỉ hiện ảnh dự phòng khi tour thiếu ảnh hoặc ảnh tải lỗi */
+    .bk-photo-fallback {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        background: linear-gradient(135deg, #195b43, #75a68b);
+        color: #fff8e9;
+    }
+
+    .bk-photo-fallback i {
+        font-size: 28px;
+        color: #ebcc88;
+    }
+
+    .bk-photo-fallback span {
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    /* Ảnh đúng tour tải thành công */
+    .bk-photo[data-failed="false"] img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Chỉ hiện ô dự phòng khi không có ảnh thật */
+    .bk-photo[data-failed="true"] img {
+        display: none;
+    }
+
+    .bk-photo[data-failed="true"] .bk-photo-fallback {
+        display: flex;
+    }
+
+        /* MIDDLE */
+
+        .bk-main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+            padding: 16px 19px;
+        }
+
+    .bk-topline {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-bottom: 9px;
+    }
+
+    .bk-code {
+        color: #a77d39;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .25px;
+        overflow-wrap: anywhere;
+    }
+
+    .bk-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .bk-status.success {
+        color: #096840;
+        background: #dcf1e3;
+    }
+
+    .bk-status.waiting {
+        color: #a16b18;
+        background: #fff0cc;
+    }
+
+    .bk-status.danger {
+        color: #a63f38;
+        background: #fdebe6;
+    }
+
+    .bk-status.refund {
+        color: #5c6597;
+        background: #e9ecfa;
+    }
+
+    .bk-status.neutral {
+        color: #60756c;
+        background: #ecf1ed;
+    }
+
+    .bk-tour-title {
+        margin: 0 0 9px;
+        color: #143f2f;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .bk-meta {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 17px;
+        row-gap: 9px;
+        color: #6c7f70;
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    .bk-meta span {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .bk-meta i {
+        flex-shrink: 0;
+        margin-top: 3px;
+        color: #2a875e;
+        font-size: 11px;
+    }
+
+    .bk-voucher {
+        display: inline-flex;
+        align-items: center;
+        align-self: flex-start;
+        gap: 6px;
+        max-width: 100%;
+        margin-top: 10px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        background: #f2f4e9;
+        color: #536e4e;
+        font-size: 10px;
+        overflow-wrap: anywhere;
+    }
+
+    .bk-voucher i {
+        color: #be963d;
+    }
+
+    /* RIGHT */
+
+    .bk-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 10px;
+        padding: 16px;
+        border-left: 1px dashed #e0e7dd;
+        background: #f7faf5;
+        text-align: right;
+    }
+
+    .bk-side-label {
+        color: #839186;
+        font-size: 10px;
+    }
+
+    .bk-amount {
+        color: #075b43;
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1.3;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .bk-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 33px;
+        padding: 0 12px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: #076044;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .bk-btn:hover {
+        background: #033f2d;
+        color: #fff;
+    }
+
+    .bk-btn-alt {
+        background: #fff4dd;
+        color: #8a611e;
+        border-color: #e9d5ac;
+    }
+
+    .bk-btn-alt:hover {
+        background: #f8e5bd;
+        color: #755018;
+    }
+
+    /* EMPTY */
+
+    .bk-empty {
+        padding: 43px 20px;
+        border: 1px dashed #cddfcf;
+        border-radius: 14px;
+        background: #fffefa;
+        text-align: center;
+    }
+
+    .bk-empty i {
+        color: #21805b;
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    .bk-empty h3 {
+        color: #174d35;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .bk-empty p {
+        color: #7f8d83;
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .bk-empty[hidden] {
+        display: none !important;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 950px) {
+        .bk-card {
+            grid-template-columns: 155px minmax(0, 1fr);
+        }
+
+        .bk-side {
+            grid-column: 2;
+            align-items: flex-start;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            text-align: left;
+            border-left: 0;
+            border-top: 1px dashed #e0e7dd;
+            padding: 11px 16px;
+        }
+
+        .bk-side-label {
+            display: none;
+        }
+
+        .bk-photo {
+            grid-row: span 2;
+        }
+
+        .bk-amount {
+            margin-right: auto;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .ht-bookings {
+            padding: 18px 12px 40px;
+        }
+
+        .bk-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .bk-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .bk-search {
+            width: 100%;
+        }
+
+        .bk-card {
+            grid-template-columns: 110px minmax(0, 1fr);
+        }
+
+        .bk-photo {
+            min-height: 145px;
+        }
+
+        .bk-photo img {
+            min-height: 145px;
+        }
+
+        .bk-main {
+            padding: 12px;
+        }
+
+        .bk-tour-title {
+            font-size: 12px;
+        }
+
+        .bk-meta {
+            font-size: 9px;
+            gap: 5px 10px;
+        }
+
+        .bk-side {
+            grid-column: 1 / -1;
+            padding: 11px 12px;
+        }
+
+        .bk-photo {
+            grid-row: auto;
+        }
+
+        .bk-amount {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="ht-bookings">
+
+    <div class="ht-bookings-container">
+
+        <!-- BREADCRUMB -->
+
+        <nav class="bk-breadcrumb">
+
+            <a href="/">Trang chủ</a>
+
+            <i class="fa-solid fa-chevron-right"></i>
+
+            <span>Đơn đặt tour của tôi</span>
+
+        </nav>
+
+        <!-- HEADER -->
+
+        <div class="bk-header">
+
+            <div>
+                <div class="bk-header-kicker">
+                    <i class="fa-solid fa-plane-departure"></i>
+                    HAPPYTRIP · MY JOURNEYS
                 </div>
+
+                <h1>Chuyến đi của tôi</h1>
+
+                <p>
+                    Theo dõi những hành trình đã đặt
+                    và quản lý thông tin booking.
+                </p>
             </div>
 
-            <nav class="account-dashboard-nav" aria-label="Điều hướng tài khoản">
-                <a href="/TaiKhoan/HoSo">Hồ sơ cá nhân</a>
-                <a href="/TaiKhoan/DonCuaToi" class="is-active">Đơn của tôi</a>
-            </nav>
+            <a href="/tours" class="bk-explore">
+                <i class="fa-solid fa-compass"></i>
+                Khám phá tour
+            </a>
 
-            <div class="account-quick-stats">
-                <article><span>Tổng đơn</span><strong>@totalOrders</strong></article>
-                <article><span>Chờ thanh toán</span><strong>@pendingOrders</strong></article>
-                <article><span>Đã thanh toán</span><strong>@paidOrders</strong></article>
+        </div>
+
+        <!-- COUNTS -->
+
+        <div class="bk-summary">
+
+            <div class="bk-summary-item">
+                <i class="fa-solid fa-suitcase-rolling"></i>
+                Tổng đơn <strong>@total</strong>
             </div>
-        </aside>
 
-        <section class="account-dashboard-main">
-            <div class="account-panel account-orders-panel">
-                <div class="account-panel-head">
-                    <h3>Đơn đặt tour của tôi</h3>
-                    <p>Lịch sử booking và trạng thái xử lý mới nhất.</p>
+            <div class="bk-summary-item is-pending">
+                <i class="fa-regular fa-clock"></i>
+                Chờ thanh toán <strong>@pending</strong>
+            </div>
+
+            <div class="bk-summary-item">
+                <i class="fa-solid fa-circle-check"></i>
+                Đã thanh toán <strong>@paid</strong>
+            </div>
+
+        </div>
+
+        @if (total == 0)
+        {
+            <div class="bk-empty">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <h3>Chưa có chuyến đi nào</h3>
+                <p>
+                    Khám phá các tour du lịch
+                    và bắt đầu hành trình cùng HappyTrip nhé.
+                </p>
+                <a href="/tours" class="bk-btn">
+                    Khám phá tour
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- FILTER & SEARCH -->
+
+            <div class="bk-toolbar">
+
+                <div class="bk-filters">
+
+                    <button type="button"
+                            class="bk-filter is-active"
+                            data-filter="all">
+                        Tất cả (@total)
+                    </button>
+
+                    <button type="button"
+                            class="bk-filter"
+                            data-filter="pending">
+                        Chờ thanh toán (@pending)
+                    </button>
+
+                    <button type="button"
+                            class="bk-filter"
+                            data-filter="paid">
+                        Đã thanh toán (@paid)
+                    </button>
+
+                    @if (other > 0)
+                    {
+                        <button type="button"
+                                class="bk-filter"
+                                data-filter="other">
+                            Trạng thái khác (@other)
+                        </button>
+                    }
+
                 </div>
 
-                @if (Model == null || !Model.Any())
-                {
-                    <div class="account-empty-order">Bạn chưa có đơn nào.</div>
-                }
-                else
-                {
-                    <div class="account-order-grid">
-                        @foreach (var d in Model)
-                        {
-                            var guestCount = d.NguoiLon + d.TreEm + d.TreNho;
-                            var finalAmount = d.TongTienSauGiam ?? (d.TongTien - (d.SoTienGiam ?? 0));
-                            if (finalAmount < 0) { finalAmount = 0; }
+                <label class="bk-search"
+                       for="bkSearchInput">
 
-                            <article class="account-order-card">
-                                <div class="account-order-top">
-                                    <div>
-                                        <p class="account-order-code">Mã đơn: <strong>@d.MaBooking</strong></p>
-                                        <h5>@d.IdTourNavigation?.TenTour</h5>
-                                    </div>
-                                    <span class="account-status @d.TrangThai">@d.TrangThai</span>
-                                </div>
+                    <i class="fa-solid fa-magnifying-glass"></i>
 
-                                <div class="account-order-meta">
-                                    <span><i class="fa-regular fa-calendar"></i> Ngày đặt: @d.NgayDat.ToString("dd/MM/yyyy HH:mm")</span>
-                                    <span><i class="fa-regular fa-compass"></i> Khởi hành: @(d.IdLichNavigation?.NgayKhoiHanh.ToString("dd/MM/yyyy") ?? "Chưa có")</span>
-                                    <span><i class="fa-solid fa-users"></i> @guestCount khách</span>
-                                    <span class="amount"><i class="fa-solid fa-wallet"></i> @finalAmount.ToString("N0") đ</span>
-                                    @if (!string.IsNullOrWhiteSpace(d.MaPhieuGiamGia))
-                                    {
-                                        <span><i class="fa-solid fa-ticket"></i> Mã: @d.MaPhieuGiamGia</span>
-                                    }
-                                </div>
+                    <input id="bkSearchInput"
+                           type="search"
+                           placeholder="Tìm mã đơn, tên tour..."
+                           autocomplete="off" />
+                </label>
 
-                                <div class="account-order-actions">
-                                    <a class="account-btn-view" href="/TaiKhoan/ChiTietDon?idDon=@d.IdDon">Xem chi tiết</a>
-                                    @if (d.TrangThai == "ChoThanhToan")
-                                    {
-                                        <a class="account-btn-extend" href="/DatTour/GiaHanThanhToan?idDon=@d.IdDon">Gia hạn 5 phút</a>
-                                    }
-                                </div>
-                            </article>
-                        }
-                    </div>
-                }
             </div>
-        </section>
+
+            <p class="bk-count" id="bkResultCount">
+                Hiển thị @total đơn đặt tour
+            </p>
+
+            <!-- BOOKINGS -->
+
+            <div class="bk-list" id="bkList">
+
+                @foreach (var d in orders)
+                {
+                    var tour = d.IdTourNavigation;
+
+                    var tourName = tour?.TenTour
+                        ?? "Tour đang cập nhật";
+
+                    var photoRaw = tour?.HinhAnh;
+
+                    // Chi dung anh thuoc dung tour.
+                    // Khong thay bang anh tour khac.
+                    var hasPhoto =
+                        !string.IsNullOrWhiteSpace(photoRaw);
+
+                    var photoUrl = hasPhoto
+                        ? TourImagePathHelper.ToTourImageSrc(
+                            photoRaw, "")
+                        : "";
+
+                    var guests =
+                        d.NguoiLon + d.TreEm + d.TreNho;
+
+                    var amount =
+                        d.TongTienSauGiam ??
+                        (d.TongTien - (d.SoTienGiam ?? 0));
+
+                    if (amount < 0)
+                    {
+                        amount = 0;
+                    }
+
+                    var code = string.IsNullOrWhiteSpace(d.MaBooking)
+                        ? $"#{d.IdDon}"
+                        : d.MaBooking;
+
+                    var departure =
+                        d.IdLichNavigation?.NgayKhoiHanh
+                            .ToString("dd/MM/yyyy")
+                        ?? "Đang cập nhật";
+
+                    var statusText = GetStatus(d.TrangThai);
+                    var statusColor =
+                        GetStatusColor(d.TrangThai);
+
+                    var filter = GetFilter(d.TrangThai);
+
+                    <article class="bk-card"
+                             data-filter="@filter"
+                             data-search="@($"{code} {tourName} {statusText}".ToLowerInvariant())">
+
+                        <!-- TOUR IMAGE -->
+
+                        <div class="bk-photo"
+                             data-failed="@(hasPhoto ? "false" : "true")">
+
+                            @if (hasPhoto)
+                            {
+                                <img src="@photoUrl"
+                                     alt="Ảnh tour @tourName"
+                                     loading="lazy"
+                                     onerror="this.parentElement.setAttribute('data-failed','true')" />
+                            }
+
+                            <div class="bk-photo-fallback">
+                                <i class="fa-solid fa-mountain-sun"></i>
+                                <span>Ảnh đang cập nhật</span>
+                            </div>
+
+                        </div>
+
+                        <!-- BOOKING INFO -->
+
+                        <div class="bk-main">
+
+                            <div class="bk-topline">
+
+                                <span class="bk-code">
+                                    #@code
+                                </span>
+
+                                <span class="bk-status @statusColor">
+                                    <i class="fa-solid fa-circle"></i>
+                                    @statusText
+                                </span>
+
+                            </div>
+
+                            <h3 class="bk-tour-title">
+                                @tourName
+                            </h3>
+
+                            <div class="bk-meta">
+
+                                <span>
+                                    <i class="fa-regular fa-calendar"></i>
+                                    Đặt: @d.NgayDat.ToString("dd/MM/yyyy")
+                                </span>
+
+                                <span>
+                                    <i class="fa-solid fa-plane-departure"></i>
+                                    Đi: @departure
+                                </span>
+
+                                <span>
+                                    <i class="fa-solid fa-users"></i>
+                                    @guests khách
+                                </span>
+
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                d.MaPhieuGiamGia))
+                            {
+                                <span class="bk-voucher">
+                                    <i class="fa-solid fa-ticket"></i>
+                                    Voucher: @d.MaPhieuGiamGia
+                                </span>
+                            }
+
+                        </div>
+
+                        <!-- PRICE & ACTIONS -->
+
+                        <div class="bk-side">
+
+                            <span class="bk-side-label">
+                                Tổng thanh toán
+                            </span>
+
+                            <strong class="bk-amount">
+                                @amount.ToString("N0")đ
+                            </strong>
+
+                            <a class="bk-btn"
+                               href="@Url.Action(
+                                   "ChiTietDon",
+                                   "TaiKhoan",
+                                   new { idDon = d.IdDon })">
+
+                                <i class="fa-regular fa-eye"></i>
+                                Xem chi tiết
+                            </a>
+
+                            @if (d.TrangThai == "ChoThanhToan")
+                            {
+                                <a class="bk-btn bk-btn-alt"
+                                   href="/DatTour/GiaHanThanhToan?idDon=@d.IdDon">
+
+                                    <i class="fa-regular fa-clock"></i>
+                                    Gia hạn 5 phút
+                                </a>
+                            }
+
+                        </div>
+
+                    </article>
+                }
+
+            </div>
+
+            <div class="bk-empty"
+                 id="bkEmptyFilter"
+                 hidden>
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <h3>Không tìm thấy đơn phù hợp</h3>
+
+                <p>
+                    Thử tìm bằng mã đặt tour,
+                    tên tour hoặc chọn trạng thái khác.
+                </p>
+
+            </div>
+        }
+
     </div>
+
 </div>
+
+<script>
+    (function () {
+        "use strict";
+
+        const buttons = document.querySelectorAll(
+            ".bk-filter"
+        );
+
+        const search = document.getElementById(
+            "bkSearchInput"
+        );
+
+        const cards = Array.from(
+            document.querySelectorAll(".bk-card")
+        );
+
+        const counter = document.getElementById(
+            "bkResultCount"
+        );
+
+        const empty = document.getElementById(
+            "bkEmptyFilter"
+        );
+
+        let currentFilter = "all";
+
+        function normalize(value) {
+            return (value || "")
+                .toLocaleLowerCase("vi-VN")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/\u0111/g, "d")
+                .trim();
+        }
+
+        function update() {
+            const keyword = normalize(
+                search ? search.value : ""
+            );
+
+            let visible = 0;
+
+            cards.forEach(function (card) {
+                const matchesFilter =
+                    currentFilter === "all" ||
+                    card.dataset.filter === currentFilter;
+
+                const matchesSearch =
+                    !keyword ||
+                    normalize(card.dataset.search)
+                        .includes(keyword);
+
+                const show =
+                    matchesFilter && matchesSearch;
+
+                card.hidden = !show;
+
+                if (show) visible++;
+            });
+
+            if (counter) {
+                counter.textContent =
+                    "Hiển thị " + visible +
+                    " / " + cards.length +
+                    " đơn đặt tour";
+            }
+
+            if (empty) {
+                empty.hidden = visible !== 0;
+            }
+        }
+
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+
+                currentFilter =
+                    button.dataset.filter || "all";
+
+                buttons.forEach(function (item) {
+                    item.classList.toggle(
+                        "is-active",
+                        item === button
+                    );
+                });
+
+                update();
+            });
+        });
+
+        if (search) {
+            search.addEventListener("input", update);
+        }
+
+        update();
+    })();
+</script>

@@ -1,189 +1,1222 @@
-@model TourWebApp.Data.Models.DonDatTour
-@{
-    var tongGoc = Model.TongTien;
-    var soTienGiam = Model.SoTienGiam ?? 0;
-    var tongCanThanhToan = Model.TongTienSauGiam ?? (tongGoc - soTienGiam);
-    if (tongCanThanhToan < 0) { tongCanThanhToan = 0; }
 
-    var laThanhToanTaiQuay = string.Equals(Model.PhuongThucTT, "TienMat", StringComparison.OrdinalIgnoreCase);
-    var tongKhach = Model.NguoiLon + Model.TreEm + Model.TreNho;
+@model TourWebApp.Data.Models.DonDatTour
+@using System
+
+@{
+    ViewData["Title"] = "Xác nhận & thanh toán | HappyTrip";
+
+    var tenTour = Model.IdTourNavigation?.TenTour
+        ?? "Tour du lịch";
+
+    var diaDiem = Model.IdTourNavigation?.DiaDiem
+        ?? "Đang cập nhật";
+
     var anhTour = Model.IdTourNavigation?.HinhAnh;
-    var tenTour = Model.IdTourNavigation?.TenTour ?? "Tour đang cập nhật";
-    var diaDiem = Model.IdTourNavigation?.DiaDiem ?? "Đang cập nhật";
-    var ngayKhoiHanh = Model.IdLichNavigation?.NgayKhoiHanh;
+
     var anhTourSrc = TourImagePathHelper.ToTourImageSrc(anhTour);
+
+    var ngayKhoiHanh = Model.IdLichNavigation?.NgayKhoiHanh;
+
+    var soKhach =
+        Model.NguoiLon +
+        Model.TreEm +
+        Model.TreNho;
+
+    var tongGoc = Model.TongTien;
+    var soTienGiam = Model.SoTienGiam ?? 0m;
+
+    var tongThanhToan = Math.Max(
+        0m,
+        Model.TongTienSauGiam ??
+        (tongGoc - soTienGiam));
+
+    var laTienMat = string.Equals(
+        Model.PhuongThucTT,
+        "TienMat",
+        StringComparison.OrdinalIgnoreCase);
+
+    var daThanhToan = Model.DaThanhToan;
+
+    var daHuy = Model.TrangThai == "DaHuy";
+
+    var hetHan = !daThanhToan &&
+        Model.HanThanhToan.HasValue &&
+        Model.HanThanhToan.Value < DateTime.Now;
 }
 
-<style>
-    :root {
-        --travel-green: #24382f;
-        --travel-moss: #6f7d6b;
-        --travel-cream: #f5f0e8;
-        --travel-sand: #d8c3a5;
-        --travel-brown: #5f4b3f;
-        --travel-text: #1f2933;
-        --travel-muted: #6b7280;
-        --travel-white: #ffffff;
-        --travel-danger: #dc2626;
-        --travel-border: #e6ded2;
-    }
+<div class="ht-pay-page">
 
-    .travel-pay-wrap {
-        max-width: 1140px;
-        margin: 1.5rem auto 1.75rem;
-        padding: 0 .75rem;
-        color: var(--travel-text);
-    }
+    <!-- HERO -->
+    <section class="htp-hero">
+        <div class="container">
 
-    .travel-page-head {
-        background: rgba(111, 125, 107, 0.92);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(8px);
-        border-radius: 22px;
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1.5rem;
-        color: var(--travel-white);
-    }
+            <div class="htp-hero-copy">
+                <span class="htp-eyebrow">
+                    HAPPYTRIP · BƯỚC 3/3
+                </span>
 
-    .travel-pay-grid { --bs-gutter-x: 2.1rem; --bs-gutter-y: 1.4rem; }
-    .travel-card {
-        background: var(--travel-cream);
-        border: 1px solid var(--travel-border);
-        border-radius: 22px;
-        padding: 1.5rem;
-        box-shadow: 0 12px 28px rgba(36, 56, 47, 0.08);
-    }
-    .travel-card.white { background: var(--travel-white); }
-    .travel-title { font-size: clamp(1.45rem, 2vw, 1.95rem); font-weight: 700; letter-spacing: .01em; }
-    .travel-muted { color: var(--travel-muted); }
-    .travel-badge {
-        display: inline-flex; align-items: center; gap: .45rem;
-        background: #e9efe9; color: var(--travel-green);
-        border: 1px solid #cbd8cc; padding: .4rem .7rem; border-radius: 999px;
-        font-size: .85rem; font-weight: 600;
-    }
-    .tour-thumb { width: 100%; height: 185px; object-fit: cover; border-radius: 16px; border: 1px solid var(--travel-border); display: block; }
-    .travel-kv { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; margin-top: 1rem; }
-    .travel-kv-item { background: rgba(255,255,255,.58); border: 1px solid var(--travel-border); border-radius: 14px; padding: .75rem .85rem; }
-    .travel-kv-item small { color: var(--travel-muted); display: block; margin-bottom: .2rem; }
-    .travel-divider { border: 0; border-top: 1px solid var(--travel-border); margin: 1.2rem 0; }
-    .amount-row { display: flex; justify-content: space-between; margin-bottom: .5rem; }
-    .amount-total { font-size: 2rem; font-weight: 800; color: var(--travel-danger); letter-spacing: .02em; }
-    .countdown-chip {
-        margin-top: 1rem; background: #f4ebdd; border: 1px solid var(--travel-border); border-left: 4px solid var(--travel-sand);
-        border-radius: 14px; padding: .75rem .9rem; font-weight: 600; color: var(--travel-brown);
-    }
-    .secure-note { border: 1px dashed var(--travel-border); border-radius: 14px; padding: .65rem .8rem; color: var(--travel-muted); font-size: .92rem; }
-    .travel-btn-main {
-        background: var(--travel-green); color: #fff; border: 0; border-radius: 12px; font-weight: 600;
-        padding: .72rem 1.1rem; transition: all .2s ease;
-    }
-    .travel-btn-main:hover { background: #1d2f27; color: #fff; transform: translateY(-1px); box-shadow: 0 10px 18px rgba(36,56,47,.2); }
-    .travel-btn-soft { border-radius: 12px; border-color: var(--travel-border); color: var(--travel-brown); }
-    .travel-btn-soft:hover { background: #f1e7da; border-color: #d6c2a6; color: #4c3b31; }
-    @@media (min-width: 1200px) {
-        .travel-card { padding: 1.25rem; }
-        .travel-page-head { padding: 1rem 1.25rem; margin-bottom: 1.2rem; }
-    }
+                <h1>Xác nhận & thanh toán</h1>
 
-    @@media (max-width: 991.98px) { .travel-kv { grid-template-columns: 1fr; } }
-</style>
+                <p>
+                    Kiểm tra lại thông tin đơn đặt tour và
+                    hoàn tất thanh toán để xác nhận chỗ.
+                </p>
+            </div>
 
-<div class="travel-pay-wrap">
-    <div class="travel-page-head d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <div>
-            <p class="mb-1 opacity-75">Premium eco tourism booking</p>
-            <h1 class="travel-title mb-0">Thanh toán đơn #@Model.MaBooking</h1>
-        </div>
-        <span class="travel-badge"><i class="bi bi-hourglass-split"></i> Đang chờ thanh toán</span>
-    </div>
+            <!-- THANH TIEN TRINH -->
+            <div class="htp-progress">
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success rounded-4">@TempData["Success"]</div>
-    }
-    @if (TempData["Info"] != null)
-    {
-        <div class="alert alert-info rounded-4">@TempData["Info"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-warning rounded-4">@TempData["Error"]</div>
-    }
-
-    <div class="row travel-pay-grid">
-        <div class="col-lg-7">
-            <section class="travel-card h-100">
-                <img src="@(!string.IsNullOrWhiteSpace(anhTourSrc) ? anhTourSrc : Url.Content("~/img/logo.svg"))" alt="@tenTour" class="tour-thumb mb-3" loading="lazy" onerror="this.onerror=null;this.src='@Url.Content("~/img/logo.svg")';this.style.objectFit='contain';this.style.background='#f3f4f6';" />
-                <h4 class="fw-bold mb-1">@tenTour</h4>
-                <p class="travel-muted mb-3">Hành trình nghỉ dưỡng của bạn đã được giữ chỗ. Hoàn tất thanh toán để xác nhận chỗ ngay.</p>
-
-                <div class="travel-kv">
-                    <div class="travel-kv-item"><small><i class="bi bi-calendar-event me-1"></i> Ngày khởi hành</small><strong>@(ngayKhoiHanh?.ToString("dd/MM/yyyy") ?? "Đang cập nhật")</strong></div>
-                    <div class="travel-kv-item"><small><i class="bi bi-geo-alt me-1"></i> Địa điểm</small><strong>@diaDiem</strong></div>
-                    <div class="travel-kv-item"><small><i class="bi bi-people me-1"></i> Số khách</small><strong>@tongKhach khách (@Model.NguoiLon NL, @Model.TreEm TE, @Model.TreNho EB)</strong></div>
-                    <div class="travel-kv-item"><small><i class="bi bi-ticket-perforated me-1"></i> Mã đặt chỗ</small><strong>@Model.MaBooking</strong></div>
+                <div class="htp-progress-step completed">
+                    <span class="htp-progress-number">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+                    <span>1. Chọn tour</span>
                 </div>
 
-                <div class="countdown-chip">⏳ Giữ chỗ của bạn trong: <span id="countdown">--:--</span></div>
-            </section>
-        </div>
+                <i class="fa-solid fa-chevron-right htp-progress-arrow"></i>
 
-        <div class="col-lg-5">
-            <section class="travel-card white mb-3">
-                <h5 class="fw-bold mb-3">Lựa chọn thanh toán</h5>
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="travel-badge">@(laThanhToanTaiQuay ? "Đang ở chế độ hỗ trợ giữ chỗ" : "Thanh toán online ngay")</span>
-                    <span class="travel-badge"><i class="bi bi-clock-history"></i> Hạn: @Model.HanThanhToan?.ToString("HH:mm dd/MM")</span>
+                <div class="htp-progress-step completed">
+                    <span class="htp-progress-number">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+                    <span>2. Thông tin đặt tour</span>
                 </div>
 
-                @if (!laThanhToanTaiQuay)
-                {
-                    <form asp-action="ChuyenSangThanhToanTaiQuay" asp-controller="DatTour" method="post" class="mb-3">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="idDon" value="@Model.IdDon" />
-                        <button class="btn travel-btn-soft w-100" type="submit">Cần hỗ trợ giữ chỗ thủ công</button>
-                    </form>
-                }
-                else
-                {
-                    <form asp-action="ChuyenSangThanhToanOnline" asp-controller="DatTour" method="post" class="mb-3">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="idDon" value="@Model.IdDon" />
-                        <button class="btn travel-btn-soft w-100" type="submit">Quay lại thanh toán online ngay</button>
-                    </form>
-                }
+                <i class="fa-solid fa-chevron-right htp-progress-arrow"></i>
 
-                @if (laThanhToanTaiQuay)
-                {
-                    <div class="secure-note">
-                        <i class="bi bi-headset me-1"></i> Bạn đang ở chế độ <strong>hỗ trợ giữ chỗ thủ công</strong>. Hệ thống sẽ giữ chỗ tạm thời, nhân viên sẽ liên hệ xác nhận và hướng dẫn thanh toán phù hợp.
+                <div class="htp-progress-step active"
+                     aria-current="step">
+                    <span class="htp-progress-number">3</span>
+                    <span>3. Thanh toán</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div class="container htp-container">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="htp-alert success" role="status">
+                <i class="fa-solid fa-circle-check"></i>
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Info"] != null)
+        {
+            <div class="htp-alert info" role="status">
+                <i class="fa-solid fa-circle-info"></i>
+                @TempData["Info"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="htp-alert error" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="htp-layout">
+
+            <!-- COT TRAI -->
+            <main class="htp-main">
+
+                <section class="htp-card">
+
+                    <div class="htp-card-heading">
+                        <span class="htp-icon">
+                            <i class="fa-solid fa-suitcase-rolling"></i>
+                        </span>
+
+                        <div>
+                            <h2>Thông tin đơn đặt tour</h2>
+                            <p>Hành trình bạn đã lựa chọn</p>
+                        </div>
                     </div>
-                    <p class="travel-muted mt-2 mb-0" style="font-size:.9rem;">Để xác nhận nhanh hơn, bạn nên quay lại thanh toán online trước hạn.</p>
-                }
-                else
-                {
-                    <div class="secure-note mb-3"><i class="bi bi-shield-lock me-1"></i> Thanh toán bảo mật bởi VNPAY</div>
-                    <form asp-action="ThanhToanVnpay" asp-controller="DatTour" method="post" class="mb-3">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="idDon" value="@Model.IdDon" />
-                        <button class="btn travel-btn-main w-100" type="submit">Thanh toán qua VNPAY</button>
-                    </form>
-                }
 
-                <hr class="travel-divider" />
-                <div class="amount-row"><span class="travel-muted">Tổng tiền gốc</span><strong>@tongGoc.ToString("N0") đ</strong></div>
-                <div class="amount-row"><span class="travel-muted">Giảm giá</span><strong>-@soTienGiam.ToString("N0") đ</strong></div>
-                <div class="amount-row align-items-end mb-0"><span class="fw-semibold">Cần thanh toán</span><span class="amount-total">@tongCanThanhToan.ToString("N0") đ</span></div>
-            </section>
+                    <div class="htp-tour-photo">
+                        <img src="@(!string.IsNullOrWhiteSpace(anhTourSrc)
+                                      ? anhTourSrc
+                                      : Url.Content("~/img/logo.svg"))"
+                             alt="@tenTour"
+                             loading="lazy"
+                             onerror="this.onerror=null;this.src='@Url.Content("~/img/logo.svg")';this.style.objectFit='contain';this.style.padding='35px';" />
+                    </div>
+
+                    <div class="htp-tour-title">
+                        <span class="htp-label">
+                            HÀNH TRÌNH ĐÃ ĐẶT
+                        </span>
+
+                        <h3>@tenTour</h3>
+
+                        <p>
+                            <i class="fa-solid fa-location-dot"></i>
+                            @diaDiem
+                        </p>
+                    </div>
+
+                    <div class="htp-info-grid">
+
+                        <div class="htp-info-item">
+                            <span class="htp-info-icon">
+                                <i class="fa-regular fa-calendar-days"></i>
+                            </span>
+
+                            <div>
+                                <small>Ngày khởi hành</small>
+                                <strong>
+                                    @(ngayKhoiHanh?.ToString("dd/MM/yyyy")
+                                        ?? "Đang cập nhật")
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="htp-info-item">
+                            <span class="htp-info-icon">
+                                <i class="fa-solid fa-users"></i>
+                            </span>
+
+                            <div>
+                                <small>Số lượng hành khách</small>
+                                <strong>@soKhach khách</strong>
+                                <span class="htp-info-extra">
+                                    @Model.NguoiLon người lớn,
+                                    @Model.TreEm trẻ em,
+                                    @Model.TreNho em bé
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="htp-booking-code">
+                        <div>
+                            <small>MÃ ĐẶT TOUR</small>
+                            <strong id="htPaymentBookingCode">
+                                @Model.MaBooking
+                            </strong>
+                        </div>
+
+                        <button type="button"
+                                class="htp-copy"
+                                id="htCopyBooking"
+                                aria-label="Sao chép mã đặt tour"
+                                title="Sao chép mã đặt tour">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+
+                </section>
+
+                <section class="htp-note">
+
+                    <div class="htp-note-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+
+                    <div>
+                        <h3>Lưu ý về đơn đặt tour</h3>
+
+                        <p>
+                            Đơn đặt tour được giữ chỗ tạm thời
+                            trong thời gian thanh toán.
+                            Nếu quá hạn mà chưa được xác nhận,
+                            đơn có thể bị hủy theo quy định hệ thống.
+                        </p>
+                    </div>
+
+                </section>
+
+            </main>
+
+            <!-- COT PHAI -->
+            <aside class="htp-sidebar">
+
+                <section class="htp-card htp-payment-card">
+
+                    <div class="htp-payment-heading">
+                        <div class="htp-payment-title">
+                            <span class="htp-icon">
+                                <i class="fa-regular fa-credit-card"></i>
+                            </span>
+
+                            <h2>Chi tiết thanh toán</h2>
+                        </div>
+
+                        @if (!daThanhToan && !daHuy)
+                        {
+                            <span class="htp-timer"
+                                  id="htpTimerBox">
+                                <i class="fa-regular fa-clock"></i>
+                                <span id="countdown">--:--</span>
+                            </span>
+                        }
+                    </div>
+
+                    <div class="htp-payment-method">
+
+                        <span class="htp-field-label">
+                            Phương thức thanh toán
+                        </span>
+
+                        <div class="htp-method-choice">
+
+                            <span class="htp-method-icon">
+                                @if (laTienMat)
+                                {
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-regular fa-credit-card"></i>
+                                }
+                            </span>
+
+                            <div>
+                                <strong>
+                                    @(laTienMat ? "Tiền mặt" : "VNPay")
+                                </strong>
+
+                                <small>
+                                    @(laTienMat
+                                        ? "Chờ nhân viên xác nhận thu tiền"
+                                        : "Thanh toán trực tuyến qua VNPay")
+                                </small>
+                            </div>
+
+                            <i class="fa-solid fa-circle-check htp-method-check"></i>
+
+                        </div>
+                    </div>
+
+                    <div class="htp-price-lines">
+
+                        <div class="htp-price-line">
+                            <span>Tổng tiền gốc</span>
+                            <strong>@tongGoc.ToString("N0") đ</strong>
+                        </div>
+
+                        <div class="htp-price-line">
+                            <span>Giảm giá</span>
+                            <strong>
+                                -@soTienGiam.ToString("N0") đ
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="htp-grand-total">
+                        <span>Tổng thanh toán</span>
+
+                        <strong>
+                            @tongThanhToan.ToString("N0") đ
+                        </strong>
+                    </div>
+
+                    @if (daThanhToan)
+                    {
+                        <div class="htp-state success">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Đơn đã thanh toán thành công.
+                        </div>
+
+                        <a asp-controller="DatTour"
+                           asp-action="HoanTat"
+                           asp-route-idDon="@Model.IdDon"
+                           class="htp-btn primary">
+                            <i class="fa-solid fa-ticket"></i>
+                            Xem vé của tôi
+                        </a>
+                    }
+                    else if (daHuy || hetHan)
+                    {
+                        <div class="htp-state error">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            @(daHuy
+                                ? "Đơn đặt tour đã bị hủy."
+                                : "Đơn đã quá hạn thanh toán.")
+                        </div>
+
+                        <a asp-controller="TaiKhoan"
+                           asp-action="DonCuaToi"
+                           class="htp-btn outline">
+                            Xem đơn đặt tour của tôi
+                        </a>
+                    }
+                    else if (laTienMat)
+                    {
+                        <div class="htp-state cash">
+                            <i class="fa-solid fa-clock"></i>
+                            Đơn đang chờ xác nhận thanh toán tiền mặt.
+                        </div>
+
+                        <form asp-controller="DatTour"
+                              asp-action="ChuyenSangThanhToanOnline"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="idDon"
+                                   value="@Model.IdDon" />
+
+                            <button type="submit"
+                                    class="htp-btn primary">
+                                <i class="fa-regular fa-credit-card"></i>
+                                Chuyển sang VNPay
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-controller="DatTour"
+                              asp-action="ThanhToanVnpay"
+                              method="post"
+                              id="htVnpayForm">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="idDon"
+                                   value="@Model.IdDon" />
+
+                            <button type="submit"
+                                    class="htp-btn primary"
+                                    id="htVnpayButton">
+                                <i class="fa-solid fa-lock"></i>
+                                Thanh toán qua VNPay
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        <form asp-controller="DatTour"
+                              asp-action="ChuyenSangThanhToanTaiQuay"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="idDon"
+                                   value="@Model.IdDon" />
+
+                            <button type="submit"
+                                    class="htp-btn outline">
+                                <i class="fa-solid fa-money-bill-wave"></i>
+                                Chuyển sang thanh toán tiền mặt
+                            </button>
+                        </form>
+                    }
+
+                    <div class="htp-secure">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Thanh toán được xử lý theo phương thức
+                        bạn đã lựa chọn.
+                    </div>
+
+                </section>
+
+                <div class="htp-support">
+                    <i class="fa-solid fa-headset"></i>
+
+                    <div>
+                        <strong>Cần hỗ trợ đặt tour?</strong>
+                        <span>
+                            Liên hệ HappyTrip để được tư vấn
+                            về đơn đặt tour của bạn.
+                        </span>
+                    </div>
+
+                    <a asp-controller="Home"
+                       asp-action="Contact"
+                       aria-label="Liên hệ hỗ trợ">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+            </aside>
         </div>
     </div>
 </div>
 
+<style>
+    .ht-pay-page {
+        --htp-green: #176d46;
+        --htp-deep: #1b4634;
+        --htp-muted: #7d8c80;
+        --htp-border: #e6eae1;
+
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+        color: #294537;
+        background: #f8f6ef;
+        padding-bottom: 52px;
+    }
+
+    .ht-pay-page *,
+    .ht-pay-page *::before,
+    .ht-pay-page *::after {
+        box-sizing: border-box;
+    }
+
+    .htp-hero {
+        padding: 27px 0 34px;
+        background:
+            radial-gradient(
+                ellipse at 90% 0%,
+                rgba(132, 193, 160, .22),
+                transparent 48%
+            ),
+            linear-gradient(
+                120deg,
+                #faf7f1,
+                #edf4ec
+            );
+    }
+
+    .htp-eyebrow {
+        color: #238050;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .htp-hero h1 {
+        font-size: clamp(26px, 2.8vw, 36px);
+        color: var(--htp-deep);
+        font-weight: 800;
+        margin: 9px 0 7px;
+    }
+
+    .htp-hero p {
+        font-size: 12px;
+        line-height: 1.8;
+        color: #66816e;
+        margin: 0;
+    }
+
+    /* TIEN TRINH */
+
+    .htp-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 25px;
+        max-width: 1120px;
+    }
+
+    .htp-progress-step {
+        flex: 1;
+        min-width: 0;
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 10px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .htp-progress-number {
+        width: 23px;
+        height: 23px;
+        border-radius: 50%;
+        border: 1px solid currentColor;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .htp-progress-step.completed {
+        color: #14723e;
+        background: #e0f0e5;
+    }
+
+    .htp-progress-step.completed .htp-progress-number {
+        color: #fff;
+        background: #16854b;
+        border-color: #16854b;
+    }
+
+    .htp-progress-step.active {
+        color: #fff;
+        background: #19754a;
+        box-shadow: 0 6px 15px rgba(23, 115, 72, .14);
+    }
+
+    .htp-progress-step.active .htp-progress-number {
+        color: #19754a;
+        background: #fff;
+        border-color: #fff;
+    }
+
+    .htp-progress-arrow {
+        font-size: 12px;
+        color: #698272;
+        flex-shrink: 0;
+    }
+
+    /* BO CUC */
+
+    .htp-container {
+        padding-top: 20px;
+    }
+
+    .htp-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.58fr) minmax(310px, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .htp-main {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+        min-width: 0;
+    }
+
+    .htp-card {
+        padding: 22px;
+        background: #fff;
+        border: 1px solid var(--htp-border);
+        border-radius: 18px;
+        box-shadow: 0 7px 25px rgba(35, 64, 42, .045);
+        min-width: 0;
+    }
+
+    .htp-card-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 19px;
+    }
+
+    .htp-icon {
+        width: 39px;
+        height: 39px;
+        border-radius: 11px;
+        background: #e8f4eb;
+        color: #23804d;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .htp-card-heading h2,
+    .htp-payment-title h2 {
+        margin: 0;
+        color: #214d36;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .htp-card-heading p {
+        color: #94a196;
+        font-size: 11px;
+        margin: 5px 0 0;
+    }
+
+    /* ANH TOUR */
+
+    .htp-tour-photo {
+        width: 100%;
+        height: 220px;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #e9f2e8;
+    }
+
+    .htp-tour-photo img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+    }
+
+    .htp-tour-title {
+        padding: 19px 0;
+    }
+
+    .htp-label {
+        color: #4e9466;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .htp-tour-title h3 {
+        font-size: 20px;
+        color: #1d4d35;
+        font-weight: 800;
+        margin: 9px 0;
+        line-height: 1.55;
+    }
+
+    .htp-tour-title p {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #7d9181;
+        margin: 0;
+    }
+
+    .htp-tour-title p i {
+        color: #288651;
+        margin-top: 3px;
+    }
+
+    /* CHI TIET DON */
+
+    .htp-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .htp-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 15px;
+        border: 1px solid #e9eee7;
+        border-radius: 11px;
+        background: #fafbf8;
+        min-width: 0;
+    }
+
+    .htp-info-icon {
+        color: #298752;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .htp-info-item small {
+        display: block;
+        color: #8b9a8d;
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .htp-info-item strong {
+        display: block;
+        color: #2d4d39;
+        font-size: 13px;
+    }
+
+    .htp-info-extra {
+        display: block;
+        color: #89988b;
+        font-size: 10px;
+        line-height: 1.8;
+        margin-top: 5px;
+    }
+
+    .htp-booking-code {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 17px;
+        padding: 16px;
+        border: 1px dashed #d3e2d4;
+        border-radius: 11px;
+        background: #f3f8f1;
+    }
+
+    .htp-booking-code small {
+        display: block;
+        color: #809382;
+        font-size: 10px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .htp-booking-code strong {
+        display: block;
+        color: #1d6d42;
+        font-size: 15px;
+        overflow-wrap: anywhere;
+    }
+
+    .htp-copy {
+        width: 37px;
+        height: 37px;
+        border: 1px solid #d5e6d8;
+        border-radius: 9px;
+        color: #277d4b;
+        background: #fff;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    /* LUU Y */
+
+    .htp-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 18px;
+        background: #e8f3e9;
+        border-radius: 14px;
+    }
+
+    .htp-note-icon {
+        color: #298653;
+        font-size: 18px;
+    }
+
+    .htp-note h3 {
+        margin: 0 0 7px;
+        font-size: 13px;
+        color: #2d6745;
+        font-weight: 800;
+    }
+
+    .htp-note p {
+        margin: 0;
+        color: #6d8674;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    /* PAYMENT */
+
+    .htp-sidebar {
+        position: sticky;
+        top: 18px;
+        min-width: 0;
+    }
+
+    .htp-payment-card {
+        padding: 21px;
+    }
+
+    .htp-payment-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+
+    .htp-payment-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .htp-payment-title .htp-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .htp-timer {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 11px;
+        border-radius: 30px;
+        background: #fff0d5;
+        color: #ad5a22;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .htp-field-label {
+        display: block;
+        color: #405e48;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 11px;
+    }
+
+    .htp-method-choice {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #eaf5ec;
+        border: 1px solid #d5ead9;
+        border-radius: 12px;
+        padding: 13px;
+    }
+
+    .htp-method-icon {
+        display: grid;
+        place-items: center;
+        width: 43px;
+        height: 43px;
+        border-radius: 10px;
+        background: #fff;
+        color: #277c4e;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .htp-method-choice > div {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .htp-method-choice strong {
+        display: block;
+        color: #234c35;
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .htp-method-choice small {
+        display: block;
+        color: #718b76;
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    .htp-method-check {
+        color: #25804e;
+        font-size: 16px;
+    }
+
+    .htp-price-lines {
+        padding: 24px 0 9px;
+        border-bottom: 1px dashed #dce7dc;
+    }
+
+    .htp-price-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 15px;
+        font-size: 12px;
+    }
+
+    .htp-price-line span {
+        color: #7d8f81;
+    }
+
+    .htp-price-line strong {
+        color: #344e3d;
+        text-align: right;
+    }
+
+    .htp-grand-total {
+        padding: 17px;
+        border-radius: 12px;
+        margin: 17px 0 20px;
+        background: #eff5e9;
+    }
+
+    .htp-grand-total span {
+        display: block;
+        color: #42694f;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .htp-grand-total strong {
+        color: #167546;
+        font-size: clamp(24px, 2.5vw, 30px);
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .htp-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: 100%;
+        min-height: 47px;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+    }
+
+    .htp-btn.primary {
+        border: none;
+        background: #197548;
+        color: #fff;
+    }
+
+    .htp-btn.primary:hover {
+        background: #105f39;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .htp-btn.outline {
+        border: 1px solid #2b8552;
+        background: #fff;
+        color: #286d46;
+        margin-top: 11px;
+    }
+
+    .htp-btn.outline:hover {
+        background: #eef7ef;
+        color: #1f613d;
+    }
+
+    .htp-secure {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 8px;
+        color: #809486;
+        font-size: 10px;
+        line-height: 1.8;
+        text-align: center;
+        margin-top: 18px;
+    }
+
+    .htp-secure i {
+        color: #278453;
+        margin-top: 3px;
+    }
+
+    .htp-state {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        padding: 13px;
+        border-radius: 10px;
+        font-size: 11px;
+        line-height: 1.7;
+        margin-bottom: 15px;
+    }
+
+    .htp-state.success {
+        background: #e4f5e7;
+        color: #187444;
+    }
+
+    .htp-state.error {
+        background: #fff0ec;
+        color: #b24d45;
+    }
+
+    .htp-state.cash {
+        background: #fff5df;
+        color: #a97725;
+    }
+
+    .htp-support {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #e6ebe2;
+        background: #fff;
+        border-radius: 14px;
+        padding: 16px;
+        margin-top: 15px;
+    }
+
+    .htp-support > i {
+        color: #298451;
+        font-size: 21px;
+    }
+
+    .htp-support > div {
+        flex: 1;
+    }
+
+    .htp-support strong {
+        display: block;
+        color: #31533e;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .htp-support span {
+        display: block;
+        color: #869889;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    .htp-support a {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        color: #267c4a;
+        background: #edf6ee;
+        text-decoration: none;
+    }
+
+    /* THONG BAO */
+
+    .htp-alert {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 17px;
+        font-size: 12px;
+    }
+
+    .htp-alert.success {
+        color: #207348;
+        background: #e6f6e9;
+    }
+
+    .htp-alert.info {
+        color: #286d9a;
+        background: #eaf4fc;
+    }
+
+    .htp-alert.error {
+        color: #ad493f;
+        background: #fff0eb;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1050px) {
+        .htp-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .htp-sidebar {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .htp-progress {
+            gap: 5px;
+        }
+
+        .htp-progress-step {
+            font-size: 9px;
+            gap: 4px;
+            padding: 8px 5px;
+            white-space: normal;
+            text-align: center;
+        }
+
+        .htp-progress-number {
+            width: 19px;
+            height: 19px;
+        }
+
+        .htp-progress-arrow {
+            font-size: 8px;
+        }
+
+        .htp-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .htp-card {
+            padding: 16px;
+        }
+
+        .htp-tour-photo {
+            height: 180px;
+        }
+
+        .htp-tour-title h3 {
+            font-size: 18px;
+        }
+
+        .htp-payment-heading {
+            flex-wrap: wrap;
+        }
+
+        .htp-hero {
+            padding: 25px 0;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .htp-btn {
+            transition: none;
+        }
+    }
+</style>
+
 @section Scripts {
-    <script src="~/js/countdown.js"></script>
+
+    <script src="~/js/countdown.js"
+            asp-append-version="true"></script>
+
     <script>
-        startCountdown("@Model.HanThanhToan", "countdown");
+        (function () {
+            "use strict";
+
+            // Giữ nguyên hàm countdown.js đang dùng trong website
+            if (typeof startCountdown === "function") {
+                startCountdown(
+                    "@Model.HanThanhToan",
+                    "countdown"
+                );
+            }
+
+            // Sao chép mã booking
+            const copyButton =
+                document.getElementById("htCopyBooking");
+
+            if (copyButton) {
+                copyButton.addEventListener("click", async function () {
+                    const code =
+                        document.getElementById(
+                            "htPaymentBookingCode"
+                        )?.textContent?.trim();
+
+                    if (!code) return;
+
+                    try {
+                        await navigator.clipboard.writeText(code);
+
+                        this.innerHTML =
+                            '<i class="fa-solid fa-check"></i>';
+
+                        this.title = "Đã sao chép";
+                    } catch {
+                        this.title = "Không thể sao chép";
+                    }
+                });
+            }
+
+            // Chặn bấm liên tục để tránh tạo nhiều yêu cầu VNPay
+            const form = document.getElementById("htVnpayForm");
+            const button = document.getElementById("htVnpayButton");
+
+            if (form && button) {
+                form.addEventListener("submit", function (event) {
+                    if (form.dataset.submitted === "true") {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    form.dataset.submitted = "true";
+                    button.disabled = true;
+                    button.style.opacity = "0.7";
+                    button.innerHTML =
+                        '<i class="fa-solid fa-spinner fa-spin"></i> Đang chuyển đến VNPay...';
+                });
+            }
+        })();
     </script>
 }

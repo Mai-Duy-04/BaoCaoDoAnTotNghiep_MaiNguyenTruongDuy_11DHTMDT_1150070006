@@ -1,233 +1,903 @@
-.ht-about-page .page-hero-about {
-    position: relative;
-    min-height: 0;
-    height: 350px;
-    padding: 30px 0;
-    display: flex;
-    align-items: center;
-    background-color: #24382F;
-    background-image: url("/img/about/about-hero.jpg");
-    background-repeat: no-repeat;
-    background-position: center 52%;
-    background-size: cover;
-    overflow: hidden;
+
+/* ============================================
+   HAPPYTRIP ABOUT - TRAVEL MAGAZINE
+   ============================================ */
+
+.htmag-about {
+    --htmag-green: #123d32;
+    --htmag-orange: #db7526;
+    --htmag-gold: #f5bd47;
+    --htmag-cream: #faf7f0;
+
+    width: 100%;
+    margin: 0;
+    overflow: clip;
+    background: var(--htmag-cream);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--htmag-green);
 }
 
-.ht-about-page .page-hero-about .page-hero-overlay {
+.htmag-about,
+.htmag-about * {
+    box-sizing: border-box;
+}
+
+.htmag-about h1,
+.htmag-about h2,
+.htmag-about h3,
+.htmag-about p {
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.htmag-shell {
+    width: min(1370px, calc(100% - 92px));
+    margin-inline: auto;
+}
+
+/* ============================================
+   1. HERO
+   ============================================ */
+
+
+/* BANNER SANG, HAN CHE CAT ANH */
+
+.htmag-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 355px;
+    aspect-ratio: 2048 / 590;
+    overflow: hidden;
+    background: #d6e7dc;
+}
+
+.htmag-hero-image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+}
+
+.htmag-hero-shade {
     position: absolute;
     inset: 0;
     background: linear-gradient(
         90deg,
-        rgba(17, 35, 29, 0.72) 0%,
-        rgba(17, 35, 29, 0.42) 48%,
-        rgba(17, 35, 29, 0.10) 100%
+        rgba(7, 47, 39, .82) 0%,
+        rgba(8, 51, 42, .58) 32%,
+        rgba(8, 51, 42, .08) 57%,
+        rgba(8, 51, 42, .64) 100%
     );
 }
 
-.ht-about-page .page-hero-about .travel-container {
+.htmag-hero-inner {
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 225px;
+    align-items: center;
+    gap: 45px;
+    padding-top: 50px;
+    padding-bottom: 50px;
 }
 
-.ht-about-page .page-hero-about h1 {
-    max-width: 900px;
-    font-size: clamp(1.8rem, 3vw, 2.8rem);
-    line-height: 1.25;
-    text-wrap: balance;
-    margin-bottom: 12px;
+.htmag-hero-copy {
+    max-width: 735px;
 }
 
-.ht-about-page .page-hero-about p {
-    max-width: 700px;
-    line-height: 1.6;
-    font-size: 1rem;
+.htmag-hero-eyebrow {
+    display: inline-block;
+    margin-bottom: 19px;
+    color: #fffaf0;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .32em;
 }
 
-.ht-about-page .ht-about-mission {
-    padding: 85px 0;
+.htmag-hero h1 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(30px, 3.45vw, 51px);
+    font-weight: 850;
+    line-height: 1.12;
+    letter-spacing: -.024em;
 }
 
-.ht-about-page .ht-about-mission-content {
-    max-width: 520px;
+.htmag-hero h1 span {
+    color: #ffd16b;
 }
 
-.ht-about-page .ht-about-mission-content h2 {
-    font-size: clamp(1.9rem, 3vw, 2.6rem);
-    line-height: 1.25;
-    margin: 12px 0 20px;
+.htmag-yellow-line {
+    display: block;
+    width: 78px;
+    height: 3px;
+    margin: 23px 0 15px;
+    background: #f2bf4c;
 }
 
-.ht-about-page .ht-about-mission-content p {
-    font-size: 1rem;
-    line-height: 1.85;
-    color: #59665D;
+.htmag-hero-copy p {
+    max-width: 610px;
+    margin: 0;
+    color: rgba(255,255,255,.92);
+    font-size: 13px;
+    line-height: 1.7;
 }
 
-.ht-about-page .ht-about-values {
+/* HERO FACTS */
+
+.htmag-hero-facts {
+    display: grid;
+    gap: 23px;
+    padding: 9px 0 9px 23px;
+    border-left: 1px solid rgba(255, 212, 112, .75);
+}
+
+.htmag-hero-fact {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    color: #fff;
+}
+
+.htmag-hero-fact > i {
+    display: grid;
+    place-items: center;
+    flex: 0 0 30px;
+    width: 30px;
+    font-size: 24px;
+    color: #f6c35a;
+}
+
+.htmag-hero-fact strong {
+    display: block;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 850;
+    line-height: 1.12;
+}
+
+.htmag-hero-fact span {
+    display: block;
+    margin-top: 3px;
+    color: #f1f1e9;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/* ============================================
+   2. MISSION
+   ============================================ */
+
+.htmag-mission {
+    padding: 48px 0 48px;
+    background: #fffcf8;
+}
+
+.htmag-mission-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 49%) minmax(0, 51%);
+    align-items: center;
+    gap: 18px;
+}
+
+.htmag-mission-images {
+    position: relative;
+    width: 100%;
+    height: 295px;
+}
+
+.htmag-mission-orange {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 57%;
+    height: 190px;
+    background: #eb8639;
+    transform: skew(-12deg) rotate(-5deg);
+    clip-path: polygon(4% 0, 100% 0, 93% 100%, 0 100%);
+}
+
+.htmag-mission-photo-primary {
+    position: absolute;
+    z-index: 1;
+    top: 22px;
+    left: 6%;
+    width: 59%;
+    height: 214px;
+    overflow: hidden;
+    background: #e3e9df;
+    transform: skew(-9deg) rotate(-4deg);
+    box-shadow: 0 10px 23px rgba(24, 45, 37, .13);
+}
+
+.htmag-mission-photo-primary img {
+    display: block;
+    width: 118%;
+    height: 115%;
+    max-width: none;
+    object-fit: cover;
+    transform: skew(9deg) rotate(4deg) translate(-5%, -3%);
+}
+
+.htmag-mission-photo-secondary {
+    position: absolute;
+    z-index: 3;
+    right: 12%;
+    bottom: 0;
+    width: 47%;
+    height: 155px;
+    overflow: hidden;
+    border: 6px solid #fff;
+    background: #e3e9df;
+    box-shadow: 0 12px 25px rgba(24, 45, 37, .14);
+    transform: rotate(4deg);
+}
+
+.htmag-mission-photo-secondary img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.htmag-mission-copy {
+    padding-left: 3px;
+}
+
+.htmag-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #294c40;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .18em;
+    line-height: 1.5;
+}
+
+.htmag-small-line {
+    display: inline-block;
+    width: 22px;
+    height: 2px;
+    background: #e89839;
+}
+
+.htmag-mission-copy h2 {
+    margin: 15px 0 14px;
+    color: var(--htmag-green);
+    font-size: clamp(27px, 2.85vw, 40px);
+    font-weight: 850;
+    line-height: 1.17;
+    letter-spacing: -.025em;
+}
+
+.htmag-mission-copy > p {
+    max-width: 560px;
+    margin: 0;
+    color: #47584f;
+    font-size: 13px;
+    line-height: 1.75;
+}
+
+.htmag-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
     margin-top: 24px;
 }
 
-.ht-about-page .ht-about-values span {
-    display: inline-flex;
+.htmag-benefit {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 13px;
-    border-radius: 999px;
-    background: #E7EEE7;
-    color: #294936;
-    font-size: 0.9rem;
-    font-weight: 600;
+    gap: 11px;
+    min-width: 0;
+    padding-right: 10px;
+    border-right: 1px solid #e7d9c8;
 }
 
-.ht-about-page .ht-about-values i {
-    color: #4B805D;
+.htmag-benefit:last-child {
+    border-right: 0;
 }
 
-.ht-about-page .ht-about-mission-media {
-    border-radius: 24px;
+.htmag-benefit i {
+    flex-shrink: 0;
+    color: #e79532;
+    font-size: 25px;
+}
+
+.htmag-benefit strong {
+    color: #173d32;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+/* ============================================
+   3. JOURNEY / TIMELINE
+   ============================================ */
+
+.htmag-journey {
+    position: relative;
     overflow: hidden;
-    box-shadow: 0 18px 40px rgba(31, 55, 42, 0.12);
+    padding: 28px 0;
+    background: #f8f4ed;
 }
 
-.ht-about-page .ht-about-mission-media img {
+.htmag-journey-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 31%)
+        minmax(0, 34%)
+        minmax(0, 35%);
+    align-items: center;
+    gap: 16px;
+    min-height: 225px;
+}
+
+.htmag-journey-heading {
+    position: relative;
+    z-index: 2;
+}
+
+.htmag-journey-heading h2 {
+    margin: 15px 0 18px;
+    color: #163e32;
+    font-size: clamp(24px, 2.45vw, 33px);
+    font-weight: 850;
+    line-height: 1.19;
+    letter-spacing: -.02em;
+}
+
+.htmag-orange-line {
+    display: block;
+    width: 64px;
+    height: 2px;
+    background: #e99c41;
+}
+
+.htmag-timeline {
+    position: relative;
+    z-index: 2;
+    padding-left: 20px;
+}
+
+.htmag-timeline::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    bottom: 14px;
+    left: 5px;
+    width: 2px;
+    background: #e9a73b;
+}
+
+.htmag-timeline-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 9px 0;
+    border-bottom: 1px solid #e8e0d5;
+}
+
+.htmag-timeline-item:last-child {
+    border-bottom: 0;
+}
+
+.htmag-timeline-marker {
+    position: absolute;
+    top: 15px;
+    left: -19px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff7e7;
+    border-radius: 50%;
+    background: #efae3e;
+}
+
+.htmag-timeline-number {
+    color: #315a43;
+    font-size: 23px;
+    font-weight: 850;
+    line-height: 1.1;
+}
+
+.htmag-timeline-text h3 {
+    margin: 0 0 4px;
+    color: #213e32;
+    font-size: 12px;
+    font-weight: 850;
+    line-height: 1.25;
+}
+
+.htmag-timeline-text p {
+    margin: 0;
+    color: #566358;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.htmag-journey-image {
+    position: relative;
+    align-self: stretch;
+    min-height: 225px;
+    overflow: hidden;
+    margin-right: -70px;
+    clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%);
+    background: #a8b799;
+}
+
+.htmag-journey-image img {
     display: block;
     width: 100%;
-    height: 360px;
+    height: 100%;
+    min-height: 225px;
     object-fit: cover;
+    object-position: center;
 }
 
-.ht-about-page .ht-about-team {
-    padding: 80px 0 90px;
+.htmag-journey-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(248,244,237,.20),
+        transparent 35%
+    );
 }
 
-.ht-about-page .ht-about-team-grid {
+/* ============================================
+   4. TEAM - EDITORIAL PHOTO CARDS
+   ============================================ */
+
+.htmag-team {
+    padding: 45px 0 48px;
+    background: #fffdf9;
+}
+
+.htmag-team-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 29%) minmax(0, 71%);
+    gap: 25px;
+    align-items: center;
+}
+
+.htmag-team-intro h2 {
+    margin: 15px 0 14px;
+    color: #163c31;
+    font-size: clamp(25px, 2.4vw, 34px);
+    font-weight: 850;
+    line-height: 1.15;
+    letter-spacing: -.025em;
+}
+
+.htmag-team-intro h2 span {
+    color: #d77c28;
+}
+
+.htmag-team-intro p {
+    max-width: 345px;
+    margin: 0 0 20px;
+    color: #52655a;
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+.htmag-team-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 22px;
-    align-items: stretch;
+    gap: 14px;
+    min-width: 0;
 }
 
-.ht-about-page .ht-about-team-card {
+.htmag-team-member {
+    min-width: 0;
+    overflow: hidden;
+    background: #f5f1e9;
+    transition: transform .25s ease;
+}
+
+.htmag-team-member:hover {
+    transform: translateY(-5px);
+}
+
+.htmag-member-photo {
+    height: 185px;
+    overflow: hidden;
+    background: #e5e9df;
+}
+
+.htmag-member-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    transition: transform .3s ease;
+}
+
+.htmag-team-member:hover img {
+    transform: scale(1.045);
+}
+
+.htmag-member-info {
+    min-height: 56px;
+    padding: 10px 7px 9px;
+    background: #153e32;
+    color: #fff;
+    text-align: center;
+}
+
+.htmag-member-info h3 {
+    margin: 0 0 5px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.htmag-member-info span {
+    display: block;
+    color: #f2f4e9;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+/* ============================================
+   5. STATS - FOREST PANORAMA
+   ============================================ */
+
+
+/* DAI THONG KE SANG HON */
+.htmag-stats {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 172px;
+    aspect-ratio: 2048 / 330;
+    background: #205f59;
+}
+
+.htmag-stats-background {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(8, 58, 49, .67),
+            rgba(8, 58, 49, .54),
+            rgba(8, 58, 49, .67)
+        ),
+        url("/img/about/happytrip-about-stats-bright.jpg")
+        center center / cover no-repeat;
+
+    filter: none;
+}
+
+.htmag-stats::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -2%;
+    right: -2%;
+    height: 23px;
+    background: #fffdf9;
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% 42%,
+        93% 30%,
+        85% 62%,
+        76% 39%,
+        68% 72%,
+        57% 33%,
+        47% 65%,
+        37% 29%,
+        27% 68%,
+        17% 36%,
+        8% 59%,
+        0 36%
+    );
+}
+
+.htmag-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(1250px, calc(100% - 80px));
+    padding-top: 32px;
+    padding-bottom: 27px;
+}
+
+.htmag-stat {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    border-radius: 20px;
-    background: #FFFFFF;
-    border: 1px solid #E6E8E2;
-    overflow: hidden;
-    box-shadow: 0 10px 26px rgba(31, 55, 42, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.ht-about-page .ht-about-team-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 18px 35px rgba(31, 55, 42, 0.13);
-}
-
-.ht-about-page .ht-about-avatar {
-    padding: 22px 20px 0;
-    display: flex;
+    align-items: center;
     justify-content: center;
-}
-
-.ht-about-page .ht-about-avatar img {
-    width: 150px;
-    height: 150px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    object-fit: cover;
-    padding: 0;
-    background: #F2F4EF;
-}
-
-.ht-about-page .ht-about-team-card .team-body {
-    padding: 20px;
-}
-
-.ht-about-page .ht-about-team-card h3 {
-    margin: 0 0 8px;
-    font-size: 1.25rem;
-}
-
-.ht-about-page .ht-about-team-card .team-body span {
-    display: block;
-    line-height: 1.5;
-}
-
-.ht-about-page .ht-about-team-card .team-body p {
-    margin-top: 12px;
-    line-height: 1.65;
-}
-
-.ht-about-page .ht-about-stats {
-    padding: 60px 0 75px;
-}
-
-.ht-about-page .ht-about-stats .stats-grid {
-    gap: 18px;
-}
-
-.ht-about-page .ht-about-stats .stat-card {
-    padding: 26px 16px;
-    border-radius: 18px;
-    border: 1px solid #E7E5DC;
-    background: #FFFFFF;
+    min-width: 0;
+    padding: 0 16px;
+    border-right: 1px solid rgba(255,255,255,.38);
     text-align: center;
-    box-shadow: 0 8px 24px rgba(31, 55, 42, 0.05);
 }
 
-.ht-about-page .ht-about-stats .stat-card strong {
-    color: #294936;
+.htmag-stat:last-child {
+    border-right: 0;
 }
+
+.htmag-stat strong {
+    display: block;
+    color: #f8d07d;
+    font-family: Georgia, serif;
+    font-size: clamp(29px, 3.7vw, 54px);
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.htmag-stat > span:not(.htmag-stat-rule) {
+    display: block;
+    margin-top: 6px;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.htmag-stat-rule {
+    display: block;
+    width: 41px;
+    height: 2px;
+    margin-top: 13px;
+    background: #edbc56;
+}
+
+/* ============================================
+   RESPONSIVE - LAPTOP
+   ============================================ */
+
+@media (max-width: 1199px) {
+    .htmag-shell {
+        width: calc(100% - 50px);
+    }
+
+    .htmag-hero-inner {
+        grid-template-columns: minmax(0, 1fr) 195px;
+        gap: 25px;
+    }
+
+    .htmag-hero h1 {
+        font-size: clamp(28px, 3.6vw, 42px);
+    }
+
+    .htmag-mission-grid {
+        gap: 16px;
+    }
+
+    .htmag-mission-images {
+        height: 275px;
+    }
+
+    .htmag-journey-grid {
+        grid-template-columns: 30% 37% 33%;
+    }
+
+    .htmag-team-layout {
+        grid-template-columns: 25% 75%;
+        gap: 15px;
+    }
+
+    .htmag-team-grid {
+        gap: 10px;
+    }
+
+    .htmag-member-photo {
+        height: 165px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - TABLET
+   ============================================ */
 
 @media (max-width: 991px) {
-    .ht-about-page .ht-about-team-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .htmag-hero-inner {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        padding-block: 42px;
+    }
+
+    .htmag-hero-facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        border-left: 0;
+        border-top: 1px solid rgba(255,212,112,.5);
+        padding: 18px 0 0;
+    }
+
+    .htmag-hero-fact {
+        gap: 9px;
+    }
+
+    .htmag-hero-fact strong {
+        font-size: 20px;
+    }
+
+    .htmag-mission-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .htmag-mission-images {
+        height: 250px;
+    }
+
+    .htmag-benefits {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .htmag-benefit {
+        border-right: 0;
+        gap: 10px;
+    }
+
+    .htmag-benefit i {
+        font-size: 20px;
+    }
+
+    .htmag-journey-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .htmag-journey-image {
+        display: none;
+    }
+
+    .htmag-team-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .htmag-team-intro p {
+        max-width: 700px;
+    }
+
+    .htmag-member-photo {
+        height: 180px;
     }
 }
 
-@media (max-width: 767px) {
-    .ht-about-page .page-hero-about {
-        height: auto;
-        min-height: 320px;
-        padding: 45px 0;
-        background-position: 42% center;
-        background-size: cover;
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+
+@media (max-width: 650px) {
+    .htmag-shell {
+        width: calc(100% - 30px);
     }
 
-    .ht-about-page .page-hero-about h1 {
-        font-size: 1.8rem;
-        line-height: 1.3;
+    .htmag-hero {
+        min-height: 0;
     }
 
-    .ht-about-page .page-hero-about p {
-        font-size: 0.9rem;
+    .htmag-hero-inner {
+        padding-block: 40px 35px;
     }
 
-    .ht-about-page .ht-about-mission,
-    .ht-about-page .ht-about-team {
-        padding: 60px 0;
+    .htmag-hero h1 {
+        font-size: clamp(28px, 7vw, 38px);
     }
 
-    .ht-about-page .ht-about-mission-media img {
-        height: 260px;
+    .htmag-hero h1 br {
+        display: none;
     }
 
-    .ht-about-page .ht-about-team-grid {
+    .htmag-hero-copy p {
+        font-size: 12px;
+    }
+
+    .htmag-hero-facts {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 16px;
     }
 
-    .ht-about-page .ht-about-stats {
-        padding: 48px 0 60px;
+    .htmag-hero-fact {
+        gap: 14px;
+    }
+
+    .htmag-mission {
+        padding: 37px 0;
+    }
+
+    .htmag-mission-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .htmag-mission-images {
+        height: 280px;
+    }
+
+    .htmag-mission-copy h2 {
+        font-size: 31px;
+    }
+
+    .htmag-journey {
+        padding: 40px 0;
+    }
+
+    .htmag-journey-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .htmag-journey-heading h2 {
+        font-size: 29px;
+    }
+
+    .htmag-timeline {
+        padding-left: 23px;
+    }
+
+    .htmag-team {
+        padding: 40px 0;
+    }
+
+    .htmag-team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .htmag-member-photo {
+        height: 175px;
+    }
+
+    .htmag-member-info {
+        min-height: 62px;
+    }
+
+    .htmag-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        row-gap: 28px;
+        width: calc(100% - 30px);
+        padding-block: 44px 33px;
+    }
+
+    .htmag-stat:nth-child(2) {
+        border-right: 0;
+    }
+
+    .htmag-stat strong {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 380px) {
+    .htmag-member-photo {
+        height: 150px;
+    }
+
+    .htmag-member-info h3 {
+        font-size: 11px;
+    }
+
+    .htmag-member-info span {
+        font-size: 9px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .ht-about-page .ht-about-team-card {
+    .htmag-team-member,
+    .htmag-member-photo img {
         transition: none;
     }
 }

@@ -1,0 +1,258 @@
+
+@model TourWebApp.Data.Models.LienHe
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chi tiết yêu cầu tư vấn";
+
+    bool daPhanHoi = Model.TrangThai == "Đã phản hồi";
+    var thanhCong = TempData["ThanhCong"] as string;
+    var loi = TempData["Loi"] as string;
+}
+
+<link rel="stylesheet"
+      href="~/css/quanly-lienhe.css"
+      asp-append-version="true" />
+
+<div class="htlh-page">
+
+    <div class="htlh-heading">
+        <div>
+            <span class="htlh-eyebrow">
+                HAPPYTRIP / CUSTOMER SUPPORT
+            </span>
+            <h2>Chi tiết yêu cầu #@Model.IdLienHe</h2>
+            <p>
+                Xem thông tin khách hàng và xử lý yêu cầu tư vấn.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="htlh-btn htlh-btn-light">
+            <i class="fa-solid fa-arrow-left"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(thanhCong))
+    {
+        <div class="htlh-alert htlh-alert-success" role="status">
+            <i class="fa-solid fa-circle-check"></i>
+            @thanhCong
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(loi))
+    {
+        <div class="htlh-alert htlh-alert-error" role="alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            @loi
+        </div>
+    }
+
+    <div class="htlh-detail-grid">
+
+        <!-- THONG TIN YEU CAU -->
+        <section class="htlh-panel">
+
+            <div class="htlh-detail-heading">
+                <div>
+                    <span class="htlh-eyebrow">
+                        THÔNG TIN KHÁCH HÀNG
+                    </span>
+                    <h3>Yêu cầu tư vấn</h3>
+                </div>
+
+                @if (daPhanHoi)
+                {
+                    <span class="htlh-status done">
+                        <i class="fa-solid fa-check"></i>
+                        Đã phản hồi
+                    </span>
+                }
+                else
+                {
+                    <span class="htlh-status pending">
+                        <i class="fa-regular fa-clock"></i>
+                        Chưa phản hồi
+                    </span>
+                }
+            </div>
+
+            <div class="htlh-info-list">
+
+                <div class="htlh-info-row">
+                    <span>Họ và tên</span>
+                    <strong>@Model.HoTen</strong>
+                </div>
+
+                <div class="htlh-info-row">
+                    <span>Email</span>
+                    <a href="mailto:@Model.Email">
+                        @Model.Email
+                    </a>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.DienThoai))
+                {
+                    <div class="htlh-info-row">
+                        <span>Điện thoại</span>
+                        <strong>@Model.DienThoai</strong>
+                    </div>
+                }
+
+                <div class="htlh-info-row">
+                    <span>Ngày gửi</span>
+                    <strong>
+                        @Model.NgayGui.ToString("dd/MM/yyyy HH:mm")
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="htlh-message-label">
+                <i class="fa-regular fa-message"></i>
+                Nội dung khách hàng gửi
+            </div>
+
+            <div class="htlh-message">@Model.NoiDung?.Trim()</div>
+
+        </section>
+
+        <!-- PHAN HOI -->
+        <section class="htlh-panel">
+
+            <div class="htlh-detail-heading">
+                <div>
+                    <span class="htlh-eyebrow">
+                        HAPPYTRIP SUPPORT
+                    </span>
+                    <h3>Phản hồi khách hàng</h3>
+                </div>
+
+                <span class="htlh-mail-icon">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </span>
+            </div>
+
+            @if (daPhanHoi)
+            {
+                <div class="htlh-replied-info">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Máy chủ email đã chấp nhận phản hồi này.
+                </div>
+
+                <div class="htlh-message-label">
+                    Nội dung đã phản hồi
+                </div>
+
+                <div class="htlh-message">@Model.NoiDungPhanHoi?.Trim()</div>
+
+                <p class="htlh-date">
+                    Thời gian gửi:
+                    @(Model.NgayPhanHoi?.ToString(
+                        "dd/MM/yyyy HH:mm") ?? "Chưa ghi nhận")
+                </p>
+
+                <div class="htlh-note">
+                    Lưu ý: Trạng thái đã phản hồi không đồng nghĩa
+                    khách hàng đã đọc hoặc chắc chắn nhận được thư.
+                </div>
+            }
+            else
+            {
+                <p class="htlh-description">
+                    Soạn nội dung tư vấn.
+                    Hệ thống tự động sử dụng mẫu email
+                    chính thức của HappyTrip khi gửi.
+                </p>
+
+                <div class="htlh-recipient">
+                    <i class="fa-regular fa-envelope"></i>
+                    <div>
+                        <small>Gửi đến</small>
+                        <strong>@Model.Email</strong>
+                    </div>
+                </div>
+
+                <form asp-controller="QuanLyLienHe"
+                      asp-action="GuiPhanHoi"
+                      method="post"
+                      id="htlh-reply-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="id"
+                           value="@Model.IdLienHe" />
+
+                    <label class="htlh-form-label"
+                           for="noiDungPhanHoi">
+                        Nội dung phản hồi
+                        <span>*</span>
+                    </label>
+
+                    <textarea id="noiDungPhanHoi"
+                              name="noiDungPhanHoi"
+                              minlength="10"
+                              maxlength="5000"
+                              rows="8"
+                              required
+                              placeholder="Nhập nội dung tư vấn cho khách hàng..."></textarea>
+
+                    <p class="htlh-form-hint">
+                        Từ 10 đến 5000 ký tự.
+                        Nội dung này sẽ được đặt vào mẫu
+                        email HappyTrip đã thiết kế.
+                    </p>
+
+                    <div style="display:grid;gap:10px;">
+
+                        <button type="submit"
+                                id="htlh-preview-btn"
+                                formaction="@Url.Action("XemTruocEmail", "QuanLyLienHe")"
+                                formtarget="_blank"
+                                class="htlh-btn htlh-btn-light"
+                                style="width:100%;min-height:44px;">
+                            <i class="fa-regular fa-eye"></i>
+                            Xem trước email HappyTrip
+                        </button>
+
+                        <button type="submit"
+                                id="htlh-send-btn"
+                                class="htlh-btn htlh-btn-primary htlh-send">
+                            <i class="fa-regular fa-paper-plane"></i>
+                            Gửi phản hồi qua Gmail
+                        </button>
+
+                    </div>
+
+                </form>
+            }
+
+        </section>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const form = document.getElementById("htlh-reply-form");
+        const sendButton = document.getElementById("htlh-send-btn");
+
+        if (!form || !sendButton) return;
+
+        form.addEventListener("submit", function (event) {
+            if (!form.checkValidity()) return;
+
+            const submitter = event.submitter;
+
+            // Xem truoc chi mo tab moi, khong khoa nut gui
+            if (submitter && submitter.id === "htlh-preview-btn") {
+                return;
+            }
+
+            sendButton.disabled = true;
+            sendButton.innerText = "Đang gửi phản hồi...";
+        });
+    })();
+</script>

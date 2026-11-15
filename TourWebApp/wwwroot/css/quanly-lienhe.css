@@ -1,0 +1,707 @@
+
+/* =========================================
+   HAPPYTRIP - QUAN LY YEU CAU TU VAN
+   ========================================= */
+
+.htlh-page {
+    --htlh-green: #244c3b;
+    --htlh-green-dark: #193d2e;
+    --htlh-yellow: #ffdc82;
+    --htlh-border: #e3e9df;
+    --htlh-muted: #7a8b80;
+
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    color: #29483a;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+}
+
+.htlh-page,
+.htlh-page * {
+    box-sizing: border-box;
+}
+
+.htlh-page button,
+.htlh-page input,
+.htlh-page select,
+.htlh-page textarea,
+.htlh-page a {
+    font-family: inherit;
+}
+
+/* =========================================
+   HEADING
+   ========================================= */
+
+.htlh-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.htlh-eyebrow {
+    display: block;
+    margin-bottom: 7px;
+    color: #b88943;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.htlh-page .htlh-heading h2 {
+    margin: 0 0 8px;
+    color: var(--htlh-green-dark);
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.htlh-heading p {
+    margin: 0;
+    color: var(--htlh-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   BUTTON
+   ========================================= */
+
+.htlh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    min-height: 40px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .2s, color .2s,
+                border-color .2s, transform .2s;
+}
+
+.htlh-btn:hover {
+    transform: translateY(-1px);
+}
+
+.htlh-btn-primary {
+    background: var(--htlh-green);
+    color: #ffffff;
+}
+
+.htlh-btn-primary:hover {
+    background: #32664d;
+    color: #ffffff;
+}
+
+.htlh-btn-light {
+    background: #ffffff;
+    border-color: var(--htlh-border);
+    color: var(--htlh-green);
+}
+
+.htlh-btn-light:hover {
+    background: #f2f7f0;
+    color: var(--htlh-green-dark);
+}
+
+/* =========================================
+   THONG KE
+   ========================================= */
+
+.htlh-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.htlh-stat {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--htlh-border);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 5px 22px rgba(31, 53, 40, .035);
+    text-decoration: none;
+    transition: border-color .2s, transform .2s;
+}
+
+.htlh-stat:hover {
+    border-color: #b5d4bc;
+    transform: translateY(-2px);
+}
+
+.htlh-stat-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    background: #e9f1e7;
+    color: #347a51;
+    font-size: 21px;
+}
+
+.htlh-stat-icon.warning {
+    background: #fff1d7;
+    color: #c28c30;
+}
+
+.htlh-stat-icon.success {
+    background: #e1f3e5;
+    color: #27834e;
+}
+
+.htlh-stat small {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--htlh-muted);
+    font-size: 12px;
+}
+
+.htlh-stat strong {
+    display: block;
+    color: var(--htlh-green-dark);
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+/* =========================================
+   PANEL
+   ========================================= */
+
+.htlh-panel {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid var(--htlh-border);
+    border-radius: 17px;
+    background: #ffffff;
+    box-shadow: 0 6px 24px rgba(28, 57, 40, .04);
+}
+
+.htlh-panel-header,
+.htlh-detail-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.htlh-page .htlh-panel h3 {
+    margin: 0 0 5px;
+    color: var(--htlh-green-dark);
+    font-family: inherit;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.htlh-panel-header p {
+    margin: 0;
+    color: var(--htlh-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   BO LOC
+   ========================================= */
+
+.htlh-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.htlh-filter select {
+    min-width: 155px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #dbe5d9;
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    color: var(--htlh-green);
+    font-size: 12px;
+}
+
+.htlh-filter select:focus {
+    border-color: #66aa82;
+}
+
+/* =========================================
+   BANG DANH SACH
+   ========================================= */
+
+.htlh-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.htlh-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.htlh-table th {
+    padding: 13px 12px;
+    background: #f3f6f0;
+    color: #526b5a;
+    font-size: 12px;
+    font-weight: 750;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.htlh-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #edf0eb;
+    color: #42594a;
+    vertical-align: middle;
+}
+
+.htlh-table tbody tr:hover td {
+    background: #fafcf8;
+}
+
+.htlh-customer {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.htlh-customer strong {
+    color: var(--htlh-green-dark);
+    font-weight: 750;
+}
+
+.htlh-customer small {
+    color: #879488;
+    overflow-wrap: anywhere;
+}
+
+.htlh-preview {
+    max-width: 270px;
+    overflow: hidden;
+    color: #6e8071;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.htlh-empty {
+    padding: 35px !important;
+    color: #8b9a8d;
+    text-align: center;
+}
+
+.htlh-empty i {
+    margin-bottom: 8px;
+    font-size: 26px;
+}
+
+/* =========================================
+   TRANG THAI
+   ========================================= */
+
+.htlh-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.htlh-status.pending {
+    background: #fff1d9;
+    color: #ad781f;
+}
+
+.htlh-status.done {
+    background: #e1f4e6;
+    color: #27834f;
+}
+
+/* =========================================
+   TRANG CHI TIET
+   ========================================= */
+
+.htlh-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+}
+
+.htlh-detail-grid > .htlh-panel {
+    padding: 22px;
+}
+
+.htlh-detail-heading {
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.htlh-detail-heading .htlh-eyebrow {
+    margin-bottom: 7px;
+}
+
+.htlh-detail-heading .htlh-status {
+    flex-shrink: 0;
+}
+
+/* =========================================
+   THONG TIN KHACH HANG
+   ========================================= */
+
+.htlh-info-list {
+    display: grid;
+    margin-bottom: 18px;
+}
+
+.htlh-info-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf1eb;
+    font-size: 12px;
+}
+
+.htlh-info-row > span {
+    flex: 0 0 100px;
+    color: #829086;
+}
+
+.htlh-info-row strong,
+.htlh-info-row a {
+    min-width: 0;
+    color: var(--htlh-green);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.htlh-info-row a:hover {
+    color: #34815a;
+}
+
+/* =========================================
+   NOI DUNG YEU CAU
+   ========================================= */
+
+.htlh-message-label,
+.htlh-form-label {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--htlh-green);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.htlh-message-label i {
+    margin-right: 6px;
+}
+
+.htlh-message {
+    padding: 15px;
+    border: 1px solid #e2eadd;
+    border-radius: 11px;
+    background: #f8faf5;
+    color: #455e4d;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+/* =========================================
+   KHUNG PHAN HOI
+   ========================================= */
+
+.htlh-mail-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+    border-radius: 11px;
+    background: #fff1cf;
+    color: #c08b2d;
+    font-size: 17px;
+}
+
+.htlh-description {
+    margin: 0 0 15px;
+    color: #7a8c7e;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.htlh-recipient {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 14px;
+    margin: 0 0 18px;
+    border: 1px solid #dce8d7;
+    border-radius: 11px;
+    background: #f5faf2;
+}
+
+.htlh-recipient > i {
+    flex-shrink: 0;
+    color: #438961;
+    font-size: 19px;
+}
+
+.htlh-recipient small,
+.htlh-recipient strong {
+    display: block;
+}
+
+.htlh-recipient small {
+    margin-bottom: 3px;
+    color: #8a998b;
+    font-size: 11px;
+}
+
+.htlh-recipient strong {
+    color: var(--htlh-green);
+    font-size: 12px;
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+
+.htlh-form-label span {
+    color: #ce6447;
+}
+
+/* =========================================
+   TEXTAREA - THU GON
+   ========================================= */
+
+.htlh-page textarea {
+    display: block;
+    width: 100%;
+    height: 165px;
+    min-height: 165px;
+    max-height: 350px;
+    padding: 13px 14px;
+    border: 1px solid #d9e4d8;
+    border-radius: 11px;
+    outline: none;
+    resize: vertical;
+    background: #fcfdfa;
+    color: #284b39;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.7;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.htlh-page textarea:focus {
+    border-color: #62a77c;
+    box-shadow: 0 0 0 3px rgba(69, 146, 102, .09);
+}
+
+.htlh-page textarea::placeholder {
+    color: #97a59a;
+    font-size: 12px;
+}
+
+.htlh-form-hint {
+    margin: 8px 0 15px;
+    color: #8a988d;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* =========================================
+   GUI EMAIL
+   ========================================= */
+
+.htlh-send {
+    width: 100%;
+    min-height: 43px;
+    padding: 11px 15px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--htlh-yellow);
+    color: var(--htlh-green-dark);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.htlh-send:hover {
+    background: #ffd061;
+    color: var(--htlh-green-dark);
+}
+
+.htlh-send:disabled {
+    opacity: .65;
+    cursor: wait;
+    transform: none;
+}
+
+/* =========================================
+   NOI DUNG DA PHAN HOI
+   ========================================= */
+
+.htlh-replied-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: #27804d;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.htlh-date {
+    margin: 12px 0;
+    color: #879488;
+    font-size: 11px;
+}
+
+.htlh-note {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff6df;
+    color: #896a33;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   THONG BAO
+   ========================================= */
+
+.htlh-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 17px;
+    padding: 13px 15px;
+    border-radius: 11px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.htlh-alert-success {
+    background: #e4f5e7;
+    color: #23693d;
+}
+
+.htlh-alert-error {
+    background: #fff0ec;
+    color: #af4036;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 1150px) {
+    .htlh-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .htlh-detail-grid > .htlh-panel {
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .htlh-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .htlh-page {
+        font-size: 13px;
+    }
+
+    .htlh-heading,
+    .htlh-panel-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .htlh-page .htlh-heading h2 {
+        font-size: 23px;
+    }
+
+    .htlh-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .htlh-panel,
+    .htlh-detail-grid > .htlh-panel {
+        padding: 16px;
+    }
+
+    .htlh-detail-heading {
+        gap: 10px;
+    }
+
+    .htlh-page .htlh-panel h3 {
+        font-size: 17px;
+    }
+
+    .htlh-info-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .htlh-info-row > span {
+        flex: none;
+    }
+
+    .htlh-info-row strong,
+    .htlh-info-row a {
+        text-align: left;
+    }
+
+    .htlh-filter {
+        width: 100%;
+    }
+
+    .htlh-filter select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .htlh-page textarea {
+        height: 150px;
+        min-height: 150px;
+    }
+}

@@ -1,175 +1,2162 @@
+
 @model TourWebApp.Data.Models.Tour
+@using System.Globalization
+@using TourWebApp.Data.Models
 
 @{
     Layout = "_LayoutAdmin";
-    var loaiTours = ViewBag.LoaiTours as List<TourWebApp.Data.Models.LoaiTour> ?? new List<TourWebApp.Data.Models.LoaiTour>();
+    ViewData["Title"] = "Chỉnh sửa tour";
+
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+    var loaiTours = ViewBag.LoaiTours as List<LoaiTour> ?? new List<LoaiTour>();
+
+    var existingImages = Model.HinhTours?
+        .OrderBy(x => x.ThuTu)
+        .ThenBy(x => x.IdHinh)
+        .ToList() ?? new List<HinhTour>();
+
+    var currentThumbnail = TourImagePathHelper.NormalizeTourImagePath(Model.HinhAnh);
+
+    var coverImage = !string.IsNullOrWhiteSpace(Model.HinhAnh)
+        ? TourImagePathHelper.ToTourImageSrc(Model.HinhAnh)
+        : existingImages.Count > 0
+            ? TourImagePathHelper.ToTourImageSrc(existingImages[0].UrlHinh)
+            : Url.Content("~/img/no-image.png");
+
+    var adultPrice = Convert.ToDecimal(ViewBag.GiaNguoiLon ?? 0m);
+    var childPrice = Convert.ToDecimal(ViewBag.GiaTreEm ?? 0m);
+    var infantPrice = Convert.ToDecimal(ViewBag.GiaEmBe ?? 0m);
+
+    var originalPrice = Model.GiaGoc ?? 0m;
+    var discountPercent = Model.PhanTramGiam ?? 0m;
+
+    var salePrice = Math.Round(
+        originalPrice * (100m - discountPercent) / 100m,
+        0,
+        MidpointRounding.AwayFromZero
+    );
+
+    var autoChildPrice = Math.Round(
+        salePrice * 0.5m,
+        0,
+        MidpointRounding.AwayFromZero
+    );
+
+    // Giữ nguyên giá đang lưu khi mở trang.
+    // Chỉ mặc định tự động nếu cả ba mức giá khớp công thức.
+    var initialPriceMode =
+        adultPrice == salePrice &&
+        childPrice == autoChildPrice &&
+        infantPrice == 0m
+            ? "TuDong"
+            : "TuyChinh";
+
+    // Khi Controller trả lại form do lỗi, ưu tiên chế độ vừa gửi.
+    var postedPriceMode = Context.Request.HasFormContentType
+        ? Context.Request.Form["CheDoGia"].ToString()
+        : "";
+
+    if (postedPriceMode == "TuDong" || postedPriceMode == "TuyChinh")
+    {
+        initialPriceMode = postedPriceMode;
+    }
+
+    var savedTopicCodes =
+        (ViewBag.SelectedMaSoThichs as IEnumerable<string>
+            ?? Array.Empty<string>())
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    var topicOptions = new[]
+    {
+        new { Code = "BIEN", Name = "Biển đảo", Icon = "fa-water" },
+        new { Code = "NUI", Name = "Núi rừng", Icon = "fa-mountain" },
+        new { Code = "VANHOA", Name = "Văn hóa", Icon = "fa-landmark" },
+        new { Code = "LICHSU", Name = "Lịch sử", Icon = "fa-building-columns" },
+        new { Code = "THANHPHO", Name = "Thành phố", Icon = "fa-city" },
+        new { Code = "CHECKIN", Name = "Check-in", Icon = "fa-camera" },
+        new { Code = "MAOHIEM", Name = "Mạo hiểm", Icon = "fa-person-hiking" },
+        new { Code = "SINHTHAI", Name = "Sinh thái", Icon = "fa-leaf" },
+        new { Code = "SONGNUOC", Name = "Sông nước", Icon = "fa-ship" },
+        new { Code = "AMTHUC", Name = "Ẩm thực", Icon = "fa-utensils" }
+    };
 }
 
-<link rel="stylesheet" href="~/css/upload-tour.css" />
+<style>
+    .ht-edit {
+        --ht-green: #248b55;
+        --ht-dark: #1b5338;
+        --ht-ink: #315a42;
+        --ht-muted: #819688;
+        --ht-border: #e0e9dc;
+        --ht-soft: #f6faf3;
 
-<div class="container-fluid">
-    <h4 class="mb-3 fw-bold">✏️ Sửa thông tin tour</h4>
+        width: min(100%, 1390px);
+        min-width: 0;
+        margin: 0 auto;
+        padding: 8px 3px 34px;
+        color: var(--ht-ink);
+        font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    }
 
-    <form asp-action="SuaTour" method="post" enctype="multipart/form-data">
+    .ht-edit *,
+    .ht-edit *::before,
+    .ht-edit *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-edit a {
+        text-decoration: none;
+    }
+
+    .ht-edit input,
+    .ht-edit select,
+    .ht-edit textarea,
+    .ht-edit button {
+        font: inherit;
+    }
+
+    /* HEADER */
+
+    .ht-edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 17px;
+    }
+
+    .ht-edit-eyebrow {
+        display: block;
+        margin-bottom: 7px;
+        color: #439565;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .ht-edit-header h1 {
+        margin: 0 0 5px;
+        color: var(--ht-dark);
+        font-size: clamp(23px, 2.2vw, 30px);
+        font-weight: 800;
+    }
+
+    .ht-edit-header p {
+        margin: 0;
+        color: var(--ht-muted);
+        font-size: 12px;
+    }
+
+    .ht-edit-back,
+    .ht-edit-save,
+    .ht-edit-cancel {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        min-height: 41px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ht-edit .ht-edit-back,
+    .ht-edit .ht-edit-cancel {
+        background: #fff;
+        border: 1px solid #dce8d9;
+        color: #4d765c;
+    }
+
+    .ht-edit .ht-edit-save {
+        background: #268d56;
+        border: 1px solid #268d56;
+        color: #fff;
+    }
+
+    .ht-edit .ht-edit-save:hover {
+        background: #197345;
+    }
+
+    .ht-edit-validation {
+        margin-bottom: 15px;
+        padding: 12px 15px;
+        border: 1px solid #efc5bb;
+        border-radius: 11px;
+        background: #fff2ef;
+        color: #a74739;
+        font-size: 12px;
+    }
+
+    .ht-edit-validation:empty {
+        display: none;
+    }
+
+    /* TOUR IDENTITY */
+
+    .ht-edit-identity {
+        display: flex;
+        align-items: center;
+        gap: 19px;
+        min-width: 0;
+        margin-bottom: 18px;
+        padding: 16px;
+        border: 1px solid #dce9d9;
+        border-radius: 17px;
+        background: linear-gradient(115deg, #fff, #f1f8ec);
+        box-shadow: 0 6px 19px rgba(30,77,45,.045);
+    }
+
+    .ht-edit-cover {
+        flex: 0 0 155px;
+        width: 155px;
+        height: 112px;
+        overflow: hidden;
+        border-radius: 12px;
+        background: #e9f4e5;
+    }
+
+    .ht-edit-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .ht-edit-identity-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ht-edit-identity-top {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-bottom: 8px;
+    }
+
+    .ht-edit-code {
+        padding: 6px 9px;
+        border-radius: 7px;
+        background: #e6f3e6;
+        color: #347c51;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-edit-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 9px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-edit-status.selling {
+        color: #20834b;
+        background: #dbf3df;
+    }
+
+    .ht-edit-status.stopped {
+        color: #b47946;
+        background: #fff0de;
+    }
+
+    .ht-edit-identity h2 {
+        margin: 0 0 7px;
+        color: #1e563b;
+        font-size: 19px;
+        font-weight: 800;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .ht-edit-identity p {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        margin: 0;
+        color: #6f8974;
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .ht-edit-identity p i {
+        margin-top: 3px;
+        color: #dca936;
+    }
+
+    /* PANELS */
+
+    .ht-edit-workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+        align-items: start;
+        gap: 17px;
+    }
+
+    .ht-edit-column {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+        min-width: 0;
+    }
+
+    .ht-edit-panel {
+        min-width: 0;
+        padding: 20px;
+        border: 1px solid var(--ht-border);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 5px 17px rgba(29,76,45,.045);
+    }
+
+    .ht-edit-wide-panel {
+        margin-top: 17px;
+    }
+
+    .ht-edit-panel-header {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 18px;
+        padding-bottom: 13px;
+        border-bottom: 1px solid #eaf0e6;
+    }
+
+    .ht-edit-panel-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: #e8f5e9;
+        color: #2b9259;
+        font-size: 15px;
+    }
+
+    .ht-edit-panel-icon.yellow {
+        color: #be8924;
+        background: #fff4d9;
+    }
+
+    .ht-edit-panel-header > div {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ht-edit-panel-header h3 {
+        margin: 0 0 3px;
+        color: #21573b;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .ht-edit-panel-header p {
+        margin: 0;
+        color: #87998a;
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    /* FORM FIELDS */
+
+    .ht-edit-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        gap: 15px 13px;
+    }
+
+    .ht-edit-field {
+        min-width: 0;
+    }
+
+    .ht-edit-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .ht-edit-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #3b634a;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-edit-field input,
+    .ht-edit-field select,
+    .ht-edit-field textarea {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        padding: 10px 11px;
+        border: 1px solid #dce8db;
+        border-radius: 9px;
+        outline: none;
+        background: #fbfdfa;
+        color: #315a42;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .ht-edit-field textarea {
+        min-height: 160px;
+        line-height: 1.7;
+        resize: vertical;
+    }
+
+    .ht-edit-field input:focus,
+    .ht-edit-field select:focus,
+    .ht-edit-field textarea:focus {
+        border-color: #62b582;
+        box-shadow: 0 0 0 3px rgba(42,153,89,.09);
+    }
+
+    .ht-edit-field input[readonly] {
+        background: #f0f4ef;
+        color: #748b7b;
+    }
+
+    .ht-edit-field small {
+        display: block;
+        margin-top: 6px;
+        color: #8b9c8e;
+        font-size: 10px;
+        line-height: 1.55;
+    }
+
+    .ht-edit-error {
+        display: block;
+        color: #c45c50;
+        font-size: 10px;
+        margin-top: 5px;
+    }
+
+    .ht-edit-money-wrap {
+        position: relative;
+    }
+
+    .ht-edit-money-wrap input {
+        padding-right: 37px;
+    }
+
+    .ht-edit-money-wrap > span {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        color: #829a86;
+        font-size: 11px;
+        font-weight: 800;
+        pointer-events: none;
+    }
+
+    .ht-edit-price-preview {
+        margin-top: 16px;
+        padding: 14px 15px;
+        border: 1px solid #d7e9d4;
+        border-radius: 11px;
+        background: linear-gradient(110deg, #edf8e9, #fff9e9);
+    }
+
+    .ht-edit-price-preview small {
+        display: block;
+        margin-bottom: 5px;
+        color: #6b9074;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-edit-price-preview strong {
+        display: block;
+        color: #1f8c52;
+        font-size: 24px;
+        font-weight: 800;
+    }
+
+    .ht-edit-help {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 13px;
+        padding: 11px 12px;
+        border-radius: 9px;
+        background: #fff9e9;
+        color: #8d7853;
+        font-size: 10px;
+        line-height: 1.65;
+    }
+
+    .ht-edit-help i {
+        margin-top: 2px;
+        color: #d4a439;
+    }
+
+    /* PRICE MODE - NEW */
+
+    .ht-edit-price-mode {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .ht-edit-mode-option {
+        position: relative;
+        display: block;
+        min-width: 0;
+        cursor: pointer;
+    }
+
+    .ht-edit-mode-option > input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .ht-edit-mode-card {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 58px;
+        padding: 10px 11px;
+        border: 1.5px solid #e0eadc;
+        border-radius: 11px;
+        background: #fbfdfa;
+        color: #668071;
+        transition: background .2s, border-color .2s;
+    }
+
+    .ht-edit-mode-card > i {
+        display: grid;
+        place-items: center;
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: #edf4e9;
+        color: #579369;
+        font-size: 14px;
+    }
+
+    .ht-edit-mode-card strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #315b43;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ht-edit-mode-card small {
+        display: block;
+        color: #8b9d8e;
+        font-size: 9px;
+        line-height: 1.5;
+    }
+
+    .ht-edit-mode-option > input:checked + .ht-edit-mode-card {
+        border-color: #36a267;
+        background: #eaf8ec;
+    }
+
+    .ht-edit-mode-option > input:focus-visible + .ht-edit-mode-card {
+        outline: 3px solid #9ad7af;
+        outline-offset: 2px;
+    }
+
+    .ht-edit-mode-option > input:checked + .ht-edit-mode-card > i {
+        background: #d4efdc;
+        color: #238751;
+    }
+
+    .ht-edit-price-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        margin: 0 0 12px;
+        border-radius: 7px;
+        background: #e9f7e8;
+        color: #318558;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ht-edit-price-tag.custom {
+        background: #fff3df;
+        color: #a77c30;
+    }
+
+    .ht-edit-price-mode-note {
+        margin-top: 12px;
+        color: #87978a;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    .ht-edit-price-mode-note strong {
+        color: #367451;
+    }
+
+    /* TOPICS */
+
+    .ht-edit-topic-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        color: #257b4b;
+        background: #e9f6e9;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ht-edit-topic-intro {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    }
+
+    .ht-edit-topic-intro p {
+        margin: 0;
+        color: #789180;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .ht-edit-topic-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0,1fr));
+        gap: 11px;
+    }
+
+    .ht-edit-topic-option {
+        position: relative;
+        display: block;
+        min-width: 0;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .ht-edit-topic-option input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .ht-edit-topic-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 99px;
+        padding: 14px 9px;
+        border: 1.5px solid #dfebdd;
+        border-radius: 13px;
+        color: #496c54;
+        background: #fbfdf9;
+        text-align: center;
+        transition: border-color .2s, background .2s, transform .2s;
+    }
+
+    .ht-edit-topic-main-icon {
+        display: grid;
+        place-items: center;
+        width: 39px;
+        height: 39px;
+        border-radius: 11px;
+        color: #348e5b;
+        background: #eaf5e9;
+        font-size: 17px;
+    }
+
+    .ht-edit-topic-name {
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.45;
+    }
+
+    .ht-edit-topic-check {
+        display: none;
+        position: absolute;
+        top: 8px;
+        right: 9px;
+        color: #268b55;
+        font-size: 12px;
+    }
+
+    .ht-edit-topic-option:hover .ht-edit-topic-content {
+        border-color: #a8d4ae;
+        background: #f3faf0;
+        transform: translateY(-2px);
+    }
+
+    .ht-edit-topic-option input:checked + .ht-edit-topic-content {
+        border-color: #2c9b60;
+        background: #e9f7e9;
+        color: #176e42;
+    }
+
+    .ht-edit-topic-option input:checked
+    + .ht-edit-topic-content
+    .ht-edit-topic-check {
+        display: block;
+    }
+
+    .ht-edit-topic-option input:focus-visible + .ht-edit-topic-content {
+        outline: 3px solid #95d4a8;
+        outline-offset: 3px;
+    }
+
+    .ht-edit-topic-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 15px;
+        padding: 12px 13px;
+        border-radius: 10px;
+        background: #f4f9f0;
+        color: #64816c;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .ht-edit-topic-note i {
+        margin-top: 3px;
+        color: #30965f;
+    }
+
+    /* IMAGE LIBRARY */
+
+    .ht-edit-drop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 130px;
+        padding: 18px;
+        border: 2px dashed #b7d8bc;
+        border-radius: 13px;
+        background: #f8fcf7;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .ht-edit-drop:hover {
+        background: #eff8ed;
+        border-color: #6caf85;
+    }
+
+    .ht-edit-drop > i {
+        font-size: 23px;
+        color: #32935d;
+    }
+
+    .ht-edit-drop > strong {
+        color: #3e7652;
+        font-size: 12px;
+    }
+
+    .ht-edit-drop > p {
+        margin: 0;
+        color: #87998a;
+        font-size: 10px;
+    }
+
+    .ht-edit-gallery-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 18px 0 11px;
+    }
+
+    .ht-edit-gallery-title strong {
+        color: #315e42;
+        font-size: 12px;
+    }
+
+    .ht-edit-gallery-title span {
+        color: #879b8b;
+        font-size: 10px;
+    }
+
+    .ht-edit .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        gap: 11px;
+        margin-top: 0;
+    }
+
+    .ht-edit .preview-item {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #dfebdc;
+        border-radius: 11px;
+        background: #fff;
+    }
+
+    .ht-edit .preview-image {
+        height: 112px;
+    }
+
+    .ht-edit .preview-image img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ht-edit .thumbnail-radio {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 34px;
+        margin: 0;
+        padding: 7px 5px;
+        color: #55745e;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .ht-edit .thumbnail-radio input {
+        accent-color: #2e945d;
+    }
+
+    .ht-edit .remove-current-image {
+        position: absolute;
+        z-index: 3;
+        top: 6px;
+        right: 6px;
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: #dd6254;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .ht-edit .preview-item.is-marked-delete {
+        opacity: .6;
+        border-color: #df7b6d;
+    }
+
+    .ht-edit .preview-item.is-marked-delete::after {
+        content: "Sẽ xóa khi lưu";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        background: rgba(112,42,34,.5);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        pointer-events: none;
+    }
+
+    .ht-edit .preview-item.is-marked-delete
+    .remove-current-image {
+        background: #218d55;
+    }
+
+    .ht-edit .preview-box {
+        position: relative;
+        display: inline-block;
+        width: 98px;
+        height: 98px;
+        margin: 5px;
+        cursor: move;
+    }
+
+    .ht-edit .preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 9px;
+    }
+
+    .ht-edit .preview-box .remove-btn {
+        position: absolute;
+        top: -7px;
+        right: -7px;
+        display: grid;
+        place-items: center;
+        width: 23px;
+        height: 23px;
+        border-radius: 50%;
+        background: #d75f54;
+        color: #fff;
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    /* FOOTER */
+
+    .ht-edit-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+        padding: 16px 18px;
+        border: 1px solid #dce9d9;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 5px 17px rgba(30,76,44,.04);
+    }
+
+    .ht-edit-footer p {
+        margin: 0;
+        color: #7e9283;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .ht-edit-footer p i {
+        margin-right: 5px;
+        color: #31915a;
+    }
+
+    .ht-edit-footer-buttons {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1120px) {
+        .ht-edit-workspace {
+            grid-template-columns: minmax(0,1fr);
+        }
+
+        .ht-edit .preview-grid {
+            grid-template-columns: repeat(4, minmax(0,1fr));
+        }
+
+        .ht-edit-topic-grid {
+            grid-template-columns: repeat(4, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 800px) {
+        .ht-edit-topic-grid {
+            grid-template-columns: repeat(3, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .ht-edit-identity {
+            align-items: flex-start;
+        }
+
+        .ht-edit-cover {
+            flex-basis: 95px;
+            width: 95px;
+            height: 95px;
+        }
+
+        .ht-edit-identity h2 {
+            font-size: 15px;
+        }
+
+        .ht-edit-panel {
+            padding: 16px 14px;
+        }
+
+        .ht-edit .preview-grid {
+            grid-template-columns: repeat(3, minmax(0,1fr));
+        }
+
+        .ht-edit-topic-grid {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .ht-edit-form-grid {
+            grid-template-columns: minmax(0,1fr);
+        }
+
+        .ht-edit-field.full {
+            grid-column: auto;
+        }
+
+        .ht-edit-price-mode {
+            grid-template-columns: minmax(0,1fr);
+        }
+
+        .ht-edit-identity {
+            flex-direction: column;
+        }
+
+        .ht-edit-cover {
+            width: 100%;
+            height: 160px;
+            flex-basis: auto;
+        }
+
+        .ht-edit .preview-grid {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+        }
+
+        .ht-edit-footer-buttons {
+            width: 100%;
+        }
+
+        .ht-edit-footer-buttons > * {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="ht-edit">
+
+    <header class="ht-edit-header">
+        <div>
+            <span class="ht-edit-eyebrow">
+                HAPPYTRIP · TOUR EDITOR
+            </span>
+
+            <h1>
+                <i class="fa-solid fa-pen-to-square"></i>
+                Chỉnh sửa tour
+            </h1>
+
+            <p>
+                Cập nhật thông tin, giá bán, chủ đề
+                và hình ảnh của hành trình.
+            </p>
+        </div>
+
+        <a asp-controller="QuanTri"
+           asp-action="QuanLyTour"
+           class="ht-edit-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            Danh sách tour
+        </a>
+    </header>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All"
+             class="ht-edit-validation"
+             role="alert"></div>
+    }
+
+    <form asp-controller="QuanTri"
+          asp-action="SuaTour"
+          method="post"
+          enctype="multipart/form-data"
+          id="htEditTourForm">
+
+        @Html.AntiForgeryToken()
+
         <input type="hidden" asp-for="IdTour" />
         <input type="hidden" asp-for="TrangThai" />
 
-        <div class="card shadow-sm p-4">
-            <div class="row g-3">
+        <!-- CURRENT TOUR -->
 
-                <div class="col-md-6">
-                    <label class="form-label">Mã tour</label>
-                    <input asp-for="MaTour" class="form-control bg-light" readonly />
-                </div>
+        <section class="ht-edit-identity">
 
-                <div class="col-md-6">
-                    <label class="form-label">Tên tour</label>
-                    <input asp-for="TenTour" class="form-control" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Loại tour</label>
-                    <select asp-for="IdLoaiTour" class="form-select">
-                        <option value="">-- Chọn loại tour --</option>
-                        @foreach (var item in loaiTours)
-                        {
-                            <option value="@item.IdLoaiTour" selected="@(item.IdLoaiTour == Model.IdLoaiTour)">
-                                @item.TenLoai
-                            </option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Địa điểm</label>
-                    <input asp-for="DiaDiem" class="form-control" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Thời gian</label>
-                    <input asp-for="ThoiGian" class="form-control" placeholder="VD: 3N2Đ" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Phương tiện</label>
-                    <select asp-for="PhuongTien" class="form-select" required>
-                        <option value="">-- Chọn phương tiện --</option>
-                        <option value="Xe du lịch">🚌 Xe du lịch</option>
-                        <option value="Máy bay">✈️ Máy bay</option>
-                        <option value="Tàu hỏa">🚆 Tàu hỏa</option>
-                        <option value="Ca nô">🚤 Ca nô</option>
-                        <option value="Xe máy">🏍 Xe máy</option>
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Giá gốc</label>
-                    <input asp-for="GiaGoc" class="form-control price-input" id="giaGoc" />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">% Giảm</label>
-                    <input asp-for="PhanTramGiam" class="form-control" id="phanTramGiam" />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Giá khuyến mãi</label>
-                    <input asp-for="GiaKhuyenMai" class="form-control price-input" id="giaKhuyenMai" readonly />
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label">Mô tả</label>
-                    <textarea asp-for="MoTa" rows="4" class="form-control"></textarea>
-                </div>
-
-                <div class="col-12 mt-4">
-                    <h5 class="fw-bold text-primary mb-2">💲 Giá chi tiết theo đối tượng</h5>
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Giá người lớn</label>
-                            <input type="number" name="GiaNguoiLon" class="form-control" value="@ViewBag.GiaNguoiLon" min="0" required />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Giá trẻ em</label>
-                            <input type="number" name="GiaTreEm" class="form-control" value="@ViewBag.GiaTreEm" min="0" required />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Giá em bé</label>
-                            <input type="number" name="GiaEmBe" class="form-control" value="@ViewBag.GiaEmBe" min="0" required />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 mt-3">
-                    <label class="form-label fw-semibold">Hình ảnh tour</label>
-
-                    <div id="drop-zone" class="drop-zone mb-3">
-                        <p class="text-muted mb-0">📷 Kéo thả hoặc click để chọn nhiều ảnh</p>
-                        <input type="file" name="HinhAnhFiles" id="fileInput" multiple accept="image/*" hidden />
-                    </div>
-
-                    <h6 class="fw-bold mb-2">Ảnh hiện tại</h6>
-                    <p class="text-muted small text-end mb-2">Bấm X để xóa ảnh khi lưu</p>
-                    <div class="preview-grid">
-                        @foreach (var h in Model.HinhTours)
-                        {
-                            var imagePath = TourImagePathHelper.NormalizeTourImagePath(h.UrlHinh);
-                            var isThumbnail = TourImagePathHelper.NormalizeTourImagePath(Model.HinhAnh) == imagePath;
-                            <div class="preview-item">
-                                <button type="button"
-                                        class="remove-current-image"
-                                        title="Xóa ảnh"
-                                        aria-label="Xóa ảnh">
-                                    &times;
-                                </button>
-                                <input type="checkbox"
-                                       name="XoaHinhIds"
-                                       value="@h.IdHinh"
-                                       class="delete-image-checkbox"
-                                       hidden />
-                                <div class="preview-image">
-                                    <img src="@TourImagePathHelper.ToTourImageSrc(h.UrlHinh)" alt="Ảnh tour" />
-                                </div>
-
-                                <label class="thumbnail-radio">
-                                    <input type="radio"
-                                        name="Thumbnail"
-                                        value="@imagePath"
-                                        @(isThumbnail ? "checked" : "") />
-                                    Ảnh đại diện
-                                </label>
-                            </div>
-                        }
-                    </div>
-                </div>
+            <div class="ht-edit-cover">
+                <img src="@coverImage"
+                     alt="Ảnh đại diện tour @Model.TenTour" />
             </div>
 
-            <div class="mt-4 text-end">
-                <a asp-action="QuanLyTour" class="btn btn-secondary">Quay lại</a>
-                <button type="submit" class="btn btn-primary px-4">💾 Lưu tour</button>
+            <div class="ht-edit-identity-content">
+                <div class="ht-edit-identity-top">
+
+                    <span class="ht-edit-code">
+                        @Model.MaTour
+                    </span>
+
+                    @if (Model.TrangThai)
+                    {
+                        <span class="ht-edit-status selling">
+                            <i class="fa-solid fa-circle"></i>
+                            Đang bán
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="ht-edit-status stopped">
+                            <i class="fa-solid fa-circle"></i>
+                            Ngưng bán
+                        </span>
+                    }
+                </div>
+
+                <h2>@Model.TenTour</h2>
+
+                <p>
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>@Model.DiaDiem</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- MAIN EDITOR -->
+
+        <div class="ht-edit-workspace">
+
+            <div class="ht-edit-column">
+
+                <!-- BASIC INFORMATION -->
+
+                <section class="ht-edit-panel">
+
+                    <div class="ht-edit-panel-header">
+                        <span class="ht-edit-panel-icon">
+                            <i class="fa-solid fa-route"></i>
+                        </span>
+
+                        <div>
+                            <h3>Thông tin hành trình</h3>
+                            <p>Điều chỉnh tên, loại và thông tin tour.</p>
+                        </div>
+                    </div>
+
+                    <div class="ht-edit-form-grid">
+
+                        <div class="ht-edit-field">
+                            <label asp-for="MaTour">Mã tour</label>
+
+                            <input asp-for="MaTour" readonly />
+
+                            <small>
+                                Mã tour được giữ nguyên khi chỉnh sửa.
+                            </small>
+                        </div>
+
+                        <div class="ht-edit-field">
+                            <label asp-for="IdLoaiTour">Loại tour</label>
+
+                            <select asp-for="IdLoaiTour" required>
+                                <option value="">
+                                    -- Chọn loại tour --
+                                </option>
+
+                                @foreach (var item in loaiTours)
+                                {
+                                    <option value="@item.IdLoaiTour">
+                                        @item.TenLoai
+                                    </option>
+                                }
+                            </select>
+
+                            <span asp-validation-for="IdLoaiTour"
+                                  class="ht-edit-error"></span>
+                        </div>
+
+                        <div class="ht-edit-field full">
+                            <label asp-for="TenTour">Tên tour</label>
+
+                            <input asp-for="TenTour"
+                                   maxlength="200"
+                                   required />
+
+                            <span asp-validation-for="TenTour"
+                                  class="ht-edit-error"></span>
+                        </div>
+
+                        <div class="ht-edit-field full">
+                            <label asp-for="DiaDiem">
+                                Tuyến điểm / Địa điểm
+                            </label>
+
+                            <input asp-for="DiaDiem"
+                                   maxlength="200"
+                                   placeholder="TP.HCM → Phú Quốc" />
+                        </div>
+
+                        <div class="ht-edit-field">
+                            <label asp-for="ThoiGian">Thời gian</label>
+
+                            <input asp-for="ThoiGian"
+                                   maxlength="50"
+                                   placeholder="3 ngày 2 đêm" />
+                        </div>
+
+                        <div class="ht-edit-field">
+                            <label asp-for="PhuongTien">Phương tiện</label>
+
+                            <select asp-for="PhuongTien" required>
+                                <option value="">
+                                    -- Chọn phương tiện --
+                                </option>
+                                <option value="Xe du lịch">Xe du lịch</option>
+                                <option value="Máy bay">Máy bay</option>
+                                <option value="Tàu hỏa">Tàu hỏa</option>
+                                <option value="Ca nô">Ca nô</option>
+                                <option value="Xe máy">Xe máy</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- DESCRIPTION -->
+
+                <section class="ht-edit-panel">
+
+                    <div class="ht-edit-panel-header">
+                        <span class="ht-edit-panel-icon">
+                            <i class="fa-solid fa-book-open"></i>
+                        </span>
+
+                        <div>
+                            <h3>Mô tả & nội dung tour</h3>
+                            <p>Cập nhật giới thiệu và lịch trình.</p>
+                        </div>
+                    </div>
+
+                    <div class="ht-edit-field">
+                        <label asp-for="MoTa">
+                            Nội dung mô tả
+                        </label>
+
+                        <textarea asp-for="MoTa"
+                                  rows="8"
+                                  placeholder="Nhập giới thiệu, các hoạt động và lịch trình từng ngày..."></textarea>
+
+                        <small>
+                            Có thể dùng **chữ đậm** và xuống dòng
+                            để phân chia các phần trong lịch trình.
+                        </small>
+                    </div>
+
+                </section>
+            </div>
+
+            <div class="ht-edit-column">
+
+                <!-- TOUR PRICE -->
+
+                <section class="ht-edit-panel">
+
+                    <div class="ht-edit-panel-header">
+                        <span class="ht-edit-panel-icon yellow">
+                            <i class="fa-solid fa-tags"></i>
+                        </span>
+
+                        <div>
+                            <h3>Điều chỉnh giá bán</h3>
+                            <p>Giá tour và chính sách khuyến mãi.</p>
+                        </div>
+                    </div>
+
+                    <div class="ht-edit-form-grid">
+
+                        <div class="ht-edit-field">
+                            <label asp-for="GiaGoc">Giá gốc</label>
+
+                            <div class="ht-edit-money-wrap">
+                                <input asp-for="GiaGoc"
+                                       type="number"
+                                       id="giaGoc"
+                                       min="0"
+                                       step="1"
+                                       required />
+                                <span>đ</span>
+                            </div>
+                        </div>
+
+                        <div class="ht-edit-field">
+                            <label asp-for="PhanTramGiam">
+                                Giảm giá
+                            </label>
+
+                            <div class="ht-edit-money-wrap">
+                                <input asp-for="PhanTramGiam"
+                                       type="number"
+                                       id="phanTramGiam"
+                                       min="0"
+                                       max="100"
+                                       step="1" />
+                                <span>%</span>
+                            </div>
+                        </div>
+
+                        <div class="ht-edit-field full">
+                            <label asp-for="GiaKhuyenMai">
+                                Giá sau giảm (tự tính)
+                            </label>
+
+                            <div class="ht-edit-money-wrap">
+                                <input asp-for="GiaKhuyenMai"
+                                       type="number"
+                                       id="giaKhuyenMai"
+                                       readonly />
+                                <span>đ</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="ht-edit-price-preview">
+                        <small>GIÁ BÁN DỰ KIẾN</small>
+
+                        <strong id="htEditSalePreview">
+                            @salePrice.ToString("N0", vi) đ
+                        </strong>
+                    </div>
+
+                </section>
+
+                <!-- PRICE BY AUDIENCE -->
+
+                <section class="ht-edit-panel">
+
+                    <div class="ht-edit-panel-header">
+                        <span class="ht-edit-panel-icon">
+                            <i class="fa-solid fa-users"></i>
+                        </span>
+
+                        <div>
+                            <h3>Giá theo đối tượng</h3>
+                            <p>
+                                Tính tự động hoặc thiết lập giá riêng
+                                cho từng nhóm khách.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- NEW: PRICE MODE -->
+
+                    <input type="hidden"
+                           name="CheDoGia"
+                           id="htEditPriceModeValue"
+                           value="@initialPriceMode" />
+
+                    <div class="ht-edit-price-mode">
+
+                        <label class="ht-edit-mode-option">
+                            <input type="radio"
+                                   name="PriceModeSelection"
+                                   value="TuDong"
+                                   class="ht-edit-mode-radio"
+                                   checked="@(initialPriceMode == "TuDong")" />
+
+                            <span class="ht-edit-mode-card">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                                <span>
+                                    <strong>Tự động</strong>
+                                    <small>
+                                        Đồng bộ theo giá sau giảm
+                                    </small>
+                                </span>
+                            </span>
+                        </label>
+
+                        <label class="ht-edit-mode-option">
+                            <input type="radio"
+                                   name="PriceModeSelection"
+                                   value="TuyChinh"
+                                   class="ht-edit-mode-radio"
+                                   checked="@(initialPriceMode == "TuyChinh")" />
+
+                            <span class="ht-edit-mode-card">
+                                <i class="fa-solid fa-sliders"></i>
+
+                                <span>
+                                    <strong>Tùy chỉnh</strong>
+                                    <small>
+                                        Nhập giá riêng từng nhóm
+                                    </small>
+                                </span>
+                            </span>
+                        </label>
+
+                    </div>
+
+                    <div id="htEditModeBadge"
+                         class="ht-edit-price-tag">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span id="htEditModeBadgeText">
+                            Đang sử dụng giá tự động
+                        </span>
+                    </div>
+
+                    <!-- THREE PRICES -->
+
+                    <div class="ht-edit-form-grid">
+
+                        <div class="ht-edit-field full">
+                            <label for="htEditAdult">
+                                Giá người lớn (VNĐ)
+                            </label>
+
+                            <div class="ht-edit-money-wrap">
+                                <input id="htEditAdult"
+                                       name="GiaNguoiLon"
+                                       type="number"
+                                       min="0"
+                                       step="1"
+                                       value="@adultPrice.ToString("0", CultureInfo.InvariantCulture)"
+                                       required />
+                                <span>đ</span>
+                            </div>
+                        </div>
+
+                        <div class="ht-edit-field">
+                            <label for="htEditChild">
+                                Giá trẻ em
+                            </label>
+
+                            <div class="ht-edit-money-wrap">
+                                <input id="htEditChild"
+                                       name="GiaTreEm"
+                                       type="number"
+                                       min="0"
+                                       step="1"
+                                       value="@childPrice.ToString("0", CultureInfo.InvariantCulture)"
+                                       required />
+                                <span>đ</span>
+                            </div>
+                        </div>
+
+                        <div class="ht-edit-field">
+                            <label for="htEditInfant">
+                                Giá em bé
+                            </label>
+
+                            <div class="ht-edit-money-wrap">
+                                <input id="htEditInfant"
+                                       name="GiaEmBe"
+                                       type="number"
+                                       min="0"
+                                       step="1"
+                                       value="@infantPrice.ToString("0", CultureInfo.InvariantCulture)"
+                                       required />
+                                <span>đ</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <p class="ht-edit-price-mode-note"
+                       id="htEditPriceModeHelp">
+                        <strong>Chế độ tự động:</strong>
+                        Người lớn bằng giá sau giảm,
+                        trẻ em bằng 50% giá người lớn,
+                        em bé bằng 0 đồng.
+                    </p>
+
+                    <div class="ht-edit-help">
+                        <i class="fa-solid fa-circle-info"></i>
+
+                        <span>
+                            Giá theo từng nhóm khách được lưu
+                            trong bảng TourGiaChiTiet.
+                            Chế độ tự động sẽ cập nhật theo
+                            giá gốc và phần trăm giảm.
+                            Chế độ tùy chỉnh cho phép nhập
+                            mức giá riêng.
+                        </span>
+                    </div>
+
+                </section>
+
             </div>
         </div>
+
+        <!-- TOPICS -->
+
+        <section class="ht-edit-panel ht-edit-wide-panel">
+
+            <div class="ht-edit-panel-header">
+                <span class="ht-edit-panel-icon yellow">
+                    <i class="fa-solid fa-compass"></i>
+                </span>
+
+                <div>
+                    <h3>Chủ đề & sở thích du lịch</h3>
+                    <p>
+                        Điều chỉnh các chủ đề giúp khách hàng
+                        khám phá tour và hỗ trợ gợi ý cá nhân hóa.
+                    </p>
+                </div>
+            </div>
+
+            <div class="ht-edit-topic-intro">
+
+                <p>
+                    Chọn một hoặc nhiều chủ đề
+                    phù hợp với hành trình này.
+                </p>
+
+                <span class="ht-edit-topic-count">
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <span id="htEditSelectedTopicCount">
+                        @savedTopicCodes.Count
+                    </span>
+
+                    chủ đề đã chọn
+                </span>
+
+            </div>
+
+            <div class="ht-edit-topic-grid"
+                 id="htEditTopicGrid">
+
+                @foreach (var topic in topicOptions)
+                {
+                    bool isChecked = savedTopicCodes.Contains(topic.Code);
+
+                    <label class="ht-edit-topic-option">
+
+                        <input type="checkbox"
+                               name="MaSoThichs"
+                               value="@topic.Code"
+                               class="ht-edit-topic-checkbox"
+                               checked="@isChecked" />
+
+                        <span class="ht-edit-topic-content">
+
+                            <i class="fa-solid @topic.Icon ht-edit-topic-main-icon"></i>
+
+                            <span class="ht-edit-topic-name">
+                                @topic.Name
+                            </span>
+
+                            <i class="fa-solid fa-circle-check ht-edit-topic-check"></i>
+
+                        </span>
+                    </label>
+                }
+
+            </div>
+
+            <span id="htEditTopicError"
+                  class="ht-edit-error"
+                  role="alert"
+                  aria-live="polite"
+                  style="display:none; margin-top:12px;">
+                Vui lòng chọn ít nhất một chủ đề du lịch.
+            </span>
+
+            <div class="ht-edit-topic-note">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>
+                    Chủ đề được lưu độc lập với Loại tour.
+                    Khi nhấn Cập nhật tour, các chủ đề mới
+                    sẽ được thêm vào bảng AITourSoThich,
+                    còn các chủ đề bỏ chọn sẽ được gỡ liên kết.
+                    Mọi thay đổi chỉ có hiệu lực khi lưu thành công.
+                </span>
+            </div>
+
+        </section>
+
+        <!-- IMAGE MANAGEMENT -->
+
+        <section class="ht-edit-panel ht-edit-wide-panel">
+
+            <div class="ht-edit-panel-header">
+                <span class="ht-edit-panel-icon">
+                    <i class="fa-solid fa-images"></i>
+                </span>
+
+                <div>
+                    <h3>Quản lý thư viện ảnh tour</h3>
+                    <p>
+                        Thêm ảnh, xóa ảnh hoặc đổi ảnh đại diện.
+                    </p>
+                </div>
+            </div>
+
+            <div class="ht-edit-gallery-title">
+                <strong>
+                    <i class="fa-solid fa-image"></i>
+                    Ảnh hiện tại (@existingImages.Count)
+                </strong>
+
+                <span>
+                    Chọn ảnh đại diện hoặc nhấn X
+                    để đánh dấu xóa.
+                </span>
+            </div>
+
+            @if (existingImages.Count > 0)
+            {
+                <div class="preview-grid"
+                     id="htEditExistingPhotos">
+
+                    @foreach (var image in existingImages)
+                    {
+                        var normalizedPath =
+                            TourImagePathHelper.NormalizeTourImagePath(
+                                image.UrlHinh
+                            );
+
+                        var isThumbnail = string.Equals(
+                            normalizedPath,
+                            currentThumbnail,
+                            StringComparison.OrdinalIgnoreCase
+                        );
+
+                        <div class="preview-item">
+
+                            <button type="button"
+                                    class="remove-current-image"
+                                    title="Đánh dấu xóa hoặc bỏ đánh dấu"
+                                    aria-label="Đánh dấu xóa ảnh">
+                                &times;
+                            </button>
+
+                            <input type="checkbox"
+                                   name="XoaHinhIds"
+                                   value="@image.IdHinh"
+                                   class="delete-image-checkbox"
+                                   hidden />
+
+                            <div class="preview-image">
+                                <img src="@TourImagePathHelper.ToTourImageSrc(image.UrlHinh)"
+                                     alt="Ảnh tour @Model.TenTour"
+                                     loading="lazy" />
+                            </div>
+
+                            <label class="thumbnail-radio">
+                                <input type="radio"
+                                       name="Thumbnail"
+                                       value="@normalizedPath"
+                                       checked="@isThumbnail" />
+                                Ảnh đại diện
+                            </label>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="ht-edit-help">
+                    <i class="fa-solid fa-image"></i>
+
+                    <span>
+                        Tour này chưa có hình ảnh.
+                        Có thể tải ảnh mới bên dưới.
+                    </span>
+                </div>
+            }
+
+            <div class="ht-edit-gallery-title"
+                 style="margin-top:22px;">
+
+                <strong>
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Bổ sung hình ảnh
+                </strong>
+
+                <span>Hỗ trợ chọn nhiều ảnh cùng lúc.</span>
+            </div>
+
+            <div id="drop-zone"
+                 class="ht-edit-drop"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Chọn hình ảnh mới cho tour">
+
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                <strong>
+                    Kéo thả hoặc chọn ảnh từ máy tính
+                </strong>
+
+                <p>Chọn ảnh JPG, PNG hoặc WEBP</p>
+
+                <input type="file"
+                       name="HinhAnhFiles"
+                       id="fileInput"
+                       accept=".jpg,.jpeg,.png,.webp"
+                       multiple
+                       hidden />
+
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+
+        <footer class="ht-edit-footer">
+
+            <p>
+                <i class="fa-solid fa-shield-halved"></i>
+                Các thay đổi chỉ được lưu khi nhấn
+                <strong>Cập nhật tour</strong>.
+            </p>
+
+            <div class="ht-edit-footer-buttons">
+
+                <a asp-controller="QuanTri"
+                   asp-action="QuanLyTour"
+                   class="ht-edit-cancel">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="ht-edit-save">
+
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Cập nhật tour
+
+                </button>
+
+            </div>
+        </footer>
+
     </form>
 </div>
 
-<script src="~/js/upload-anh-tour.js"></script>
-<script src="~/js/tinh-gia-tour.js"></script>
+<script src="~/js/upload-anh-tour.js"
+        asp-append-version="true"></script>
+
 <script>
-    document.querySelectorAll(".remove-current-image").forEach(button => {
-        button.addEventListener("click", () => {
-            const item = button.closest(".preview-item");
-            const checkbox = item.querySelector(".delete-image-checkbox");
-            const radio = item.querySelector("input[type='radio']");
+document.addEventListener("DOMContentLoaded", function () {
 
-            checkbox.checked = !checkbox.checked;
-            item.classList.toggle("is-marked-delete", checkbox.checked);
+    const form = document.getElementById("htEditTourForm");
+    if (!form) return;
 
-            if (checkbox.checked && radio?.checked) {
-                radio.checked = false;
+    /* ==========================================
+       1. PRICE MODE AND CALCULATION
+       ========================================== */
+
+    const originalInput = document.getElementById("giaGoc");
+    const discountInput = document.getElementById("phanTramGiam");
+    const saleInput = document.getElementById("giaKhuyenMai");
+    const salePreview = document.getElementById("htEditSalePreview");
+
+    const adultInput = document.getElementById("htEditAdult");
+    const childInput = document.getElementById("htEditChild");
+    const infantInput = document.getElementById("htEditInfant");
+
+    const priceModeValue = document.getElementById(
+        "htEditPriceModeValue"
+    );
+
+    const modeRadios = Array.from(
+        form.querySelectorAll(".ht-edit-mode-radio")
+    );
+
+    const modeBadge = document.getElementById(
+        "htEditModeBadge"
+    );
+
+    const modeBadgeText = document.getElementById(
+        "htEditModeBadgeText"
+    );
+
+    const modeHelp = document.getElementById(
+        "htEditPriceModeHelp"
+    );
+
+    const formatter = new Intl.NumberFormat("vi-VN", {
+        maximumFractionDigits: 0
+    });
+
+    function positiveNumber(value) {
+        const number = Number(value);
+
+        return Number.isFinite(number)
+            ? Math.max(0, number)
+            : 0;
+    }
+
+    function getDiscount() {
+        return Math.min(
+            100,
+            positiveNumber(discountInput?.value)
+        );
+    }
+
+    function getSalePrice() {
+        const original = positiveNumber(
+            originalInput?.value
+        );
+
+        return Math.round(
+            original * (1 - getDiscount() / 100)
+        );
+    }
+
+    function getPriceMode() {
+        const selected = modeRadios.find(
+            radio => radio.checked
+        );
+
+        return selected?.value === "TuyChinh"
+            ? "TuyChinh"
+            : "TuDong";
+    }
+
+    function syncPriceModeValue() {
+        if (priceModeValue) {
+            priceModeValue.value = getPriceMode();
+        }
+    }
+
+    function calculateSalePreview() {
+        const salePrice = getSalePrice();
+
+        if (saleInput) {
+            saleInput.value = salePrice;
+        }
+
+        if (salePreview) {
+            salePreview.textContent =
+                formatter.format(salePrice) + " đ";
+        }
+
+        return salePrice;
+    }
+
+    // Giá người lớn = giá sau giảm.
+    // Giá trẻ em = 50% người lớn.
+    // Giá em bé = 0.
+    function applyAutomaticPrices() {
+        const salePrice = calculateSalePreview();
+
+        if (adultInput) {
+            adultInput.value = salePrice;
+        }
+
+        if (childInput) {
+            childInput.value = Math.round(
+                salePrice * 0.5
+            );
+        }
+
+        if (infantInput) {
+            infantInput.value = 0;
+        }
+    }
+
+    // Không dùng disabled vì các input vẫn cần
+    // gửi giá trị trong POST lên Controller.
+    function setPriceInputsReadOnly(readonly) {
+        [adultInput, childInput, infantInput]
+            .forEach(function (input) {
+
+                if (input) {
+                    input.readOnly = readonly;
+                }
+            });
+    }
+
+    function updatePriceModeVisual() {
+        const isAuto = getPriceMode() === "TuDong";
+
+        setPriceInputsReadOnly(isAuto);
+
+        if (modeBadge) {
+            modeBadge.classList.toggle(
+                "custom",
+                !isAuto
+            );
+        }
+
+        if (modeBadgeText) {
+            modeBadgeText.textContent = isAuto
+                ? "Đang sử dụng giá tự động"
+                : "Đang sử dụng giá tùy chỉnh";
+        }
+
+        if (modeHelp) {
+            modeHelp.innerHTML = isAuto
+                ? "<strong>Chế độ tự động:</strong> " +
+                  "Người lớn bằng giá sau giảm, " +
+                  "trẻ em bằng 50% người lớn, " +
+                  "em bé bằng 0 đồng."
+                : "<strong>Chế độ tùy chỉnh:</strong> " +
+                  "Có thể nhập mức giá riêng cho " +
+                  "người lớn, trẻ em và em bé. " +
+                  "Thay đổi giảm giá không tự ghi đè " +
+                  "các mức giá này.";
+        }
+
+        syncPriceModeValue();
+    }
+
+    function handlePriceChanged() {
+        calculateSalePreview();
+
+        if (getPriceMode() === "TuDong") {
+            applyAutomaticPrices();
+        }
+    }
+
+    function handleModeChanged() {
+        updatePriceModeVisual();
+
+        // Chỉ tự tính lại khi Admin chọn
+        // chuyển sang chế độ tự động.
+        if (getPriceMode() === "TuDong") {
+            applyAutomaticPrices();
+        } else {
+            calculateSalePreview();
+        }
+    }
+
+    originalInput?.addEventListener(
+        "input",
+        handlePriceChanged
+    );
+
+    discountInput?.addEventListener(
+        "input",
+        handlePriceChanged
+    );
+
+    modeRadios.forEach(function (radio) {
+        radio.addEventListener(
+            "change",
+            handleModeChanged
+        );
+    });
+
+    // Khi vừa mở trang:
+    // giữ nguyên giá đang có nếu đang tùy chỉnh.
+    updatePriceModeVisual();
+
+    if (getPriceMode() === "TuDong") {
+        applyAutomaticPrices();
+    } else {
+        calculateSalePreview();
+    }
+
+    /* ==========================================
+       2. TOUR TOPICS
+       ========================================== */
+
+    const topicCheckboxes = Array.from(
+        form.querySelectorAll(
+            ".ht-edit-topic-checkbox"
+        )
+    );
+
+    const selectedTopicCount = document.getElementById(
+        "htEditSelectedTopicCount"
+    );
+
+    const topicError = document.getElementById(
+        "htEditTopicError"
+    );
+
+    function updateTopicCount() {
+        const count = topicCheckboxes.filter(
+            checkbox => checkbox.checked
+        ).length;
+
+        if (selectedTopicCount) {
+            selectedTopicCount.textContent = count;
+        }
+
+        if (topicError && count > 0) {
+            topicError.style.display = "none";
+        }
+
+        return count;
+    }
+
+    topicCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener(
+            "change",
+            updateTopicCount
+        );
+    });
+
+    updateTopicCount();
+
+    /* ==========================================
+       3. EXISTING IMAGES
+       ========================================== */
+
+    const imageItems = Array.from(
+        form.querySelectorAll(
+            "#htEditExistingPhotos .preview-item"
+        )
+    );
+
+    function getRemainingImages() {
+        return imageItems.filter(function (item) {
+
+            const deleteCheckbox = item.querySelector(
+                ".delete-image-checkbox"
+            );
+
+            return deleteCheckbox && !deleteCheckbox.checked;
+        });
+    }
+
+    imageItems.forEach(function (item) {
+
+        const removeButton = item.querySelector(
+            ".remove-current-image"
+        );
+
+        const deleteCheckbox = item.querySelector(
+            ".delete-image-checkbox"
+        );
+
+        const thumbnailRadio = item.querySelector(
+            "input[name='Thumbnail']"
+        );
+
+        if (!removeButton || !deleteCheckbox) {
+            return;
+        }
+
+        removeButton.addEventListener("click", function () {
+
+            const willDelete = !deleteCheckbox.checked;
+
+            deleteCheckbox.checked = willDelete;
+
+            item.classList.toggle(
+                "is-marked-delete",
+                willDelete
+            );
+
+            if (willDelete && thumbnailRadio?.checked) {
+                thumbnailRadio.checked = false;
             }
+
+            if (thumbnailRadio) {
+                thumbnailRadio.disabled = willDelete;
+            }
+
+            removeButton.title = willDelete
+                ? "Bỏ đánh dấu xóa ảnh"
+                : "Đánh dấu xóa ảnh";
+
+            removeButton.setAttribute(
+                "aria-label",
+                removeButton.title
+            );
         });
     });
+
+    /* ==========================================
+       4. UPLOAD IMAGE KEYBOARD SUPPORT
+       ========================================== */
+
+    const dropZone = document.getElementById(
+        "drop-zone"
+    );
+
+    const fileInput = document.getElementById(
+        "fileInput"
+    );
+
+    dropZone?.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.target === dropZone &&
+                (
+                    event.key === "Enter" ||
+                    event.key === " "
+                )
+            ) {
+                event.preventDefault();
+                fileInput?.click();
+            }
+        }
+    );
+
+    /* ==========================================
+       5. FORM SUBMIT
+       ========================================== */
+
+    form.addEventListener("submit", function (event) {
+
+        // Đồng bộ dữ liệu giá ngay trước POST.
+        syncPriceModeValue();
+
+        calculateSalePreview();
+
+        if (getPriceMode() === "TuDong") {
+            applyAutomaticPrices();
+        }
+
+        // Phải chọn ít nhất một chủ đề.
+        const selectedCount = updateTopicCount();
+
+        if (selectedCount === 0) {
+            event.preventDefault();
+
+            if (topicError) {
+                topicError.style.display = "block";
+            }
+
+            document.getElementById(
+                "htEditTopicGrid"
+            )?.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            return;
+        }
+
+        // Nếu ảnh đại diện đã bị đánh dấu xóa,
+        // chọn ảnh cũ đầu tiên còn lại.
+        const selectedThumbnail = form.querySelector(
+            "input[name='Thumbnail']:checked"
+        );
+
+        if (!selectedThumbnail) {
+            const availableImages = getRemainingImages();
+
+            if (availableImages.length > 0) {
+                const firstRadio = availableImages[0]
+                    .querySelector(
+                        "input[name='Thumbnail']"
+                    );
+
+                if (firstRadio) {
+                    firstRadio.checked = true;
+                }
+            }
+        }
+    });
+
+});
 </script>

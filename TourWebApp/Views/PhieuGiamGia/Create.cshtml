@@ -1,134 +1,1091 @@
-﻿@model TourWebApp.Data.Models.PhieuGiamGia
+﻿
+@model TourWebApp.Data.Models.PhieuGiamGia
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Tạo phiếu giảm giá";
+
     var dsTour = ViewBag.DsTour as IEnumerable<dynamic>;
     var dsLoaiTour = ViewBag.DsLoaiTour as IEnumerable<dynamic>;
 }
 
-<h3 class="fw-bold mb-3">Tạo phiếu giảm giá</h3>
+<style>
+    .htvc-create-page {
+        width: 100%;
+        max-width: 1250px;
+        margin: 0 auto;
+        padding-bottom: 24px;
+        font-family: inherit;
+        color: #204934;
+    }
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <form asp-action="Create" method="post" class="row g-3">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .htvc-create-page * {
+        box-sizing: border-box;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="MaPhieu" class="form-label">Mã phiếu</label>
-                <input asp-for="MaPhieu" class="form-control" placeholder="VD: HAPPY20" />
-                <span asp-validation-for="MaPhieu" class="text-danger small"></span>
-            </div>
+    .htvc-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 23px;
+    }
 
-            <div class="col-md-8">
-                <label asp-for="TenPhieu" class="form-label">Tên phiếu</label>
-                <input asp-for="TenPhieu" class="form-control" placeholder="Giảm 20% cho tour mùa hè" />
-                <span asp-validation-for="TenPhieu" class="text-danger small"></span>
-            </div>
+    .htvc-page-header h1 {
+        margin: 0 0 7px;
+        color: #174b34;
+        font-size: clamp(23px, 2.3vw, 30px);
+        font-weight: 800;
+        letter-spacing: -.7px;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="LoaiGiam" class="form-label">Loại giảm</label>
-                <select asp-for="LoaiGiam" class="form-select">
-                    <option value="PhanTram">Phần trăm (%)</option>
-                    <option value="TienMat">Tiền mặt (VND)</option>
-                </select>
-            </div>
+    .htvc-page-header p {
+        margin: 0;
+        color: #7b9082;
+        font-size: 13px;
+        line-height: 1.6;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="GiaTriGiam" class="form-label">Giá trị giảm</label>
-                <input asp-for="GiaTriGiam" type="number" step="0.01" min="0" class="form-control" />
-                <span asp-validation-for="GiaTriGiam" class="text-danger small"></span>
-            </div>
+    .htvc-back-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 9px 14px;
+        border: 1px solid #dce8de;
+        border-radius: 11px;
+        background: #fff;
+        color: #436b51;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="DonToiThieu" class="form-label">Đơn tối thiểu</label>
-                <input asp-for="DonToiThieu" type="number" min="0" class="form-control" />
-            </div>
+    .htvc-back-link:hover {
+        color: #187949;
+        background: #eff8ef;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="GiamToiDa" class="form-label">Giảm tối đa</label>
-                <input asp-for="GiamToiDa" type="number" min="0" class="form-control" />
-            </div>
+    .htvc-form-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="NgayBatDau" class="form-label">Ngày bắt đầu</label>
-                <input asp-for="NgayBatDau" type="datetime-local" class="form-control" value="@(Model.NgayBatDau?.ToString("yyyy-MM-ddTHH:mm"))" />
-            </div>
+    .htvc-section {
+        min-width: 0;
+        padding: 23px 25px;
+        border: 1px solid #e3ece3;
+        border-radius: 19px;
+        background: #fff;
+        box-shadow: 0 8px 26px rgba(33, 77, 47, .045);
+    }
 
-            <div class="col-md-3">
-                <label asp-for="NgayKetThuc" class="form-label">Ngày kết thúc</label>
-                <input asp-for="NgayKetThuc" type="datetime-local" class="form-control" value="@(Model.NgayKetThuc?.ToString("yyyy-MM-ddTHH:mm"))" />
-                <span asp-validation-for="NgayKetThuc" class="text-danger small"></span>
-            </div>
+    .htvc-section-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 21px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #edf2ec;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="TongLuotSuDung" class="form-label">Tổng lượt sử dụng</label>
-                <input asp-for="TongLuotSuDung" type="number" min="1" class="form-control" />
-            </div>
+    .htvc-section-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: #e8f5eb;
+        color: #238b53;
+        font-size: 18px;
+    }
 
-            <div class="col-md-3">
-                <label asp-for="LuotToiDaMoiTaiKhoan" class="form-label">Lượt mỗi tài khoản</label>
-                <input asp-for="LuotToiDaMoiTaiKhoan" type="number" min="1" class="form-control" />
-                <span asp-validation-for="LuotToiDaMoiTaiKhoan" class="text-danger small"></span>
-            </div>
+    .htvc-section-icon.gold {
+        background: #fff5dd;
+        color: #d49c22;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="PhamViApDung" class="form-label">Phạm vi áp dụng</label>
-                <select asp-for="PhamViApDung" class="form-select">
-                    <option value="TatCa">Tất cả tour</option>
-                    <option value="Tour">Theo tour</option>
-                    <option value="LoaiTour">Theo loại tour</option>
-                </select>
-            </div>
+    .htvc-section-heading h2 {
+        margin: 0 0 3px;
+        color: #204e37;
+        font-size: 16px;
+        font-weight: 800;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="IdTour" class="form-label">Tour áp dụng</label>
-                <select asp-for="IdTour" class="form-select">
-                    <option value="">-- Chọn tour --</option>
-                    @if (dsTour != null)
-                    {
-                        foreach (var t in dsTour)
-                        {
-                            <option value="@t.IdTour" selected="@t.Selected">@t.TenTour</option>
-                        }
-                    }
-                </select>
-                <span asp-validation-for="IdTour" class="text-danger small"></span>
-            </div>
+    .htvc-section-heading p {
+        margin: 0;
+        color: #87988c;
+        font-size: 11px;
+        line-height: 1.6;
+    }
 
-            <div class="col-md-4">
-                <label asp-for="IdLoaiTour" class="form-label">Loại tour áp dụng</label>
-                <select asp-for="IdLoaiTour" class="form-select">
-                    <option value="">-- Chọn loại tour --</option>
-                    @if (dsLoaiTour != null)
-                    {
-                        foreach (var l in dsLoaiTour)
-                        {
-                            <option value="@l.IdLoaiTour" selected="@l.Selected">@l.TenLoai</option>
-                        }
-                    }
-                </select>
-                <span asp-validation-for="IdLoaiTour" class="text-danger small"></span>
-            </div>
+    .htvc-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 17px 18px;
+    }
 
-            <div class="col-12">
-                <label asp-for="MoTa" class="form-label">Mô tả</label>
-                <textarea asp-for="MoTa" rows="3" class="form-control" placeholder="Điều kiện và lưu ý sử dụng phiếu"></textarea>
-            </div>
+    .htvc-col-4 {
+        grid-column: span 4;
+    }
 
-            <div class="col-12 form-check ms-2">
-                <input asp-for="TrangThai" class="form-check-input" />
-                <label asp-for="TrangThai" class="form-check-label">Kích hoạt ngay sau khi tạo</label>
-            </div>
+    .htvc-col-6 {
+        grid-column: span 6;
+    }
 
-            <div class="col-12 d-flex gap-2">
-                <button class="btn btn-success" type="submit">Lưu phiếu</button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
-            </div>
-        </form>
+    .htvc-col-8 {
+        grid-column: span 8;
+    }
+
+    .htvc-col-12 {
+        grid-column: span 12;
+    }
+
+    .htvc-field {
+        min-width: 0;
+    }
+
+    .htvc-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #355f46;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .htvc-required {
+        margin-left: 3px;
+        color: #d77a57;
+    }
+
+    .htvc-field .form-control,
+    .htvc-field .form-select {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 13px;
+        border: 1px solid #dae7dc;
+        border-radius: 11px;
+        background-color: #fcfdfb;
+        color: #244d36;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: none;
+    }
+
+    .htvc-field .form-control:focus,
+    .htvc-field .form-select:focus {
+        border-color: #56ad78;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(50, 150, 85, .1);
+    }
+
+    .htvc-field .form-control::placeholder {
+        color: #a0b1a4;
+        font-weight: 400;
+    }
+
+    .htvc-field textarea.form-control {
+        min-height: 107px;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+    .htvc-hint {
+        display: block;
+        margin-top: 7px;
+        color: #899c8e;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htvc-field .text-danger {
+        display: block;
+        margin-top: 6px;
+        font-size: 11px;
+    }
+
+    .htvc-validation-summary {
+        padding: 12px 15px;
+        border-radius: 11px;
+        background: #fff0ed;
+        color: #b4493c;
+        font-size: 12px;
+    }
+
+    .htvc-validation-summary.validation-summary-valid {
+        display: none;
+    }
+
+    .htvc-discount-highlight {
+        position: relative;
+    }
+
+    .htvc-discount-highlight .form-control {
+        padding-right: 62px;
+        color: #177746;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .htvc-discount-unit {
+        position: absolute;
+        right: 13px;
+        top: 37px;
+        z-index: 2;
+        color: #74917e;
+        font-size: 11px;
+        font-weight: 800;
+        pointer-events: none;
+    }
+
+    .htvc-scope-options {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .htvc-scope-choice {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        min-height: 58px;
+        padding: 12px;
+        border: 1px solid #dfe9e0;
+        border-radius: 12px;
+        background: #fafcf9;
+        color: #456c53;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    .htvc-scope-choice:has(input:checked) {
+        border-color: #74bd8d;
+        background: #ecf8ef;
+        color: #167a48;
+        box-shadow: 0 0 0 2px rgba(47, 150, 83, .06);
+    }
+
+    .htvc-scope-choice input {
+        accent-color: #258b54;
+        flex-shrink: 0;
+    }
+
+    .htvc-scope-choice i {
+        color: #3d9965;
+        font-size: 15px;
+    }
+
+    .htvc-scope-detail {
+        padding: 17px;
+        border: 1px solid #e2ece1;
+        border-radius: 12px;
+        background: #f8fcf8;
+    }
+
+    .htvc-scope-detail[hidden] {
+        display: none !important;
+    }
+
+    .htvc-scope-message {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #4b7859;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.6;
+    }
+
+    .htvc-scope-message i {
+        color: #279a5a;
+        font-size: 16px;
+    }
+
+    .htvc-status-box {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 16px;
+        border: 1px solid #dbece0;
+        border-radius: 12px;
+        background: #f2faf3;
+    }
+
+    .htvc-status-box input {
+        width: 19px;
+        height: 19px;
+        margin: 0;
+        flex-shrink: 0;
+        accent-color: #238d55;
+    }
+
+    .htvc-status-box label {
+        display: block;
+        margin-bottom: 3px;
+        color: #226b44;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .htvc-status-box small {
+        color: #748d7a;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htvc-form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 18px 23px;
+        border: 1px solid #e1eae0;
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    .htvc-action-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #86998a;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .htvc-action-note i {
+        color: #2b9860;
+    }
+
+    .htvc-action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .htvc-btn-save,
+    .htvc-btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 19px;
+        border-radius: 11px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .htvc-btn-save {
+        border: 0;
+        background: linear-gradient(135deg, #30a567, #187d4b);
+        color: #fff;
+        box-shadow: 0 5px 14px rgba(37, 141, 81, .15);
+    }
+
+    .htvc-btn-save:hover {
+        background: #176f43;
+        color: #fff;
+    }
+
+    .htvc-btn-cancel {
+        border: 1px solid #dce8de;
+        background: #fff;
+        color: #52705b;
+    }
+
+    .htvc-btn-cancel:hover {
+        background: #f0f7ef;
+        color: #197347;
+    }
+
+    @@media (max-width: 991.98px) {
+        .htvc-section {
+            padding: 20px;
+        }
+
+        .htvc-col-4 {
+            grid-column: span 6;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .htvc-page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .htvc-grid {
+            gap: 15px;
+        }
+
+        .htvc-col-4,
+        .htvc-col-6,
+        .htvc-col-8 {
+            grid-column: span 12;
+        }
+
+        .htvc-scope-options {
+            grid-template-columns: 1fr;
+        }
+
+        .htvc-section {
+            padding: 17px;
+            border-radius: 14px;
+        }
+
+        .htvc-form-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .htvc-action-buttons {
+            width: 100%;
+        }
+
+        .htvc-btn-save,
+        .htvc-btn-cancel {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="htvc-create-page">
+
+    <div class="htvc-page-header">
+        <div>
+            <h1>Tạo phiếu giảm giá</h1>
+            <p>Thiết lập chương trình ưu đãi mới cho khách hàng HappyTrip.</p>
+        </div>
+
+        <a asp-action="Index" class="htvc-back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            Quay lại danh sách
+        </a>
     </div>
+
+    <form asp-action="Create"
+          method="post"
+          id="htVoucherCreateForm"
+          class="htvc-form-shell">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="htvc-validation-summary text-danger">
+        </div>
+
+        <section class="htvc-section">
+
+            <div class="htvc-section-heading">
+                <div class="htvc-section-icon">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+
+                <div>
+                    <h2>01. Thông tin cơ bản</h2>
+                    <p>Mã phiếu và tên hiển thị của chương trình ưu đãi.</p>
+                </div>
+            </div>
+
+            <div class="htvc-grid">
+
+                <div class="htvc-field htvc-col-4">
+                    <label asp-for="MaPhieu" class="htvc-label">
+                        Mã phiếu
+                        <span class="htvc-required">*</span>
+                    </label>
+
+                    <input asp-for="MaPhieu"
+                           class="form-control"
+                           placeholder="VD: HAPPY20"
+                           autocomplete="off" />
+
+                    <small class="htvc-hint">
+                        Mã sẽ được chuẩn hóa thành chữ in hoa khi lưu.
+                    </small>
+
+                    <span asp-validation-for="MaPhieu"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-8">
+                    <label asp-for="TenPhieu" class="htvc-label">
+                        Tên chương trình ưu đãi
+                        <span class="htvc-required">*</span>
+                    </label>
+
+                    <input asp-for="TenPhieu"
+                           class="form-control"
+                           placeholder="VD: Giảm 20% cho tour mùa hè" />
+
+                    <small class="htvc-hint">
+                        Đặt tên ngắn gọn, dễ hiểu với khách hàng.
+                    </small>
+
+                    <span asp-validation-for="TenPhieu"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="htvc-section">
+
+            <div class="htvc-section-heading">
+                <div class="htvc-section-icon gold">
+                    <i class="fa-solid fa-percent"></i>
+                </div>
+
+                <div>
+                    <h2>02. Thiết lập giá trị giảm</h2>
+                    <p>Cấu hình mức ưu đãi và điều kiện giá trị đơn hàng.</p>
+                </div>
+            </div>
+
+            <div class="htvc-grid">
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="LoaiGiam" class="htvc-label">
+                        Loại giảm
+                    </label>
+
+                    <select asp-for="LoaiGiam"
+                            class="form-select"
+                            id="htvcLoaiGiam">
+
+                        <option value="PhanTram">Phần trăm (%)</option>
+                        <option value="TienMat">Tiền mặt (VNĐ)</option>
+
+                    </select>
+
+                    <span asp-validation-for="LoaiGiam"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-6 htvc-discount-highlight">
+                    <label asp-for="GiaTriGiam" class="htvc-label">
+                        Giá trị giảm
+                        <span class="htvc-required">*</span>
+                    </label>
+
+                    <input asp-for="GiaTriGiam"
+                           type="number"
+                           min="0.01"
+                           step="0.01"
+                           class="form-control"
+                           id="htvcGiaTriGiam" />
+
+                    <span class="htvc-discount-unit"
+                          id="htvcDiscountUnit">
+                        %
+                    </span>
+
+                    <span asp-validation-for="GiaTriGiam"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="DonToiThieu" class="htvc-label">
+                        Giá trị đơn tối thiểu
+                    </label>
+
+                    <input asp-for="DonToiThieu"
+                           type="number"
+                           min="0"
+                           step="1"
+                           class="form-control" />
+
+                    <small class="htvc-hint">
+                        Nhập 0 nếu không yêu cầu giá trị đơn tối thiểu.
+                    </small>
+
+                    <span asp-validation-for="DonToiThieu"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="GiamToiDa" class="htvc-label">
+                        Số tiền giảm tối đa
+                    </label>
+
+                    <input asp-for="GiamToiDa"
+                           type="number"
+                           min="0"
+                           step="1"
+                           class="form-control" />
+
+                    <small class="htvc-hint">
+                        Dùng để giới hạn số tiền được giảm.
+                        Để trống nếu không giới hạn.
+                    </small>
+
+                    <span asp-validation-for="GiamToiDa"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="htvc-section">
+
+            <div class="htvc-section-heading">
+                <div class="htvc-section-icon">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+
+                <div>
+                    <h2>03. Thời hạn và lượt sử dụng</h2>
+                    <p>Quy định thời điểm và số lượt được phép áp dụng voucher.</p>
+                </div>
+            </div>
+
+            <div class="htvc-grid">
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="NgayBatDau" class="htvc-label">
+                        Ngày bắt đầu
+                    </label>
+
+                    <input asp-for="NgayBatDau"
+                           type="datetime-local"
+                           class="form-control"
+                           id="htvcNgayBatDau"
+                           value="@(Model.NgayBatDau?.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                    <span asp-validation-for="NgayBatDau"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="NgayKetThuc" class="htvc-label">
+                        Ngày kết thúc
+                    </label>
+
+                    <input asp-for="NgayKetThuc"
+                           type="datetime-local"
+                           class="form-control"
+                           id="htvcNgayKetThuc"
+                           value="@(Model.NgayKetThuc?.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                    <span asp-validation-for="NgayKetThuc"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="TongLuotSuDung" class="htvc-label">
+                        Tổng lượt sử dụng
+                    </label>
+
+                    <input asp-for="TongLuotSuDung"
+                           type="number"
+                           min="1"
+                           step="1"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+
+                    <small class="htvc-hint">
+                        Để trống nếu không giới hạn tổng lượt sử dụng.
+                    </small>
+
+                    <span asp-validation-for="TongLuotSuDung"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-field htvc-col-6">
+                    <label asp-for="LuotToiDaMoiTaiKhoan"
+                           class="htvc-label">
+                        Lượt tối đa mỗi tài khoản
+                    </label>
+
+                    <input asp-for="LuotToiDaMoiTaiKhoan"
+                           type="number"
+                           min="1"
+                           step="1"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+
+                    <small class="htvc-hint">
+                        Để trống nếu không giới hạn lượt dùng mỗi tài khoản.
+                    </small>
+
+                    <span asp-validation-for="LuotToiDaMoiTaiKhoan"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="htvc-section">
+
+            <div class="htvc-section-heading">
+                <div class="htvc-section-icon gold">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+
+                <div>
+                    <h2>04. Phạm vi áp dụng</h2>
+                    <p>Chỉ định các tour được sử dụng chương trình ưu đãi.</p>
+                </div>
+            </div>
+
+            <div class="htvc-scope-options">
+
+                <label class="htvc-scope-choice">
+                    <input type="radio"
+                           name="htvcScopeChoice"
+                           value="TatCa"
+                           checked="@(Model.PhamViApDung == "TatCa")" />
+
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Tất cả tour</span>
+                </label>
+
+                <label class="htvc-scope-choice">
+                    <input type="radio"
+                           name="htvcScopeChoice"
+                           value="Tour"
+                           checked="@(Model.PhamViApDung == "Tour")" />
+
+                    <i class="fa-solid fa-route"></i>
+                    <span>Một tour cụ thể</span>
+                </label>
+
+                <label class="htvc-scope-choice">
+                    <input type="radio"
+                           name="htvcScopeChoice"
+                           value="LoaiTour"
+                           checked="@(Model.PhamViApDung == "LoaiTour")" />
+
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Theo loại tour</span>
+                </label>
+
+            </div>
+
+            <input asp-for="PhamViApDung"
+                   type="hidden"
+                   id="htvcPhamViApDung" />
+
+            <div class="htvc-scope-detail"
+                 id="htvcScopeAll">
+
+                <div class="htvc-scope-message">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>
+                        Phiếu này sẽ áp dụng cho tất cả tour
+                        đáp ứng điều kiện giảm giá.
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="htvc-scope-detail"
+                 id="htvcScopeTour"
+                 hidden>
+
+                <div class="htvc-field">
+                    <label asp-for="IdTour" class="htvc-label">
+                        Chọn tour áp dụng
+                    </label>
+
+                    <select asp-for="IdTour"
+                            class="form-select"
+                            id="htvcIdTour">
+
+                        <option value="">-- Chọn tour --</option>
+
+                        @if (dsTour != null)
+                        {
+                            foreach (var t in dsTour)
+                            {
+                                <option value="@t.IdTour"
+                                        selected="@t.Selected">
+                                    @t.TenTour
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                    <span asp-validation-for="IdTour"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="htvc-scope-detail"
+                 id="htvcScopeLoaiTour"
+                 hidden>
+
+                <div class="htvc-field">
+                    <label asp-for="IdLoaiTour" class="htvc-label">
+                        Chọn loại tour áp dụng
+                    </label>
+
+                    <select asp-for="IdLoaiTour"
+                            class="form-select"
+                            id="htvcIdLoaiTour">
+
+                        <option value="">-- Chọn loại tour --</option>
+
+                        @if (dsLoaiTour != null)
+                        {
+                            foreach (var l in dsLoaiTour)
+                            {
+                                <option value="@l.IdLoaiTour"
+                                        selected="@l.Selected">
+                                    @l.TenLoai
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                    <span asp-validation-for="IdLoaiTour"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <span asp-validation-for="PhamViApDung"
+                  class="text-danger small"></span>
+
+        </section>
+
+        <section class="htvc-section">
+
+            <div class="htvc-section-heading">
+                <div class="htvc-section-icon">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <div>
+                    <h2>05. Mô tả và trạng thái</h2>
+                    <p>Bổ sung ghi chú và quyết định bật hoặc tắt phiếu.</p>
+                </div>
+            </div>
+
+            <div class="htvc-grid">
+
+                <div class="htvc-field htvc-col-12">
+
+                    <label asp-for="MoTa" class="htvc-label">
+                        Mô tả chương trình
+                    </label>
+
+                    <textarea asp-for="MoTa"
+                              rows="4"
+                              class="form-control"
+                              placeholder="Nhập điều kiện và lưu ý khi sử dụng phiếu..."></textarea>
+
+                    <span asp-validation-for="MoTa"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="htvc-col-12">
+
+                    <div class="htvc-status-box">
+
+                        <input asp-for="TrangThai"
+                               id="htvcTrangThai" />
+
+                        <div>
+                            <label for="htvcTrangThai">
+                                Kích hoạt phiếu sau khi tạo
+                            </label>
+
+                            <small>
+                                Phiếu được bật nhưng vẫn phải đáp ứng
+                                thời hạn, giới hạn và điều kiện áp dụng.
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <div class="htvc-form-actions">
+
+            <div class="htvc-action-note">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>
+                    Thông tin sẽ được kiểm tra trước khi lưu.
+                </span>
+            </div>
+
+            <div class="htvc-action-buttons">
+
+                <a asp-action="Index"
+                   class="htvc-btn-cancel">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="htvc-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Lưu phiếu
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById(
+                "htVoucherCreateForm"
+            );
+
+            const scopeInput = document.getElementById(
+                "htvcPhamViApDung"
+            );
+
+            const scopeRadios = document.querySelectorAll(
+                'input[name="htvcScopeChoice"]'
+            );
+
+            const scopeAll = document.getElementById(
+                "htvcScopeAll"
+            );
+
+            const scopeTour = document.getElementById(
+                "htvcScopeTour"
+            );
+
+            const scopeLoaiTour = document.getElementById(
+                "htvcScopeLoaiTour"
+            );
+
+            const tourSelect = document.getElementById(
+                "htvcIdTour"
+            );
+
+            const loaiTourSelect = document.getElementById(
+                "htvcIdLoaiTour"
+            );
+
+            const loaiGiam = document.getElementById(
+                "htvcLoaiGiam"
+            );
+
+            const giaTriGiam = document.getElementById(
+                "htvcGiaTriGiam"
+            );
+
+            const discountUnit = document.getElementById(
+                "htvcDiscountUnit"
+            );
+
+            const ngayBatDau = document.getElementById(
+                "htvcNgayBatDau"
+            );
+
+            const ngayKetThuc = document.getElementById(
+                "htvcNgayKetThuc"
+            );
+
+            function updateScope() {
+                const selected = Array.from(scopeRadios)
+                    .find(radio => radio.checked)?.value || "TatCa";
+
+                scopeInput.value = selected;
+
+                scopeAll.hidden = selected !== "TatCa";
+                scopeTour.hidden = selected !== "Tour";
+                scopeLoaiTour.hidden = selected !== "LoaiTour";
+
+                tourSelect.disabled = selected !== "Tour";
+                loaiTourSelect.disabled = selected !== "LoaiTour";
+
+                tourSelect.required = selected === "Tour";
+                loaiTourSelect.required = selected === "LoaiTour";
+            }
+
+            function updateDiscountType() {
+                const isPercentage =
+                    loaiGiam.value === "PhanTram";
+
+                discountUnit.textContent =
+                    isPercentage ? "%" : "VNĐ";
+
+                giaTriGiam.max =
+                    isPercentage ? "100" : "";
+            }
+
+            function validateDates() {
+                ngayKetThuc.setCustomValidity("");
+
+                if (
+                    ngayBatDau.value &&
+                    ngayKetThuc.value &&
+                    ngayKetThuc.value < ngayBatDau.value
+                ) {
+                    ngayKetThuc.setCustomValidity(
+                        "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu."
+                    );
+                }
+            }
+
+            scopeRadios.forEach(function (radio) {
+                radio.addEventListener(
+                    "change",
+                    updateScope
+                );
+            });
+
+            loaiGiam.addEventListener(
+                "change",
+                updateDiscountType
+            );
+
+            ngayBatDau.addEventListener(
+                "change",
+                validateDates
+            );
+
+            ngayKetThuc.addEventListener(
+                "change",
+                validateDates
+            );
+
+            form.addEventListener("submit", function () {
+                updateScope();
+                validateDates();
+            });
+
+            updateScope();
+            updateDiscountType();
+            validateDates();
+        });
+    </script>
 }

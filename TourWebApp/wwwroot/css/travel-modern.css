@@ -1569,3 +1569,429 @@ h6 {
         width: 100%;
     }
 }
+
+/* ========================================================
+   HAPPYTRIP NAVBAR - FINAL LIGHT NAVY
+   Giao dien navbar gon, nhe, hien dai
+   ======================================================== */
+
+body.travel-body > .travel-navbar-wrap {
+    position: sticky;
+    top: 0;
+    left: auto;
+    right: auto;
+    width: 100%;
+    z-index: 1050;
+}
+
+body.travel-body > .travel-navbar-wrap + .travel-main {
+    padding-top: 0;
+}
+
+/* NAVBAR */
+body.travel-body .travel-navbar {
+    min-height: 68px;
+    padding: 10px 0;
+    background: rgba(15, 67, 78, 0.94);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 3px 14px rgba(7, 35, 42, 0.09);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+body.travel-body .travel-navbar > .travel-container {
+    width: min(1280px, calc(100% - 44px));
+    max-width: 1280px;
+}
+
+/* LOGO */
+body.travel-body .travel-navbar .travel-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+    margin-right: 20px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+body.travel-body .travel-navbar .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #ffdf81;
+    box-shadow: none;
+    transform: rotate(-8deg);
+}
+
+body.travel-body .travel-navbar .brand-mark svg {
+    display: block;
+    width: 25px;
+    height: 25px;
+}
+
+body.travel-body .travel-navbar .brand-text {
+    color: #ffffff;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 750;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+}
+
+/* MENU */
+body.travel-body .travel-navbar .travel-main-nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 1.2vw, 20px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.travel-body .travel-navbar .travel-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* MENU LINKS */
+body.travel-body .travel-navbar .travel-nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 39px;
+    padding: 9px !important;
+    border-radius: 0;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.89) !important;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-shadow: none;
+    white-space: nowrap;
+    transform: none !important;
+    transition: color 0.2s ease;
+}
+
+body.travel-body .travel-navbar .travel-nav-link::after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 999px;
+    background: #ffdc70;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.2s ease;
+}
+
+body.travel-body .travel-navbar .travel-nav-link:hover,
+body.travel-body .travel-navbar .travel-nav-link.is-active {
+    color: #ffffff !important;
+    background: transparent !important;
+    transform: none !important;
+}
+
+body.travel-body .travel-navbar .travel-nav-link:hover::after,
+body.travel-body .travel-navbar .travel-nav-link.is-active::after {
+    transform: scaleX(1);
+}
+
+/* VOUCHER AND WISHLIST ICONS */
+body.travel-body .travel-navbar .travel-icon-link {
+    display: inline-grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #f9fbfb;
+    font-size: 16px;
+    text-decoration: none;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+body.travel-body .travel-navbar .travel-icon-link:hover,
+body.travel-body .travel-navbar .travel-icon-link.is-active {
+    color: #ffdc70;
+    background: rgba(255, 255, 255, 0.08);
+    transform: none;
+}
+
+/* BOOKING AND ACCOUNT BUTTONS */
+body.travel-body .travel-navbar .travel-book-btn,
+body.travel-body .travel-navbar .travel-account-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 16px;
+    border: 1px solid #ffe08a;
+    border-radius: 999px;
+    background: #ffe08a;
+    color: #143d40;
+    box-shadow: none;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.2;
+    white-space: nowrap;
+    transform: none;
+    transition: background-color 0.2s ease;
+}
+
+body.travel-body .travel-navbar .travel-book-btn:hover,
+body.travel-body .travel-navbar .travel-account-btn:hover {
+    background: #fff0bb;
+    color: #143d40;
+    border-color: #fff0bb;
+    box-shadow: none;
+    transform: none;
+}
+
+body.travel-body .travel-navbar .travel-account-btn {
+    max-width: 210px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.travel-body .travel-navbar .travel-account-avatar {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 25px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #0d5a57;
+    color: #ffffff;
+}
+
+/* ACCOUNT DROPDOWN */
+body.travel-body .travel-navbar .travel-account-menu {
+    min-width: 245px;
+    margin-top: 9px;
+    padding: 9px;
+    border: 1px solid #e7e8e1;
+    border-radius: 15px;
+    background: #fffefa;
+    box-shadow: 0 14px 36px rgba(5, 30, 37, 0.15);
+}
+
+body.travel-body .travel-navbar .travel-account-menu-header {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 9px 11px;
+    color: #173f37;
+}
+
+body.travel-body .travel-navbar .travel-account-menu-header small {
+    color: #70877c;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+body.travel-body .travel-navbar .travel-account-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 11px;
+    border-radius: 9px;
+    color: #25493f;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+body.travel-body .travel-navbar .travel-account-menu .dropdown-item i {
+    width: 17px;
+    text-align: center;
+    color: #28745e;
+}
+
+body.travel-body .travel-navbar .travel-account-menu .dropdown-item:hover {
+    background: #eff6ef;
+}
+
+body.travel-body .travel-navbar .travel-account-menu .dropdown-item.text-danger,
+body.travel-body .travel-navbar .travel-account-menu .dropdown-item.text-danger i {
+    color: #be3742 !important;
+}
+
+/* KEYBOARD ACCESSIBILITY */
+body.travel-body .travel-navbar a:focus-visible,
+body.travel-body .travel-navbar button:focus-visible {
+    outline: 3px solid #ffe08a;
+    outline-offset: 3px;
+}
+
+/* LAPTOP */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    body.travel-body .travel-navbar > .travel-container {
+        width: calc(100% - 30px);
+    }
+
+    body.travel-body .travel-navbar .brand-text {
+        font-size: 19px;
+    }
+
+    body.travel-body .travel-navbar .travel-nav-link {
+        padding-inline: 6px !important;
+        font-size: 12px;
+    }
+
+    body.travel-body .travel-navbar .travel-main-nav {
+        gap: 5px;
+    }
+
+    body.travel-body .travel-navbar .travel-nav-actions {
+        gap: 4px;
+    }
+}
+
+/* TABLET AND MOBILE */
+@media (max-width: 991.98px) {
+    body.travel-body .travel-navbar {
+        min-height: 64px;
+        padding: 9px 0;
+        background: rgba(15, 67, 78, 0.97);
+    }
+
+    body.travel-body .travel-navbar > .travel-container {
+        width: calc(100% - 32px);
+    }
+
+    body.travel-body .travel-navbar .travel-navbar-toggler {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        margin-left: auto;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.07);
+        color: #ffffff;
+    }
+
+    body.travel-body .travel-navbar .travel-navbar-toggler i {
+        color: #ffffff;
+    }
+
+    body.travel-body .travel-navbar #travelMainNav {
+        flex-basis: 100%;
+        width: 100%;
+        max-height: calc(100dvh - 75px);
+        overflow-y: auto;
+        padding-top: 12px;
+    }
+
+    body.travel-body .travel-navbar .travel-main-nav,
+    body.travel-body .travel-navbar .travel-nav-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 3px;
+    }
+
+    body.travel-body .travel-navbar .travel-nav-link {
+        justify-content: flex-start;
+        min-height: 42px;
+        padding: 10px 12px !important;
+        font-size: 14px;
+    }
+
+    body.travel-body .travel-navbar .travel-nav-link::after {
+        left: 12px;
+        right: auto;
+        width: 35px;
+        transform-origin: left;
+    }
+
+    body.travel-body .travel-navbar .travel-nav-actions {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    body.travel-body .travel-navbar .travel-book-btn,
+    body.travel-body .travel-navbar .travel-account-btn {
+        width: 100%;
+        max-width: none;
+        justify-content: center;
+    }
+
+    body.travel-body .travel-navbar .travel-icon-link {
+        display: none;
+    }
+
+    body.travel-body .travel-navbar .travel-account-menu {
+        position: static;
+        margin-top: 7px;
+        max-width: 100%;
+    }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 420px) {
+    body.travel-body .travel-navbar .brand-text {
+        font-size: 19px;
+    }
+
+    body.travel-body .travel-navbar .brand-mark {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+    body.travel-body .travel-navbar *,
+    body.travel-body .travel-navbar *::before,
+    body.travel-body .travel-navbar *::after {
+        transition: none !important;
+    }
+}
+
+/* ==========================================
+   HAPPYTRIP - NAVBAR CUNG MAU FOOTER
+   ========================================== */
+
+body.travel-body > .travel-navbar-wrap,
+body.travel-body > .travel-navbar-wrap .travel-navbar,
+body.travel-body > .travel-navbar-wrap .ht-navbar {
+    background: linear-gradient(
+        140deg,
+        #1d2e27,
+        #2e463b
+    ) !important;
+
+    background-color: #1d2e27 !important;
+    background-image: linear-gradient(
+        140deg,
+        #1d2e27,
+        #2e463b
+    ) !important;
+
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}

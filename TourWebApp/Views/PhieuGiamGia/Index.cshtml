@@ -1,140 +1,838 @@
-﻿@model List<TourWebApp.Data.Models.PhieuGiamGia>
+﻿
+@model List<TourWebApp.Data.Models.PhieuGiamGia>
+
 @{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Phiếu giảm giá";
+
     var trangThai = (ViewBag.TrangThai as string ?? "tatca").ToLowerInvariant();
+    var danhSach = Model ?? new List<TourWebApp.Data.Models.PhieuGiamGia>();
+    var now = DateTime.Now;
+
+    var tongPhieu = danhSach.Count;
+
+    var dangHieuLuc = danhSach.Count(x =>
+        x.TrangThai &&
+        (!x.NgayBatDau.HasValue || x.NgayBatDau.Value <= now) &&
+        (!x.NgayKetThuc.HasValue || x.NgayKetThuc.Value >= now)
+    );
+
+    var tamKhoa = danhSach.Count(x => !x.TrangThai);
+
+    var daHetHan = danhSach.Count(x =>
+        x.NgayKetThuc.HasValue &&
+        x.NgayKetThuc.Value < now
+    );
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-1">Quản lý phiếu giảm giá</h3>
-        <p class="text-muted mb-0">Tạo, cập nhật và theo dõi lượt sử dụng mã giảm giá.</p>
-    </div>
-    <a class="btn btn-success" asp-action="Create">
-        <i class="fa-solid fa-plus me-1"></i> Tạo phiếu mới
-    </a>
-</div>
+<link rel="stylesheet"
+      href="~/css/admin-vouchers.css"
+      asp-append-version="true" />
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-warning">@TempData["Error"]</div>
-}
+<style>
+    .voucher-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 19px;
+        padding: 17px 19px;
+        background: #ffffff;
+        border: 1px solid #e3ede7;
+        border-radius: 18px;
+        box-shadow: 0 6px 19px rgba(27, 74, 55, .04);
+    }
 
-<form method="get" class="row g-2 mb-3">
-    <div class="col-sm-3">
-        <select class="form-select" name="trangThai">
-            <option value="tatca" selected="@(trangThai == "tatca")">Tất cả</option>
-            <option value="active" selected="@(trangThai == "active")">Đang hoạt động</option>
-            <option value="inactive" selected="@(trangThai == "inactive")">Ngừng hoạt động</option>
-        </select>
-    </div>
-    <div class="col-sm-2">
-        <button class="btn btn-primary w-100">Lọc</button>
-    </div>
-</form>
+    .voucher-pagination-info {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 11px;
+        color: #73887a;
+        font-size: 12px;
+        font-weight: 600;
+    }
 
-<div class="card shadow-sm border-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Mã phiếu</th>
-                    <th>Tên phiếu</th>
-                    <th>Loại giảm</th>
-                    <th>Giá trị</th>
-                    <th>Phạm vi</th>
-                    <th>Hiệu lực</th>
-                    <th>Lượt dùng</th>
-                    <th>Trạng thái</th>
-                    <th class="text-end">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model == null || !Model.Any())
+    .voucher-pagination-info strong {
+        color: #197a4b;
+        font-weight: 800;
+    }
+
+    .voucher-pagination-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .voucher-page-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 11px;
+        border: 1px solid #e0eae1;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #466b53;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background .2s ease, color .2s ease;
+    }
+
+    .voucher-page-button:hover:not(:disabled) {
+        color: #137646;
+        background: #edf8f0;
+        border-color: #badcc7;
+    }
+
+    .voucher-page-button.active {
+        color: #ffffff;
+        background: #218d54;
+        border-color: #218d54;
+        box-shadow: 0 4px 11px rgba(33, 141, 84, .15);
+    }
+
+    .voucher-page-button:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
+    .voucher-page-button:focus-visible {
+        outline: 3px solid #b4dfc4;
+        outline-offset: 2px;
+    }
+
+    .voucher-page-size {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .voucher-page-size select {
+        height: 36px;
+        min-width: 65px;
+        padding: 0 9px;
+        border: 1px solid #d9e7dd;
+        border-radius: 9px;
+        background: #fbfdfb;
+        color: #265c3e;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .voucher-page-size select:focus {
+        outline: 2px solid #b4dfc4;
+    }
+
+    .voucher-page-ellipsis {
+        padding: 0 3px;
+        color: #8da395;
+        font-size: 12px;
+    }
+
+    .voucher-page-counter {
+        min-width: 70px;
+        text-align: center;
+        color: #65846f;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .voucher-history-note {
+        overflow-wrap: anywhere;
+    }
+
+    .voucher-item-card {
+        min-width: 0;
+    }
+
+    .voucher-code-block strong,
+    .voucher-meta-card strong {
+        overflow-wrap: anywhere;
+    }
+</style>
+
+<div class="voucher-admin-page">
+
+    <div class="voucher-admin-header">
+        <div>
+            <h1>Quản lý phiếu giảm giá</h1>
+            <p>
+                Quản lý ưu đãi, theo dõi thời hạn
+                và lượt sử dụng phiếu giảm giá.
+            </p>
+        </div>
+
+        <a class="voucher-create-btn" asp-action="Create">
+            <i class="fa-solid fa-plus"></i>
+            <span>Tạo phiếu mới</span>
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="voucher-alert success">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="voucher-alert warning">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="voucher-summary-grid">
+
+        <div class="voucher-summary-card">
+            <div class="voucher-summary-icon green">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <div>
+                <span>Phiếu trong danh sách</span>
+                <strong>@tongPhieu</strong>
+            </div>
+        </div>
+
+        <div class="voucher-summary-card">
+            <div class="voucher-summary-icon emerald">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <span>Đang có hiệu lực</span>
+                <strong>@dangHieuLuc</strong>
+            </div>
+        </div>
+
+        <div class="voucher-summary-card">
+            <div class="voucher-summary-icon gray">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <span>Tạm khóa</span>
+                <strong>@tamKhoa</strong>
+            </div>
+        </div>
+
+        <div class="voucher-summary-card">
+            <div class="voucher-summary-icon orange">
+                <i class="fa-regular fa-clock"></i>
+            </div>
+            <div>
+                <span>Đã hết hạn</span>
+                <strong>@daHetHan</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="voucher-filter-card">
+
+        <form method="get" class="voucher-filter-form">
+
+            <div class="voucher-filter-select">
+                <select name="trangThai" class="form-select">
+                    <option value="tatca"
+                            selected="@(trangThai == "tatca")">
+                        Tất cả trạng thái
+                    </option>
+
+                    <option value="active"
+                            selected="@(trangThai == "active")">
+                        Đang hoạt động
+                    </option>
+
+                    <option value="inactive"
+                            selected="@(trangThai == "inactive")">
+                        Ngừng hoạt động
+                    </option>
+                </select>
+            </div>
+
+            <button class="voucher-filter-btn" type="submit">
+                <i class="fa-solid fa-filter"></i>
+                <span>Lọc</span>
+            </button>
+
+        </form>
+
+    </div>
+
+    @if (!danhSach.Any())
+    {
+        <div class="voucher-empty-state">
+
+            <div class="voucher-empty-icon">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+
+            <h3>Không có phiếu giảm giá phù hợp</h3>
+
+            <p>
+                Chưa có phiếu giảm giá trong danh sách
+                theo trạng thái đã chọn.
+            </p>
+
+            <a asp-action="Index"
+               class="voucher-create-btn">
+                <i class="fa-solid fa-list"></i>
+                <span>Xem tất cả phiếu</span>
+            </a>
+
+        </div>
+    }
+    else
+    {
+        <div class="voucher-list-shell" id="voucherList">
+
+            @foreach (var p in danhSach)
+            {
+                var laPhanTram = p.LoaiGiam == "PhanTram";
+
+                var loaiGiam = laPhanTram
+                    ? "Phần trăm"
+                    : "Tiền mặt";
+
+                var giaTri = laPhanTram
+                    ? $"{p.GiaTriGiam:N0}%"
+                    : $"{p.GiaTriGiam:N0} đ";
+
+                var phamVi = "Tất cả tour";
+
+                if (p.PhamViApDung == "Tour" &&
+                    p.IdTourNavigation != null)
                 {
-                    <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">Chưa có phiếu giảm giá nào.</td>
-                    </tr>
+                    phamVi =
+                        $"Tour: {p.IdTourNavigation.TenTour}";
+                }
+                else if (p.PhamViApDung == "LoaiTour" &&
+                         p.IdLoaiTourNavigation != null)
+                {
+                    phamVi =
+                        $"Loại: {p.IdLoaiTourNavigation.TenLoai}";
+                }
+                else if (p.PhamViApDung != "TatCa")
+                {
+                    phamVi = p.PhamViApDung;
+                }
+
+                var daDung = p.DaSuDung;
+                var tongLuot = p.TongLuotSuDung;
+
+                var percent = 0m;
+
+                if (tongLuot.HasValue &&
+                    tongLuot.Value > 0)
+                {
+                    percent = Math.Min(
+                        100m,
+                        Math.Round(
+                            (decimal)daDung * 100m /
+                            tongLuot.Value,
+                            1
+                        )
+                    );
+                }
+
+                var percentCss = percent.ToString(
+                    System.Globalization.CultureInfo.InvariantCulture
+                );
+
+                var hetHan =
+                    p.NgayKetThuc.HasValue &&
+                    p.NgayKetThuc.Value < now;
+
+                var chuaBatDau =
+                    p.NgayBatDau.HasValue &&
+                    p.NgayBatDau.Value > now;
+
+                string trangThaiText;
+                string trangThaiClass;
+
+                if (hetHan)
+                {
+                    trangThaiText = "Hết hạn";
+                    trangThaiClass = "expired";
+                }
+                else if (!p.TrangThai)
+                {
+                    trangThaiText = "Tạm khóa";
+                    trangThaiClass = "inactive";
+                }
+                else if (chuaBatDau)
+                {
+                    trangThaiText = "Sắp mở";
+                    trangThaiClass = "pending";
                 }
                 else
                 {
-                    foreach (var p in Model)
-                    {
-                        var loaiGiam = p.LoaiGiam == "PhanTram" ? "Phần trăm" : "Tiền mặt";
-                        var giaTri = p.LoaiGiam == "PhanTram"
-                            ? $"{p.GiaTriGiam:N0}%"
-                            : $"{p.GiaTriGiam:N0} đ";
+                    trangThaiText = "Có hiệu lực";
+                    trangThaiClass = "active";
+                }
 
-                        var phamVi = p.PhamViApDung;
-                        if (p.PhamViApDung == "Tour" && p.IdTourNavigation != null)
-                        {
-                            phamVi = $"Tour: {p.IdTourNavigation.TenTour}";
-                        }
-                        else if (p.PhamViApDung == "LoaiTour" && p.IdLoaiTourNavigation != null)
-                        {
-                            phamVi = $"Loại: {p.IdLoaiTourNavigation.TenLoai}";
-                        }
+                <article class="voucher-item-card voucher-paged-item">
 
-                        <tr>
-                            <td><strong>@p.MaPhieu</strong></td>
-                            <td>
-                                <div class="fw-semibold">@p.TenPhieu</div>
+                    <div class="voucher-code-block">
+                        <span class="voucher-code-label">
+                            Mã phiếu
+                        </span>
+
+                        <strong>@p.MaPhieu</strong>
+                    </div>
+
+                    <div class="voucher-main-block">
+
+                        <div class="voucher-main-head">
+
+                            <div>
+                                <h3>@p.TenPhieu</h3>
+
                                 @if (!string.IsNullOrWhiteSpace(p.MoTa))
                                 {
-                                    <div class="text-muted small">@p.MoTa</div>
+                                    <p>@p.MoTa</p>
                                 }
-                            </td>
-                            <td>@loaiGiam</td>
-                            <td>
-                                <div>@giaTri</div>
-                                @if (p.GiamToiDa.HasValue && p.GiamToiDa.Value > 0)
+                            </div>
+
+                            <span class="voucher-status-badge @trangThaiClass">
+                                @trangThaiText
+                            </span>
+
+                        </div>
+
+                        <div class="voucher-meta-grid">
+
+                            <div class="voucher-meta-card">
+                                <span>Giá trị giảm</span>
+                                <strong>@giaTri</strong>
+                                <small>@loaiGiam</small>
+
+                                @if (p.GiamToiDa.HasValue &&
+                                     p.GiamToiDa.Value > 0)
                                 {
-                                    <div class="small text-muted">Tối đa: @p.GiamToiDa.Value.ToString("N0") đ</div>
+                                    <small>
+                                        Tối đa:
+                                        @p.GiamToiDa.Value.ToString("N0") đ
+                                    </small>
                                 }
-                            </td>
-                            <td>@phamVi</td>
-                            <td>
-                                <div>TỪ: @(p.NgayBatDau?.ToString("dd/MM/yyyy HH:mm") ?? "--")</div>
-                                <div>ĐẾN: @(p.NgayKetThuc?.ToString("dd/MM/yyyy HH:mm") ?? "--")</div>
-                            </td>
-                            <td>
-                                @p.DaSuDung / @(p.TongLuotSuDung?.ToString() ?? "Không giới hạn")
-                            </td>
-                            <td>
-                                @if (p.TrangThai)
+                            </div>
+
+                            <div class="voucher-meta-card">
+                                <span>Phạm vi</span>
+                                <strong>@phamVi</strong>
+                                <small>Áp dụng ưu đãi</small>
+                            </div>
+
+                            <div class="voucher-meta-card">
+                                <span>Thời gian hiệu lực</span>
+
+                                <strong>
+                                    Từ:
+                                    @(p.NgayBatDau?.ToString("dd/MM/yyyy HH:mm") ?? "--")
+                                </strong>
+
+                                <small>
+                                    Đến:
+                                    @(p.NgayKetThuc?.ToString("dd/MM/yyyy HH:mm") ?? "--")
+                                </small>
+                            </div>
+
+                            <div class="voucher-meta-card">
+                                <span>Lượt dùng</span>
+
+                                <strong>
+                                    @daDung /
+                                    @(tongLuot?.ToString() ?? "Không giới hạn")
+                                </strong>
+
+                                <small>Tiến độ sử dụng</small>
+
+                                <div class="voucher-usage-bar">
+                                    <span style="width:@(percentCss)%"></span>
+                                </div>
+                            </div>
+
+                            <div class="voucher-meta-card">
+                                <span>Giới hạn khác</span>
+
+                                @if (p.GiamToiDa.HasValue &&
+                                     p.GiamToiDa.Value > 0)
                                 {
-                                    <span class="badge bg-success">Hoạt động</span>
+                                    <strong>
+                                        Tối đa:
+                                        @p.GiamToiDa.Value.ToString("N0") đ
+                                    </strong>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Tạm khóa</span>
+                                    <strong>
+                                        Không giới hạn trần giảm
+                                    </strong>
                                 }
-                            </td>
-                            <td class="text-end">
-                                <a asp-action="Edit" asp-route-id="@p.IdPhieuGiamGia" class="btn btn-sm btn-outline-primary me-1">
-                                    Sửa
-                                </a>
-                                <form asp-action="DoiTrangThai" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@p.IdPhieuGiamGia" />
-                                    <button class="btn btn-sm btn-outline-warning me-1" type="submit">
-                                        @(p.TrangThai ? "Tạm khóa" : "Kích hoạt")
-                                    </button>
-                                </form>
-                                <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Xóa phiếu này?');">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@p.IdPhieuGiamGia" />
-                                    <button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
+
+                                @if (p.DonToiThieu > 0)
+                                {
+                                    <small>
+                                        Đơn tối thiểu:
+                                        @p.DonToiThieu.ToString("N0") đ
+                                    </small>
+                                }
+                                else
+                                {
+                                    <small>
+                                        Không yêu cầu đơn tối thiểu
+                                    </small>
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="voucher-action-block">
+
+                        <a asp-action="Edit"
+                           asp-route-id="@p.IdPhieuGiamGia"
+                           class="voucher-action-btn secondary">
+
+                            <i class="fa-solid fa-pen"></i>
+                            <span>Sửa</span>
+                        </a>
+
+                        <form asp-action="DoiTrangThai"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@p.IdPhieuGiamGia" />
+
+                            <button class="voucher-action-btn warning"
+                                    type="submit">
+
+                                <i class="fa-solid @(p.TrangThai ? "fa-pause" : "fa-play")"></i>
+
+                                <span>
+                                    @(p.TrangThai ? "Khóa" : "Bật")
+                                </span>
+                            </button>
+
+                        </form>
+
+                        <form asp-action="Delete"
+                              method="post"
+                              onsubmit="return confirm('Xóa phiếu này? Nếu đã có lịch sử sử dụng, hệ thống chỉ chuyển sang ngừng hoạt động để bảo toàn dữ liệu.');">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@p.IdPhieuGiamGia" />
+
+                            <button class="voucher-action-btn danger"
+                                    type="submit">
+
+                                <i class="fa-solid fa-trash"></i>
+                                <span>Xóa</span>
+
+                            </button>
+
+                        </form>
+
+                        @if (p.DaSuDung > 0)
+                        {
+                            <p class="voucher-history-note">
+                                Phiếu đã có lịch sử sử dụng.
+                                Khi xóa, hệ thống sẽ chuyển
+                                sang ngừng hoạt động.
+                            </p>
+                        }
+
+                    </div>
+
+                </article>
+            }
+
+        </div>
+
+        <nav class="voucher-pagination"
+             id="voucherPagination"
+             aria-label="Phân trang phiếu giảm giá">
+
+            <div class="voucher-pagination-info">
+
+                <span>
+                    Hiển thị
+                    <strong id="voucherRangeStart">1</strong>
+                    –
+                    <strong id="voucherRangeEnd">5</strong>
+                    trong
+                    <strong id="voucherTotal">@tongPhieu</strong>
+                    phiếu
+                </span>
+
+                <label class="voucher-page-size"
+                       for="voucherPageSize">
+                    Số phiếu/trang:
+
+                    <select id="voucherPageSize">
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                    </select>
+                </label>
+
+            </div>
+
+            <div class="voucher-pagination-controls"
+                 id="voucherPageControls">
+            </div>
+
+        </nav>
+    }
+
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const items = Array.from(
+            document.querySelectorAll(".voucher-paged-item")
+        );
+
+        const pageSizeSelect = document.getElementById(
+            "voucherPageSize"
+        );
+
+        const controls = document.getElementById(
+            "voucherPageControls"
+        );
+
+        const rangeStart = document.getElementById(
+            "voucherRangeStart"
+        );
+
+        const rangeEnd = document.getElementById(
+            "voucherRangeEnd"
+        );
+
+        const totalElement = document.getElementById(
+            "voucherTotal"
+        );
+
+        const pagination = document.getElementById(
+            "voucherPagination"
+        );
+
+        if (!pageSizeSelect || !controls || !pagination) {
+            return;
+        }
+
+        let currentPage = 1;
+        let pageSize = 5;
+
+        function getTotalPages() {
+            return Math.max(
+                1,
+                Math.ceil(items.length / pageSize)
+            );
+        }
+
+        function createButton(
+            label,
+            targetPage,
+            disabled,
+            active = false,
+            icon = ""
+        ) {
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "voucher-page-button";
+
+            if (active) {
+                button.classList.add("active");
+                button.setAttribute("aria-current", "page");
+            }
+
+            button.disabled = disabled;
+            button.setAttribute(
+                "aria-label",
+                icon ? label : "Trang " + label
+            );
+
+            if (icon) {
+                const i = document.createElement("i");
+                i.className = icon;
+                i.setAttribute("aria-hidden", "true");
+
+                const text = document.createElement("span");
+                text.textContent = label;
+
+                button.append(i, text);
+            } else {
+                button.textContent = label;
+            }
+
+            button.addEventListener("click", function () {
+                if (disabled || targetPage === currentPage) {
+                    return;
+                }
+
+                currentPage = targetPage;
+                renderPagination();
+            });
+
+            return button;
+        }
+
+        function createEllipsis() {
+            const span = document.createElement("span");
+
+            span.className = "voucher-page-ellipsis";
+            span.textContent = "...";
+            span.setAttribute("aria-hidden", "true");
+
+            return span;
+        }
+
+        function getPageNumbers(totalPages) {
+            if (totalPages <= 7) {
+                return Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1
+                );
+            }
+
+            const pages = new Set([
+                1,
+                totalPages,
+                currentPage - 1,
+                currentPage,
+                currentPage + 1
+            ]);
+
+            return Array.from(pages)
+                .filter(page =>
+                    page >= 1 && page <= totalPages
+                )
+                .sort((a, b) => a - b);
+        }
+
+        function renderPagination() {
+            const total = items.length;
+            const totalPages = getTotalPages();
+
+            currentPage = Math.max(
+                1,
+                Math.min(currentPage, totalPages)
+            );
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(
+                startIndex + pageSize,
+                total
+            );
+
+            items.forEach(function (item, index) {
+                const visible =
+                    index >= startIndex &&
+                    index < endIndex;
+
+                item.style.display = visible ? "" : "none";
+            });
+
+            if (rangeStart) {
+                rangeStart.textContent = total === 0
+                    ? "0"
+                    : String(startIndex + 1);
+            }
+
+            if (rangeEnd) {
+                rangeEnd.textContent = String(endIndex);
+            }
+
+            if (totalElement) {
+                totalElement.textContent = String(total);
+            }
+
+            controls.replaceChildren();
+
+            if (totalPages <= 1) {
+                pagination.querySelectorAll(
+                    ".voucher-page-counter"
+                ).forEach(element => element.remove());
+
+                return;
+            }
+
+            controls.appendChild(
+                createButton(
+                    "Trước",
+                    currentPage - 1,
+                    currentPage === 1,
+                    false,
+                    "fa-solid fa-chevron-left"
+                )
+            );
+
+            const pages = getPageNumbers(totalPages);
+            let previousPage = 0;
+
+            pages.forEach(function (page) {
+                if (previousPage > 0 &&
+                    page - previousPage > 1) {
+                    controls.appendChild(createEllipsis());
+                }
+
+                controls.appendChild(
+                    createButton(
+                        String(page),
+                        page,
+                        false,
+                        page === currentPage
+                    )
+                );
+
+                previousPage = page;
+            });
+
+            controls.appendChild(
+                createButton(
+                    "Tiếp",
+                    currentPage + 1,
+                    currentPage === totalPages,
+                    false,
+                    "fa-solid fa-chevron-right"
+                )
+            );
+        }
+
+        pageSizeSelect.addEventListener(
+            "change",
+            function () {
+                const selected = Number(pageSizeSelect.value);
+
+                if (![5, 10, 20].includes(selected)) {
+                    return;
+                }
+
+                pageSize = selected;
+                currentPage = 1;
+                renderPagination();
+            }
+        );
+
+        renderPagination();
+    });
+</script>

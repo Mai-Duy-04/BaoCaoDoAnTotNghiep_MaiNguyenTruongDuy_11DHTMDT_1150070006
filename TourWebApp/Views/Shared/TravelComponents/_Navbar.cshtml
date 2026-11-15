@@ -15,15 +15,26 @@
         }
 
         return currentPath == normalizedUrl
-            || currentPath.StartsWith(normalizedUrl + "/", StringComparison.Ordinal);
+            || currentPath.StartsWith(
+                normalizedUrl + "/",
+                StringComparison.Ordinal);
     }
 }
 
 <header class="travel-navbar-wrap">
-    <nav class="navbar navbar-expand-lg travel-navbar" aria-label="Điều hướng chính">
+    <nav class="navbar navbar-expand-lg travel-navbar"
+         aria-label="Điều hướng chính">
+
         <div class="container travel-container">
+
             <a class="travel-brand" href="/">
-                <span class="brand-mark">H</span>
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M21.8 3.6c.4-.3.9-.2 1.2.1.3.3.3.8.1 1.2l-8.2 15.6c-.2.5-.8.8-1.3.7-.5-.1-.9-.5-1-.9l-1.5-6-6-1.5c-.5-.1-.9-.5-1-.9-.1-.5.2-1 .7-1.3L21.8 3.6Zm-7.7 14.1 5.9-11.2-11.2 5.9 4.1 1c.3.1.6.4.7.7l1 3.6Z"
+                              fill="currentColor" />
+                    </svg>
+                </span>
+
                 <span class="brand-text">HappyTrip</span>
             </a>
 
@@ -34,90 +45,178 @@
                     aria-controls="travelMainNav"
                     aria-expanded="false"
                     aria-label="Mở menu điều hướng">
+
                 <i class="fa-solid fa-bars" aria-hidden="true"></i>
             </button>
 
-            <div class="collapse navbar-collapse" id="travelMainNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <div class="collapse navbar-collapse"
+                 id="travelMainNav">
+
+                <!-- MENU CHINH -->
+                <ul class="navbar-nav mx-auto align-items-lg-center travel-main-nav">
 
                     <li class="nav-item">
                         <a class="nav-link travel-nav-link @(IsActive("/") ? "is-active" : "")"
-                           href="/">Trang chủ</a>
+                           href="/">
+                            Trang chủ
+                        </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link travel-nav-link @(IsActive("/about") ? "is-active" : "")"
-                           href="/about">Giới thiệu</a>
+                           href="/about">
+                            Giới thiệu
+                        </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link travel-nav-link @(IsActive("/tours") || IsActive("/tour") ? "is-active" : "")"
-                           href="/tours">Tour</a>
+                           href="/tours">
+                            Tour du lịch
+                        </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link travel-nav-link @(IsActive("/contact") ? "is-active" : "")"
-                           href="/contact">Liên hệ</a>
+                           href="/contact">
+                            Liên hệ
+                        </a>
                     </li>
+
+                </ul>
+
+                <!-- TAI KHOAN -->
+                <ul class="navbar-nav align-items-lg-center travel-nav-actions">
 
                     @if (idTaiKhoan == null)
                     {
                         <li class="nav-item">
-                            <a class="nav-link travel-nav-link"
-                               href="/TaiKhoan/DangNhap">Đăng nhập</a>
+                            <a class="nav-link travel-nav-link travel-nav-link-sub"
+                               href="/TaiKhoan/DangNhap">
+                                Đăng nhập
+                            </a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link travel-nav-link"
-                               href="/TaiKhoan/DangKy">Đăng ký</a>
+                            <a class="nav-link travel-nav-link travel-nav-link-sub"
+                               href="/TaiKhoan/DangKy">
+                                Đăng ký
+                            </a>
                         </li>
 
-                        <li class="nav-item ms-lg-1 mt-3 mt-lg-0">
-                            <a class="btn travel-btn travel-btn-primary"
-                               href="/TaiKhoan/DangNhap">Đặt tour</a>
+                        <li class="nav-item ms-lg-2 mt-3 mt-lg-0">
+                            <a class="btn travel-btn travel-btn-primary travel-book-btn"
+                               href="/TaiKhoan/DangNhap">
+
+                                Đặt tour
+
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
                         </li>
                     }
                     else
                     {
-                        <li class="nav-item">
-                            <a class="nav-link travel-nav-link @(IsActive("/TaiKhoan/KhoPhieuGiamGia") ? "is-active" : "")"
-                               href="/TaiKhoan/KhoPhieuGiamGia">Voucher</a>
+                        <!-- VOUCHER -->
+                        <li class="nav-item d-none d-lg-block">
+                            <a class="travel-icon-link @(IsActive("/TaiKhoan/KhoPhieuGiamGia") ? "is-active" : "")"
+                               href="/TaiKhoan/KhoPhieuGiamGia"
+                               title="Voucher"
+                               aria-label="Voucher">
+
+                                <i class="fa-solid fa-ticket"></i>
+                            </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link travel-nav-link @(IsActive("/Wishlist") ? "is-active" : "")"
-                               href="/Wishlist">Yêu thích</a>
+                        <!-- YEU THICH -->
+                        <li class="nav-item d-none d-lg-block">
+                            <a class="travel-icon-link @(IsActive("/Wishlist") ? "is-active" : "")"
+                               href="/Wishlist"
+                               title="Yêu thích"
+                               aria-label="Yêu thích">
+
+                                <i class="fa-regular fa-heart"></i>
+                            </a>
                         </li>
 
-                        <li class="nav-item dropdown ms-lg-1 mt-3 mt-lg-0">
-                            <button class="btn travel-btn travel-btn-primary dropdown-toggle travel-account-btn"
+                        <!-- ACCOUNT DROPDOWN -->
+                        <li class="nav-item dropdown ms-lg-2 mt-3 mt-lg-0">
+
+                            <button class="btn travel-account-btn dropdown-toggle"
                                     type="button"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false">
-                                @hoTen
+
+                                <span class="travel-account-avatar">
+                                    <i class="fa-regular fa-user"></i>
+                                </span>
+
+                                <span>@hoTen</span>
                             </button>
 
                             <ul class="dropdown-menu dropdown-menu-end travel-account-menu">
-                                <li>
-                                    <a class="dropdown-item"
-                                       href="/TaiKhoan/HoSo">Hồ sơ</a>
+
+                                <li class="travel-account-menu-header">
+                                    <small>Tài khoản HappyTrip</small>
+                                    <strong>@hoTen</strong>
                                 </li>
 
                                 <li>
-                                    <a class="dropdown-item"
-                                       href="/TaiKhoan/DonCuaToi">Đơn của tôi</a>
+                                    <hr class="dropdown-divider" />
                                 </li>
 
+                                <!-- HO SO -->
                                 <li>
                                     <a class="dropdown-item"
-                                       href="/TaiKhoan/KhoPhieuGiamGia">Kho voucher</a>
+                                       href="/TaiKhoan/HoSo">
+
+                                        <i class="fa-regular fa-user"></i>
+                                        <span>Hồ sơ của tôi</span>
+                                    </a>
                                 </li>
 
-                                @if (string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase))
+                                <!-- DON CUA TOI -->
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="/TaiKhoan/DonCuaToi">
+
+                                        <i class="fa-regular fa-clipboard"></i>
+                                        <span>Đơn của tôi</span>
+                                    </a>
+                                </li>
+
+                                <!-- WISHLIST -->
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="/Wishlist">
+
+                                        <i class="fa-regular fa-heart"></i>
+                                        <span>Tour yêu thích</span>
+                                    </a>
+                                </li>
+
+                                <!-- VOUCHER -->
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="/TaiKhoan/KhoPhieuGiamGia">
+
+                                        <i class="fa-solid fa-ticket"></i>
+                                        <span>Kho voucher</span>
+                                    </a>
+                                </li>
+
+                                <!-- ADMIN -->
+                                @if (string.Equals(
+                                    vaiTro,
+                                    "Admin",
+                                    StringComparison.OrdinalIgnoreCase))
                                 {
                                     <li>
                                         <a class="dropdown-item"
-                                           href="/QuanTri/Dashboard">Dashboard Admin</a>
+                                           href="/QuanTri/Dashboard">
+
+                                            <i class="fa-solid fa-chart-line"></i>
+                                            <span>Dashboard Admin</span>
+                                        </a>
                                     </li>
                                 }
 
@@ -125,15 +224,32 @@
                                     <hr class="dropdown-divider" />
                                 </li>
 
+                                <!-- DANG XUAT: POST + CSRF -->
                                 <li>
-                                    <a class="dropdown-item text-danger"
-                                       href="/TaiKhoan/DangXuat">Đăng xuất</a>
+                                    <form asp-controller="TaiKhoan"
+                                          asp-action="DangXuat"
+                                          method="post"
+                                          class="m-0 p-0">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="dropdown-item text-danger"
+                                                style="width:100%; text-align:left;">
+
+                                            <i class="fa-solid fa-right-from-bracket"></i>
+                                            <span>Đăng xuất</span>
+
+                                        </button>
+                                    </form>
                                 </li>
+
                             </ul>
                         </li>
                     }
 
                 </ul>
+
             </div>
         </div>
     </nav>

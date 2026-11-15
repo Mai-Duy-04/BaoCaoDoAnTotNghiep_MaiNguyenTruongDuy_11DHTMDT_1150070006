@@ -1,29 +1,622 @@
+
 @model TourWebApp.Data.Models.LoaiTour
 
 @{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "_LayoutAdmin";
     ViewData["Title"] = "Thêm loại tour";
 }
 
-<h3 class="fw-bold mb-3">➕ Thêm loại tour</h3>
+<style>
+    .ht-category-create {
+        --ht-green: #248b55;
+        --ht-dark: #1e563b;
+        --ht-text: #365c43;
+        --ht-muted: #84998a;
+        --ht-border: #e1eadd;
 
-<form asp-action="Create" method="post" class="card shadow-sm border-0">
-    <div class="card-body">
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Tên loại</label>
-            <input asp-for="TenLoai" class="form-control" placeholder="VD: Tour Biển Đảo Nam Bộ" />
-            <span asp-validation-for="TenLoai" class="text-danger small"></span>
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 22px 12px 40px;
+
+        color: var(--ht-text);
+        font-family: "Plus Jakarta Sans",
+                     "Segoe UI", Arial, sans-serif;
+    }
+
+    .ht-category-create *,
+    .ht-category-create *::before,
+    .ht-category-create *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-category-create a {
+        text-decoration: none;
+    }
+
+    /* HEADER */
+
+    .ht-create-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 21px;
+    }
+
+    .ht-create-heading-main {
+        min-width: 0;
+    }
+
+    .ht-create-eyebrow {
+        display: block;
+        margin-bottom: 8px;
+        color: #6aa17a;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+    }
+
+    .ht-create-heading h1 {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin: 0 0 7px;
+        font-size: clamp(23px, 2.3vw, 29px);
+        font-weight: 800;
+        color: var(--ht-dark);
+    }
+
+    .ht-create-heading h1 i {
+        display: grid;
+        place-items: center;
+        width: 41px;
+        height: 41px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        color: #2b8d56;
+        background: #e5f4e7;
+        font-size: 17px;
+    }
+
+    .ht-create-heading p {
+        margin: 0;
+        color: var(--ht-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .ht-create-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 39px;
+        padding: 9px 13px;
+        border: 1px solid #dfebdc;
+        border-radius: 10px;
+        background: #fff;
+        color: #568063;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ht-create-back:hover {
+        color: #21804c;
+        border-color: #a7d1b0;
+    }
+
+    /* MAIN CARD */
+
+    .ht-create-card {
+        overflow: hidden;
+        border: 1px solid #deeadb;
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 9px 28px rgba(29,74,45,.055);
+    }
+
+    .ht-create-card-header {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 20px 23px;
+        background: linear-gradient(
+            110deg,
+            #f8fcf6,
+            #eff7eb
+        );
+        border-bottom: 1px solid #e3eddf;
+    }
+
+    .ht-create-card-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 43px;
+        width: 43px;
+        height: 43px;
+        border-radius: 12px;
+        color: #2f975e;
+        background: #e0f1e2;
+        font-size: 18px;
+    }
+
+    .ht-create-card-header h2 {
+        margin: 0 0 4px;
+        color: #24573d;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .ht-create-card-header p {
+        margin: 0;
+        color: #829688;
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    /* FORM */
+
+    .ht-create-body {
+        padding: 25px 24px;
+    }
+
+    .ht-create-field {
+        margin-bottom: 21px;
+    }
+
+    .ht-create-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .ht-create-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 9px;
+        color: #355e45;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .ht-create-label i {
+        color: #4c9e6a;
+        font-size: 12px;
+    }
+
+    .ht-required {
+        color: #d35e50;
+    }
+
+    .ht-create-input,
+    .ht-create-textarea {
+        display: block;
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dbe8d8;
+        border-radius: 11px;
+        outline: none;
+        background: #fbfdfa;
+        color: #315840;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .ht-create-input {
+        height: 46px;
+    }
+
+    .ht-create-textarea {
+        min-height: 125px;
+        resize: vertical;
+        line-height: 1.75;
+    }
+
+    .ht-create-input::placeholder,
+    .ht-create-textarea::placeholder {
+        color: #a2b2a3;
+        font-weight: 500;
+    }
+
+    .ht-create-input:focus,
+    .ht-create-textarea:focus {
+        border-color: #59ae78;
+        box-shadow: 0 0 0 3px rgba(43,151,88,.09);
+    }
+
+    .ht-create-hint {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 7px;
+        color: #91a293;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .ht-create-error {
+        display: block;
+        margin-top: 6px;
+        color: #c65248;
+        font-size: 11px;
+    }
+
+    .ht-create-validation {
+        padding: 11px 13px;
+        margin-bottom: 18px;
+        border: 1px solid #f1d4cc;
+        border-radius: 9px;
+        background: #fff5f1;
+        color: #ba5349;
+        font-size: 11px;
+    }
+
+    .ht-create-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 13px 14px;
+        border-radius: 10px;
+        background: #f3f9f0;
+        color: #6c8873;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    .ht-create-note i {
+        margin-top: 3px;
+        color: #32945d;
+    }
+
+    /* FOOTER */
+
+    .ht-create-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 13px;
+        padding: 16px 24px;
+        border-top: 1px solid #e9efe5;
+        background: #fcfefb;
+    }
+
+    .ht-create-footer-hint {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #90a193;
+        font-size: 10px;
+    }
+
+    .ht-create-footer-hint i {
+        color: #419663;
+    }
+
+    .ht-create-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .ht-create-cancel,
+    .ht-create-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 41px;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .ht-create-cancel {
+        color: #67816d;
+        background: #fff;
+        border: 1px solid #dae6d6;
+    }
+
+    .ht-create-cancel:hover {
+        background: #f5f9f2;
+    }
+
+    .ht-create-submit {
+        background: #248d55;
+        border: 1px solid #248d55;
+        color: #fff;
+        box-shadow: 0 5px 13px rgba(36,141,85,.15);
+    }
+
+    .ht-create-submit:hover {
+        background: #1a7544;
+    }
+
+    .ht-create-submit:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    @@media (max-width: 600px) {
+        .ht-category-create {
+            padding: 12px 0 25px;
+        }
+
+        .ht-create-heading {
+            align-items: flex-start;
+        }
+
+        .ht-create-heading h1 {
+            font-size: 22px;
+        }
+
+        .ht-create-back {
+            padding: 9px;
+            font-size: 0;
+        }
+
+        .ht-create-back i {
+            font-size: 13px;
+        }
+
+        .ht-create-body {
+            padding: 19px 16px;
+        }
+
+        .ht-create-card-header {
+            padding: 17px 16px;
+        }
+
+        .ht-create-footer {
+            padding: 16px;
+        }
+
+        .ht-create-footer-hint {
+            width: 100%;
+        }
+
+        .ht-create-actions {
+            width: 100%;
+        }
+
+        .ht-create-actions > * {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="ht-category-create">
+
+    <!-- PAGE HEADER -->
+
+    <header class="ht-create-heading">
+
+        <div class="ht-create-heading-main">
+
+            <span class="ht-create-eyebrow">
+                HAPPYTRIP / TOUR CATEGORIES
+            </span>
+
+            <h1>
+                <i class="fa-solid fa-folder-plus"></i>
+                Thêm loại tour
+            </h1>
+
+            <p>
+                Tạo nhóm hành trình mới để quản lý
+                và phân loại các tour du lịch.
+            </p>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Mô tả</label>
-            <textarea asp-for="MoTa" class="form-control" rows="3"
-                      placeholder="Mô tả ngắn về loại tour..."></textarea>
+        <a asp-controller="AdminLoaiTour"
+           asp-action="Index"
+           class="ht-create-back">
+
+            <i class="fa-solid fa-arrow-left"></i>
+            Danh sách
+        </a>
+
+    </header>
+
+    <!-- MAIN FORM -->
+
+    <form asp-controller="AdminLoaiTour"
+          asp-action="Create"
+          method="post"
+          id="htCreateCategoryForm">
+
+        @Html.AntiForgeryToken()
+
+        <div class="ht-create-card">
+
+            <div class="ht-create-card-header">
+
+                <span class="ht-create-card-icon">
+                    <i class="fa-solid fa-layer-group"></i>
+                </span>
+
+                <div>
+                    <h2>Thông tin loại tour</h2>
+
+                    <p>
+                        Điền tên và mô tả cho nhóm tour mới.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="ht-create-body">
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div asp-validation-summary="All"
+                         class="ht-create-validation"
+                         role="alert"></div>
+                }
+
+                <!-- TEN LOAI TOUR -->
+
+                <div class="ht-create-field">
+
+                    <label asp-for="TenLoai"
+                           class="ht-create-label">
+
+                        <i class="fa-solid fa-tag"></i>
+
+                        Tên loại tour
+
+                        <span class="ht-required">*</span>
+                    </label>
+
+                    <input asp-for="TenLoai"
+                           class="ht-create-input"
+                           placeholder="Ví dụ: Tour Biển Đảo Nam Bộ"
+                           maxlength="150"
+                           autocomplete="off"
+                           required />
+
+                    <span asp-validation-for="TenLoai"
+                          class="ht-create-error"></span>
+
+                    <div class="ht-create-hint">
+                        <span>
+                            Đặt tên ngắn gọn, dễ phân biệt
+                            với các loại tour khác.
+                        </span>
+
+                        <span id="htCreateNameCount">
+                            0/150
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- MO TA -->
+
+                <div class="ht-create-field">
+
+                    <label asp-for="MoTa"
+                           class="ht-create-label">
+
+                        <i class="fa-solid fa-align-left"></i>
+                        Mô tả loại tour
+                    </label>
+
+                    <textarea asp-for="MoTa"
+                              class="ht-create-textarea"
+                              rows="4"
+                              placeholder="Mô tả ngắn về điểm đến, trải nghiệm và đặc trưng của loại tour..."></textarea>
+
+                    <div class="ht-create-hint">
+                        <span>
+                            Giúp Admin hiểu rõ phạm vi
+                            của nhóm hành trình.
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- NOTE -->
+
+                <div class="ht-create-note">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <span>
+                        Sau khi tạo, loại tour sẽ xuất hiện
+                        trong danh sách quản lý và có thể
+                        được lựa chọn khi thêm hoặc sửa tour.
+                        Chủ đề sở thích dùng cho gợi ý AI
+                        được quản lý riêng với loại tour.
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+
+            <div class="ht-create-footer">
+
+                <span class="ht-create-footer-hint">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Thông tin được lưu khi xác nhận.
+                </span>
+
+                <div class="ht-create-actions">
+
+                    <a asp-controller="AdminLoaiTour"
+                       asp-action="Index"
+                       class="ht-create-cancel">
+
+                        Hủy bỏ
+                    </a>
+
+                    <button type="submit"
+                            class="ht-create-submit"
+                            id="htCreateSubmit">
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Lưu loại tour
+
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary">Lưu</button>
-            <a class="btn btn-secondary" asp-action="Index">Quay lại</a>
-        </div>
-    </div>
-</form>
+    </form>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const nameInput = document.getElementById("TenLoai");
+    const counter = document.getElementById("htCreateNameCount");
+    const form = document.getElementById("htCreateCategoryForm");
+    const submit = document.getElementById("htCreateSubmit");
+
+    function updateCounter() {
+        if (!nameInput || !counter) {
+            return;
+        }
+
+        counter.textContent =
+            nameInput.value.length + "/150";
+    }
+
+    nameInput?.addEventListener("input", updateCounter);
+
+    updateCounter();
+
+    form?.addEventListener("submit", function (event) {
+
+        if (!nameInput || !nameInput.value.trim()) {
+            event.preventDefault();
+
+            nameInput?.focus();
+
+            return;
+        }
+
+        if (submit) {
+            submit.disabled = true;
+            submit.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+        }
+    });
+
+});
+</script>

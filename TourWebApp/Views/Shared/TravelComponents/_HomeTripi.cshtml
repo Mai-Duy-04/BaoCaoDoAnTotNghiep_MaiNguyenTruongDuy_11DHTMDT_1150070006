@@ -1,0 +1,968 @@
+
+@* =====================================================
+   HAPPYTRIP - TRIPI HOME V2
+   Component doc lap, khong dung CSS Tripi cu
+   ===================================================== *@
+
+<section class="ht2-section" aria-labelledby="ht2-title">
+    <div class="ht2-shell">
+
+        <div class="ht2-panel">
+
+            <!-- BACKGROUND DECORATION -->
+            <div class="ht2-paper" aria-hidden="true"></div>
+            <div class="ht2-wave" aria-hidden="true"></div>
+
+            <!-- LEFT: FOX AND TRAVEL PHOTOS -->
+            <div class="ht2-left">
+
+                <span class="ht2-sun" aria-hidden="true">✺</span>
+                <span class="ht2-star ht2-star-a" aria-hidden="true">✦</span>
+                <span class="ht2-star ht2-star-b" aria-hidden="true">✧</span>
+
+                <div class="ht2-fox-glow" aria-hidden="true"></div>
+
+                <img class="ht2-fox"
+                     src="~/img/tripi/tripi-fox.png"
+                     asp-append-version="true"
+                     alt="Cáo Tripi, trợ lý du lịch HappyTrip"
+                     loading="lazy" />
+
+                <div class="ht2-photo-group" aria-hidden="true">
+
+                    <div class="ht2-photo ht2-photo-first">
+                        <span class="ht2-tape"></span>
+                        <img src="/img/happytrip-hero/nguyen-hue.jpg"
+                             alt=""
+                             loading="lazy" />
+                    </div>
+
+                    <div class="ht2-photo ht2-photo-second">
+                        <span class="ht2-tape"></span>
+                        <img src="/img/happytrip-hero/cho-ben-thanh.jpg"
+                             alt=""
+                             loading="lazy" />
+                    </div>
+
+                    <span class="ht2-camera">
+                        <i class="fa-solid fa-camera"></i>
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- CENTER: TRIPI INTRODUCTION -->
+            <div class="ht2-center">
+
+                <span class="ht2-eyebrow">
+                    <i class="fa-solid fa-wand-magic-sparkles"
+                       aria-hidden="true"></i>
+                    TRỢ LÝ DU LỊCH AI
+                </span>
+
+                <h2 id="ht2-title">
+                    Chưa biết đi đâu?
+                    <span>Để Tripi gợi ý cho bạn!</span>
+                </h2>
+
+                <svg class="ht2-underline"
+                     viewBox="0 0 190 20"
+                     fill="none"
+                     aria-hidden="true">
+                    <path d="M5 12 Q92 -1 183 10"
+                          stroke="#F5AF1D"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+                </svg>
+
+                <p class="ht2-description">
+                    Chỉ cần chia sẻ sở thích, thời gian và ngân sách,
+                    Tripi sẽ đề xuất những hành trình phù hợp
+                    với nhu cầu của bạn.
+                </p>
+
+                <a href="/goi-y-tour"
+                   class="ht2-button">
+                    <i class="fa-regular fa-comments"
+                       aria-hidden="true"></i>
+                    Trò chuyện với Tripi
+                    <i class="fa-solid fa-arrow-right"
+                       aria-hidden="true"></i>
+                </a>
+
+                <div class="ht2-benefits">
+                    <span>
+                        <i class="fa-solid fa-heart"></i>
+                        Theo sở thích
+                    </span>
+                    <span>
+                        <i class="fa-solid fa-wallet"></i>
+                        Theo ngân sách
+                    </span>
+                    <span>
+                        <i class="fa-solid fa-location-dot"></i>
+                        Theo điểm đến
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: PROMPTS AND ILLUSTRATED MAP -->
+            <div class="ht2-right">
+
+                <div class="ht2-prompts">
+
+                    <a href="/goi-y-tour"
+                       class="ht2-prompt ht2-prompt-one">
+                        <span class="ht2-prompt-emoji">🌴</span>
+                        Đi biển cuối tuần?
+                        <i class="fa-solid fa-arrow-up-right-from-square"
+                           aria-hidden="true"></i>
+                    </a>
+
+                    <a href="/goi-y-tour"
+                       class="ht2-prompt ht2-prompt-two">
+                        <span class="ht2-prompt-emoji">🍜</span>
+                        Khám phá ẩm thực?
+                        <i class="fa-solid fa-arrow-up-right-from-square"
+                           aria-hidden="true"></i>
+                    </a>
+
+                    <a href="/goi-y-tour"
+                       class="ht2-prompt ht2-prompt-three">
+                        <span class="ht2-prompt-emoji">🛶</span>
+                        Trải nghiệm sông nước?
+                        <i class="fa-solid fa-arrow-up-right-from-square"
+                           aria-hidden="true"></i>
+                    </a>
+
+                </div>
+
+                <div class="ht2-map-area" aria-hidden="true">
+
+                    <div class="ht2-map-heading">
+                        <span>KHÁM PHÁ</span>
+                        <strong class="ht2-map-title"><span>Miền</span> <span>Nam</span></strong>
+                    </div>
+
+                    <svg class="ht2-map"
+                         viewBox="0 0 200 250"
+                         fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="M96 14
+                                 L119 22 L124 40 L145 46
+                                 L151 62 L136 80 L154 96
+                                 L144 114 L162 130 L150 144
+                                 L159 164 L144 179 L134 199
+                                 L114 206 L107 232 L91 214
+                                 L74 209 L65 193 L46 199
+                                 L33 179 L49 161 L38 147
+                                 L51 129 L44 111 L61 98
+                                 L55 80 L73 67 L70 49
+                                 L85 37 Z"
+                              fill="#F7FBEF"
+                              stroke="#08715C"
+                              stroke-width="3"
+                              stroke-linejoin="round" />
+
+                        <path d="M90 55
+                                 C121 89 75 128 109 167
+                                 S119 208 104 222"
+                              stroke="#9CCAB3"
+                              stroke-width="2"
+                              stroke-dasharray="4 6" />
+
+                        <g fill="#F4A025"
+                           stroke="#FFFFFF"
+                           stroke-width="3">
+                            <circle cx="118" cy="105" r="9" />
+                            <circle cx="89" cy="173" r="9" />
+                        </g>
+
+                        <g fill="#FFFFFF">
+                            <circle cx="118" cy="105" r="3" />
+                            <circle cx="89" cy="173" r="3" />
+                        </g>
+
+                    </svg>
+
+                    <span class="ht2-palm" aria-hidden="true">🌴</span>
+                    <span class="ht2-scooter" aria-hidden="true">🛵</span>
+                    <span class="ht2-boat" aria-hidden="true">⛵</span>
+
+                </div>
+
+                <svg class="ht2-flight-path"
+                     viewBox="0 0 310 85"
+                     fill="none"
+                     aria-hidden="true">
+
+                    <path d="M4 65
+                             C50 14 89 94 143 46
+                             S225 10 303 52"
+                          stroke="#177765"
+                          stroke-width="2.5"
+                          stroke-dasharray="6 8"
+                          stroke-linecap="round" />
+
+                </svg>
+
+                <span class="ht2-plane" aria-hidden="true">
+                    <i class="fa-solid fa-plane"></i>
+                </span>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<style>
+    /* ======================================
+       TRIPI V2 - INDEPENDENT STYLING
+       ====================================== */
+
+    .ht2-section,
+    .ht2-section * {
+        box-sizing: border-box;
+    }
+
+    .ht2-section {
+        position: relative;
+        width: 100%;
+        padding: 32px 0 58px;
+        background: #faf5ec;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .ht2-shell {
+        width: min(1350px, calc(100% - 48px));
+        margin-inline: auto;
+    }
+
+    .ht2-panel {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        grid-template-columns:
+            minmax(0, 28%)
+            minmax(0, 37%)
+            minmax(0, 35%);
+        grid-template-rows: minmax(400px, auto);
+        align-items: center;
+        gap: 0;
+        min-height: 430px;
+        padding: 28px 26px 44px;
+        overflow: hidden;
+        border: 1px solid #eee3d1;
+        border-radius: 34px;
+        background:
+            radial-gradient(circle at 18% 45%,
+                rgba(255, 226, 174, .37), transparent 33%),
+            radial-gradient(circle at 89% 26%,
+                rgba(224, 239, 204, .34), transparent 40%),
+            linear-gradient(115deg,
+                #fff8ed 0%,
+                #fffbf5 50%,
+                #f7f8ed 100%);
+        box-shadow: 0 16px 40px rgba(72, 62, 43, .08);
+    }
+
+    .ht2-paper,
+    .ht2-wave {
+        position: absolute;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .ht2-paper {
+        inset: 0;
+        opacity: .32;
+        background-image: radial-gradient(
+            rgba(174, 140, 99, .08) .75px,
+            transparent .75px);
+        background-size: 9px 9px;
+    }
+
+    .ht2-wave {
+        left: -8%;
+        right: -8%;
+        bottom: -125px;
+        height: 195px;
+        border-radius: 50% 50% 0 0;
+        background: linear-gradient(95deg,
+            #fbe8c9, #f7efd9, #dcebd0);
+        opacity: .62;
+    }
+
+    /* THREE EXPLICIT COLUMNS */
+
+    .ht2-left {
+        position: relative;
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+        height: 340px;
+        align-self: center;
+    }
+
+    .ht2-center {
+        position: relative;
+        grid-column: 2;
+        grid-row: 1;
+        z-index: 3;
+        min-width: 0;
+        align-self: center;
+        padding: 0 10px 0 4px;
+        text-align: left;
+    }
+
+    .ht2-right {
+        position: relative;
+        grid-column: 3;
+        grid-row: 1;
+        min-width: 0;
+        height: 330px;
+        align-self: center;
+    }
+
+    /* FOX */
+
+    .ht2-fox-glow {
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        width: 275px;
+        max-width: 100%;
+        height: 275px;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: radial-gradient(circle,
+            rgba(255, 215, 154, .52),
+            rgba(255, 226, 180, .15) 55%,
+            transparent 73%);
+    }
+
+    .ht2-fox {
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        z-index: 2;
+        display: block;
+        width: min(95%, 285px);
+        height: 285px;
+        max-width: none;
+        object-fit: contain;
+        border: 0;
+        background: transparent;
+        transform: translateX(-50%);
+        filter: drop-shadow(0 12px 12px rgba(108,74,37,.14));
+        animation: ht2FoxFloat 4s ease-in-out infinite;
+    }
+
+    .ht2-sun,
+    .ht2-star {
+        position: absolute;
+        z-index: 3;
+        color: #f1ae27;
+        pointer-events: none;
+    }
+
+    .ht2-sun {
+        top: 34px;
+        left: 7%;
+        font-size: 45px;
+    }
+
+    .ht2-star-a {
+        top: 108px;
+        left: 2%;
+        font-size: 29px;
+    }
+
+    .ht2-star-b {
+        top: 66px;
+        right: 6%;
+        font-size: 32px;
+    }
+
+    /* POLAROID GROUP */
+
+    .ht2-photo-group {
+        position: absolute;
+        left: 0;
+        bottom: -20px;
+        z-index: 5;
+        width: 280px;
+        height: 116px;
+        pointer-events: none;
+    }
+
+    .ht2-photo {
+        position: absolute;
+        width: 145px;
+        height: 113px;
+        padding: 6px 6px 15px;
+        border-radius: 5px;
+        background: #fffdf8;
+        border: 1px solid #fff;
+        box-shadow: 0 8px 17px rgba(67,53,33,.17);
+    }
+
+    .ht2-photo img {
+        display: block;
+        width: 100%;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 2px;
+    }
+
+    .ht2-photo-first {
+        left: 0;
+        bottom: 0;
+        transform: rotate(-10deg);
+    }
+
+    .ht2-photo-second {
+        left: 112px;
+        bottom: -4px;
+        transform: rotate(9deg);
+    }
+
+    .ht2-tape {
+        position: absolute;
+        left: 34%;
+        top: -10px;
+        width: 47px;
+        height: 19px;
+        background: rgba(239,186,92,.82);
+        transform: rotate(-6deg);
+    }
+
+    .ht2-camera {
+        position: absolute;
+        bottom: -13px;
+        left: 137px;
+        z-index: 5;
+        display: grid;
+        place-items: center;
+        width: 43px;
+        height: 43px;
+        border: 3px solid white;
+        border-radius: 11px;
+        background: #116a5b;
+        color: white;
+        font-size: 22px;
+        transform: rotate(-12deg);
+        box-shadow: 0 5px 12px rgba(37,61,49,.18);
+    }
+
+    /* MAIN TEXT */
+
+    .ht2-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 19px;
+        padding: 9px 17px;
+        border-radius: 999px;
+        background: #ffdf91;
+        color: #095648;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .055em;
+        white-space: nowrap;
+        box-shadow: 0 6px 15px rgba(185,136,51,.12);
+    }
+
+    .ht2-eyebrow i {
+        color: #d78b15;
+    }
+
+    .ht2-center h2 {
+        margin: 0;
+        color: #093f33;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: clamp(28px, 2.85vw, 42px);
+        line-height: 1.18;
+        font-weight: 850;
+        letter-spacing: -.04em;
+        text-wrap: balance;
+    }
+
+    .ht2-center h2 span {
+        display: block;
+        margin-top: 6px;
+        color: #c47b2c;
+        font-size: .94em;
+    }
+
+    .ht2-underline {
+        display: block;
+        width: 155px;
+        height: 17px;
+        margin: -4px 16% 13px auto;
+    }
+
+    .ht2-description {
+        max-width: 425px;
+        margin: 0 0 22px;
+        color: #596961;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .ht2-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 11px;
+        min-height: 48px;
+        padding: 12px 21px;
+        border-radius: 999px;
+        border: 1px solid #075d50;
+        background: #075d50;
+        color: white;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 9px 19px rgba(4,87,73,.18);
+        transition: transform .2s ease, background .2s ease;
+    }
+
+    .ht2-button:hover {
+        background: #034638;
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .ht2-benefits {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 0;
+        margin-top: 22px;
+    }
+
+    .ht2-benefits span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 11px;
+        color: #466257;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .ht2-benefits span:first-child {
+        padding-left: 0;
+    }
+
+    .ht2-benefits span + span {
+        border-left: 1px solid #d8cebe;
+    }
+
+    .ht2-benefits i {
+        color: #147762;
+    }
+
+    /* PROMPTS */
+
+    .ht2-prompts {
+        position: absolute;
+        top: 57px;
+        left: 0;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 17px;
+    }
+
+    .ht2-prompt {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 51px;
+        width: max-content;
+        max-width: 230px;
+        padding: 9px 13px 9px 9px;
+        background: rgba(255,255,255,.98);
+        color: #1b4037;
+        border: 1px solid #eee5d6;
+        border-radius: 999px;
+        box-shadow: 0 8px 17px rgba(72,56,38,.12);
+        font-size: 11px;
+        font-weight: 750;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: translate .2s ease;
+    }
+
+    .ht2-prompt:hover {
+        color: #075d50;
+        translate: 0 -4px;
+    }
+
+    .ht2-prompt-emoji {
+        display: grid;
+        place-items: center;
+        flex: 0 0 29px;
+        width: 29px;
+        height: 29px;
+        border-radius: 50%;
+        background: #fff1d6;
+        font-size: 20px;
+    }
+
+    .ht2-prompt > i {
+        color: #a8b4aa;
+        font-size: 9px;
+    }
+
+    .ht2-prompt-one {
+        transform: rotate(-4deg);
+    }
+
+    .ht2-prompt-two {
+        margin-left: 15px;
+        transform: rotate(2deg);
+    }
+
+    .ht2-prompt-three {
+        margin-left: -2px;
+        transform: rotate(-2deg);
+    }
+
+    /* MAP */
+
+    .ht2-map-area {
+        position: absolute;
+        top: 7px;
+        right: 0;
+        width: 180px;
+        height: 285px;
+        pointer-events: none;
+    }
+
+    .ht2-map-heading {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transform: rotate(-6deg);
+    }
+
+    .ht2-map-heading span {
+        color: #246c56;
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: .09em;
+    }
+
+    
+   
+    .ht2-map-heading .ht2-map-title {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 8px;
+        width: max-content;
+        max-width: none;
+
+        color: #c87d28;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 29px;
+        font-weight: 700;
+        font-style: italic;
+        line-height: 1.3;
+
+        letter-spacing: -0.03em;
+        word-spacing: normal;
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .ht2-map-heading .ht2-map-title > span {
+        display: inline-block;
+        flex: 0 0 auto;
+        width: auto;
+        margin: 0;
+        padding: 0;
+        font: inherit;
+        letter-spacing: inherit;
+        white-space: nowrap;
+    }
+
+    .ht2-map {
+        position: absolute;
+        top: 37px;
+        right: 7px;
+        width: 151px;
+        height: 225px;
+        transform: rotate(7deg);
+    }
+
+    .ht2-palm,
+    .ht2-scooter,
+    .ht2-boat {
+        position: absolute;
+        z-index: 4;
+    }
+
+    .ht2-palm {
+        right: -9px;
+        top: 156px;
+        font-size: 38px;
+    }
+
+    .ht2-scooter {
+        right: -5px;
+        bottom: -11px;
+        font-size: 40px;
+    }
+
+    .ht2-boat {
+        left: -4px;
+        bottom: 1px;
+        font-size: 29px;
+    }
+
+    .ht2-flight-path {
+        position: absolute;
+        right: 15px;
+        bottom: -18px;
+        z-index: 1;
+        width: 285px;
+        height: 80px;
+    }
+
+    .ht2-plane {
+        position: absolute;
+        right: 57%;
+        bottom: 30px;
+        z-index: 2;
+        color: #0a755c;
+        font-size: 23px;
+        transform: rotate(17deg);
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1199px) and (min-width: 992px) {
+        .ht2-panel {
+            grid-template-columns: 27% 39% 34%;
+            padding-inline: 17px;
+        }
+
+        .ht2-photo-group {
+            transform: scale(.78);
+            transform-origin: bottom left;
+        }
+
+        .ht2-fox {
+            width: 235px;
+            height: 250px;
+        }
+
+        .ht2-center h2 {
+            font-size: 31px;
+        }
+
+        .ht2-prompt {
+            max-width: 195px;
+            font-size: 10px;
+        }
+
+        .ht2-map-area {
+            right: -20px;
+            transform: scale(.82);
+            transform-origin: top right;
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .ht2-panel {
+            grid-template-columns: minmax(0, 36%) minmax(0, 64%);
+            grid-template-rows: auto auto;
+            gap: 0;
+            padding: 25px 24px 42px;
+        }
+
+        .ht2-left {
+            grid-column: 1;
+            grid-row: 1;
+            height: 300px;
+        }
+
+        .ht2-center {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .ht2-right {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            height: 115px;
+        }
+
+        .ht2-fox {
+            width: 240px;
+            height: 250px;
+        }
+
+        .ht2-photo-group {
+            transform: scale(.65);
+            transform-origin: bottom left;
+            bottom: -20px;
+        }
+
+        .ht2-prompts {
+            position: relative;
+            top: 22px;
+            left: auto;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 11px;
+        }
+
+        .ht2-prompt,
+        .ht2-prompt-two,
+        .ht2-prompt-three {
+            margin-left: 0;
+        }
+
+        .ht2-map-area,
+        .ht2-flight-path,
+        .ht2-plane {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .ht2-section {
+            padding: 24px 0 44px;
+        }
+
+        .ht2-shell {
+            width: calc(100% - 26px);
+        }
+
+        .ht2-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            min-height: 0;
+            padding: 20px 17px 29px;
+            border-radius: 25px;
+        }
+
+        .ht2-left {
+            width: 100%;
+            height: 240px;
+            flex: 0 0 auto;
+        }
+
+        .ht2-fox {
+            top: 0;
+            width: 215px;
+            height: 218px;
+        }
+
+        .ht2-photo-group {
+            bottom: -18px;
+            left: 8%;
+            transform: scale(.46);
+        }
+
+        .ht2-sun {
+            left: 13%;
+            font-size: 30px;
+        }
+
+        .ht2-center {
+            width: 100%;
+            padding: 13px 0 0;
+            text-align: center;
+        }
+
+        .ht2-eyebrow {
+            font-size: 10px;
+        }
+
+        .ht2-center h2 {
+            font-size: clamp(25px, 7vw, 34px);
+            text-align: center;
+        }
+
+        .ht2-underline {
+            margin: -3px auto 13px;
+            width: 120px;
+        }
+
+        .ht2-description {
+            margin: 0 auto 20px;
+            font-size: 12px;
+        }
+
+        .ht2-benefits {
+            justify-content: center;
+        }
+
+        .ht2-benefits span {
+            font-size: 10px;
+        }
+
+        .ht2-right {
+            width: 100%;
+            height: auto;
+            min-height: 112px;
+            margin-top: 15px;
+        }
+
+        .ht2-prompts {
+            top: 0;
+            gap: 9px;
+        }
+
+        .ht2-prompt {
+            min-height: 40px;
+            max-width: 100%;
+            padding: 7px 10px;
+            font-size: 10px;
+        }
+
+        .ht2-prompt-emoji {
+            width: 24px;
+            height: 24px;
+            flex-basis: 24px;
+            font-size: 15px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .ht2-fox {
+            animation: none;
+        }
+
+        .ht2-button,
+        .ht2-prompt {
+            transition: none;
+        }
+    }
+
+    @@keyframes ht2FoxFloat {
+        0%, 100% {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        50% {
+            transform: translateX(-50%) translateY(-9px);
+        }
+    }
+</style>

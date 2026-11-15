@@ -79,7 +79,7 @@ namespace TourWebApp.Controllers
             }
 
             var gia = TinhGiaDatTour(tour, adult, child, baby);
-
+            ViewBag.AnhTour = tour.HinhAnh;
             var vm = new NhapThongTinVM
             {
                 IdTour = idTour,
@@ -194,8 +194,11 @@ namespace TourWebApp.Controllers
                     IdTaiKhoan = userId,
                     NguoiLon = model.NguoiLon,
                     TreEm = model.TreEm,
-                    TreNho = model.EmBe,
+                    TreNho = model.EmBe,          
                     GhiChu = model.GhiChu,
+                    DiaChiLienHe = string.IsNullOrWhiteSpace(model.DiaChiLienHe)
+                        ? null
+                        : model.DiaChiLienHe.Trim(),
                     // Persist the computed booking amount so voucher/payment logic uses the real value.
                     TongTien = model.TongTien,
                     NgayDat = DateTime.Now,
@@ -756,40 +759,54 @@ END");
             }
         }
 
+        [HttpGet]
         public IActionResult XacNhanThanhToan(int idDon)
         {
             int? userId = HttpContext.Session.GetInt32("IdTaiKhoan");
+
             if (userId == null)
             {
-                return RedirectToAction("DangNhap", "TaiKhoan", new { returnUrl = $"/DatTour/ThanhToan?idDon={idDon}" });
+                return RedirectToAction(
+                    "DangNhap",
+                    "TaiKhoan",
+                    new
+                    {
+                        returnUrl = $"/DatTour/ThanhToan?idDon={idDon}"
+                    });
             }
 
             var don = _db.DonDatTours
-                .Include(t => t.IdLichNavigation)
-                .Include(t => t.IdTourNavigation)
-                .FirstOrDefault(t => t.IdDon == idDon && t.IdTaiKhoan == userId.Value);
+                .AsNoTracking()
+                .FirstOrDefault(x =>
+                    x.IdDon == idDon &&
+                    x.IdTaiKhoan == userId.Value);
 
             if (don == null)
             {
-                TempData["Error"] = "Don khong ton tai.";
-                return RedirectToAction("DonCuaToi", "TaiKhoan");
+                TempData["Error"] = "Không tìm thấy đơn đặt tour.";
+
+                return RedirectToAction(
+                    "DonCuaToi",
+                    "TaiKhoan");
             }
 
-            if (DonDaHetHan(don))
+            if (don.DaThanhToan)
             {
-                HuyDonQuaHan(don, "Don het han khi xac nhan thanh toan");
-                LuuVaDongBoCho(don);
-                TempData["Error"] = "Don da het han va bi huy tu dong!";
-                return RedirectToAction("DonCuaToi", "TaiKhoan");
+                return RedirectToAction(
+                    "HoanTat",
+                    "DatTour",
+                    new { idDon = don.IdDon });
             }
 
-            CapNhatDonThanhToanThanhCong(don, "ChuyenKhoanQR", don.MaGiaoDich);
+            TempData["Info"] =
+                "Đơn hàng chưa được xác nhận thanh toán. " +
+                "Vui lòng hoàn tất giao dịch qua VNPay.";
 
-            _db.SaveChanges();
-
-            return RedirectToAction("HoanTat", new { idDon });
+            return RedirectToAction(
+                "ThanhToan",
+                "DatTour",
+                new { idDon = don.IdDon });
         }
-
         public IActionResult HoanTat(int idDon)
         {
             var don = _db.DonDatTours
@@ -956,15 +973,83 @@ END");
                 .OrderBy(x => x)
                 .ToList();
         }
-
-        private (decimal GiaNguoiLon, decimal GiaTreEm, decimal GiaEmBe, decimal TongTien) TinhGiaDatTour(Tour tour, int nguoiLon, int treEm, int emBe)
+      
+        private (
+            decimal GiaNguoiLon,
+            decimal GiaTreEm,
+            decimal GiaEmBe,
+            decimal TongTien
+        ) TinhGiaDatTour(
+            Tour tour,
+            int nguoiLon,
+            int treEm,
+            int emBe)
         {
-            decimal giaNguoiLon = (decimal)(tour.GiaKhuyenMai ?? tour.GiaGoc ?? 0);
-            decimal giaTreEm = (decimal)(tour.TourGiaChiTiets.FirstOrDefault(x => TourPriceAudience.IsChild(x.DoiTuong))?.Gia ?? 0);
-            decimal giaEmBe = (decimal)(tour.TourGiaChiTiets.FirstOrDefault(x => TourPriceAudience.IsInfant(x.DoiTuong))?.Gia ?? 0);
+            if (tour == null)
+            {
+                throw new ArgumentNullException(nameof(tour));
+            }
 
-            decimal tongTien = nguoiLon * giaNguoiLon + treEm * giaTreEm + emBe * giaEmBe;
-            return (giaNguoiLon, giaTreEm, giaEmBe, tongTien);
+            // Gia cong bo duoc su dung khi chua co
+            // bang gia nguoi lon trong TourGiaChiTiet.
+            decimal giaCongBo =
+                tour.GiaKhuyenMai
+                ?? tour.GiaGoc
+                ?? 0m;
+
+            var bangGia = tour.TourGiaChiTiets
+                .ToList();
+
+            var giaNguoiLonChiTiet = bangGia
+                .FirstOrDefault(x =>
+                    TourPriceAudience.IsAdult(x.DoiTuong));
+
+            var giaTreEmChiTiet = bangGia
+                .FirstOrDefault(x =>
+                    TourPriceAudience.IsChild(x.DoiTuong));
+
+            var giaEmBeChiTiet = bangGia
+                .FirstOrDefault(x =>
+                    TourPriceAudience.IsInfant(x.DoiTuong));
+
+            // Uu tien muc gia Admin da luu theo doi tuong.
+            decimal giaNguoiLon =
+                giaNguoiLonChiTiet?.Gia ?? giaCongBo;
+
+            // Neu chua co gia tre em, mac dinh bang
+            // 50% gia nguoi lon.
+            decimal giaTreEm =
+                giaTreEmChiTiet?.Gia
+                ?? Math.Round(
+                    giaNguoiLon * 0.5m,
+                    0,
+                    MidpointRounding.AwayFromZero
+                );
+
+            // Em be mac dinh mien phi neu chua co cau hinh.
+            decimal giaEmBe =
+                giaEmBeChiTiet?.Gia ?? 0m;
+
+            if (giaNguoiLon < 0 ||
+                giaTreEm < 0 ||
+                giaEmBe < 0)
+            {
+                throw new InvalidOperationException(
+                    "Bang gia tour co gia tri khong hop le."
+                );
+            }
+
+            decimal tongTien =
+                nguoiLon * giaNguoiLon
+                + treEm * giaTreEm
+                + emBe * giaEmBe;
+
+            return (
+                GiaNguoiLon: giaNguoiLon,
+                GiaTreEm: giaTreEm,
+                GiaEmBe: giaEmBe,
+                TongTien: tongTien
+            );
         }
 
         private (bool HopLe, string ThongBaoLoi, PhieuGiamGia? Phieu, decimal SoTienGiam) KiemTraPhieuGiamGia(string? maPhieuInput, Tour tour, int idTaiKhoan, decimal tongTien)

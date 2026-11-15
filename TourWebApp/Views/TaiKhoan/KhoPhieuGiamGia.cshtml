@@ -1,216 +1,1630 @@
-﻿@model List<TourWebApp.Data.Models.PhieuGiamGiaTaiKhoan>
+﻿
+@model List<TourWebApp.Data.Models.PhieuGiamGiaTaiKhoan>
 @using TourWebApp.Data.Models
+@using System
+@using System.Linq
+@using System.Collections.Generic
+
 @{
-    ViewData["Title"] = "Kho voucher";
+    ViewData["Title"] = "Ví ưu đãi";
 
-    var danhSachCoTheLuu = ViewBag.DanhSachPhieuCoTheLuu as List<PhieuGiamGia> ?? new List<PhieuGiamGia>();
-    var daLuuIds = ViewBag.DaLuuIds as List<int> ?? new List<int>();
+    var savedVouchers = (Model ?? new List<PhieuGiamGiaTaiKhoan>())
+        .Where(x => x.IdPhieuGiamGiaNavigation != null)
+        .ToList();
 
-    string FormatGiam(PhieuGiamGia p)
+    var availableVouchers =
+        ViewBag.DanhSachPhieuCoTheLuu as List<PhieuGiamGia>
+        ?? new List<PhieuGiamGia>();
+
+    var savedIds =
+        (ViewBag.DaLuuIds as List<int> ?? new List<int>())
+        .ToHashSet();
+
+    foreach (var item in savedVouchers)
     {
-        if (string.Equals(p.LoaiGiam, "PhanTram", StringComparison.OrdinalIgnoreCase))
+        savedIds.Add(item.IdPhieuGiamGia);
+    }
+
+    var discoverVouchers = availableVouchers
+        .Where(x => !savedIds.Contains(x.IdPhieuGiamGia))
+        .ToList();
+
+    var now = DateTime.Now;
+
+    bool IsActive(PhieuGiamGia p)
+    {
+        return p.TrangThai
+            && (!p.NgayBatDau.HasValue || p.NgayBatDau.Value <= now)
+            && (!p.NgayKetThuc.HasValue || p.NgayKetThuc.Value >= now);
+    }
+
+    string StatusText(PhieuGiamGia p)
+    {
+        if (!p.TrangThai)
+            return "Ngừng áp dụng";
+
+        if (p.NgayKetThuc.HasValue && p.NgayKetThuc.Value < now)
+            return "Đã hết hạn";
+
+        if (p.NgayBatDau.HasValue && p.NgayBatDau.Value > now)
+            return "Chưa bắt đầu";
+
+        return "Còn hiệu lực";
+    }
+
+    bool IsPercent(PhieuGiamGia p)
+    {
+        return string.Equals(
+            p.LoaiGiam,
+            "PhanTram",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Gia tri rut gon CHI DUNG DE HIEN THI.
+    // Khong thay doi du lieu giam gia trong SQL.
+    string ShortDiscount(PhieuGiamGia p)
+    {
+        if (IsPercent(p))
         {
-            var text = $"{p.GiaTriGiam:N0}%";
+            return $"{p.GiaTriGiam:N0}%";
+        }
+
+        var amount = p.GiaTriGiam;
+
+        if (amount >= 1000000m)
+        {
+            return $"{amount / 1000000m:0.##}TR";
+        }
+
+        if (amount >= 1000m)
+        {
+            return $"{amount / 1000m:0.##}K";
+        }
+
+        return $"{amount:N0}đ";
+    }
+
+    string FullDiscount(PhieuGiamGia p)
+    {
+        if (IsPercent(p))
+        {
+            return $"Giảm {p.GiaTriGiam:N0}%";
+        }
+
+        return $"Giảm trực tiếp {p.GiaTriGiam:N0}đ";
+    }
+
+    string DiscountDescription(PhieuGiamGia p)
+    {
+        if (IsPercent(p))
+        {
             if (p.GiamToiDa.HasValue && p.GiamToiDa.Value > 0)
             {
-                text += $" (tối đa {p.GiamToiDa.Value:N0} đ)";
+                return $"Giảm tối đa {p.GiamToiDa.Value:N0}đ";
             }
-            return text;
+
+            return "Ưu đãi theo phần trăm";
         }
 
-        return $"{p.GiaTriGiam:N0} đ";
+        return "Áp dụng khi đặt tour đủ điều kiện";
     }
 
-    string FormatPhamVi(PhieuGiamGia p)
+    string ScopeText(PhieuGiamGia p)
     {
-        if (string.Equals(p.PhamViApDung, "Tour", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(
+            p.PhamViApDung,
+            "Tour",
+            StringComparison.OrdinalIgnoreCase))
         {
-            return p.IdTourNavigation?.TenTour is string tenTour && !string.IsNullOrWhiteSpace(tenTour)
-                ? $"Theo tour: {tenTour}"
-                : "Theo tour";
+            return string.IsNullOrWhiteSpace(
+                p.IdTourNavigation?.TenTour)
+                ? "Áp dụng cho tour chỉ định"
+                : $"Tour: {p.IdTourNavigation.TenTour}";
         }
 
-        if (string.Equals(p.PhamViApDung, "LoaiTour", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(
+            p.PhamViApDung,
+            "LoaiTour",
+            StringComparison.OrdinalIgnoreCase))
         {
-            return p.IdLoaiTourNavigation?.TenLoai is string tenLoai && !string.IsNullOrWhiteSpace(tenLoai)
-                ? $"Theo loại: {tenLoai}"
-                : "Theo loại";
+            return string.IsNullOrWhiteSpace(
+                p.IdLoaiTourNavigation?.TenLoai)
+                ? "Áp dụng theo loại tour"
+                : $"Loại tour: {p.IdLoaiTourNavigation.TenLoai}";
         }
 
-        return "Tất cả tour";
+        return "Áp dụng cho tất cả tour";
     }
+
+    string ExpiryText(PhieuGiamGia p)
+    {
+        return p.NgayKetThuc?.ToString("dd/MM/yyyy HH:mm")
+            ?? "Không giới hạn";
+    }
+
+    var activeSavedCount = savedVouchers.Count(
+        x => IsActive(x.IdPhieuGiamGiaNavigation!));
+
+    var successMessage = TempData["Success"] as string;
+    var errorMessage = TempData["Error"] as string;
+    var infoMessage = TempData["Info"] as string;
 }
 
-<link rel="stylesheet" href="~/css/account-dashboard.css" asp-append-version="true" />
+<style>
+    /* ========================================
+       HAPPYTRIP - PREMIUM VOUCHER WALLET
+       ======================================== */
 
-<div class="account-dashboard-page">
-    <div class="account-dashboard-shell">
-        <aside class="account-dashboard-sidebar">
-            <div class="account-user-chip">
-                <div class="account-user-avatar">@((Context.Session.GetString("HoTen") ?? "U").Trim().Substring(0, 1).ToUpper())</div>
+    .ht-rewards,
+    .ht-rewards *,
+    .ht-rewards *::before,
+    .ht-rewards *::after {
+        box-sizing: border-box;
+    }
+
+    .ht-rewards {
+        --rw-green: #075b43;
+        --rw-dark: #103d30;
+        --rw-gold: #d4a04f;
+        --rw-paper: #fffdf8;
+        --rw-muted: #73857a;
+
+        min-height: 65vh;
+        padding: 0 0 55px;
+        background: #faf7f0;
+        color: #193e30;
+        font-family: "Be Vietnam Pro", Arial, sans-serif;
+    }
+
+    .rw-container {
+        width: min(1150px, calc(100% - 42px));
+        margin: 0 auto;
+    }
+
+    /* HERO */
+
+    .rw-hero {
+        position: relative;
+        min-height: 165px;
+        overflow: hidden;
+        background:
+            radial-gradient(
+                circle at 85% 40%,
+                rgba(250, 213, 140, .3),
+                transparent 40%
+            ),
+            linear-gradient(110deg, #fffbf3, #eef4ea);
+    }
+
+    .rw-hero-inner {
+        position: relative;
+        min-height: 165px;
+        display: flex;
+        align-items: center;
+        isolation: isolate;
+    }
+
+    .rw-hero-content {
+        position: relative;
+        z-index: 2;
+        width: 62%;
+        padding: 22px 0;
+    }
+
+    .rw-hero-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #b7863b;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .rw-hero h1 {
+        margin: 0 0 9px;
+        color: #0b4835;
+        font-size: clamp(25px, 3vw, 35px);
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .rw-hero h1 i {
+        color: #d6a24d;
+        font-size: 15px;
+        vertical-align: top;
+    }
+
+    .rw-hero p {
+        max-width: 540px;
+        margin: 0;
+        color: #64796c;
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .rw-hero-art {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 49%;
+        opacity: .85;
+    }
+
+    .rw-hero-art svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    /* NAV */
+
+    .rw-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        width: fit-content;
+        max-width: 100%;
+        margin: 23px 0 26px;
+        padding: 5px;
+        border: 1px solid #e4e5d9;
+        border-radius: 40px;
+        background: #edeee5;
+    }
+
+    .rw-nav button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 38px;
+        padding: 0 17px;
+        border: 0;
+        border-radius: 30px;
+        background: transparent;
+        color: #5b7466;
+        font: 700 11px "Be Vietnam Pro", Arial, sans-serif;
+        cursor: pointer;
+        transition: background .2s;
+    }
+
+    .rw-nav button.is-active {
+        background: #086144;
+        color: #fff;
+    }
+
+    .rw-nav-count {
+        min-width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+        border-radius: 20px;
+        background: #dfebdc;
+        color: #2c6c4a;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .rw-nav button.is-active .rw-nav-count {
+        background: #f0d18d;
+        color: #36512b;
+    }
+
+    /* SECTIONS */
+
+    .rw-section {
+        scroll-margin-top: 100px;
+        margin-bottom: 30px;
+    }
+
+    .rw-section + .rw-section {
+        padding-top: 24px;
+        border-top: 1px solid #e9e2d6;
+    }
+
+    .rw-section-title {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        margin-bottom: 17px;
+    }
+
+    .rw-section-title > i {
+        margin-top: 3px;
+        color: #be8e40;
+        font-size: 20px;
+    }
+
+    .rw-section-title h2 {
+        margin: 0 0 5px;
+        color: #153f30;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .rw-section-title p {
+        margin: 0;
+        color: #7d8e81;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    /* TICKET GRID */
+
+    .rw-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 17px;
+    }
+
+    .rw-ticket {
+        width: 100%;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: 112px minmax(0, 1fr);
+        overflow: hidden;
+        border: 1px solid #e7dfd2;
+        border-radius: 15px;
+        background: #fffdf8;
+        box-shadow: 0 6px 18px rgba(35, 62, 44, .07);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .rw-ticket:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(35, 62, 44, .11);
+    }
+
+    .rw-ticket.is-inactive .rw-ticket-left {
+        background: linear-gradient(145deg, #527d6d, #668b77);
+    }
+
+    /* LEFT - DISCOUNT */
+
+    .rw-ticket-left {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-width: 0;
+        padding: 17px 5px 42px;
+        overflow: hidden;
+        background: linear-gradient(145deg, #00654a, #07513d);
+        color: #fff;
+        text-align: center;
+    }
+
+    .rw-ticket-left::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: -1px;
+        bottom: 0;
+        width: 9px;
+        background:
+            radial-gradient(
+                circle at right center,
+                #fffdf8 4.5px,
+                transparent 5px
+            ) left top / 9px 16px repeat-y;
+        z-index: 3;
+    }
+
+    .rw-ticket-left > i {
+        position: relative;
+        z-index: 2;
+        color: #f4cc81;
+        font-size: 21px;
+    }
+
+    .rw-ticket-amount {
+        display: block;
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 0 3px;
+        color: #fff;
+        font-size: clamp(22px, 2.5vw, 30px);
+        font-weight: 800;
+        line-height: 1.15;
+        white-space: nowrap;
+        letter-spacing: -.7px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .rw-ticket-brand {
+        position: relative;
+        z-index: 2;
+        color: #dcefe3;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .8px;
+    }
+
+    .rw-ticket-landscape {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 50px;
+        z-index: 1;
+    }
+
+    /* RIGHT - CONTENT */
+
+    .rw-ticket-body {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 14px 15px 13px;
+    }
+
+    .rw-ticket-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 7px;
+        margin-bottom: 8px;
+    }
+
+    .rw-ticket-kicker {
+        color: #b88a41;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .8px;
+    }
+
+    .rw-ticket-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        border-radius: 20px;
+        background: #e5f3e7;
+        color: #176b43;
+        font-size: 9px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .rw-ticket-status.inactive {
+        background: #eeeae3;
+        color: #847d72;
+    }
+
+    .rw-ticket-body h3 {
+        margin: 0 0 5px;
+        color: #173f2e;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .rw-ticket-discount {
+        margin: 0 0 5px;
+        color: #08704e;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.5;
+    }
+
+    .rw-ticket-desc {
+        margin: 0 0 10px;
+        color: #839084;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    .rw-ticket-details {
+        display: grid;
+        gap: 5px;
+        margin: 0 0 11px;
+        color: #65786b;
+        font-size: 10px;
+        line-height: 1.55;
+    }
+
+    .rw-ticket-detail {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .rw-ticket-detail i {
+        flex-shrink: 0;
+        width: 13px;
+        margin-top: 3px;
+        color: #20885f;
+        font-size: 11px;
+    }
+
+    .rw-ticket-detail span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* CODE + ACTIONS */
+
+    .rw-ticket-footer {
+        margin-top: auto;
+        padding-top: 10px;
+        border-top: 1px dashed #d9e2d7;
+    }
+
+    .rw-ticket-code {
+        display: block;
+        margin-bottom: 9px;
+        color: #075d40;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        letter-spacing: .2px;
+    }
+
+    .rw-ticket-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .rw-ticket-actions form {
+        display: inline-flex;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .rw-ticket-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 32px;
+        padding: 0 10px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font: 700 10px "Be Vietnam Pro", Arial, sans-serif;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background .2s;
+    }
+
+    .rw-ticket-btn.primary {
+        background: #076448;
+        color: #fff;
+    }
+
+    .rw-ticket-btn.primary:hover {
+        background: #034b36;
+    }
+
+    .rw-ticket-btn.copy {
+        background: #f0f6ed;
+        color: #176544;
+        border-color: #d7e4d4;
+    }
+
+    .rw-ticket-btn.copy:hover {
+        background: #e4f0e1;
+    }
+
+    .rw-ticket-btn.remove {
+        background: #fff9f7;
+        color: #b25146;
+        border-color: #efd5cd;
+    }
+
+    .rw-ticket-btn.remove:hover {
+        background: #ffede9;
+    }
+
+    .rw-ticket-btn:disabled {
+        opacity: .6;
+        cursor: wait;
+    }
+
+    /* EMPTY STATES */
+
+    .rw-empty {
+        padding: 34px 20px;
+        border: 1px dashed #dadfd2;
+        border-radius: 15px;
+        background: #fffdf8;
+        text-align: center;
+    }
+
+    .rw-empty > i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 53px;
+        height: 53px;
+        margin-bottom: 12px;
+        border-radius: 50%;
+        background: #e8f2e6;
+        color: #1d7850;
+        font-size: 22px;
+    }
+
+    .rw-empty h3 {
+        margin: 0 0 7px;
+        color: #1b4a35;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .rw-empty p {
+        margin: 0;
+        color: #819085;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+    /* ALERTS */
+
+    .rw-alert {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 12px 15px;
+        margin: 15px 0;
+        border-radius: 10px;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    .rw-alert.success {
+        background: #e9f7ea;
+        color: #216a41;
+        border: 1px solid #cce7d2;
+    }
+
+    .rw-alert.error {
+        background: #fff0ed;
+        color: #a54138;
+        border: 1px solid #f0d5cf;
+    }
+
+    .rw-alert.info {
+        background: #edf2f8;
+        color: #456c84;
+        border: 1px solid #dce6ef;
+    }
+
+    /* BOTTOM NOTE */
+
+    .rw-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 17px;
+        border: 1px solid #e0e4d3;
+        border-radius: 12px;
+        background: #f0f2e7;
+        color: #697d6d;
+        font-size: 10px;
+        line-height: 1.8;
+    }
+
+    .rw-note i {
+        margin-top: 3px;
+        flex-shrink: 0;
+        color: #17764b;
+        font-size: 14px;
+    }
+
+    .rw-note strong {
+        color: #24513a;
+    }
+
+    /* COPY TOAST */
+
+    .rw-copy-toast {
+        position: fixed;
+        z-index: 9999;
+        left: 50%;
+        bottom: 25px;
+        transform: translate(-50%, 15px);
+        padding: 11px 17px;
+        border-radius: 10px;
+        background: #0a573e;
+        color: #fff;
+        font-size: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s, transform .2s;
+    }
+
+    .rw-copy-toast.visible {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1050px) {
+        .rw-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .rw-ticket {
+            max-width: 650px;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .rw-container {
+            width: calc(100% - 26px);
+        }
+
+        .rw-hero-content {
+            width: 87%;
+        }
+
+        .rw-hero-art {
+            width: 65%;
+            opacity: .35;
+        }
+
+        .rw-hero h1 {
+            font-size: 25px;
+        }
+
+        .rw-nav {
+            width: 100%;
+        }
+
+        .rw-nav button {
+            flex: 1;
+            min-width: 0;
+            gap: 5px;
+            padding: 0 8px;
+            font-size: 10px;
+        }
+
+        .rw-ticket {
+            grid-template-columns: 95px minmax(0, 1fr);
+        }
+
+        .rw-ticket-left {
+            padding-left: 3px;
+            padding-right: 3px;
+        }
+
+        .rw-ticket-amount {
+            font-size: 21px;
+        }
+
+        .rw-ticket-body {
+            padding: 12px 11px;
+        }
+
+        .rw-ticket-status {
+            padding: 4px 6px;
+            font-size: 8px;
+        }
+
+        .rw-ticket-kicker {
+            font-size: 8px;
+        }
+
+        .rw-ticket-btn {
+            font-size: 9px;
+            padding: 0 8px;
+        }
+    }
+
+    @@media (max-width: 380px) {
+        .rw-ticket {
+            grid-template-columns: 82px minmax(0, 1fr);
+        }
+
+        .rw-ticket-amount {
+            font-size: 18px;
+        }
+
+        .rw-ticket-left > i {
+            font-size: 18px;
+        }
+
+        .rw-nav button {
+            font-size: 9px;
+        }
+    }
+</style>
+
+<div class="ht-rewards">
+
+    <!-- HERO -->
+
+    <section class="rw-hero">
+
+        <div class="rw-container rw-hero-inner">
+
+            <div class="rw-hero-content">
+
+                <div class="rw-hero-eyebrow">
+
+                    <i class="fa-solid fa-ticket"></i>
+
+                    HAPPYTRIP · TRAVEL REWARDS
+
+                </div>
+
+                <h1>
+                    Ví ưu đãi của bạn
+                    <i class="fa-solid fa-sparkles"></i>
+                </h1>
+
+                <p>
+                    Quản lý voucher đã lưu và khám phá
+                    những ưu đãi hấp dẫn trước khi đặt tour.
+                    Thêm niềm vui cho mỗi hành trình cùng HappyTrip.
+                </p>
+
+            </div>
+
+            <div class="rw-hero-art" aria-hidden="true">
+
+                <svg viewBox="0 0 520 190"
+                     preserveAspectRatio="xMidYMid slice"
+                     xmlns="http://www.w3.org/2000/svg">
+
+                    <defs>
+
+                        <linearGradient id="rwSky"
+                                        x1="0" y1="0"
+                                        x2="0" y2="1">
+
+                            <stop offset="0%"
+                                  stop-color="#a5d7d1" />
+
+                            <stop offset="100%"
+                                  stop-color="#e6eedb" />
+
+                        </linearGradient>
+
+                        <linearGradient id="rwSea"
+                                        x1="0" y1="0"
+                                        x2="0" y2="1">
+
+                            <stop offset="0%"
+                                  stop-color="#79bdb2" />
+
+                            <stop offset="100%"
+                                  stop-color="#358d7b" />
+
+                        </linearGradient>
+
+                    </defs>
+
+                    <rect width="520"
+                          height="190"
+                          fill="url(#rwSky)" />
+
+                    <circle cx="365"
+                            cy="49"
+                            r="31"
+                            fill="#f5d994" />
+
+                    <path d="M0 140 L70 80 L105 115
+                             L165 43 L220 127 L275 70
+                             L325 123 L395 49 L455 113
+                             L520 65 L520 190 L0 190Z"
+                          fill="#639a7d" />
+
+                    <path d="M0 158 L65 115 L115 148
+                             L192 80 L250 154 L320 105
+                             L390 150 L457 92 L520 140
+                             L520 190 L0 190Z"
+                          fill="#347e69" />
+
+                    <path d="M0 156 Q170 150 285 159
+                             Q410 149 520 159
+                             L520 190 L0 190Z"
+                          fill="url(#rwSea)" />
+
+                    <path d="M300 155 L380 155
+                             L364 169 L315 169Z"
+                          fill="#fff8e9" />
+
+                    <path d="M318 132 L355 132
+                             L362 155 L310 155Z"
+                          fill="#f3ebd9" />
+
+                    <rect x="323" y="138"
+                          width="11" height="9"
+                          fill="#237d70" />
+
+                    <rect x="339" y="138"
+                          width="11" height="9"
+                          fill="#237d70" />
+
+                    <path d="M334 116 L334 132"
+                          stroke="#ffffff"
+                          stroke-width="2" />
+
+                    <path d="M334 117 L353 124 L334 124Z"
+                          fill="#e5b35c" />
+
+                    <path d="M295 174 Q338 183 388 174"
+                          fill="none"
+                          stroke="#e6f1dc"
+                          stroke-width="2" />
+
+                </svg>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <div class="rw-container">
+
+        <!-- SERVER MESSAGES -->
+
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="rw-alert success" role="status">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <span>@successMessage</span>
+
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="rw-alert error" role="alert">
+
+                <i class="fa-solid fa-circle-exclamation"></i>
+
+                <span>@errorMessage</span>
+
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(infoMessage))
+        {
+            <div class="rw-alert info" role="status">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>@infoMessage</span>
+
+            </div>
+        }
+
+        <!-- NAVIGATION -->
+
+        <nav class="rw-nav" aria-label="Danh mục ưu đãi">
+
+            <button type="button"
+                    class="is-active"
+                    data-scroll-target="rwSaved">
+
+                <i class="fa-regular fa-bookmark"></i>
+
+                Ưu đãi của tôi
+
+                <span class="rw-nav-count">
+                    @savedVouchers.Count
+                </span>
+
+            </button>
+
+            <button type="button"
+                    data-scroll-target="rwDiscover">
+
+                <i class="fa-regular fa-compass"></i>
+
+                Khám phá ưu đãi
+
+                <span class="rw-nav-count">
+                    @discoverVouchers.Count
+                </span>
+
+            </button>
+
+        </nav>
+
+        <!-- SAVED VOUCHERS -->
+
+        <section id="rwSaved" class="rw-section">
+
+            <div class="rw-section-title">
+
+                <i class="fa-regular fa-bookmark"></i>
+
                 <div>
-                    <p class="account-user-kicker">Kho mã giảm giá</p>
-                    <h2>@(Context.Session.GetString("HoTen") ?? "Khách hàng")</h2>
-                    <p class="account-user-email">Lưu voucher để dùng nhanh khi đặt tour</p>
-                </div>
-            </div>
 
-            <nav class="account-dashboard-nav" aria-label="Điều hướng tài khoản">
-                <a href="/TaiKhoan/HoSo">Hồ sơ cá nhân</a>
-                <a href="/TaiKhoan/DonCuaToi">Đơn của tôi</a>
-                <a href="/TaiKhoan/KhoPhieuGiamGia" class="is-active">Kho voucher</a>
-            </nav>
-        </aside>
+                    <h2>Ưu đãi của tôi</h2>
 
-        <section class="account-dashboard-main">
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success">@TempData["Success"]</div>
-            }
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-warning">@TempData["Error"]</div>
-            }
-            @if (TempData["Info"] != null)
-            {
-                <div class="alert alert-info">@TempData["Info"]</div>
-            }
+                    <p>
+                        Các mã giảm giá đã lưu vào ví HappyTrip.
+                        Có @activeSavedCount ưu đãi còn hiệu lực theo thời gian.
+                    </p>
 
-            <div class="account-panel mb-4">
-                <div class="account-panel-head">
-                    <h3>Voucher đã lưu</h3>
-                    <p>Copy mã này và dán vào form đặt tour tại bước nhập thông tin.</p>
                 </div>
 
-                @if (Model == null || !Model.Any())
-                {
-                    <div class="account-empty-order">Bạn chưa lưu voucher nào.</div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Mã</th>
-                                    <th>Nội dung</th>
-                                    <th>Ưu đãi</th>
-                                    <th>Điều kiện</th>
-                                    <th>Hết hạn</th>
-                                    <th class="text-end">Tác vụ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model)
-                                {
-                                    var p = item.IdPhieuGiamGiaNavigation;
-                                    if (p == null) { continue; }
-
-                                    <tr>
-                                        <td><span class="badge bg-success fs-6">@p.MaPhieu</span></td>
-                                        <td>
-                                            <div class="fw-semibold">@p.TenPhieu</div>
-                                            <div class="small text-muted">@FormatPhamVi(p)</div>
-                                        </td>
-                                        <td>@FormatGiam(p)</td>
-                                        <td>Đơn tối thiểu: @p.DonToiThieu.ToString("N0") đ</td>
-                                        <td>@(p.NgayKetThuc?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</td>
-                                        <td class="text-end">
-                                            <button type="button" class="btn btn-sm btn-outline-primary me-1 js-copy-voucher" data-code="@p.MaPhieu">Copy mã</button>
-                                            <form asp-action="BoLuuPhieuGiamGia" method="post" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="idPhieuGiamGia" value="@p.IdPhieuGiamGia" />
-                                                <button class="btn btn-sm btn-outline-danger" type="submit">Bỏ lưu</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
             </div>
 
-            <div class="account-panel">
-                <div class="account-panel-head">
-                    <h3>Voucher có sẵn</h3>
-                    <p>Lưu vào kho để dùng sau. Hệ thống vẫn sẽ check điều kiện khi áp mã.</p>
+            @if (!savedVouchers.Any())
+            {
+                <div class="rw-empty">
+
+                    <i class="fa-solid fa-ticket"></i>
+
+                    <h3>Ví ưu đãi đang trống</h3>
+
+                    <p>
+                        Bạn chưa lưu voucher nào.
+                        Khám phá các ưu đãi mới ở phía dưới nhé!
+                    </p>
+
                 </div>
+            }
+            else
+            {
+                <div class="rw-grid">
 
-                @if (!danhSachCoTheLuu.Any())
-                {
-                    <div class="account-empty-order">Hiện chưa có voucher đang mở.</div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Mã</th>
-                                    <th>Nội dung</th>
-                                    <th>Ưu đãi</th>
-                                    <th>Điều kiện</th>
-                                    <th>Hết hạn</th>
-                                    <th class="text-end">Tác vụ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var p in danhSachCoTheLuu)
-                                {
-                                    var daLuu = daLuuIds.Contains(p.IdPhieuGiamGia);
+                    @foreach (var item in savedVouchers)
+                    {
+                        var voucher = item.IdPhieuGiamGiaNavigation;
 
-                                    <tr>
-                                        <td><span class="badge bg-light text-dark fs-6">@p.MaPhieu</span></td>
-                                        <td>
-                                            <div class="fw-semibold">@p.TenPhieu</div>
-                                            <div class="small text-muted">@FormatPhamVi(p)</div>
-                                        </td>
-                                        <td>@FormatGiam(p)</td>
-                                        <td>Đơn tối thiểu: @p.DonToiThieu.ToString("N0") đ</td>
-                                        <td>@(p.NgayKetThuc?.ToString("dd/MM/yyyy HH:mm") ?? "Không giới hạn")</td>
-                                        <td class="text-end">
-                                            @if (daLuu)
-                                            {
-                                                <span class="badge bg-success">Đã lưu</span>
-                                            }
-                                            else
-                                            {
-                                                <form asp-action="LuuPhieuGiamGia" method="post" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="idPhieuGiamGia" value="@p.IdPhieuGiamGia" />
-                                                    <button class="btn btn-sm btn-primary" type="submit">Lưu vào kho</button>
-                                                </form>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
+                        if (voucher == null)
+                        {
+                            continue;
+                        }
+
+                        var active = IsActive(voucher);
+
+                        <article class="rw-ticket @(active ? "" : "is-inactive")">
+
+                            <div class="rw-ticket-left">
+
+                                <i class="fa-solid fa-ticket"></i>
+
+                                <strong class="rw-ticket-amount"
+                                        title="@FullDiscount(voucher)">
+
+                                    @ShortDiscount(voucher)
+
+                                </strong>
+
+                                <span class="rw-ticket-brand">
+                                    HAPPYTRIP
+                                </span>
+
+                                <svg class="rw-ticket-landscape"
+                                     viewBox="0 0 120 50"
+                                     preserveAspectRatio="none"
+                                     aria-hidden="true">
+
+                                    <circle cx="99" cy="13"
+                                            r="9"
+                                            fill="#f0d08c" />
+
+                                    <path d="M0 38 L24 15 L43 30
+                                             L65 8 L88 31 L105 18
+                                             L120 35 L120 50 L0 50Z"
+                                          fill="#4f9d80" />
+
+                                    <path d="M0 44 L26 31 L46 40
+                                             L75 22 L104 43 L120 32
+                                             L120 50 L0 50Z"
+                                          fill="#88c4a1" />
+
+                                    <path d="M0 48 Q30 39 59 49
+                                             Q92 37 120 46
+                                             L120 50 L0 50Z"
+                                          fill="#e5d8a1" />
+
+                                </svg>
+
+                            </div>
+
+                            <div class="rw-ticket-body">
+
+                                <div class="rw-ticket-header">
+
+                                    <span class="rw-ticket-kicker">
+                                        TRAVEL REWARD
+                                    </span>
+
+                                    <span class="rw-ticket-status @(active ? "" : "inactive")">
+
+                                        <i class="fa-solid @(active ? "fa-circle-check" : "fa-circle-minus")"></i>
+
+                                        @StatusText(voucher)
+
+                                    </span>
+
+                                </div>
+
+                                <h3>@voucher.TenPhieu</h3>
+
+                                <p class="rw-ticket-discount">
+                                    @FullDiscount(voucher)
+                                </p>
+
+                                <p class="rw-ticket-desc">
+                                    @DiscountDescription(voucher)
+                                </p>
+
+                                <div class="rw-ticket-details">
+
+                                    <div class="rw-ticket-detail">
+
+                                        <i class="fa-solid fa-route"></i>
+
+                                        <span>@ScopeText(voucher)</span>
+
+                                    </div>
+
+                                    <div class="rw-ticket-detail">
+
+                                        <i class="fa-solid fa-wallet"></i>
+
+                                        <span>
+                                            Đơn tối thiểu:
+                                            @voucher.DonToiThieu.ToString("N0")đ
+                                        </span>
+
+                                    </div>
+
+                                    <div class="rw-ticket-detail">
+
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        <span>
+                                            Hết hạn:
+                                            @ExpiryText(voucher)
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="rw-ticket-footer">
+
+                                    <strong class="rw-ticket-code">
+                                        @voucher.MaPhieu
+                                    </strong>
+
+                                    <div class="rw-ticket-actions">
+
+                                        @if (active)
+                                        {
+                                            <button type="button"
+                                                    class="rw-ticket-btn copy js-copy-voucher"
+                                                    data-code="@voucher.MaPhieu">
+
+                                                <i class="fa-regular fa-copy"></i>
+                                                Sao chép mã
+
+                                            </button>
+                                        }
+
+                                        <form asp-controller="TaiKhoan"
+                                              asp-action="BoLuuPhieuGiamGia"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="idPhieuGiamGia"
+                                                   value="@voucher.IdPhieuGiamGia" />
+
+                                            <button type="submit"
+                                                    class="rw-ticket-btn remove">
+
+                                                <i class="fa-solid fa-xmark"></i>
+                                                Bỏ lưu
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+                    }
+
+                </div>
+            }
+
         </section>
+
+        <!-- DISCOVER VOUCHERS -->
+
+        <section id="rwDiscover" class="rw-section">
+
+            <div class="rw-section-title">
+
+                <i class="fa-solid fa-gift"></i>
+
+                <div>
+
+                    <h2>Khám phá ưu đãi</h2>
+
+                    <p>
+                        Voucher đang mở mà bạn chưa lưu.
+                        Chọn ưu đãi phù hợp cho chuyến đi sắp tới.
+                    </p>
+
+                </div>
+
+            </div>
+
+            @if (!discoverVouchers.Any())
+            {
+                <div class="rw-empty">
+
+                    <i class="fa-solid fa-gift"></i>
+
+                    <h3>Chưa có ưu đãi mới</h3>
+
+                    <p>
+                        Hiện không có voucher mới để lưu.
+                        Hãy xem lại các ưu đãi đã lưu trong ví nhé.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="rw-grid">
+
+                    @foreach (var voucher in discoverVouchers)
+                    {
+                        <article class="rw-ticket">
+
+                            <div class="rw-ticket-left">
+
+                                <i class="fa-solid fa-gift"></i>
+
+                                <strong class="rw-ticket-amount"
+                                        title="@FullDiscount(voucher)">
+
+                                    @ShortDiscount(voucher)
+
+                                </strong>
+
+                                <span class="rw-ticket-brand">
+                                    HAPPYTRIP
+                                </span>
+
+                                <svg class="rw-ticket-landscape"
+                                     viewBox="0 0 120 50"
+                                     preserveAspectRatio="none"
+                                     aria-hidden="true">
+
+                                    <circle cx="91" cy="13"
+                                            r="10"
+                                            fill="#f0d08c" />
+
+                                    <path d="M0 37 L20 16 L41 31
+                                             L67 9 L92 33 L110 20
+                                             L120 35 L120 50 L0 50Z"
+                                          fill="#4eac8a" />
+
+                                    <path d="M0 44 L25 30 L48 43
+                                             L76 22 L101 40 L120 32
+                                             L120 50 L0 50Z"
+                                          fill="#a4caa3" />
+
+                                    <path d="M0 50 Q38 37 68 48
+                                             Q97 38 120 46
+                                             L120 50 L0 50Z"
+                                          fill="#e5d8a1" />
+
+                                </svg>
+
+                            </div>
+
+                            <div class="rw-ticket-body">
+
+                                <div class="rw-ticket-header">
+
+                                    <span class="rw-ticket-kicker">
+                                        NEW OFFER
+                                    </span>
+
+                                    <span class="rw-ticket-status">
+
+                                        <i class="fa-solid fa-bolt"></i>
+                                        Đang mở
+
+                                    </span>
+
+                                </div>
+
+                                <h3>@voucher.TenPhieu</h3>
+
+                                <p class="rw-ticket-discount">
+                                    @FullDiscount(voucher)
+                                </p>
+
+                                <p class="rw-ticket-desc">
+                                    @DiscountDescription(voucher)
+                                </p>
+
+                                <div class="rw-ticket-details">
+
+                                    <div class="rw-ticket-detail">
+
+                                        <i class="fa-solid fa-route"></i>
+
+                                        <span>@ScopeText(voucher)</span>
+
+                                    </div>
+
+                                    <div class="rw-ticket-detail">
+
+                                        <i class="fa-solid fa-wallet"></i>
+
+                                        <span>
+                                            Đơn tối thiểu:
+                                            @voucher.DonToiThieu.ToString("N0")đ
+                                        </span>
+
+                                    </div>
+
+                                    <div class="rw-ticket-detail">
+
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        <span>
+                                            Hết hạn:
+                                            @ExpiryText(voucher)
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="rw-ticket-footer">
+
+                                    <strong class="rw-ticket-code">
+                                        @voucher.MaPhieu
+                                    </strong>
+
+                                    <div class="rw-ticket-actions">
+
+                                        <form asp-controller="TaiKhoan"
+                                              asp-action="LuuPhieuGiamGia"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="idPhieuGiamGia"
+                                                   value="@voucher.IdPhieuGiamGia" />
+
+                                            <button type="submit"
+                                                    class="rw-ticket-btn primary">
+
+                                                <i class="fa-regular fa-bookmark"></i>
+                                                Lưu vào ví
+
+                                            </button>
+
+                                        </form>
+
+                                        <button type="button"
+                                                class="rw-ticket-btn copy js-copy-voucher"
+                                                data-code="@voucher.MaPhieu">
+
+                                            <i class="fa-regular fa-copy"></i>
+                                            Sao chép mã
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+                    }
+
+                </div>
+            }
+
+        </section>
+
+        <!-- NOTE -->
+
+        <div class="rw-note">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            <span>
+                <strong>
+                    Lưu voucher không đảm bảo chắc chắn được giảm giá.
+                </strong>
+
+                Khi áp dụng mã ở bước đặt tour,
+                hệ thống sẽ kiểm tra thời hạn,
+                giá trị đơn tối thiểu, phạm vi tour
+                và những điều kiện liên quan.
+                Voucher hết hạn vẫn có thể xuất hiện
+                trong danh sách đã lưu để quản lý hoặc bỏ lưu.
+            </span>
+
+        </div>
+
     </div>
+
+    <div id="rwCopyToast"
+         class="rw-copy-toast"
+         role="status"
+         aria-live="polite"></div>
+
 </div>
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".js-copy-voucher").forEach(function (btn) {
-                btn.addEventListener("click", async function () {
-                    const code = btn.getAttribute("data-code") || "";
+        (function () {
+            "use strict";
+
+            const navButtons =
+                document.querySelectorAll(".rw-nav button");
+
+            const copyToast =
+                document.getElementById("rwCopyToast");
+
+            let toastTimer = null;
+
+            // CHUYEN NHANH DEN TUNG NHOM VOUCHER
+            navButtons.forEach(function (button) {
+
+                button.addEventListener("click", function () {
+
+                    const targetId =
+                        button.getAttribute("data-scroll-target");
+
+                    const target =
+                        document.getElementById(targetId);
+
+                    if (!target) return;
+
+                    navButtons.forEach(function (item) {
+                        item.classList.remove("is-active");
+                    });
+
+                    button.classList.add("is-active");
+
+                    target.scrollIntoView({
+                        behavior: window.matchMedia(
+                            "(prefers-reduced-motion: reduce)"
+                        ).matches ? "auto" : "smooth",
+                        block: "start"
+                    });
+                });
+            });
+
+            // THONG BAO SAO CHEP MA
+            function showCopyToast(message) {
+
+                if (!copyToast) return;
+
+                copyToast.textContent = message;
+                copyToast.classList.add("visible");
+
+                clearTimeout(toastTimer);
+
+                toastTimer = setTimeout(function () {
+                    copyToast.classList.remove("visible");
+                }, 2000);
+            }
+
+            // FALLBACK CHO TRINH DUYET KHONG CO CLIPBOARD API
+            function fallbackCopy(text) {
+
+                const input = document.createElement("textarea");
+
+                input.value = text;
+                input.setAttribute("readonly", "");
+
+                input.style.position = "fixed";
+                input.style.left = "-9999px";
+                input.style.top = "-9999px";
+
+                document.body.appendChild(input);
+
+                input.focus();
+                input.select();
+
+                let success = false;
+
+                try {
+                    success = document.execCommand("copy");
+                } catch (error) {
+                    success = false;
+                }
+
+                input.remove();
+
+                return success;
+            }
+
+            // SAO CHEP MA VOUCHER
+            document.querySelectorAll(
+                ".js-copy-voucher"
+            ).forEach(function (button) {
+
+                button.addEventListener("click", async function () {
+
+                    const code =
+                        button.getAttribute("data-code") || "";
+
                     if (!code) return;
 
+                    let copied = false;
+
                     try {
-                        await navigator.clipboard.writeText(code);
-                        btn.textContent = "Đã copy";
-                        setTimeout(function () { btn.textContent = "Copy mã"; }, 1200);
-                    } catch {
-                        alert("Không copy được mã, vui lòng copy thủ công: " + code);
+                        if (
+                            navigator.clipboard &&
+                            navigator.clipboard.writeText
+                        ) {
+                            await navigator.clipboard.writeText(code);
+                            copied = true;
+                        } else {
+                            copied = fallbackCopy(code);
+                        }
+                    } catch (error) {
+                        copied = fallbackCopy(code);
+                    }
+
+                    if (copied) {
+
+                        showCopyToast("Đã sao chép mã: " + code);
+
+                        const originalHtml = button.innerHTML;
+
+                        button.innerHTML =
+                            '<i class="fa-solid fa-check"></i> ' +
+                            "Đã sao chép";
+
+                        button.disabled = true;
+
+                        setTimeout(function () {
+                            button.innerHTML = originalHtml;
+                            button.disabled = false;
+                        }, 1400);
+
+                    } else {
+                        window.prompt(
+                            "Sao chép mã voucher:",
+                            code
+                        );
                     }
                 });
             });
-        });
+
+        })();
     </script>
 }

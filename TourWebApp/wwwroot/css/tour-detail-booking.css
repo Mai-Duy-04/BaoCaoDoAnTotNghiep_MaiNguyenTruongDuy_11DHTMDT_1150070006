@@ -1,0 +1,729 @@
+/* =========================================================
+   HAPPYTRIP - BOOKING EXPERIENCE REDESIGN
+   File: wwwroot/css/tour-detail-booking.css
+
+   Scope: #lichkhoihanh
+   Compatible with:
+   - tour-detail.css
+   - tour-detail-redesign.css
+   - tour-detail-months.js
+   - tour-detail.js
+   ========================================================= */
+
+.tour-detail-page #lichkhoihanh {
+    --booking-green: #176c43;
+    --booking-deep: #163e2c;
+    --booking-soft: #ecf7ed;
+    --booking-gold: #c59747;
+    --booking-red: #ce533d;
+    --booking-text: #315541;
+    --booking-muted: #829387;
+    --booking-border: #e1e9df;
+
+    scroll-margin-top: 145px;
+}
+
+/* ============================================
+   MAIN SECTION
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-card {
+    padding: 27px;
+    border: 1px solid #e0e9df;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(22, 64, 37, .045);
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-head {
+    margin-bottom: 21px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    color: var(--booking-deep);
+    font-size: clamp(21px, 2vw, 26px);
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-head h2 i {
+    color: #29925b;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-head p {
+    margin: 0;
+    color: var(--booking-muted);
+    font-size: 12px;
+}
+
+/* ============================================
+   TWO COLUMN LAYOUT
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-card > .row {
+    --bs-gutter-x: 18px;
+    --bs-gutter-y: 18px;
+    align-items: stretch;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-section-card > .row > div {
+    min-width: 0;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-schedule-card,
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card {
+    position: relative;
+    min-width: 0;
+    height: 100%;
+    padding: 21px;
+    background: #fff;
+    border: 1px solid var(--booking-border);
+    border-radius: 17px;
+    box-shadow: 0 4px 16px rgba(18, 61, 36, .035);
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-schedule-card {
+    background:
+        linear-gradient(
+            180deg,
+            #fcfefb 0%,
+            #fff 95px
+        );
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-schedule-card > h3,
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card > h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 17px;
+    color: var(--booking-deep);
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-schedule-card > h3 i,
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card > h3 i {
+    color: #30955c;
+}
+
+/* ============================================
+   MONTH TABS
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.ht-month-toolbar {
+    margin: 0 0 18px;
+    padding: 0 0 16px;
+    border-bottom: 1px solid #e9eee6;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-toolbar-title {
+    margin-bottom: 11px;
+    color: #3c684b;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tabs {
+    display: flex;
+    gap: 9px;
+    padding: 2px 1px 9px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 95px;
+    min-height: 68px;
+    padding: 10px 13px;
+    border: 1px solid #dce8db;
+    border-radius: 13px;
+    background: #fff;
+    color: #617e69;
+    font-size: 12px;
+    font-weight: 800;
+    scroll-snap-align: start;
+    box-shadow: none;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab:hover {
+    background: #f4faf3;
+    border-color: #91c49e;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab.active {
+    background: linear-gradient(
+        140deg,
+        #248e59,
+        #14683f
+    );
+    border-color: #1c7749;
+    color: #fff;
+    box-shadow: 0 5px 14px rgba(24, 113, 67, .17);
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab-year {
+    color: inherit;
+    font-size: 10px;
+    opacity: .83;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab-count {
+    min-width: 21px;
+    height: 20px;
+    border-radius: 999px;
+    background: #e9f5e9;
+    color: #378a57;
+    font-size: 10px;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-tab.active .ht-month-tab-count {
+    background: rgba(255, 255, 255, .2);
+    color: #fff;
+}
+
+.tour-detail-page #lichkhoihanh
+.ht-month-summary {
+    margin: 4px 0 0;
+    color: #839688;
+    font-size: 11px;
+}
+
+/* ============================================
+   DEPARTURE ROWS
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid,
+.tour-detail-page #lichkhoihanh
+.ht-month-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid[hidden] {
+    display: none !important;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row {
+    display: grid;
+    grid-template-columns:
+        45px
+        minmax(35px, .5fr)
+        minmax(70px, .8fr)
+        minmax(105px, 1.65fr);
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 73px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #e2eae0;
+    border-radius: 13px;
+    background: #fff;
+    color: #315b42;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: none;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row:hover {
+    border-color: #9ecbab;
+    background: #f7fbf6;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row:focus-visible {
+    outline: 3px solid #b5dfc0;
+    outline-offset: 2px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row.lich-selected {
+    border: 1.5px solid #21844f !important;
+    background: #eff8ef !important;
+    box-shadow:
+        0 0 0 2px rgba(38, 139, 82, .07);
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .tour-calendar-day {
+    display: grid;
+    place-items: center;
+    width: 43px;
+    height: 43px;
+    border-radius: 11px;
+    background: #eaf5ec;
+    color: #248550;
+    font-size: 19px;
+    font-weight: 850;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-selected
+.tour-calendar-day {
+    background: #d8eedc;
+    color: #176a41;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row > span:nth-child(2) {
+    color: #426a4e;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-row > span:nth-child(3) {
+    color: #718b78;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .tour-detail-status {
+    justify-self: end;
+    color: #26834f;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: right;
+    line-height: 1.5;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-full {
+    background: #f9f9f7;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-calendar-grid .lich-full
+.tour-detail-status {
+    color: #b86357;
+}
+
+/* ============================================
+   CALCULATOR CARD
+   ============================================ */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card {
+    background:
+        linear-gradient(
+            180deg,
+            #fffdf8 0%,
+            #fff 145px
+        );
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-card > h3 {
+    padding: 0 0 15px;
+    border-bottom: 1px solid #e8ece4;
+}
+
+/* Departure detail */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info {
+    padding: 13px 15px;
+    margin: 0 0 15px;
+    border: 1px solid #e7ecdf;
+    border-radius: 13px;
+    background: #fafbf6;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info p {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 11px;
+    margin: 0;
+    padding: 7px 0;
+    font-size: 11px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info p + p {
+    border-top: 1px dashed #eef0e9;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info p span {
+    color: #819183;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-calc-info p strong {
+    max-width: 60%;
+    overflow-wrap: anywhere;
+    color: #28553b;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+#thoigian_trangthai {
+    color: #218852;
+}
+
+/* Price by audience */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list {
+    padding: 0 0 15px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e7ece4;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list h4 {
+    display: flex;
+    align-items: center;
+    margin: 0 0 10px;
+    color: #20563b;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 11px;
+    margin: 0;
+    padding: 8px 0;
+    font-size: 12px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list p span {
+    color: #718676;
+    font-weight: 600;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-price-list p strong {
+    color: #be503d;
+    font-size: 13px;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+/* Passenger selection */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-qty-list {
+    padding-bottom: 13px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e7ece4;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-qty-list h4 {
+    margin-bottom: 14px;
+    color: #21553a;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 43px;
+    margin-bottom: 9px;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-qty-row label {
+    color: #345b42;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.tour-detail-page #lichkhoihanh
+.qty-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tour-detail-page #lichkhoihanh
+.qty-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #dae8da;
+    border-radius: 8px;
+    background: #f2f7f0;
+    color: #317c51;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.tour-detail-page #lichkhoihanh
+.qty-btn:not(:disabled):hover {
+    background: #e3f2e5;
+    border-color: #92c5a1;
+}
+
+.tour-detail-page #lichkhoihanh
+.qty-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.tour-detail-page #lichkhoihanh
+.qty-input {
+    width: 47px;
+    height: 32px;
+    padding: 3px;
+    border: 1px solid #dce9da;
+    border-radius: 8px;
+    background: #fff;
+    color: #1f573b;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+}
+
+/* Total cost */
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-total-box {
+    padding: 15px;
+    border: 1px solid #d9e8d7;
+    border-radius: 13px;
+    background: linear-gradient(
+        115deg,
+        #eef8ed,
+        #fff9ec
+    );
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-total-box p {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    margin: 0;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-total-box p span {
+    color: #718674;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-total-box p strong {
+    color: #255a3e;
+}
+
+.tour-detail-page #lichkhoihanh
+.tour-detail-total-box
+.tour-detail-total-amount {
+    color: #c84d38 !important;
+    font-size: clamp(19px, 2vw, 24px);
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+/* Booking button */
+
+.tour-detail-page #lichkhoihanh
+#bookingButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 48px;
+    margin-top: 13px !important;
+    padding: 12px 15px;
+    border: 1px solid #15653c;
+    border-radius: 12px;
+    background: linear-gradient(
+        95deg,
+        #218c54,
+        #14683f
+    );
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 7px 17px rgba(21, 104, 62, .15);
+}
+
+.tour-detail-page #lichkhoihanh
+#bookingButton:not(:disabled):hover {
+    background: #115a36;
+    box-shadow: 0 10px 22px rgba(21,104,62,.2);
+}
+
+.tour-detail-page #lichkhoihanh
+#bookingButton:disabled {
+    opacity: .6;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.tour-detail-page #lichkhoihanh
+#seatWarning {
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 11px;
+    line-height: 1.65;
+}
+
+/* Waitlist remains unchanged functionally */
+
+.tour-detail-page #lichkhoihanh
+#waitlistForm button {
+    min-height: 43px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (min-width: 1200px) {
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-section-card > .row > .col-xl-7 {
+        flex: 0 0 58%;
+        max-width: 58%;
+        width: 58%;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-section-card > .row > .col-xl-5 {
+        flex: 0 0 42%;
+        max-width: 42%;
+        width: 42%;
+    }
+}
+
+@media (max-width: 1199px) {
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-schedule-card,
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-calc-card {
+        height: auto;
+    }
+}
+
+@media (max-width: 767px) {
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-section-card {
+        padding: 16px 12px;
+        border-radius: 16px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-schedule-card,
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-calc-card {
+        padding: 15px 12px;
+        border-radius: 13px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .ht-month-tab {
+        min-width: 85px;
+        min-height: 62px;
+        padding: 9px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-calendar-grid .lich-row {
+        grid-template-columns:
+            35px 32px 50px minmax(0, 1fr);
+        min-height: 64px;
+        padding: 8px 7px;
+        gap: 5px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-calendar-grid .tour-calendar-day {
+        width: 33px;
+        height: 33px;
+        font-size: 15px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-calendar-grid .lich-row > span:nth-child(2),
+    .tour-detail-page #lichkhoihanh
+    .tour-calendar-grid .lich-row > span:nth-child(3) {
+        font-size: 10px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-calendar-grid .tour-detail-status {
+        font-size: 9px;
+    }
+
+    .tour-detail-page #lichkhoihanh
+    .tour-detail-total-box
+    .tour-detail-total-amount {
+        font-size: 19px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tour-detail-page #lichkhoihanh *,
+    .tour-detail-page #lichkhoihanh *::before,
+    .tour-detail-page #lichkhoihanh *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+    }
+}

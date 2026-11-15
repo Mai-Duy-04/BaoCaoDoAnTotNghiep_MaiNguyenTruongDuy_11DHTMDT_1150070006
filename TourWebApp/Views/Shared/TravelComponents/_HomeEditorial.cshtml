@@ -1,0 +1,996 @@
+
+@model TravelHomeViewModel
+
+@{
+    var guidePosts = Model.GuidePosts.Take(3).ToList();
+    var testimonials = Model.Testimonials.Take(2).ToList();
+}
+
+<section class="he2-section" aria-label="Cẩm nang du lịch và đánh giá khách hàng">
+
+    <!-- NỀN TRANG TRÍ -->
+    <div class="he2-top-glow" aria-hidden="true"></div>
+
+    <div class="he2-container">
+
+        <!-- ==================================
+             CỘT TRÁI: CẨM NANG DU LỊCH
+             ================================== -->
+        <div class="he2-guides">
+
+            <div class="he2-heading">
+
+                <div class="he2-label">
+                    <span class="he2-label-icon">
+                        <i class="fa-solid fa-book-open"></i>
+                    </span>
+                    <span>CẨM NANG DU LỊCH</span>
+                </div>
+
+                <h2>
+                    Mẹo hay cho chuyến đi
+                    <span class="he2-accent">trọn vẹn</span>
+                </h2>
+
+                <p>
+                    Kinh nghiệm, gợi ý và bí quyết khám phá
+                    miền Nam từ HappyTrip.
+                </p>
+
+                <!-- MÁY BAY VÀ ĐƯỜNG BAY -->
+                <div class="he2-airplane" aria-hidden="true">
+
+                    <svg viewBox="0 0 160 65"
+                         fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="M4 52
+                                 C25 4 49 62 76 26
+                                 S119 11 143 24"
+                              stroke="#E9A725"
+                              stroke-width="2.5"
+                              stroke-dasharray="6 7"
+                              stroke-linecap="round"/>
+
+                    </svg>
+
+                    <i class="fa-solid fa-plane"></i>
+                </div>
+
+            </div>
+
+            <!-- DANH SÁCH BÀI VIẾT -->
+            <div class="he2-guide-grid">
+
+                @foreach (var post in guidePosts)
+                {
+                    <article class="he2-guide-card">
+
+                        <div class="he2-guide-image">
+
+                            <img src="@post.ImageUrl"
+                                 alt="@post.Title"
+                                 loading="lazy" />
+
+                            <span class="he2-guide-date">
+                                <i class="fa-regular fa-calendar-days"></i>
+                                @post.DateLabel
+                            </span>
+
+                        </div>
+
+                        <div class="he2-guide-body">
+
+                            <h3>@post.Title</h3>
+
+                            <p>@post.Summary</p>
+
+                            <span class="he2-guide-arrow"
+                                  aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+
+                        </div>
+
+                    </article>
+                }
+
+            </div>
+
+            <!-- TRANG TRÍ CHÂN CẨM NANG -->
+            <div class="he2-guides-footer">
+
+                <div class="he2-guide-note">
+
+                    <span class="he2-compass">
+                        <i class="fa-regular fa-compass"></i>
+                    </span>
+
+                    <span>
+                        Cùng HappyTrip chuẩn bị cho hành trình!
+                    </span>
+
+                </div>
+
+                <!-- STICKER BẢN ĐỒ -->
+                <div class="he2-map-sticker"
+                     aria-hidden="true">
+
+                    <svg viewBox="0 0 120 95"
+                         xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="M12 23
+                                 L39 11
+                                 L70 25
+                                 L105 12
+                                 L105 76
+                                 L77 87
+                                 L43 73
+                                 L12 86Z"
+                              fill="#D7E8AC"
+                              stroke="#FFFFFF"
+                              stroke-width="5"
+                              stroke-linejoin="round"/>
+
+                        <path d="M39 11 L43 73"
+                              stroke="#AACD77"
+                              stroke-width="3"/>
+
+                        <path d="M70 25 L77 87"
+                              stroke="#A2C972"
+                              stroke-width="3"/>
+
+                        <path d="M25 65
+                                 Q43 35 58 54
+                                 T90 42"
+                              fill="none"
+                              stroke="#FFFFFF"
+                              stroke-width="3"
+                              stroke-dasharray="5 5"
+                              stroke-linecap="round"/>
+
+                        <path d="M63 11
+                                 C49 11 44 21 44 32
+                                 C44 47 63 64 63 64
+                                 C63 64 82 47 82 32
+                                 C82 21 77 11 63 11Z"
+                              fill="#ED6C48"
+                              stroke="#FFFFFF"
+                              stroke-width="4"/>
+
+                        <circle cx="63"
+                                cy="31"
+                                r="8"
+                                fill="#FFF7EA"/>
+
+                    </svg>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ĐƯỜNG PHÂN CÁCH -->
+        <div class="he2-divider"
+             aria-hidden="true"></div>
+
+        <!-- ==================================
+             CỘT PHẢI: ĐÁNH GIÁ KHÁCH HÀNG
+             ================================== -->
+        <div class="he2-reviews">
+
+            <div class="he2-heading">
+
+                <div class="he2-label">
+
+                    <span class="he2-label-icon he2-star-icon">
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+
+                    <span>ĐÁNH GIÁ TỪ KHÁCH ĐI TOUR</span>
+
+                </div>
+
+                <h2>
+                    Khách hàng nói gì về
+                    <span class="he2-accent">HappyTrip?</span>
+                </h2>
+
+                <p>
+                    Phản hồi thực tế từ những chuyến đi
+                    đầy trải nghiệm.
+                </p>
+
+                <span class="he2-heading-spark"
+                      aria-hidden="true">✦</span>
+
+            </div>
+
+            <!-- GIỮ DỮ LIỆU ĐÁNH GIÁ HIỆN TẠI -->
+            <div class="he2-review-grid">
+
+                @foreach (var testimonial in testimonials)
+                {
+                    <div class="he2-review-card">
+
+                        <partial name="~/Views/Shared/TravelComponents/_TestimonialCard.cshtml"
+                                 model="testimonial" />
+
+                        <span class="he2-quote"
+                              aria-hidden="true">”</span>
+
+                    </div>
+                }
+
+            </div>
+
+            <div class="he2-reviews-bottom">
+
+                <span class="he2-review-caption">
+                    <i class="fa-solid fa-heart"></i>
+                    Những trải nghiệm đáng nhớ cùng HappyTrip
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- STICKER LÁ XANH -->
+        <div class="he2-leaves" aria-hidden="true">
+            <svg viewBox="0 0 140 130"
+                 xmlns="http://www.w3.org/2000/svg">
+
+                <path d="M16 117 Q67 93 122 11"
+                      fill="none"
+                      stroke="#397C40"
+                      stroke-width="5"
+                      stroke-linecap="round"/>
+
+                <path d="M57 85
+                         C15 82 5 56 10 32
+                         C48 35 66 52 57 85Z"
+                      fill="#82B850"/>
+
+                <path d="M77 62
+                         C79 14 101 6 131 12
+                         C122 48 109 64 77 62Z"
+                      fill="#6EA642"/>
+
+                <path d="M36 102
+                         C8 111 3 92 5 76
+                         C28 72 43 82 36 102Z"
+                      fill="#9CC76A"/>
+
+                <path d="M17 42 Q42 59 57 85"
+                      fill="none"
+                      stroke="#B7D98A"
+                      stroke-width="2.5"/>
+
+                <path d="M119 21 Q94 46 77 62"
+                      fill="none"
+                      stroke="#B7D98A"
+                      stroke-width="2.5"/>
+
+            </svg>
+        </div>
+
+        <span class="he2-spark he2-spark-one"
+              aria-hidden="true">✦</span>
+
+        <span class="he2-spark he2-spark-two"
+              aria-hidden="true">✧</span>
+
+    </div>
+
+    <!-- NỀN LƯỢN SÓNG -->
+    <svg class="he2-bottom-wave"
+         viewBox="0 0 1440 100"
+         preserveAspectRatio="none"
+         aria-hidden="true">
+
+        <path d="M0 38
+                 C160 4 250 92 410 65
+                 S690 20 820 55
+                 S1080 94 1200 42
+                 S1360 31 1440 58
+                 L1440 100
+                 L0 100Z"
+              fill="#F4EFD8"
+              opacity=".65"/>
+
+        <path d="M0 75
+                 C185 39 300 112 490 81
+                 S800 67 950 82
+                 S1260 39 1440 79
+                 L1440 100
+                 L0 100Z"
+              fill="#E8EBCF"
+              opacity=".55"/>
+
+    </svg>
+
+</section>
+
+<style>
+    /* ======================================
+       HAPPYTRIP EDITORIAL - MAU 2
+       ====================================== */
+
+    .he2-section,
+    .he2-section * {
+        box-sizing: border-box;
+    }
+
+    .he2-section {
+        --he2-green: #153F32;
+        --he2-orange: #D98129;
+        --he2-yellow: #ECAF27;
+
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        padding: 48px 0 55px;
+        background: #FFF9F0;
+    }
+
+    .he2-top-glow {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+            radial-gradient(
+                ellipse at 5% 0%,
+                rgba(247, 211, 133, .15),
+                transparent 45%
+            ),
+            radial-gradient(
+                ellipse at 95% 100%,
+                rgba(197, 225, 165, .12),
+                transparent 40%
+            );
+        pointer-events: none;
+    }
+
+    .he2-container {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns:
+            minmax(0, 1.08fr)
+            1px
+            minmax(0, 1fr);
+        align-items: stretch;
+        gap: 24px;
+        width: min(1260px, calc(100% - 56px));
+        margin: 0 auto;
+    }
+
+    .he2-guides,
+    .he2-reviews {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .he2-divider {
+        width: 1px;
+        min-height: 370px;
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            #EADCC4 12%,
+            #EADCC4 88%,
+            transparent
+        );
+    }
+
+    /* ======================================
+       NHAN XANH LA
+       ====================================== */
+
+    .he2-heading {
+        position: relative;
+        min-height: 137px;
+        margin-bottom: 17px;
+    }
+
+    .he2-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 100%;
+        min-height: 37px;
+        margin-bottom: 16px;
+        padding: 5px 20px 5px 8px;
+        border-radius: 7px 26px 19px 7px;
+        background: linear-gradient(
+            100deg,
+            #0E634C,
+            #126347 80%,
+            #21815D
+        );
+        color: #FFFFFF;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: .055em;
+        box-shadow: 3px 3px 0 #E1D9AF;
+        transform: rotate(-1deg);
+    }
+
+    .he2-label-icon {
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        width: 34px;
+        height: 32px;
+        border-radius: 8px;
+        background: #FCE4A0;
+        color: #D39219;
+        font-size: 19px;
+        transform: rotate(-7deg);
+    }
+
+    .he2-star-icon {
+        color: #E7A91C;
+    }
+
+    /* ======================================
+       TIEU DE
+       ====================================== */
+
+    .he2-heading h2 {
+        position: relative;
+        z-index: 2;
+        margin: 0 0 10px;
+        color: var(--he2-green);
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: clamp(23px, 2.15vw, 30px);
+        font-weight: 850;
+        line-height: 1.24;
+        letter-spacing: -.025em;
+    }
+
+    .he2-accent {
+        position: relative;
+        display: inline-block;
+        color: var(--he2-orange);
+    }
+
+    .he2-accent::after {
+        content: "";
+        position: absolute;
+        left: 4%;
+        right: 0;
+        bottom: -5px;
+        height: 4px;
+        border-radius: 50%;
+        background: #F0B52A;
+        transform: rotate(-2deg);
+    }
+
+    .he2-heading p {
+        margin: 0;
+        color: #536B5E;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.65;
+    }
+
+    /* ======================================
+       MAY BAY
+       ====================================== */
+
+    .he2-airplane {
+        position: absolute;
+        top: -17px;
+        right: -3px;
+        width: 119px;
+        height: 53px;
+        pointer-events: none;
+    }
+
+    .he2-airplane svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .he2-airplane i {
+        position: absolute;
+        top: -11px;
+        right: 4px;
+        font-size: 25px;
+        color: #E9AC24;
+        transform: rotate(-24deg);
+    }
+
+    .he2-heading-spark {
+        position: absolute;
+        right: 5px;
+        top: 70px;
+        color: #ECAA27;
+        font-size: 21px;
+        pointer-events: none;
+    }
+
+    /* ======================================
+       3 CARD CAM NANG
+       ====================================== */
+
+    .he2-guide-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .he2-guide-card {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        height: 286px;
+        overflow: hidden;
+        border: 1px solid #EBDDCA;
+        border-radius: 19px;
+        background: #FFFEFA;
+        box-shadow:
+            0 6px 0 rgba(228, 213, 179, .25),
+            0 9px 16px rgba(66, 69, 47, .08);
+        transition:
+            transform .25s ease,
+            box-shadow .25s ease;
+    }
+
+    .he2-guide-card:hover {
+        transform: translateY(-5px);
+        box-shadow:
+            0 12px 23px rgba(66, 69, 47, .15);
+    }
+
+    .he2-guide-image {
+        position: relative;
+        flex: 0 0 138px;
+        height: 138px;
+        overflow: hidden;
+        background: #EAEEDB;
+    }
+
+    .he2-guide-image img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .35s ease;
+    }
+
+    .he2-guide-card:hover
+    .he2-guide-image img {
+        transform: scale(1.06);
+    }
+
+    .he2-guide-date {
+        position: absolute;
+        bottom: 9px;
+        left: 9px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: #FFE7A6;
+        color: #263E30;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10px;
+        font-weight: 800;
+        box-shadow: 0 2px 5px rgba(0,0,0,.09);
+    }
+
+    .he2-guide-body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        padding: 13px 12px 11px;
+    }
+
+    .he2-guide-body h3 {
+        display: -webkit-box;
+        overflow: hidden;
+        margin: 0 0 7px;
+        color: var(--he2-green);
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 850;
+        line-height: 1.4;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .he2-guide-body p {
+        display: -webkit-box;
+        overflow: hidden;
+        margin: 0;
+        color: #66786A;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10px;
+        line-height: 1.5;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .he2-guide-arrow {
+        display: grid;
+        place-items: center;
+        align-self: flex-end;
+        flex-shrink: 0;
+        width: 29px;
+        height: 29px;
+        margin-top: auto;
+        border-radius: 50%;
+        background: #DBEBC4;
+        color: #14503D;
+        font-size: 13px;
+        transition:
+            background .25s ease,
+            transform .25s ease;
+    }
+
+    .he2-guide-card:hover .he2-guide-arrow {
+        background: #C6E5A6;
+        transform: translateX(3px);
+    }
+
+    /* ======================================
+       FOOTER CAM NANG
+       ====================================== */
+
+    .he2-guides-footer {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 62px;
+        margin-top: 10px;
+    }
+
+    .he2-guide-note {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #315D49;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 750;
+        font-style: italic;
+    }
+
+    .he2-compass {
+        display: grid;
+        place-items: center;
+        flex: 0 0 25px;
+        height: 25px;
+        border: 2px solid #E9AB22;
+        border-radius: 50%;
+        color: #D99517;
+        font-size: 13px;
+    }
+
+    .he2-map-sticker {
+        flex-shrink: 0;
+        width: 81px;
+        height: 64px;
+        margin-right: 5px;
+        transform: rotate(-9deg);
+        filter: drop-shadow(
+            0 4px 3px rgba(44, 63, 44, .12)
+        );
+    }
+
+    .he2-map-sticker svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* ======================================
+       CARD DANH GIA
+       ====================================== */
+
+    .he2-review-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .he2-review-card {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        height: 286px;
+        border: 1px solid #E9DDC8;
+        border-radius: 20px;
+        background: #FFFEFB;
+        box-shadow:
+            0 5px 0 #A5CDA8,
+            0 11px 18px rgba(56, 66, 46, .09);
+        transition: transform .25s ease;
+    }
+
+    .he2-review-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* PARTIAL DANH GIA CU */
+    .he2-review-card .testimonial-card {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 19px 15px 30px;
+        border: 0;
+        border-radius: inherit;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .he2-review-card .testimonial-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .he2-quote {
+        position: absolute;
+        right: 15px;
+        bottom: -7px;
+        color: #D5E8BB;
+        font-family: Georgia, serif;
+        font-size: 74px;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .he2-reviews-bottom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 62px;
+        margin-top: 10px;
+    }
+
+    .he2-review-caption {
+        color: #557764;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .he2-review-caption i {
+        margin-right: 6px;
+        color: #E6A327;
+    }
+
+    /* ======================================
+       TRANG TRI LA, SAO, SONG
+       ====================================== */
+
+    .he2-leaves {
+        position: absolute;
+        z-index: 3;
+        right: -43px;
+        bottom: -30px;
+        width: 118px;
+        height: 108px;
+        transform: rotate(-8deg);
+        pointer-events: none;
+    }
+
+    .he2-leaves svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .he2-spark {
+        position: absolute;
+        z-index: 3;
+        color: #E9AE29;
+        pointer-events: none;
+        animation: he2Twinkle 3.5s ease-in-out infinite;
+    }
+
+    .he2-spark-one {
+        top: 9px;
+        right: 1%;
+        font-size: 22px;
+    }
+
+    .he2-spark-two {
+        bottom: 40px;
+        left: -18px;
+        font-size: 20px;
+        animation-delay: 1.3s;
+    }
+
+    .he2-bottom-wave {
+        position: absolute;
+        z-index: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        height: 47px;
+        pointer-events: none;
+    }
+
+    @@keyframes he2Twinkle {
+        0%, 100% {
+            opacity: .4;
+            transform: scale(.8);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+    }
+
+    /* ======================================
+       RESPONSIVE LAPTOP
+       ====================================== */
+
+    @@media (max-width: 1199px) {
+        .he2-container {
+            gap: 18px;
+            width: calc(100% - 36px);
+        }
+
+        .he2-heading h2 {
+            font-size: 25px;
+        }
+
+        .he2-guide-grid {
+            gap: 9px;
+        }
+
+        .he2-review-grid {
+            gap: 10px;
+        }
+
+        .he2-guide-body {
+            padding: 11px 10px 10px;
+        }
+
+        .he2-guide-body h3 {
+            font-size: 12px;
+        }
+
+        .he2-airplane {
+            opacity: .65;
+        }
+    }
+
+    /* ======================================
+       RESPONSIVE TABLET
+       ====================================== */
+
+    @@media (max-width: 991px) {
+        .he2-section {
+            padding: 43px 0 55px;
+        }
+
+        .he2-container {
+            grid-template-columns: 1fr;
+            max-width: 760px;
+            gap: 30px;
+        }
+
+        .he2-divider {
+            width: 100%;
+            height: 1px;
+            min-height: 1px;
+        }
+
+        .he2-heading {
+            min-height: auto;
+            margin-bottom: 23px;
+        }
+
+        .he2-guide-card,
+        .he2-review-card {
+            height: 300px;
+        }
+
+        .he2-guide-image {
+            flex-basis: 150px;
+            height: 150px;
+        }
+    }
+
+    /* ======================================
+       RESPONSIVE MOBILE
+       ====================================== */
+
+    @@media (max-width: 600px) {
+        .he2-section {
+            padding: 38px 0 50px;
+        }
+
+        .he2-container {
+            width: calc(100% - 28px);
+        }
+
+        .he2-heading h2 {
+            font-size: 26px;
+        }
+
+        .he2-label {
+            font-size: 10px;
+        }
+
+        .he2-guide-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 11px;
+        }
+
+        .he2-guide-card {
+            height: 282px;
+        }
+
+        .he2-guide-image {
+            flex-basis: 128px;
+            height: 128px;
+        }
+
+        .he2-review-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .he2-review-card {
+            height: auto;
+            min-height: 215px;
+        }
+
+        .he2-review-card .testimonial-card {
+            min-height: 215px;
+        }
+
+        .he2-airplane {
+            display: none;
+        }
+
+        .he2-map-sticker {
+            width: 65px;
+            height: 56px;
+        }
+    }
+
+    @@media (max-width: 390px) {
+        .he2-guide-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .he2-guide-card {
+            height: 320px;
+        }
+
+        .he2-guide-image {
+            flex-basis: 165px;
+            height: 165px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .he2-spark {
+            animation: none;
+        }
+
+        .he2-guide-card,
+        .he2-guide-image img,
+        .he2-review-card,
+        .he2-guide-arrow {
+            transition: none;
+        }
+    }
+</style>

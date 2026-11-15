@@ -1,66 +1,897 @@
+
 @model IEnumerable<TourPackageItem>
 
 @{
-    var tours = Model.ToList();
+    var tours = Model?.Take(3).ToList()
+                ?? new List<TourPackageItem>();
 }
 
-<section class="ht-showcase-section" aria-label="Tour nổi bật HappyTrip">
-    <div class="ht-showcase-heading">
-        <span class="ht-showcase-kicker">
-            HAPPYTRIP · HÀNH TRÌNH NỔI BẬT
-        </span>
+<section class="ht-showcase-section ht-south-tours"
+         aria-labelledby="ht-south-tours-title">
 
-        <h2>Những chuyến đi đáng trải nghiệm</h2>
+    <div class="ht-south-tours-inner">
 
-        <p>
-            Khám phá những hành trình du lịch được HappyTrip tuyển chọn,
-            với lịch trình rõ ràng và chi phí minh bạch.
-        </p>
-    </div>
+        <!-- GIOI THIEU -->
+        <div class="ht-south-tours-heading">
 
-    @if (tours.Count > 0)
-    {
-        <div class="ht-showcase-stage"
-             aria-roledescription="carousel"
-             aria-label="Các tour nổi bật">
+            <span class="ht-south-tours-kicker">
+                <i class="fa-solid fa-location-dot"></i>
+                HAPPYTRIP · TOUR NỔI BẬT
+            </span>
 
-            @for (var i = 0; i < tours.Count; i++)
-            {
-                <div class="ht-showcase-slide"
-                     data-index="@i"
-                     data-position="@(i == 0 ? "0" : "hidden")"
-                     aria-hidden="@(i == 0 ? "false" : "true")">
-                    <partial name="~/Views/Shared/TravelComponents/_TourShowcaseCard.cshtml"
-                             model="tours[i]" />
-                </div>
-            }
-        </div>
+            <h2 id="ht-south-tours-title">
+                <span class="ht-south-heading-first">
+                    Tour nổi bật
+                </span>
+                <span class="ht-south-heading-second">
+                    miền Nam
+                </span>
+            </h2>
 
-        <div class="ht-showcase-controls">
-            <button class="ht-showcase-prev"
-                    type="button"
-                    aria-label="Tour trước">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
+            <span class="ht-south-heading-underline"
+                  aria-hidden="true"></span>
 
-            <div class="ht-showcase-counter" aria-live="polite">
-                <strong class="ht-showcase-current">01</strong>
-                <span>/</span>
-                <span>@tours.Count.ToString("D2")</span>
-            </div>
+            <p>
+                Từ miền Tây sông nước đến những bãi biển
+                đầy nắng, chọn một hành trình thật đáng nhớ
+                cùng HappyTrip nhé!
+            </p>
 
-            <button class="ht-showcase-next"
-                    type="button"
-                    aria-label="Tour tiếp theo">
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </div>
-
-        <div class="ht-showcase-all">
-            <a href="/tours">
-                Khám phá tất cả tour
+            <a href="/tours"
+               class="ht-south-tours-all">
+                Xem tất cả tour
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
+
+            <div class="ht-south-tours-flight"
+                 aria-hidden="true">
+
+                <svg viewBox="0 0 220 100"
+                     fill="none">
+
+                    <path d="M8 80 C45 18 88 103 132 47 S190 35 210 8"
+                          stroke="#E6A12B"
+                          stroke-width="2.5"
+                          stroke-dasharray="7 8"
+                          stroke-linecap="round" />
+
+                </svg>
+
+                <i class="fa-solid fa-plane"></i>
+            </div>
+
+            <span class="ht-south-heading-star"
+                  aria-hidden="true">✦</span>
+
         </div>
-    }
+
+        <!-- DANH SACH TOUR THAT -->
+        @if (tours.Count > 0)
+        {
+            <div class="ht-south-tours-grid">
+
+                @foreach (var tour in tours)
+                {
+                    <div class="ht-south-tours-item">
+
+                        <partial name="~/Views/Shared/TravelComponents/_TourShowcaseCard.cshtml"
+                                 model="tour" />
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="ht-south-tours-empty">
+
+                <i class="fa-regular fa-compass"></i>
+
+                <p>Chưa có tour nổi bật để hiển thị.</p>
+
+                <a href="/tours">
+                    Khám phá danh sách tour
+                </a>
+
+            </div>
+        }
+
+    </div>
+
+    <!-- TRANG TRI -->
+    <span class="ht-south-decor ht-south-decor-one"
+          aria-hidden="true">✧</span>
+
+    <span class="ht-south-decor ht-south-decor-two"
+          aria-hidden="true">✦</span>
+
+    <span class="ht-south-decor ht-south-decor-three"
+          aria-hidden="true">✳</span>
+
 </section>
+
+<style>
+    /* ==========================================
+       HAPPYTRIP - TOUR NOI BAT MIEN NAM
+       STYLES DUOC GOM VAO MOT KHOI
+       ========================================== */
+
+    .ht-south-tours,
+    .ht-south-tours * {
+        box-sizing: border-box;
+    }
+
+    .ht-south-tours {
+        position: relative;
+        isolation: isolate;
+        width: 100%;
+        padding: 48px 0 55px;
+        background:
+            radial-gradient(
+                ellipse at 97% 4%,
+                rgba(238, 222, 165, .18),
+                transparent 30%
+            ),
+            #fff9ed;
+        overflow: hidden;
+    }
+
+    .ht-south-tours-inner {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 245px minmax(0, 1fr);
+        gap: 23px;
+        align-items: stretch;
+        width: min(1320px, calc(100% - 60px));
+        margin: 0 auto;
+    }
+
+    /* ==========================================
+       HEADING
+       ========================================== */
+
+    .ht-south-tours-heading {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        min-width: 0;
+        padding: 10px 3px 25px 0;
+    }
+
+    .ht-south-tours-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 16px;
+        color: #16715b;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .07em;
+    }
+
+    .ht-south-tours-kicker i {
+        color: #de9b2b;
+    }
+
+    /* FIX FONT TIENG VIET */
+
+    .ht-south-tours .ht-south-tours-heading h2 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: clamp(29px, 2.7vw, 38px);
+        font-weight: 800;
+        line-height: 1.22;
+        letter-spacing: 0;
+        color: #173d32;
+        text-transform: none;
+    }
+
+    .ht-south-tours .ht-south-heading-first {
+        display: block;
+        color: #173d32;
+        font-family: inherit;
+        font-size: 1em;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .ht-south-tours .ht-south-heading-second {
+        display: block;
+        color: #d48629;
+        font-family: inherit;
+        font-size: 1em;
+        font-weight: 800;
+        line-height: 1.3;
+        letter-spacing: 0;
+        white-space: normal;
+        overflow-wrap: normal;
+    }
+
+    .ht-south-heading-underline {
+        display: block;
+        width: 105px;
+        height: 5px;
+        margin: 5px 0 20px 70px;
+        border-radius: 100% 100% 40% 40%;
+        background: #f0b42d;
+        transform: rotate(-3deg);
+    }
+
+    .ht-south-tours-heading p {
+        max-width: 245px;
+        margin: 0 0 20px;
+        color: #637368;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.8;
+    }
+
+    .ht-south-tours-all {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 11px 18px;
+        border: 1px solid #f1c45b;
+        border-radius: 999px;
+        background: #ffdc7b;
+        color: #1a4336;
+        box-shadow: 0 4px 0 #dfa83e;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        transition:
+            transform .25s ease,
+            background .25s ease;
+    }
+
+    .ht-south-tours-all:hover {
+        color: #163c31;
+        background: #ffe59a;
+        transform: translateY(-3px);
+    }
+
+    .ht-south-tours-flight {
+        position: absolute;
+        left: 4px;
+        bottom: -13px;
+        width: 180px;
+        height: 76px;
+        pointer-events: none;
+    }
+
+    .ht-south-tours-flight svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .ht-south-tours-flight i {
+        position: absolute;
+        top: -7px;
+        right: -6px;
+        color: #dd9d29;
+        font-size: 23px;
+        transform: rotate(-26deg);
+    }
+
+    .ht-south-heading-star {
+        position: absolute;
+        top: 5px;
+        right: 9px;
+        color: #eeb52e;
+        font-size: 30px;
+        animation: htSouthSparkle 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    /* ==========================================
+       TOUR GRID
+       ========================================== */
+
+    .ht-south-tours-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        align-items: stretch;
+        min-width: 0;
+    }
+
+    .ht-south-tours-item {
+        display: flex;
+        min-width: 0;
+    }
+
+    .ht-south-tours-item:nth-child(1) {
+        transform: rotate(-.6deg);
+    }
+
+    .ht-south-tours-item:nth-child(2) {
+        transform: rotate(.5deg);
+    }
+
+    .ht-south-tours-item:nth-child(3) {
+        transform: rotate(-.4deg);
+    }
+
+    /* ==========================================
+       TOUR TICKET CARD
+       ========================================== */
+
+    .ht-south-tours .ht-showcase-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        min-height: 345px;
+        margin: 0;
+        padding: 7px 7px 13px;
+        border: 2px solid #fff;
+        border-radius: 18px;
+        background: #fffdf9;
+        box-shadow:
+            0 5px 0 rgba(222, 205, 172, .28),
+            0 13px 24px rgba(52, 65, 47, .10);
+        overflow: visible;
+        transition:
+            transform .3s ease,
+            box-shadow .3s ease;
+    }
+
+    .ht-south-tours .ht-showcase-card:hover {
+        transform: translateY(-7px);
+        box-shadow:
+            0 8px 0 rgba(222, 205, 172, .28),
+            0 20px 35px rgba(41, 75, 57, .16);
+    }
+
+    /* Khoet canh ve */
+
+    .ht-south-tours .ht-showcase-card::before,
+    .ht-south-tours .ht-showcase-card::after {
+        content: "";
+        position: absolute;
+        bottom: 66px;
+        z-index: 3;
+        width: 14px;
+        height: 22px;
+        background: #fff9ed;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .ht-south-tours .ht-showcase-card::before {
+        left: -9px;
+    }
+
+    .ht-south-tours .ht-showcase-card::after {
+        right: -9px;
+    }
+
+    /* ==========================================
+       IMAGE
+       ========================================== */
+
+    .ht-south-tours .ht-showcase-media {
+        position: relative;
+        flex: 0 0 auto;
+        width: 100%;
+        height: 170px;
+        margin: 0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .ht-south-tours .ht-showcase-media > img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .45s ease;
+    }
+
+    .ht-south-tours .ht-showcase-card:hover
+    .ht-showcase-media > img {
+        transform: scale(1.055);
+    }
+
+    /* An cac thanh phan cua carousel cu */
+
+    .ht-south-tours .ht-showcase-image-overlay,
+    .ht-south-tours .ht-showcase-image-caption,
+    .ht-south-tours .ht-showcase-category,
+    .ht-south-tours .ht-showcase-meta,
+    .ht-south-tours .ht-showcase-stamp {
+        display: none;
+    }
+
+    /* Duration badge */
+
+    .ht-south-tours .ht-showcase-duration-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 4;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: calc(100% - 65px);
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 253, 246, .97);
+        color: #214a3c;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10px;
+        font-weight: 800;
+        box-shadow: 0 3px 9px rgba(0, 0, 0, .09);
+    }
+
+    .ht-south-tours .ht-showcase-duration-badge i {
+        color: #d88a26;
+    }
+
+    /* Sticker may anh */
+
+    .ht-south-tours .ht-tour-sticker {
+        position: absolute;
+        top: 10px;
+        right: 11px;
+        z-index: 4;
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border: 3px solid #fff9ed;
+        border-radius: 10px;
+        background: #f9ca54;
+        color: #0b634f;
+        font-size: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .14);
+        transform: rotate(12deg);
+        transition: transform .3s ease;
+    }
+
+    .ht-south-tours .ht-showcase-card:hover
+    .ht-tour-sticker {
+        transform: rotate(-9deg) scale(1.1);
+    }
+
+    /* Bling bling */
+
+    .ht-south-tours .ht-tour-sparkle {
+        position: absolute;
+        z-index: 5;
+        color: #ffdc65;
+        pointer-events: none;
+        text-shadow: 0 1px 6px rgba(125, 88, 22, .3);
+        animation: htSouthSparkle 3s ease-in-out infinite;
+    }
+
+    .ht-south-tours .ht-tour-sparkle-one {
+        top: 47px;
+        right: 5px;
+        font-size: 19px;
+    }
+
+    .ht-south-tours .ht-tour-sparkle-two {
+        top: 4px;
+        right: 53px;
+        font-size: 14px;
+        animation-delay: 1.3s;
+    }
+
+    @@keyframes htSouthSparkle {
+        0%, 100% {
+            opacity: .45;
+            transform: scale(.85) rotate(-10deg);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.2) rotate(12deg);
+        }
+    }
+
+    /* ==========================================
+       CARD CONTENT
+       ========================================== */
+
+    .ht-south-tours .ht-showcase-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-width: 0;
+        margin: 0;
+        padding: 12px 8px 2px;
+        background: transparent;
+    }
+
+    .ht-south-tours .ht-tour-topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 0 0 9px;
+    }
+
+    .ht-south-tours .ht-showcase-category-text,
+    .ht-south-tours .ht-showcase-tour-rating {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin: 0;
+        color: #13735a;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10px;
+        font-weight: 750;
+    }
+
+    .ht-south-tours .ht-showcase-category-text i {
+        color: #d9952b;
+    }
+
+    .ht-south-tours .ht-showcase-tour-rating {
+        flex-shrink: 0;
+        color: #5f7065;
+    }
+
+    .ht-south-tours .ht-showcase-tour-rating i {
+        color: #eeb32c;
+    }
+
+    /* Ten tour */
+
+    .ht-south-tours .ht-showcase-tour-name {
+        display: -webkit-box;
+        margin: 0 0 10px;
+        overflow: hidden;
+        color: #183d32;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.4;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    /* Mo ta */
+
+    .ht-south-tours .ht-showcase-description {
+        display: -webkit-box;
+        margin: 0 0 10px;
+        overflow: hidden;
+        color: #607266;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 1.65;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    /* Duong cat ve */
+
+    .ht-south-tours .ht-tour-divider {
+        position: relative;
+        flex: 0 0 auto;
+        height: 20px;
+        margin-top: auto;
+        border-bottom: 1px dashed #e5cfa8;
+    }
+
+    .ht-south-tours .ht-tour-divider span {
+        position: absolute;
+        left: 50%;
+        bottom: -9px;
+        padding: 0 7px;
+        background: #fffdf9;
+        color: #e8a728;
+        font-size: 13px;
+        transform: translateX(-50%);
+    }
+
+    /* ==========================================
+       PRICE AND BUTTON
+       ========================================== */
+
+    .ht-south-tours .ht-showcase-footer {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        margin: 0;
+        padding: 14px 0 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .ht-south-tours .ht-showcase-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .ht-south-tours .ht-showcase-price span {
+        color: #8b8072;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .04em;
+    }
+
+    .ht-south-tours .ht-showcase-price strong {
+        color: #d87923;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: clamp(15px, 1.5vw, 19px);
+        font-weight: 900;
+        line-height: 1.3;
+        white-space: nowrap;
+    }
+
+    .ht-south-tours .ht-showcase-detail {
+        display: inline-flex;
+        flex: 0 0 38px;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: #08664f;
+        color: #fff;
+        box-shadow: 0 3px 0 #094635;
+        font-size: 0;
+        text-decoration: none;
+        transition:
+            transform .25s ease,
+            background .25s ease;
+    }
+
+    .ht-south-tours .ht-showcase-detail i {
+        display: block;
+        margin: 0;
+        color: #fff;
+        font-size: 16px;
+    }
+
+    .ht-south-tours .ht-showcase-detail:hover {
+        color: #fff;
+        background: #0b8768;
+        transform: rotate(-18deg) scale(1.08);
+    }
+
+    /* ==========================================
+       EMPTY STATE
+       ========================================== */
+
+    .ht-south-tours-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 280px;
+        padding: 30px;
+        border: 1px dashed #d7cdb9;
+        border-radius: 18px;
+        color: #345c47;
+        text-align: center;
+    }
+
+    .ht-south-tours-empty i {
+        font-size: 30px;
+    }
+
+    .ht-south-tours-empty p {
+        margin: 0;
+    }
+
+    .ht-south-tours-empty a {
+        color: #12634f;
+        font-weight: 800;
+    }
+
+    /* ==========================================
+       DECORATIONS
+       ========================================== */
+
+    .ht-south-decor {
+        position: absolute;
+        z-index: 1;
+        color: #e6af3c;
+        pointer-events: none;
+        animation: htSouthSparkle 3.5s ease-in-out infinite;
+    }
+
+    .ht-south-decor-one {
+        left: 15px;
+        bottom: 20px;
+        font-size: 35px;
+    }
+
+    .ht-south-decor-two {
+        right: 25px;
+        top: 10px;
+        font-size: 28px;
+        animation-delay: .8s;
+    }
+
+    .ht-south-decor-three {
+        left: 18%;
+        top: 18px;
+        font-size: 23px;
+        animation-delay: 1.4s;
+    }
+
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+
+    @@media (max-width: 1199px) {
+
+        .ht-south-tours-inner {
+            grid-template-columns: 210px minmax(0, 1fr);
+            gap: 16px;
+            width: calc(100% - 36px);
+        }
+
+        .ht-south-tours-grid {
+            gap: 11px;
+        }
+
+        .ht-south-tours .ht-showcase-media {
+            height: 150px;
+        }
+
+        .ht-south-tours .ht-showcase-card {
+            min-height: 335px;
+        }
+
+        .ht-south-tours .ht-south-tours-heading h2 {
+            font-size: 31px;
+        }
+
+        .ht-south-tours .ht-showcase-tour-name {
+            font-size: 14px;
+        }
+    }
+
+    @@media (max-width: 991px) {
+
+        .ht-south-tours {
+            padding: 36px 0 44px;
+        }
+
+        .ht-south-tours-inner {
+            display: block;
+        }
+
+        .ht-south-tours-heading {
+            padding: 0 0 28px;
+        }
+
+        .ht-south-tours-heading p {
+            max-width: 540px;
+        }
+
+        .ht-south-tours-flight {
+            left: auto;
+            right: 15px;
+            bottom: 0;
+        }
+
+        .ht-south-tours-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .ht-south-tours .ht-showcase-media {
+            height: 165px;
+        }
+    }
+
+    @@media (max-width: 700px) {
+
+        .ht-south-tours-inner {
+            width: calc(100% - 30px);
+        }
+
+        .ht-south-tours-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .ht-south-tours .ht-showcase-media {
+            height: 160px;
+        }
+
+        .ht-south-tours .ht-showcase-card {
+            min-height: 325px;
+        }
+
+        .ht-south-tours-flight {
+            opacity: .35;
+        }
+    }
+
+    @@media (max-width: 480px) {
+
+        .ht-south-tours {
+            padding: 32px 0 38px;
+        }
+
+        .ht-south-tours-inner {
+            width: calc(100% - 36px);
+        }
+
+        .ht-south-tours .ht-south-tours-heading h2 {
+            font-size: 31px;
+        }
+
+        .ht-south-tours-grid {
+            grid-template-columns: 1fr;
+            max-width: 360px;
+            margin: 0 auto;
+            gap: 22px;
+        }
+
+        .ht-south-tours-item:nth-child(n) {
+            transform: none;
+        }
+
+        .ht-south-tours .ht-showcase-media {
+            height: 205px;
+        }
+
+        .ht-south-tours .ht-showcase-card {
+            min-height: 0;
+        }
+
+        .ht-south-tours .ht-showcase-price strong {
+            font-size: 19px;
+        }
+
+        .ht-south-tours-flight {
+            display: none;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+
+        .ht-south-tours .ht-tour-sparkle,
+        .ht-south-heading-star,
+        .ht-south-decor {
+            animation: none;
+        }
+
+        .ht-south-tours .ht-showcase-card,
+        .ht-south-tours .ht-showcase-media > img,
+        .ht-south-tours .ht-tour-sticker,
+        .ht-south-tours .ht-showcase-detail,
+        .ht-south-tours-all {
+            transition: none;
+        }
+    }
+</style>

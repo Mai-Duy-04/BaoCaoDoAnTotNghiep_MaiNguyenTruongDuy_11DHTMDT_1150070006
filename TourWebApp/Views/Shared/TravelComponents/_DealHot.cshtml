@@ -1,64 +1,227 @@
-<section class="deal-hot" id="deal-hot">
+
+@* =========================================================
+   HAPPYTRIP - DEAL HOT
+   Bố cục scrapbook theo mẫu:
+   - Trái: tiêu đề, mô tả, điều hướng
+   - Phải: carousel banner xếp lớp
+   - Dưới: dots
+   Giữ nguyên class cho deal-hot.js
+   ========================================================= *@
+
+<section class="deal-hot" id="deal-hot"
+         aria-labelledby="dealHotTitle">
+
     <div class="deal-hot-container">
-        <div class="deal-hot-header">
-            <div class="deal-hot-heading">
-                <span class="deal-hot-fire">🔥</span>
 
-                <div class="deal-hot-heading-text">
-                    <h2>Deal hot hôm nay</h2>
-                    <p>Ưu đãi hấp dẫn, hành trình đáng nhớ cùng HappyTrip</p>
+        <div class="deal-hot-body">
+
+            @* =========================================
+               CỘT TRÁI - TIÊU ĐỀ VÀ NÚT ĐIỀU HƯỚNG
+               ========================================= *@
+
+            <div class="deal-hot-header">
+
+                <div class="deal-hot-heading">
+
+                    <div class="deal-hot-heading-top">
+
+                        <span class="deal-hot-fire"
+                              aria-hidden="true">
+                            🔥
+                        </span>
+
+                        <div class="deal-hot-heading-text">
+
+                            <h2 id="dealHotTitle">
+                                Deal hot hôm nay
+                            </h2>
+
+                            <p>
+                                Ưu đãi hấp dẫn, hành trình
+                                chất lượng cùng HappyTrip.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="deal-hot-navigation"
+                         aria-label="Điều hướng ưu đãi">
+
+                        <button type="button"
+                                class="deal-hot-arrow deal-hot-prev"
+                                aria-label="Xem banner trước">
+
+                            <i class="fa-solid fa-chevron-left"
+                               aria-hidden="true"></i>
+
+                        </button>
+
+                        <button type="button"
+                                class="deal-hot-arrow deal-hot-next"
+                                aria-label="Xem banner tiếp theo">
+
+                            <i class="fa-solid fa-chevron-right"
+                               aria-hidden="true"></i>
+
+                        </button>
+
+                    </div>
+
                 </div>
-            </div>
-        </div>
-
-        <div class="deal-hot-carousel">
-            <button type="button"
-                    class="deal-hot-arrow deal-hot-prev"
-                    aria-label="Xem banner trước">
-                &#10094;
-            </button>
-
-            <div class="deal-hot-track" tabindex="0">
-
-                <a href="/tours" class="deal-hot-card">
-                    <img src="/img/deals/deal-bien-dao.png"
-                         alt="Deal Hot ưu đãi du lịch biển đảo"
-                         loading="lazy" />
-                </a>
-
-                <a href="/tours" class="deal-hot-card">
-                    <img src="/img/deals/deal-kham-pha.png"
-                         alt="Deal Hot ưu đãi khám phá thiên nhiên"
-                         loading="lazy" />
-                </a>
-
-                <a href="/tours" class="deal-hot-card">
-                    <img src="/img/deals/deal-trai-nghiem.png"
-                         alt="Deal Hot ưu đãi trải nghiệm miền Tây"
-                         loading="lazy" />
-                </a>
-
-                <a href="/tours" class="deal-hot-card">
-                    <img src="/img/deals/deal-thanh-pho.png"
-                         alt="Deal Hot ưu đãi du lịch thành phố"
-                         loading="lazy" />
-                </a>
-
-                <a href="/tours" class="deal-hot-card">
-                    <img src="/img/deals/deal-cung-duong.png"
-                         alt="Deal Hot ưu đãi khám phá cung đường"
-                         loading="lazy" />
-                </a>
 
             </div>
 
-            <button type="button"
-                    class="deal-hot-arrow deal-hot-next"
-                    aria-label="Xem banner tiếp theo">
-                &#10095;
-            </button>
+            @* =========================================
+               CỘT PHẢI - CAROUSEL
+               ========================================= *@
+
+            <div class="deal-hot-carousel">
+
+                @* NÉT VẼ TRANG TRÍ BÊN TRÁI *@
+
+                <svg class="deal-hot-doodle deal-hot-doodle-left"
+                     viewBox="0 0 100 95"
+                     fill="none"
+                     xmlns="http://www.w3.org/2000/svg"
+                     aria-hidden="true">
+
+                    <path d="M12 76
+                             C29 67 22 39 41 44
+                             C60 48 51 17 76 20"
+                          stroke="#F4B72E"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round" />
+
+                    <path d="M66 15 L77 19 L69 31"
+                          stroke="#F4B72E"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round" />
+
+                </svg>
+
+                @* NÉT VẼ TRANG TRÍ BÊN PHẢI *@
+
+                <svg class="deal-hot-doodle deal-hot-doodle-right"
+                     viewBox="0 0 65 85"
+                     fill="none"
+                     xmlns="http://www.w3.org/2000/svg"
+                     aria-hidden="true">
+
+                    <path d="M13 43 L6 18"
+                          stroke="#F4B72E"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+
+                    <path d="M28 53 L49 31"
+                          stroke="#F4B72E"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+
+                    <path d="M33 66 L59 59"
+                          stroke="#F4B72E"
+                          stroke-width="5"
+                          stroke-linecap="round" />
+
+                </svg>
+
+                @* NÉT VẼ MÁY BAY GIẤY *@
+
+                <span class="deal-hot-plane"
+                      aria-hidden="true">
+                    <i class="fa-solid fa-plane"></i>
+                </span>
+
+                @* =====================================
+                   CAROUSEL TRACK
+                   ===================================== *@
+
+                <div class="deal-hot-track"
+                     tabindex="0"
+                     aria-label="Danh sách banner ưu đãi">
+
+                    @* BANNER 1 - BIỂN ĐẢO *@
+
+                    <a href="/tours"
+                       class="deal-hot-card"
+                       aria-label="Khám phá các tour du lịch biển đảo">
+
+                        <img src="/img/deals/deal-bien-dao.png"
+                             alt="Ưu đãi tour du lịch biển đảo"
+                             loading="lazy" />
+
+                    </a>
+
+                    @* BANNER 2 - KHÁM PHÁ *@
+
+                    <a href="/tours"
+                       class="deal-hot-card"
+                       aria-label="Khám phá các tour thiên nhiên">
+
+                        <img src="/img/deals/deal-kham-pha.png"
+                             alt="Ưu đãi tour khám phá thiên nhiên"
+                             loading="lazy" />
+
+                    </a>
+
+                    @* BANNER 3 - TRẢI NGHIỆM *@
+
+                    <a href="/tours"
+                       class="deal-hot-card"
+                       aria-label="Khám phá các tour trải nghiệm miền Tây">
+
+                        <img src="/img/deals/deal-trai-nghiem.png"
+                             alt="Ưu đãi tour trải nghiệm miền Tây"
+                             loading="lazy" />
+
+                    </a>
+
+                    @* BANNER 4 - THÀNH PHỐ *@
+
+                    <a href="/tours"
+                       class="deal-hot-card"
+                       aria-label="Khám phá các tour du lịch thành phố">
+
+                        <img src="/img/deals/deal-thanh-pho.png"
+                             alt="Ưu đãi tour du lịch thành phố"
+                             loading="lazy" />
+
+                    </a>
+
+                    @* BANNER 5 - CUNG ĐƯỜNG *@
+
+                    <a href="/tours"
+                       class="deal-hot-card"
+                       aria-label="Khám phá các cung đường du lịch">
+
+                        <img src="/img/deals/deal-cung-duong.png"
+                             alt="Ưu đãi tour khám phá cung đường"
+                             loading="lazy" />
+
+                    </a>
+
+                </div>
+
+                @* =====================================
+                   CHẤM ĐIỀU HƯỚNG
+                   deal-hot.js tiếp tục quản lý
+                   ===================================== *@
+
+                <div class="deal-hot-dots"
+                     aria-label="Chọn banner ưu đãi">
+                </div>
+
+                @* STICKER BĂNG KEO TRANG TRÍ *@
+
+                <span class="deal-hot-tape"
+                      aria-hidden="true"></span>
+
+            </div>
+
         </div>
 
-        <div class="deal-hot-dots" aria-label="Chọn banner"></div>
     </div>
+
 </section>
